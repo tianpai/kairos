@@ -1,16 +1,36 @@
 import { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
-import { ArrowLeft, Key, Palette, Monitor, Sun, Moon } from 'lucide-react'
+import { ArrowLeft, Key, Palette, Monitor, Sun, Moon, Info } from 'lucide-react'
 import { PageHeader } from '@ui/PageHeader'
 import { InvertedButton } from '@ui/InvertedButton'
 import { useApiKey, useSetApiKey, useDeleteApiKey } from '@hooks/useSettings'
 import { useTheme, useSetTheme } from '@hooks/useTheme'
 
-type SettingsSection = 'api-keys' | 'appearance'
+function GitHubIcon({ size = 24 }: { size?: number }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4" />
+      <path d="M9 18c-4.51 2-5-2-7-2" />
+    </svg>
+  )
+}
+
+type SettingsSection = 'api-keys' | 'appearance' | 'about'
 
 const NAV_ITEMS: { id: SettingsSection; label: string; icon: typeof Key }[] = [
   { id: 'api-keys', label: 'API Keys', icon: Key },
   { id: 'appearance', label: 'Appearance', icon: Palette },
+  { id: 'about', label: 'About', icon: Info },
 ]
 
 function ApiKeysSection() {
@@ -138,6 +158,33 @@ function AppearanceSection() {
   )
 }
 
+const GITHUB_URL = 'https://github.com/tianpai/kairos'
+
+function AboutSection() {
+  return (
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-lg font-semibold">About</h2>
+        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+          Kairos - AI-powered resume optimization
+        </p>
+      </div>
+
+      <div className="space-y-4">
+        <a
+          href={GITHUB_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
+        >
+          <GitHubIcon size={14} />
+          github.com/tianpai/kairos
+        </a>
+      </div>
+    </div>
+  )
+}
+
 export default function SettingsPage() {
   const navigate = useNavigate()
   const [activeSection, setActiveSection] = useState<SettingsSection>('api-keys')
@@ -187,6 +234,7 @@ export default function SettingsPage() {
         <main className="flex-1 overflow-auto p-8">
           {activeSection === 'api-keys' && <ApiKeysSection />}
           {activeSection === 'appearance' && <AppearanceSection />}
+          {activeSection === 'about' && <AboutSection />}
         </main>
       </div>
     </div>

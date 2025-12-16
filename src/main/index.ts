@@ -105,7 +105,7 @@ app.whenReady().then(async () => {
       applicationVersion: app.getVersion(),
       version: '', // hide build number
       copyright: 'Copyright © 2025',
-      credits: 'AI-powered resume optimization',
+      credits: 'AI-powered resume optimization\n\ngithub.com/tianpai/kairos',
       iconPath: join(app.getAppPath(), 'build/icon.png'),
     })
     // Apply saved theme preference

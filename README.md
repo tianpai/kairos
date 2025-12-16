@@ -59,6 +59,18 @@ npm run build:all
 
 Output will be in the `dist/` directory.
 
+## Clean Build
+
+Remove build artifacts and user data for a fresh start:
+
+```bash
+rm -rf dist/ out/ ~/Library/Application\ Support/kairos/
+```
+
+- `dist/` - packaged app output
+- `out/` - compiled source
+- `~/Library/Application Support/kairos/` - user data (database, settings)
+
 ## Database
 
 The application uses **SQLite** for local storage via Prisma ORM:

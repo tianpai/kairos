@@ -74,7 +74,7 @@ export async function createJobApplication(
   return window.electron.jobs.create(payload)
 }
 
-export async function createFromScratch(
+export function createFromScratch(
   payload: CreateFromScratchPayload,
 ): Promise<CreateJobApplicationResponse> {
   return window.electron.jobs.createFromScratch(payload)
@@ -84,7 +84,9 @@ export async function getAllJobApplications(): Promise<Array<JobApplication>> {
   return window.electron.jobs.getAll() as Promise<Array<JobApplication>>
 }
 
-export async function getJobApplication(id: string): Promise<JobApplicationDetails> {
+export async function getJobApplication(
+  id: string,
+): Promise<JobApplicationDetails> {
   return window.electron.jobs.get(id) as Promise<JobApplicationDetails>
 }
 
@@ -114,7 +116,10 @@ export async function saveParsedResume(
   parsedResume: Record<string, unknown>,
   tailoredResume: Record<string, unknown>,
 ): Promise<GeneralAPIResponse> {
-  return window.electron.jobs.saveParsedResume(jobId, { parsedResume, tailoredResume })
+  return window.electron.jobs.saveParsedResume(jobId, {
+    parsedResume,
+    tailoredResume,
+  })
 }
 
 export async function saveTailoredResume(
@@ -143,10 +148,13 @@ export async function saveWorkflowState(
   workflowSteps: Record<string, unknown>,
   workflowStatus: string,
 ): Promise<GeneralAPIResponse> {
-  return window.electron.jobs.saveWorkflowState(jobId, { workflowSteps, workflowStatus })
+  return window.electron.jobs.saveWorkflowState(jobId, {
+    workflowSteps,
+    workflowStatus,
+  })
 }
 
-export async function updateJobDescription(
+export function updateJobDescription(
   jobId: string,
   jobDescription: string,
 ): Promise<GeneralAPIResponse> {
