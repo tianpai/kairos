@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="AI CV Editor" />
+    <title>Kairos</title>
+    <style>
+      /* Splash screen - shows immediately before React loads */
+      #splash {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background-color: #fafafa;
+        z-index: 9999;
+        transition: opacity 0.3s ease-out;
+        /* Draggable like title bar */
+        -webkit-app-region: drag;
+      }
+      #splash.fade-out {
+        opacity: 0;
+        pointer-events: none;
+      }
+      #splash-title {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        font-size: 28px;
+        font-weight: 600;
+        color: #111827;
+        letter-spacing: -0.5px;
+      }
+      @media (prefers-color-scheme: dark) {
+        #splash {
+          background-color: #1a1a1a;
+        }
+        #splash-title {
+          color: #e5e5e5;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="splash">
+      <div id="splash-title">Kairos</div>
+    </div>
+    <div id="app"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

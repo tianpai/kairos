@@ -1,0 +1,67 @@
+appId: com.kairos.app
+productName: Kairos
+copyright: Copyright © 2025
+
+directories:
+  output: dist
+  buildResources: build
+
+files:
+  - out/**/*
+  - package.json
+  - node_modules/**/*
+  - "!node_modules/**/*.ts"
+  - "!node_modules/**/*.map"
+  - "!node_modules/**/test/**"
+  - "!node_modules/**/tests/**"
+  - "!node_modules/**/__tests__/**"
+  - "!node_modules/**/docs/**"
+  - "!node_modules/**/*.md"
+
+extraResources:
+  - from: node_modules/.prisma
+    to: node_modules/.prisma
+    filter:
+      - "**/*"
+  - from: node_modules/@prisma/client
+    to: node_modules/@prisma/client
+    filter:
+      - "**/*"
+  - from: prisma
+    to: prisma
+    filter:
+      - "**/*"
+
+asar: true
+
+mac:
+  category: public.app-category.productivity
+  target:
+    - dmg
+    - zip
+  icon: build/icon.icns
+  hardenedRuntime: true
+  gatekeeperAssess: false
+
+dmg:
+  writeUpdateInfo: false
+
+win:
+  target:
+    - nsis
+    - portable
+  icon: build/icon.ico
+
+linux:
+  target:
+    - AppImage
+    - deb
+  icon: build/icon.png
+  category: Office
+
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  deleteAppDataOnUninstall: false
+
+publish: null

@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "nodenext",
+    "lib": ["ES2020"],
+    "skipLibCheck": true,
+    "strict": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "moduleResolution": "nodenext",
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true
+  },
+  "include": ["src/main/**/*", "src/preload/**/*"],
+  "exclude": ["node_modules", "out", "src/renderer"]
+}
