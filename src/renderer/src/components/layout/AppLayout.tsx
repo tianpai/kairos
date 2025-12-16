@@ -21,7 +21,6 @@ import Checklist from '@checklist/Checklist'
 import ResumeParsingLoader from '@editor/ResumeParsingLoader'
 import DownloadResumeButton from '@editor/DownloadResumeButton'
 import SaveResumeButton from '@editor/SaveResumeButton'
-import { ManageSectionsButton } from '@resumeForm/ManageSectionsButton'
 import { DocumentConfigButton } from '@resumeForm/DocumentConfigButton'
 import { EmptyState } from './EmptyState'
 import { Sidebar } from './Sidebar'
@@ -186,7 +185,6 @@ export default function AppLayout() {
                 {Math.round(matchPercentage)}%
               </span>
               <TailoringButton />
-              <ManageSectionsButton />
               <DocumentConfigButton />
               <SaveResumeButton
                 jobId={jobId}

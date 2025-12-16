@@ -5,6 +5,7 @@ import { DocumentSetupSchema } from '@templates/shared/document-config'
 import { Modal } from '@ui/Modal'
 import { InvertedButton } from '@ui/InvertedButton'
 import { ColorPickerField } from './ColorPickerField'
+import { SectionManagerContent } from './SectionManager'
 import type { DocumentSetup } from '@templates/shared/document-config'
 
 interface DocumentConfigModalProps {
@@ -54,69 +55,81 @@ export function DocumentConfigModal({
     <Modal
       open={isOpen}
       onClose={onClose}
-      maxWidth="lg"
+      maxWidth="xl"
       actions={<InvertedButton onClick={onClose}>Done</InvertedButton>}
     >
-      <div className="mb-4">
-        <h2 className="text-xl">Document Settings</h2>
+      <div className="mb-6">
+        <h2 className="text-xl dark:text-gray-200">Document Settings</h2>
       </div>
 
-      <div className="space-y-4">
-        {/* Font Selection */}
-        <div className="space-y-1">
-          <label className="block text-sm font-medium">Font</label>
-          <select
-            value={globalConfig.font}
-            onChange={(e) => handleChange('font', e.target.value)}
-            className="w-full rounded border border-gray-300 bg-white px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-800"
-          >
-            {FONT_OPTIONS.map((font) => (
-              <option key={font} value={font}>
-                {font}
-              </option>
-            ))}
-          </select>
-        </div>
+      <div className="grid grid-cols-2 gap-8">
+        {/* Left: Section Manager */}
+        <SectionManagerContent />
 
-        {/* Font Size Selection */}
-        <DiscreteSlider
-          values={FONT_SIZE_VALUES}
-          value={currentFontSizeValue}
-          onChange={handleFontSizeChange}
-          label="Font Size"
-          unit="pt"
-        />
+        {/* Right: Document Config */}
+        <div>
+          <div className="mb-4">
+            <h3 className="text-lg font-medium dark:text-gray-200">Layout</h3>
+          </div>
 
-        {/* Heading Color */}
-        <ColorPickerField
-          label="Heading Color"
-          value={globalConfig.headingColor}
-          onChange={(value) => handleChange('headingColor', value)}
-        />
+          <div className="space-y-4">
+            {/* Font Selection */}
+            <div className="space-y-1">
+              <label className="block text-sm font-medium">Font</label>
+              <select
+                value={globalConfig.font}
+                onChange={(e) => handleChange('font', e.target.value)}
+                className="w-full rounded border border-gray-300 bg-white px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-800"
+              >
+                {FONT_OPTIONS.map((font) => (
+                  <option key={font} value={font}>
+                    {font}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-        {/* Margin Selection */}
-        <DiscreteSlider
-          values={MARGIN_VALUES}
-          value={currentMarginValue}
-          onChange={handleMarginChange}
-          label="Page Margin"
-          unit="inch"
-        />
+            {/* Font Size Selection */}
+            <DiscreteSlider
+              values={FONT_SIZE_VALUES}
+              value={currentFontSizeValue}
+              onChange={handleFontSizeChange}
+              label="Font Size"
+              unit="pt"
+            />
 
-        {/* Paper Size Selection */}
-        <div className="space-y-1">
-          <label className="block text-sm font-medium">Paper Size</label>
-          <select
-            value={globalConfig.paperSize}
-            onChange={(e) => handleChange('paperSize', e.target.value)}
-            className="w-full rounded border border-gray-300 bg-white px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-800"
-          >
-            {PAPER_SIZE_OPTIONS.map((size) => (
-              <option key={size} value={size}>
-                {size}
-              </option>
-            ))}
-          </select>
+            {/* Heading Color */}
+            <ColorPickerField
+              label="Heading Color"
+              value={globalConfig.headingColor}
+              onChange={(value) => handleChange('headingColor', value)}
+            />
+
+            {/* Margin Selection */}
+            <DiscreteSlider
+              values={MARGIN_VALUES}
+              value={currentMarginValue}
+              onChange={handleMarginChange}
+              label="Page Margin"
+              unit="inch"
+            />
+
+            {/* Paper Size Selection */}
+            <div className="space-y-1">
+              <label className="block text-sm font-medium">Paper Size</label>
+              <select
+                value={globalConfig.paperSize}
+                onChange={(e) => handleChange('paperSize', e.target.value)}
+                className="w-full rounded border border-gray-300 bg-white px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-800"
+              >
+                {PAPER_SIZE_OPTIONS.map((size) => (
+                  <option key={size} value={size}>
+                    {size}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
         </div>
       </div>
     </Modal>
