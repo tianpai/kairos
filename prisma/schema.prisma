@@ -23,9 +23,9 @@ model JobApplication {
     dueDate           DateTime
     matchPercentage   Int
     templateId        String
-    jobDescription    String
+    jobDescription    String?
     checklist         Json?
-    originalResume    String
+    originalResume    String?
     parsedResume      Json?
     tailoredResume    Json?
     workflowStatus    String?

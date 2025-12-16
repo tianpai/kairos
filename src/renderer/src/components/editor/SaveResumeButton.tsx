@@ -4,10 +4,14 @@ import { useSaveResume } from '@/hooks/useSaveResume'
 
 interface SaveResumeButtonProps {
   jobId?: string
+  isBuiltFromScratch?: boolean
 }
 
-export default function SaveResumeButton({ jobId }: SaveResumeButtonProps) {
-  const { mutate: saveResume } = useSaveResume(jobId!)
+export default function SaveResumeButton({
+  jobId,
+  isBuiltFromScratch = false,
+}: SaveResumeButtonProps) {
+  const { mutate: saveResume } = useSaveResume(jobId!, { isBuiltFromScratch })
 
   const handleSave = () => {
     if (!jobId) return

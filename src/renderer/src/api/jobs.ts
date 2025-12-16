@@ -27,6 +27,14 @@ export interface CreateJobApplicationPayload extends JobApplicationInput {
   jsonSchema: Record<string, unknown>
 }
 
+export interface CreateFromScratchPayload {
+  companyName: string
+  position: string
+  dueDate: string
+  jobDescription?: string
+  templateId: string
+}
+
 export interface JobApplication {
   id: string
   companyName: string
@@ -34,15 +42,16 @@ export interface JobApplication {
   dueDate: string
   matchPercentage: number
   applicationStatus: string | null
+  originalResume: string | null
   createdAt: string
   updatedAt: string
 }
 
 export interface JobApplicationDetails extends JobApplication {
   templateId: string
-  jobDescription: string
+  jobDescription: string | null
+  parsedResume: Record<string, unknown> | null
   tailoredResume: Record<string, unknown> | null
-  originalResume: string
   checklist: Checklist | null
   failedTasks: FailedTasksMap
 }
@@ -63,6 +72,12 @@ export async function createJobApplication(
   payload: CreateJobApplicationPayload,
 ): Promise<CreateJobApplicationResponse> {
   return window.electron.jobs.create(payload)
+}
+
+export async function createFromScratch(
+  payload: CreateFromScratchPayload,
+): Promise<CreateJobApplicationResponse> {
+  return window.electron.jobs.createFromScratch(payload)
 }
 
 export async function getAllJobApplications(): Promise<Array<JobApplication>> {
@@ -129,4 +144,11 @@ export async function saveWorkflowState(
   workflowStatus: string,
 ): Promise<GeneralAPIResponse> {
   return window.electron.jobs.saveWorkflowState(jobId, { workflowSteps, workflowStatus })
+}
+
+export async function updateJobDescription(
+  jobId: string,
+  jobDescription: string,
+): Promise<GeneralAPIResponse> {
+  return window.electron.jobs.updateJobDescription(jobId, { jobDescription })
 }

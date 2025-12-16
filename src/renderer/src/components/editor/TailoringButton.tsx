@@ -6,7 +6,14 @@ import { InvertedButton } from '@ui/InvertedButton'
 import { useTailoringData } from '@hooks/useTailoringData'
 
 export function TailoringButton() {
-  const { jobId, checklist, resumeStructure, jsonSchema } = useTailoringData()
+  const {
+    jobId,
+    checklist,
+    resumeStructure,
+    jsonSchema,
+    hasJobDescription,
+    hasResumeContent,
+  } = useTailoringData()
 
   // Get loading states from workflow store
   const isTailoringResume = useWorkflowStore((state) =>
@@ -37,17 +44,35 @@ export function TailoringButton() {
     })
   }
 
-  // Determine if button is in loading state
-  const isLoading =
-    !isChecklistReady || isTailoringResume || isMatchingTailoredResume
+  // Determine disabled state and tooltip
+  const isProcessing = isTailoringResume || isMatchingTailoredResume
+  const missingJobDescription = !hasJobDescription
+  const missingResumeContent = !hasResumeContent
+  const missingChecklist = !isChecklistReady
+
+  const isDisabled =
+    isProcessing ||
+    missingJobDescription ||
+    missingResumeContent ||
+    missingChecklist
+
+  // Build tooltip message
+  let tooltipMessage = 'Tailor resume'
+  if (missingJobDescription) {
+    tooltipMessage = 'Add job description to enable tailoring'
+  } else if (missingResumeContent) {
+    tooltipMessage = 'Add resume content to enable tailoring'
+  } else if (missingChecklist) {
+    tooltipMessage = 'Waiting for checklist to be ready'
+  }
 
   return (
     <InvertedButton
       onClick={handleClick}
-      disabled={isLoading}
-      loading={isLoading}
-      title="Tailor resume"
-      ariaLabel="Tailor resume"
+      disabled={isDisabled}
+      loading={isProcessing}
+      title={tooltipMessage}
+      ariaLabel={tooltipMessage}
     >
       <WandSparkles size={16} />
     </InvertedButton>

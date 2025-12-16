@@ -3,7 +3,9 @@ import log from 'electron-log/main'
 import { JobApplicationService, JobNotFoundError } from '../services/job-application.service'
 import {
   CreateJobApplicationSchema,
+  CreateFromScratchSchema,
   UpdateJobApplicationSchema,
+  UpdateJobDescriptionSchema,
   SaveResumeSchema,
   SaveParsedResumeSchema,
   SaveTailoredResumeSchema,
@@ -23,6 +25,18 @@ export function registerJobsHandlers(service: JobApplicationService): void {
       return result
     } catch (error) {
       log.error('jobs:create failed', error)
+      throw error
+    }
+  })
+
+  ipcMain.handle('jobs:createFromScratch', async (_, data: unknown) => {
+    try {
+      const validated = CreateFromScratchSchema.parse(data)
+      const result = await service.createFromScratch(validated)
+      log.info(`Job created from scratch: ${result.id}`)
+      return result
+    } catch (error) {
+      log.error('jobs:createFromScratch failed', error)
       throw error
     }
   })
@@ -101,5 +115,10 @@ export function registerJobsHandlers(service: JobApplicationService): void {
   ipcMain.handle('jobs:saveWorkflowState', async (_, id: string, data: unknown) => {
     const validated = SaveWorkflowStateSchema.parse(data)
     return service.saveWorkflowState(id, validated)
+  })
+
+  ipcMain.handle('jobs:updateJobDescription', async (_, id: string, data: unknown) => {
+    const validated = UpdateJobDescriptionSchema.parse(data)
+    return service.updateJobDescription(id, validated)
   })
 }

@@ -2,7 +2,9 @@ import { randomUUID } from 'node:crypto'
 import type { Prisma, PrismaClient } from '@prisma/client'
 import type {
   CreateJobApplicationInput,
+  CreateFromScratchInput,
   UpdateJobApplicationInput,
+  UpdateJobDescriptionInput,
   SaveResumeInput,
   SaveParsedResumeInput,
   SaveTailoredResumeInput,
@@ -83,6 +85,38 @@ export class JobApplicationService {
     }
   }
 
+  async createFromScratch(dto: CreateFromScratchInput): Promise<{
+    id: string
+  }> {
+    const jobId = randomUUID()
+
+    let company = await this.database.company.findUnique({
+      where: { name: dto.companyName },
+    })
+    if (!company) {
+      company = await this.database.company.create({
+        data: { name: dto.companyName },
+      })
+    }
+
+    const jobApplication = await this.database.jobApplication.create({
+      data: {
+        id: jobId,
+        companyId: company.id,
+        position: dto.position,
+        dueDate: new Date(dto.dueDate),
+        matchPercentage: 0,
+        templateId: dto.templateId,
+        jobDescription: dto.jobDescription ?? null,
+        originalResume: null,
+      },
+    })
+
+    return {
+      id: jobApplication.id,
+    }
+  }
+
   async getAllJobApplications(): Promise<
     Array<{
       id: string
@@ -91,6 +125,7 @@ export class JobApplicationService {
       dueDate: string
       matchPercentage: number
       applicationStatus: string | null
+      originalResume: string | null
       createdAt: string
       updatedAt: string
     }>
@@ -111,6 +146,7 @@ export class JobApplicationService {
       dueDate: app.dueDate.toISOString().split('T')[0],
       matchPercentage: app.matchPercentage,
       applicationStatus: app.applicationStatus,
+      originalResume: app.originalResume,
       createdAt: app.createdAt.toISOString(),
       updatedAt: app.updatedAt.toISOString(),
     }))
@@ -126,9 +162,10 @@ export class JobApplicationService {
     createdAt: string
     updatedAt: string
     templateId: string
-    jobDescription: string
+    jobDescription: string | null
+    parsedResume: Record<string, unknown> | null
     tailoredResume: Record<string, unknown> | null
-    originalResume: string
+    originalResume: string | null
     checklist: Record<string, unknown> | null
     workflowStatus: string | null
     failedTasks: Record<string, unknown>
@@ -163,6 +200,7 @@ export class JobApplicationService {
       updatedAt: jobApplication.updatedAt.toISOString(),
       templateId: jobApplication.templateId,
       jobDescription: jobApplication.jobDescription,
+      parsedResume: jobApplication.parsedResume as Record<string, unknown> | null,
       tailoredResume: jobApplication.tailoredResume as Record<string, unknown> | null,
       originalResume: jobApplication.originalResume,
       checklist: jobApplication.checklist as Record<string, unknown> | null,
@@ -311,6 +349,19 @@ export class JobApplicationService {
     await this.database.jobApplication.update({
       where: { id: jobId },
       data: updateData,
+    })
+    return { success: true }
+  }
+
+  async updateJobDescription(
+    jobId: string,
+    dto: UpdateJobDescriptionInput,
+  ): Promise<{ success: boolean }> {
+    await this.database.jobApplication.update({
+      where: { id: jobId },
+      data: {
+        jobDescription: dto.jobDescription,
+      },
     })
     return { success: true }
   }

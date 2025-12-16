@@ -130,6 +130,7 @@ export default function AppLayout() {
   const companyName = jobApplication?.companyName
   const position = jobApplication?.position
   const matchPercentage = jobApplication?.matchPercentage ?? 0
+  const isBuiltFromScratch = !jobApplication?.originalResume
 
   const hasApplications = applications.length > 0
   const hasSelection = !!jobId && !!jobApplication
@@ -187,7 +188,10 @@ export default function AppLayout() {
               <TailoringButton />
               <ManageSectionsButton />
               <DocumentConfigButton />
-              <SaveResumeButton jobId={jobId} />
+              <SaveResumeButton
+                jobId={jobId}
+                isBuiltFromScratch={isBuiltFromScratch}
+              />
               <DownloadResumeButton
                 companyName={companyName}
                 position={position}

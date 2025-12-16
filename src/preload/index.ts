@@ -16,6 +16,8 @@ contextBridge.exposeInMainWorld('electron', {
   jobs: {
     // CRUD
     create: (data: unknown): Promise<{ id: string }> => ipcRenderer.invoke('jobs:create', data),
+    createFromScratch: (data: unknown): Promise<{ id: string }> =>
+      ipcRenderer.invoke('jobs:createFromScratch', data),
     getAll: (): Promise<unknown[]> => ipcRenderer.invoke('jobs:getAll'),
     get: (id: string): Promise<unknown> => ipcRenderer.invoke('jobs:get', id),
     update: (id: string, data: unknown): Promise<unknown> =>
@@ -23,6 +25,8 @@ contextBridge.exposeInMainWorld('electron', {
     delete: (id: string): Promise<{ success: boolean }> => ipcRenderer.invoke('jobs:delete', id),
     saveResume: (id: string, data: unknown): Promise<{ success: boolean }> =>
       ipcRenderer.invoke('jobs:saveResume', id, data),
+    updateJobDescription: (id: string, data: unknown): Promise<{ success: boolean }> =>
+      ipcRenderer.invoke('jobs:updateJobDescription', id, data),
     // Workflow data
     saveParsedResume: (id: string, data: unknown): Promise<{ success: boolean }> =>
       ipcRenderer.invoke('jobs:saveParsedResume', id, data),
