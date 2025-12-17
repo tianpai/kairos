@@ -102,10 +102,10 @@ app.whenReady().then(async () => {
     app.setName('Kairos')
     app.setAboutPanelOptions({
       applicationName: 'Kairos',
-      applicationVersion: app.getVersion(),
+      applicationVersion: `${app.getVersion()} - "Damn! It looks like a Desktop app"`,
       version: '', // hide build number
-      copyright: 'Copyright © 2025',
-      credits: 'AI-powered resume optimization\n\ngithub.com/tianpai/kairos',
+      copyright:
+        'AI-powered resume optimization\ngithub.com/tianpai/kairos\n\nCopyright © 2025',
       iconPath: join(app.getAppPath(), 'build/icon.png'),
     })
     // Apply saved theme preference
