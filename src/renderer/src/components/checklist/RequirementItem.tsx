@@ -1,5 +1,5 @@
 import { Circle, CircleDot, CircleDotDashed } from 'lucide-react'
-import { KeywordsList } from './KeywordsList'
+import { HighlightedRequirement } from './HighlightedRequirement'
 import type { ChecklistRequirement } from '@type/checklist'
 
 interface RequirementItemProps {
@@ -33,22 +33,22 @@ export function RequirementItem({
       : 'text-gray-300'
 
   return (
-    <div className="mb-4">
-      <div className="flex items-start gap-2">
+    <div className="mb-2">
+      <div className="flex items-start gap-2 rounded-lg bg-gray-50 p-3 dark:bg-gray-800/50">
         <StatusIcon className={`mt-0.5 h-4 w-4 shrink-0 ${iconColor}`} />
         <div className="flex-1">
-          <p className="text-xs text-gray-800 dark:text-gray-300">{requirement.requirement}</p>
+          <p className="text-sm text-gray-800 dark:text-gray-300">
+            <HighlightedRequirement
+              text={requirement.requirement}
+              keywords={requirement.keywords}
+              selectedKeywords={selectedKeywords}
+              onToggleKeyword={onToggleKeyword}
+            />
+          </p>
           {hasWarning && (
-            <p className="mt-1 text-xs text-amber-500">{requirement.reason}</p>
+            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">{requirement.reason}</p>
           )}
         </div>
-      </div>
-      <div className="ml-5">
-        <KeywordsList
-          keywords={requirement.keywords}
-          selectedKeywords={selectedKeywords}
-          onToggleKeyword={onToggleKeyword}
-        />
       </div>
     </div>
   )
