@@ -17,11 +17,13 @@ interface IElectronAPI {
   jobs: {
     // CRUD
     create: (data: unknown) => Promise<{ id: string }>
+    createFromScratch: (data: unknown) => Promise<{ id: string }>
     getAll: () => Promise<unknown[]>
     get: (id: string) => Promise<unknown>
     update: (id: string, data: unknown) => Promise<unknown>
     delete: (id: string) => Promise<{ success: boolean }>
     saveResume: (id: string, data: unknown) => Promise<{ success: boolean }>
+    updateJobDescription: (id: string, data: unknown) => Promise<{ success: boolean }>
     // Workflow data
     saveParsedResume: (id: string, data: unknown) => Promise<{ success: boolean }>
     saveTailoredResume: (id: string, data: unknown) => Promise<{ success: boolean }>

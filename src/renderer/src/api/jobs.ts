@@ -27,6 +27,14 @@ export interface CreateJobApplicationPayload extends JobApplicationInput {
   jsonSchema: Record<string, unknown>
 }
 
+export interface CreateFromScratchPayload {
+  companyName: string
+  position: string
+  dueDate: string
+  jobDescription?: string
+  templateId: string
+}
+
 export interface JobApplication {
   id: string
   companyName: string
@@ -34,15 +42,16 @@ export interface JobApplication {
   dueDate: string
   matchPercentage: number
   applicationStatus: string | null
+  originalResume: string | null
   createdAt: string
   updatedAt: string
 }
 
 export interface JobApplicationDetails extends JobApplication {
   templateId: string
-  jobDescription: string
+  jobDescription: string | null
+  parsedResume: Record<string, unknown> | null
   tailoredResume: Record<string, unknown> | null
-  originalResume: string
   checklist: Checklist | null
   failedTasks: FailedTasksMap
 }
@@ -65,11 +74,19 @@ export async function createJobApplication(
   return window.electron.jobs.create(payload)
 }
 
+export function createFromScratch(
+  payload: CreateFromScratchPayload,
+): Promise<CreateJobApplicationResponse> {
+  return window.electron.jobs.createFromScratch(payload)
+}
+
 export async function getAllJobApplications(): Promise<Array<JobApplication>> {
   return window.electron.jobs.getAll() as Promise<Array<JobApplication>>
 }
 
-export async function getJobApplication(id: string): Promise<JobApplicationDetails> {
+export async function getJobApplication(
+  id: string,
+): Promise<JobApplicationDetails> {
   return window.electron.jobs.get(id) as Promise<JobApplicationDetails>
 }
 
@@ -99,7 +116,10 @@ export async function saveParsedResume(
   parsedResume: Record<string, unknown>,
   tailoredResume: Record<string, unknown>,
 ): Promise<GeneralAPIResponse> {
-  return window.electron.jobs.saveParsedResume(jobId, { parsedResume, tailoredResume })
+  return window.electron.jobs.saveParsedResume(jobId, {
+    parsedResume,
+    tailoredResume,
+  })
 }
 
 export async function saveTailoredResume(
@@ -128,5 +148,15 @@ export async function saveWorkflowState(
   workflowSteps: Record<string, unknown>,
   workflowStatus: string,
 ): Promise<GeneralAPIResponse> {
-  return window.electron.jobs.saveWorkflowState(jobId, { workflowSteps, workflowStatus })
+  return window.electron.jobs.saveWorkflowState(jobId, {
+    workflowSteps,
+    workflowStatus,
+  })
+}
+
+export function updateJobDescription(
+  jobId: string,
+  jobDescription: string,
+): Promise<GeneralAPIResponse> {
+  return window.electron.jobs.updateJobDescription(jobId, { jobDescription })
 }

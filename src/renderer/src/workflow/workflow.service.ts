@@ -100,6 +100,39 @@ export async function startTailoringWorkflow(
 }
 
 /**
+ * Start CHECKLIST_ONLY workflow
+ *
+ * For scratch builds where resume is already structured.
+ * Entry task: checklist.parsing
+ */
+export async function startChecklistOnlyWorkflow(
+  jobId: string,
+  data: {
+    jobDescription: string
+    resumeStructure: Record<string, unknown>
+    jsonSchema: Record<string, unknown>
+  },
+): Promise<void> {
+  const workflowName: WorkflowName = 'checklist-only'
+  const workflow = WORKFLOWS[workflowName]
+  const tasks = Object.keys(workflow) as Task[]
+
+  const store = useWorkflowStore.getState()
+  store.startWorkflow(jobId, workflowName, tasks, {
+    jobDescription: data.jobDescription,
+    resumeStructure: data.resumeStructure,
+    jsonSchema: data.jsonSchema,
+  })
+
+  await saveWorkflowState(jobId)
+
+  // Start entry task
+  runTask(jobId, CHECKLIST_PARSING, () =>
+    executeChecklistParsing(data.jobDescription),
+  )
+}
+
+/**
  * Run a task and handle completion
  */
 async function runTask(

@@ -17,16 +17,9 @@ import {
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { useSectionManager } from '@hooks/useSectionManager'
-import { Modal } from '@ui/Modal'
-import { InvertedButton } from '@ui/InvertedButton'
 import { getSectionLabel } from '@templates/builder'
 import type { ReactNode } from 'react'
 import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core'
-
-interface SectionManagerModalProps {
-  isOpen: boolean
-  onClose: () => void
-}
 
 interface SectionCardProps {
   id: string
@@ -141,7 +134,7 @@ const SortableZone = memo(function SortableZone<T>({
       <SortableContext items={itemIds} strategy={verticalListSortingStrategy}>
         <div
           ref={setNodeRef}
-          className={`min-h-[100px] space-y-2 transition-colors ${
+          className={`min-h-25 space-y-2 transition-colors ${
             isOver ? 'ring-2 ring-gray-300' : ''
           }`}
         >
@@ -205,10 +198,7 @@ function AvailableSectionsZone({
   )
 }
 
-export function SectionManagerModal({
-  isOpen,
-  onClose,
-}: SectionManagerModalProps) {
+export function SectionManagerContent() {
   // Track active drag item
   const [activeId, setActiveId] = useState<string | null>(null)
 
@@ -241,15 +231,10 @@ export function SectionManagerModal({
   )
 
   return (
-    <Modal
-      open={isOpen}
-      onClose={onClose}
-      maxWidth="xl"
-      actions={<InvertedButton onClick={onClose}>Done</InvertedButton>}
-    >
+    <div>
       <div className="mb-4">
-        <h2 className="text-xl dark:text-gray-200">Manage Sections</h2>
-        <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+        <h3 className="text-lg font-medium dark:text-gray-200">Sections</h3>
+        <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
           Data will be lost if sections are removed (dragged out)
         </p>
       </div>
@@ -284,6 +269,6 @@ export function SectionManagerModal({
           ) : null}
         </DragOverlay>
       </DndContext>
-    </Modal>
+    </div>
   )
 }

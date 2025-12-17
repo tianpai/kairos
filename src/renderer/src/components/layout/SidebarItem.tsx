@@ -1,4 +1,4 @@
-import { SquarePen } from 'lucide-react'
+import { Hammer, SquarePen } from 'lucide-react'
 import { getScoreColor } from '@/utils/scoreThresholds'
 
 interface SidebarItemProps {
@@ -7,6 +7,7 @@ interface SidebarItemProps {
   position: string
   dueDate: string
   matchPercentage: number
+  isBuiltFromScratch?: boolean
   isSelected: boolean
   onClick: () => void
   onEdit: () => void
@@ -33,6 +34,7 @@ export function SidebarItem({
   position,
   dueDate,
   matchPercentage,
+  isBuiltFromScratch = false,
   isSelected,
   onClick,
   onEdit,
@@ -47,8 +49,15 @@ export function SidebarItem({
       onClick={onClick}
     >
       <div className="min-w-0 flex-1">
-        <div className="truncate text-sm font-medium text-gray-900 dark:text-white">
-          {companyName}
+        <div className="flex items-center gap-1 truncate text-sm font-medium text-gray-900 dark:text-white">
+          {isBuiltFromScratch && (
+            <Hammer
+              size={12}
+              className="shrink-0 text-gray-400 dark:text-gray-500"
+              title="Built from scratch"
+            />
+          )}
+          <span className="truncate">{companyName}</span>
         </div>
         <div className="truncate text-xs text-gray-500 dark:text-gray-400">
           {position}
