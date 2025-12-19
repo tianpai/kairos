@@ -3,16 +3,16 @@ import ReactDOM from 'react-dom/client'
 import {
   Outlet,
   RouterProvider,
+  createHashHistory,
   createRootRoute,
   createRoute,
   createRouter,
-  createHashHistory,
 } from '@tanstack/react-router'
 // import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
 
-import AppLayout from '@/components/layout/AppLayout'
-import SettingsPage from '@/components/settings/SettingsPage'
 import reportWebVitals from './reportWebVitals.ts'
+import App from '@/components/layout/App'
+import SettingsPage from '@/components/settings/SettingsPage'
 import * as TanStackQueryProvider from '@/integrations/tanstack-query/root-provider.tsx'
 
 import './styles.css'
@@ -56,7 +56,7 @@ const rootRoute = createRootRoute({
 const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/',
-  component: AppLayout,
+  component: App,
   validateSearch: (search: Record<string, unknown>) => ({
     jobId: (search.jobId as string) || undefined,
   }),

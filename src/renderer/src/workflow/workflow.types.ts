@@ -21,7 +21,7 @@ export type Task =
 
 export type TaskStatus = 'pending' | 'running' | 'completed' | 'failed'
 export type WorkflowStatus = 'idle' | 'running' | 'completed' | 'failed'
-export type WorkflowName = 'create-application' | 'tailoring'
+export type WorkflowName = 'create-application' | 'tailoring' | 'checklist-only'
 
 /** Tracks which tasks are pending/running/completed/failed */
 export type TaskStateMap = Partial<Record<Task, TaskStatus>>

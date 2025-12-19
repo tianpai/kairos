@@ -11,6 +11,15 @@ export const CreateJobApplicationSchema = z.object({
   rawResumeContent: z.string().min(1),
 })
 
+// Create job application from scratch (no resume upload)
+export const CreateFromScratchSchema = z.object({
+  companyName: z.string().min(1),
+  position: z.string().min(1),
+  dueDate: z.string().date(),
+  jobDescription: z.string().optional(),
+  templateId: z.string().min(1),
+})
+
 // Update job application (basic fields)
 export const UpdateJobApplicationSchema = z.object({
   companyName: z.string().min(1).optional(),
@@ -47,9 +56,15 @@ export const SaveWorkflowStateSchema = z.object({
   workflowStatus: z.string().optional(),
 })
 
+export const UpdateJobDescriptionSchema = z.object({
+  jobDescription: z.string().min(1),
+})
+
 // Inferred types
 export type CreateJobApplicationInput = z.infer<typeof CreateJobApplicationSchema>
+export type CreateFromScratchInput = z.infer<typeof CreateFromScratchSchema>
 export type UpdateJobApplicationInput = z.infer<typeof UpdateJobApplicationSchema>
+export type UpdateJobDescriptionInput = z.infer<typeof UpdateJobDescriptionSchema>
 export type SaveResumeInput = z.infer<typeof SaveResumeSchema>
 export type SaveParsedResumeInput = z.infer<typeof SaveParsedResumeSchema>
 export type SaveTailoredResumeInput = z.infer<typeof SaveTailoredResumeSchema>

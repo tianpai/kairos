@@ -4,6 +4,7 @@ import { Settings } from 'lucide-react'
 import EditJobModal from '@dashboard/EditJobModal'
 import { SidebarItem } from './SidebarItem'
 import UploadButton from '@/components/upload/UploadButton'
+import BuilderButton from '@/components/resume-builder/BuilderButton'
 
 interface Application {
   id: string
@@ -11,6 +12,7 @@ interface Application {
   position: string
   dueDate: string
   matchPercentage: number
+  originalResume: string | null
 }
 
 interface SidebarProps {
@@ -65,9 +67,10 @@ export function Sidebar({
       >
         {/* Inner container to prevent content reflow during animation */}
         <div className="flex h-full w-60 flex-col">
-          {/* Upload Button */}
-          <div className="p-3">
+          {/* Action Buttons */}
+          <div className="flex gap-2 p-3">
             <UploadButton onSuccess={onUploadSuccess} />
+            <BuilderButton onSuccess={onUploadSuccess} />
           </div>
 
           {/* Applications List */}
@@ -80,6 +83,7 @@ export function Sidebar({
                 position={app.position}
                 dueDate={app.dueDate}
                 matchPercentage={app.matchPercentage}
+                isBuiltFromScratch={!app.originalResume}
                 isSelected={app.id === selectedId}
                 onClick={() => onSelect(app.id)}
                 onEdit={() => setEditingApp(app)}

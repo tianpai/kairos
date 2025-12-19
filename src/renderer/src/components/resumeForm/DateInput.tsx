@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
-import { InvertedCircleButton } from './InvertedCircleButton'
-import { InvertedButton } from './InvertedButton'
+import { InvertedCircleButton } from '@ui/InvertedCircleButton'
+import { InvertedButton } from '@ui/InvertedButton'
+import { INPUT_BASE } from './fieldStyles'
 
 // DateInput supports flexible date formats commonly used in resumes
 // Displays the date string and provides a calendar picker with granularity options
@@ -10,7 +11,6 @@ type Granularity = 'year' | 'month-year' | 'present'
 
 interface DateInputProps {
   id: string
-  label: string
   value: string
   onChange: (value: string) => void
 }
@@ -102,7 +102,9 @@ function MonthPicker({
         >
           <ChevronLeft className="h-3 w-3" />
         </InvertedCircleButton>
-        <span className="text-sm font-medium dark:text-gray-200">{displayYear}</span>
+        <span className="text-sm font-medium dark:text-gray-200">
+          {displayYear}
+        </span>
         <InvertedCircleButton
           onClick={() => setDisplayYear((prev) => prev + 1)}
           ariaLabel="Next year"
@@ -128,7 +130,7 @@ function MonthPicker({
   )
 }
 
-export function DateInput({ id, label, value, onChange }: DateInputProps) {
+export function DateInput({ id, value, onChange }: DateInputProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [granularity, setGranularity] = useState<Granularity>('month-year')
   const containerRef = useRef<HTMLDivElement>(null)
@@ -163,15 +165,11 @@ export function DateInput({ id, label, value, onChange }: DateInputProps) {
 
   return (
     <div ref={containerRef} className="relative">
-      <label htmlFor={id} className="mb-1 block text-xs font-medium dark:text-gray-200">
-        {label}
-      </label>
-
-      {/* Display */}
       <button
+        id={id}
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="mb-1 w-full border-b border-gray-400 px-3 py-2 text-left text-sm focus:border-b focus:border-black focus:outline-none dark:border-gray-600 dark:text-gray-200 dark:focus:border-white"
+        className={`${INPUT_BASE} cursor-pointer text-left`}
       >
         {value || NBSP}
       </button>
