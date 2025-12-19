@@ -1,5 +1,7 @@
 import { InvertedButton } from '@ui/InvertedButton'
-import { DateInput } from '@ui/DateInput'
+import { DateInput } from './DateInput'
+import { asString, asStringArray } from './fieldUtils'
+import { INPUT_BASE, INPUT_TEXTAREA, LABEL_BASE } from './fieldStyles'
 import type { FieldSchema, FieldValue } from '@templates/template.types'
 
 interface FieldProps {
@@ -17,7 +19,7 @@ interface FieldWrapperProps {
 function FieldWrapper({ label, htmlFor, children }: FieldWrapperProps) {
   return (
     <div className="mb-2">
-      <label htmlFor={htmlFor} className="mb-1 block text-xs font-medium">
+      <label htmlFor={htmlFor} className={LABEL_BASE}>
         {label}
       </label>
       {children}
@@ -44,7 +46,7 @@ function useAutoResizeTextarea() {
 
 function TextArrayField({ schema, value, onChange }: FieldProps) {
   const { label, placeholder } = schema
-  const items = Array.isArray(value) ? value : []
+  const items = asStringArray(value)
   const { ref, handleInput } = useAutoResizeTextarea()
 
   const updateItem = (index: number, newValue: string) => {
@@ -67,7 +69,7 @@ function TextArrayField({ schema, value, onChange }: FieldProps) {
               onInput={handleInput}
               placeholder={placeholder}
               rows={1}
-              className="w-full resize-none overflow-hidden border-b border-gray-400 px-3 py-2 text-xs focus:border-b focus:border-black focus:outline-none"
+              className={INPUT_TEXTAREA}
             />
           </div>
         ))}
@@ -83,15 +85,14 @@ function TextArrayField({ schema, value, onChange }: FieldProps) {
 
 function SelectField({ schema, value, onChange }: FieldProps) {
   const { key, label, options } = schema
-  const stringValue = typeof value === 'string' ? value : ''
 
   return (
     <FieldWrapper label={label} htmlFor={key}>
       <select
         id={key}
-        value={stringValue}
+        value={asString(value)}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full border-b border-gray-400 px-3 py-2 text-sm focus:border-b focus:border-black focus:outline-none"
+        className={INPUT_BASE}
       >
         {options?.map((option) => (
           <option key={option} value={option}>
@@ -105,7 +106,6 @@ function SelectField({ schema, value, onChange }: FieldProps) {
 
 function TextareaField({ schema, value, onChange }: FieldProps) {
   const { key, label, placeholder } = schema
-  const stringValue = typeof value === 'string' ? value : ''
   const { ref, handleInput } = useAutoResizeTextarea()
 
   return (
@@ -113,12 +113,12 @@ function TextareaField({ schema, value, onChange }: FieldProps) {
       <textarea
         id={key}
         ref={ref}
-        value={stringValue}
+        value={asString(value)}
         onChange={(e) => onChange(e.target.value)}
         onInput={handleInput}
         placeholder={placeholder}
         rows={1}
-        className="w-full resize-none overflow-hidden border-b border-gray-400 px-3 py-2 text-sm focus:border-b focus:border-black focus:outline-none"
+        className={INPUT_TEXTAREA}
       />
     </FieldWrapper>
   )
@@ -126,31 +126,30 @@ function TextareaField({ schema, value, onChange }: FieldProps) {
 
 function DateField({ schema, value, onChange }: FieldProps) {
   const { key, label } = schema
-  const stringValue = typeof value === 'string' ? value : ''
 
   return (
-    <DateInput
-      id={key}
-      label={label}
-      value={stringValue}
-      onChange={(val) => onChange(val)}
-    />
+    <FieldWrapper label={label} htmlFor={key}>
+      <DateInput
+        id={key}
+        value={asString(value)}
+        onChange={(val) => onChange(val)}
+      />
+    </FieldWrapper>
   )
 }
 
 function TextField({ schema, value, onChange }: FieldProps) {
   const { key, label, type, placeholder } = schema
-  const stringValue = typeof value === 'string' ? value : ''
 
   return (
     <FieldWrapper label={label} htmlFor={key}>
       <input
         id={key}
         type={type}
-        value={stringValue}
+        value={asString(value)}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full border-b border-gray-400 px-3 py-2 text-xs focus:border-b focus:border-black focus:outline-none"
+        className={INPUT_BASE}
       />
     </FieldWrapper>
   )

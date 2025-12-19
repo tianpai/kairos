@@ -1,6 +1,5 @@
 import { useResumeStore } from '@typst-compiler/resumeState'
 import { CircleX, Plus } from 'lucide-react'
-import { InvertedCircleButton } from '@ui/InvertedCircleButton'
 import { DynamicField } from './DynamicField'
 import type {
   FieldSchema,
@@ -11,33 +10,10 @@ import type {
 
 interface DynamicSectionProps {
   schema: SectionUISchema
-  hideTitle?: boolean
 }
 
-interface SectionWrapperProps {
-  title: string
-  children: React.ReactNode
-  action?: React.ReactNode
-  hideTitle?: boolean
-}
-
-function SectionWrapper({
-  title,
-  children,
-  action,
-  hideTitle,
-}: SectionWrapperProps) {
-  return (
-    <div className="mb-4">
-      {!hideTitle && (
-        <div className="flex items-center justify-between bg-black px-3 py-2">
-          <h3 className="text-xs font-semibold text-gray-200">{title}</h3>
-          {action && <div>{action}</div>}
-        </div>
-      )}
-      <div className="p-2">{children}</div>
-    </div>
-  )
+function SectionWrapper({ children }: { children: React.ReactNode }) {
+  return <div className="mb-4 p-2">{children}</div>
 }
 
 interface FieldListProps {
@@ -101,15 +77,44 @@ function EntryItem({
   )
 }
 
-export function DynamicSection({ schema, hideTitle }: DynamicSectionProps) {
-  const data = useResumeStore((state) => state.data[schema.id])
+interface SingleEntrySectionProps {
+  schema: SectionUISchema
+  data: SectionEntry
+}
+
+function SingleEntrySection({ schema, data }: SingleEntrySectionProps) {
+  const updateField = useResumeStore((state) => state.updateField)
+  const compile = useResumeStore((state) => state.compile)
+
+  const handleFieldChange = (fieldKey: string, value: FieldValue) => {
+    updateField(schema.id, null, fieldKey, value)
+    compile()
+  }
+
+  return (
+    <SectionWrapper>
+      <FieldList
+        fields={schema.fields}
+        data={data}
+        onFieldChange={handleFieldChange}
+      />
+    </SectionWrapper>
+  )
+}
+
+interface MultipleEntrySectionProps {
+  schema: SectionUISchema
+  entries: Array<SectionEntry>
+}
+
+function MultipleEntrySection({ schema, entries }: MultipleEntrySectionProps) {
   const updateField = useResumeStore((state) => state.updateField)
   const addEntry = useResumeStore((state) => state.addEntry)
   const removeEntry = useResumeStore((state) => state.removeEntry)
   const compile = useResumeStore((state) => state.compile)
 
   const handleFieldChange = (
-    index: number | null,
+    index: number,
     fieldKey: string,
     value: FieldValue,
   ) => {
@@ -126,56 +131,18 @@ export function DynamicSection({ schema, hideTitle }: DynamicSectionProps) {
     addEntry(schema.id)
   }
 
-  // Handle case where data doesn't exist yet
-  if (!data) {
-    return null
-  }
-
-  if (!schema.multiple) {
-    const sectionData = data as SectionEntry
-    return (
-      <SectionWrapper title={schema.label} hideTitle={hideTitle}>
-        <FieldList
-          fields={schema.fields}
-          data={sectionData}
-          onFieldChange={(fieldKey, value) =>
-            handleFieldChange(null, fieldKey, value)
-          }
-        />
-      </SectionWrapper>
-    )
-  }
-
-  const entries = data as Array<SectionEntry>
   const canRemoveAny = !schema.required || entries.length > 1
 
-  const addButton = hideTitle ? (
-    <button
-      type="button"
-      onClick={handleAdd}
-      className="flex w-full cursor-pointer items-center justify-center gap-1 rounded-md py-2 text-sm text-gray-600 transition-colors hover:bg-gray-100"
-    >
-      <Plus size={14} />
-      <span>New</span>
-    </button>
-  ) : (
-    <InvertedCircleButton
-      onClick={handleAdd}
-      ariaLabel={`Add ${schema.label}`}
-      variant="dark"
-      bordered={false}
-    >
-      <Plus size={16} />
-    </InvertedCircleButton>
-  )
-
   return (
-    <SectionWrapper
-      title={schema.label}
-      hideTitle={hideTitle}
-      action={hideTitle ? undefined : addButton}
-    >
-      {hideTitle && addButton}
+    <SectionWrapper>
+      <button
+        type="button"
+        onClick={handleAdd}
+        className="flex w-full cursor-pointer items-center justify-center gap-1 rounded-md py-2 text-sm text-gray-600 transition-colors hover:bg-gray-100"
+      >
+        <Plus size={14} />
+        <span>New</span>
+      </button>
 
       {entries.length === 0 && (
         <p className="mb-2 text-xs text-gray-500 italic">
@@ -198,5 +165,24 @@ export function DynamicSection({ schema, hideTitle }: DynamicSectionProps) {
         />
       ))}
     </SectionWrapper>
+  )
+}
+
+export function DynamicSection({ schema }: DynamicSectionProps) {
+  const data = useResumeStore((state) => state.data[schema.id])
+
+  if (!data) {
+    return null
+  }
+
+  if (!schema.multiple) {
+    return <SingleEntrySection schema={schema} data={data as SectionEntry} />
+  }
+
+  return (
+    <MultipleEntrySection
+      schema={schema}
+      entries={data as Array<SectionEntry>}
+    />
   )
 }
