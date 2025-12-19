@@ -4,6 +4,7 @@ import { InvertedButton } from '@/components/ui/InvertedButton'
 import BuilderModal from '@/components/resume-builder/BuilderModal'
 import type { BuilderFormData } from '@/components/resume-builder/BuilderModal'
 import { useCreateFromScratch } from '@/hooks/useCreateFromScratch'
+import { useShortcutStore } from '@/components/layout/shortcut.store'
 
 interface BuilderButtonProps {
   onSuccess?: (jobId: string) => void
@@ -14,6 +15,21 @@ export default function BuilderButton({ onSuccess }: BuilderButtonProps) {
 
   const { handleSubmit, isPending, isSuccess, error, data } =
     useCreateFromScratch()
+
+  // Listen for keyboard shortcut to open modal
+  const buildFromScratchRequested = useShortcutStore(
+    (state) => state.buildFromScratchRequested,
+  )
+  const clearBuildFromScratchRequest = useShortcutStore(
+    (state) => state.clearBuildFromScratchRequest,
+  )
+
+  useEffect(() => {
+    if (buildFromScratchRequested) {
+      setIsModalOpen(true)
+      clearBuildFromScratchRequest()
+    }
+  }, [buildFromScratchRequested, clearBuildFromScratchRequest])
 
   const errorMessage = error
     ? error instanceof Error

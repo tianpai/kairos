@@ -5,6 +5,7 @@ import { InvertedButton } from '@/components/ui/InvertedButton'
 import UploadModal from '@/components/upload/UploadModal'
 import { useCreateJobApplication } from '@/hooks/useCreateJobApplication'
 import { extractResumeText } from '@/utils/resumeTextExtractor'
+import { useShortcutStore } from '@/components/layout/shortcut.store'
 
 export interface UploadModalSubmitPayload {
   resumeFile: File
@@ -24,6 +25,21 @@ export default function UploadButton({ onSuccess }: UploadButtonProps) {
 
   const { handleSubmit, isPending, isSuccess, error, data } =
     useCreateJobApplication()
+
+  // Listen for keyboard shortcut to open modal
+  const newApplicationRequested = useShortcutStore(
+    (state) => state.newApplicationRequested,
+  )
+  const clearNewApplicationRequest = useShortcutStore(
+    (state) => state.clearNewApplicationRequest,
+  )
+
+  useEffect(() => {
+    if (newApplicationRequested) {
+      setIsModalOpen(true)
+      clearNewApplicationRequest()
+    }
+  }, [newApplicationRequested, clearNewApplicationRequest])
 
   const errorMessage =
     extractionError ||

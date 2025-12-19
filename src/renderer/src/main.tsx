@@ -14,6 +14,7 @@ import reportWebVitals from './reportWebVitals.ts'
 import App from '@/components/layout/App'
 import SettingsPage from '@/components/settings/SettingsPage'
 import * as TanStackQueryProvider from '@/integrations/tanstack-query/root-provider.tsx'
+import { useShortcutListener } from '@/hooks/useShortcutListener'
 
 import './styles.css'
 
@@ -36,6 +37,9 @@ function hideSplash() {
 }
 
 function RootLayout() {
+  // Initialize keyboard shortcuts listener
+  useShortcutListener()
+
   useEffect(() => {
     // Hide splash once React has mounted (respects minimum time)
     hideSplash()

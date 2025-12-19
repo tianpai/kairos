@@ -4,6 +4,7 @@ import log from 'electron-log/main'
 import { SettingsService } from './config/settings.service'
 import { registerAllHandlers } from './ipc'
 import { connectDatabase, disconnectDatabase, runMigrations } from './services/database.service'
+import { createAppMenu } from './menu'
 
 // Initialize logger
 log.initialize()
@@ -94,6 +95,9 @@ async function createWindow() {
   mainWindow.on('closed', () => {
     mainWindow = null
   })
+
+  // Create app menu with keyboard shortcuts
+  createAppMenu(mainWindow)
 }
 
 app.whenReady().then(async () => {
