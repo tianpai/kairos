@@ -172,9 +172,9 @@ function AboutSection() {
 
       <div className="space-y-4">
         <div>
-          <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Version 0.0.1</p>
+          <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Version 0.0.2</p>
           <p className="mt-1 text-sm italic text-gray-500 dark:text-gray-400">
-            "Damn! It looks like a Desktop app"
+            "Damn! It even uses like a desktop app"
           </p>
         </div>
 
