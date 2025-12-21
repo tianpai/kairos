@@ -23,12 +23,15 @@ export function useCreateJobApplication() {
       return { response, payload }
     },
     onSuccess({ response, payload }) {
+      console.log('[NEW] Job created, starting workflow for:', response.id)
       queryClient.invalidateQueries({ queryKey: ['jobApplications'] })
       // Start workflow with the job ID from the response
       startCreateApplicationWorkflow(response.id, {
         rawResumeContent: payload.rawResumeContent,
         jobDescription: payload.jobDescription,
         jsonSchema: payload.jsonSchema,
+      }).catch((error) => {
+        console.error('[Workflow] Failed to start create-application workflow:', error)
       })
     },
   })

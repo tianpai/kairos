@@ -46,6 +46,7 @@ export async function startCreateApplicationWorkflow(
     jsonSchema: Record<string, unknown>
   },
 ): Promise<void> {
+  console.log('[Workflow] Starting create-application workflow for job:', jobId)
   const workflowName: WorkflowName = 'create-application'
   const workflow = WORKFLOWS[workflowName]
   const tasks = Object.keys(workflow) as Task[]
