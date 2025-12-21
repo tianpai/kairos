@@ -45,6 +45,11 @@ export function useWorkflowSync(jobId: string | undefined) {
     // Invalidate job application query to refetch fresh data
     queryClient.invalidateQueries({ queryKey: ['jobApplication', jobId] })
 
+    // If score updated, also invalidate the applications list for sidebar
+    if (justCompleted.includes('score.updating')) {
+      queryClient.invalidateQueries({ queryKey: ['jobApplications'] })
+    }
+
     // If resume parsing or tailoring completed, load into resume store
     if (
       justCompleted.includes('resume.parsing') ||
