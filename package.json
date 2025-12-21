@@ -4,7 +4,7 @@
   "description": "AI-powered resume optimization desktop application",
   "main": "./out/main/index.js",
   "author": "",
-  "license": "ISC",
+  "license": "AGPL-3.0",
   "scripts": {
     "dev": "electron-vite dev",
     "build": "electron-vite build",
