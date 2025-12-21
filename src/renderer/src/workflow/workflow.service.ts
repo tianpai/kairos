@@ -10,6 +10,7 @@ import {
 import type { Task, Workflow, WorkflowName, TaskStateMap } from './workflow.types'
 import type { Checklist } from '@type/checklist'
 import { saveWorkflowState as saveWorkflowStateToDb } from '@api/jobs'
+import { tip } from '@tips/tips.service'
 
 import {
   executeResumeParsing,
@@ -171,45 +172,52 @@ async function handleTaskSuccess(
   result: unknown,
 ): Promise<void> {
   const store = useWorkflowStore.getState()
-  const context = store.context
+  const isActiveWorkflow = store.activeWorkflow?.jobId === jobId
 
-  if (!context || store.activeWorkflow?.jobId !== jobId) {
-    console.warn(`[Workflow] Task ${taskType} success ignored - workflow changed`)
-    return
-  }
-
-  // Call task-specific success handler (persists to DB)
-  // and update context with result for downstream tasks
+  // Always persist task results to database (prevents data loss on navigation)
   switch (taskType) {
     case RESUME_PARSING: {
       const resumeStructure = result as Record<string, unknown>
       await onResumeParsingSuccess(jobId, resumeStructure)
-      store.updateContext({ resumeStructure })
+      if (isActiveWorkflow) store.updateContext({ resumeStructure })
       break
     }
     case CHECKLIST_PARSING: {
       const checklist = result as Checklist
       await onChecklistParsingSuccess(jobId, checklist)
-      store.updateContext({ checklist })
+      if (isActiveWorkflow) {
+        store.updateContext({ checklist })
+        tip.trigger('checklist.parsed')
+      }
       break
     }
     case RESUME_TAILORING: {
       const tailoredResume = result as Record<string, unknown>
       await onResumeTailoringSuccess(jobId, tailoredResume)
-      store.updateContext({ resumeStructure: tailoredResume })
+      if (isActiveWorkflow) {
+        store.updateContext({ resumeStructure: tailoredResume })
+        tip.trigger('tailoring.complete')
+      }
       break
     }
     case CHECKLIST_MATCHING: {
       const matchedChecklist = result as Checklist
       await onChecklistMatchingSuccess(jobId, matchedChecklist)
-      store.updateContext({ checklist: matchedChecklist })
+      if (isActiveWorkflow) store.updateContext({ checklist: matchedChecklist })
       break
     }
     case SCORE_UPDATING: {
       const matchPercentage = result as number
       await onScoreUpdatingSuccess(jobId, matchPercentage)
+      if (isActiveWorkflow) tip.trigger('score.updated', { score: matchPercentage })
       break
     }
+  }
+
+  // Only update workflow state and trigger downstream tasks if still active
+  if (!isActiveWorkflow) {
+    console.log(`[Workflow] Task ${taskType} saved to DB, but workflow changed - skipping state update`)
+    return
   }
 
   // Update task state to completed

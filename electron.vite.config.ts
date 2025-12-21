@@ -80,6 +80,7 @@ export default defineConfig({
         '@typst-compiler/': `${rendererRoot}/src/typst-compiler/`,
         '@utils/': `${rendererRoot}/src/utils/`,
         '@workflow/': `${rendererRoot}/src/workflow/`,
+        '@tips/': `${rendererRoot}/src/tips/`,
       }
     },
     server: {
