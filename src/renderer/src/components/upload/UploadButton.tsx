@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { FilePlus } from 'lucide-react'
 import type { JobApplicationInput } from '@/api/jobs'
 import { InvertedButton } from '@/components/ui/InvertedButton'
 import UploadModal from '@/components/upload/UploadModal'
 import { useCreateJobApplication } from '@/hooks/useCreateJobApplication'
+import { useHasApiKey } from '@/hooks/useSettings'
 import { extractResumeText } from '@/utils/resumeTextExtractor'
 import { useShortcutStore } from '@/components/layout/shortcut.store'
 
@@ -22,7 +23,9 @@ interface UploadButtonProps {
 export default function UploadButton({ onSuccess }: UploadButtonProps) {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [extractionError, setExtractionError] = useState<string | null>(null)
+  const handledJobIdRef = useRef<string | null>(null)
 
+  const { data: hasApiKey } = useHasApiKey()
   const { handleSubmit, isPending, isSuccess, error, data } =
     useCreateJobApplication()
 
@@ -36,10 +39,13 @@ export default function UploadButton({ onSuccess }: UploadButtonProps) {
 
   useEffect(() => {
     if (newApplicationRequested) {
-      setIsModalOpen(true)
+      // Only open modal if API key is configured
+      if (hasApiKey) {
+        setIsModalOpen(true)
+      }
       clearNewApplicationRequest()
     }
-  }, [newApplicationRequested, clearNewApplicationRequest])
+  }, [newApplicationRequested, clearNewApplicationRequest, hasApiKey])
 
   const errorMessage =
     extractionError ||
@@ -50,7 +56,8 @@ export default function UploadButton({ onSuccess }: UploadButtonProps) {
       : null)
 
   useEffect(() => {
-    if (isSuccess && data) {
+    if (isSuccess && data && data.id !== handledJobIdRef.current) {
+      handledJobIdRef.current = data.id
       setIsModalOpen(false)
       onSuccess?.(data.id)
     }
@@ -85,7 +92,8 @@ export default function UploadButton({ onSuccess }: UploadButtonProps) {
     <>
       <InvertedButton
         onClick={() => setIsModalOpen(true)}
-        title="New application"
+        disabled={!hasApiKey}
+        title={hasApiKey ? 'New application' : 'Configure API key in Settings first'}
       >
         <div className="flex flex-row items-center gap-2">
           <FilePlus size={16} />

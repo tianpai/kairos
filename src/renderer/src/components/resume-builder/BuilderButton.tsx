@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Hammer } from 'lucide-react'
 import { InvertedButton } from '@/components/ui/InvertedButton'
 import BuilderModal from '@/components/resume-builder/BuilderModal'
@@ -12,6 +12,7 @@ interface BuilderButtonProps {
 
 export default function BuilderButton({ onSuccess }: BuilderButtonProps) {
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const handledJobIdRef = useRef<string | null>(null)
 
   const { handleSubmit, isPending, isSuccess, error, data } =
     useCreateFromScratch()
@@ -38,7 +39,8 @@ export default function BuilderButton({ onSuccess }: BuilderButtonProps) {
     : null
 
   useEffect(() => {
-    if (isSuccess && data) {
+    if (isSuccess && data && data.id !== handledJobIdRef.current) {
+      handledJobIdRef.current = data.id
       setIsModalOpen(false)
       onSuccess?.(data.id)
     }
