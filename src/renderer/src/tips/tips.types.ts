@@ -42,4 +42,5 @@ export interface TipState {
   incrementShownCount: (tipId: TipId) => void
   markActionCompleted: (action: string) => void
   isFirstTime: (action: string) => boolean
+  reset: () => void
 }

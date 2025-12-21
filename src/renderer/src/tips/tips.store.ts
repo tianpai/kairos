@@ -89,6 +89,16 @@ export const useTipsStore = create<TipState>()(
       isFirstTime: (action: string) => {
         return !get().completedActions.includes(action)
       },
+
+      reset: () => {
+        set({
+          activeTip: null,
+          shownCount: {},
+          dismissedAt: {},
+          neverShowAgain: [],
+          completedActions: [],
+        })
+      },
     }),
     {
       name: 'tips-storage',

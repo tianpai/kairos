@@ -1,10 +1,12 @@
 import { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
-import { ArrowLeft, Key, Palette, Monitor, Sun, Moon, Info } from 'lucide-react'
+import { ArrowLeft, Key, Palette, Monitor, Sun, Moon, Info, Lightbulb } from 'lucide-react'
 import { PageHeader } from '@ui/PageHeader'
 import { InvertedButton } from '@ui/InvertedButton'
 import { useApiKey, useSetApiKey, useDeleteApiKey } from '@hooks/useSettings'
 import { useTheme, useSetTheme } from '@hooks/useTheme'
+import { tips } from '../../tips/tips.data'
+import { useTipsStore } from '../../tips/tips.store'
 
 function GitHubIcon({ size = 24 }: { size?: number }) {
   return (
@@ -25,11 +27,12 @@ function GitHubIcon({ size = 24 }: { size?: number }) {
   )
 }
 
-type SettingsSection = 'api-keys' | 'appearance' | 'about'
+type SettingsSection = 'api-keys' | 'appearance' | 'tips' | 'about'
 
 const NAV_ITEMS: { id: SettingsSection; label: string; icon: typeof Key }[] = [
   { id: 'api-keys', label: 'API Keys', icon: Key },
   { id: 'appearance', label: 'Appearance', icon: Palette },
+  { id: 'tips', label: 'Tips', icon: Lightbulb },
   { id: 'about', label: 'About', icon: Info },
 ]
 
@@ -158,6 +161,53 @@ function AppearanceSection() {
   )
 }
 
+function TipsSection() {
+  const { neverShowAgain, dismissedAt, cooldownMs, reset } = useTipsStore()
+
+  const getTipStatus = (tipId: string): 'hidden' | 'dismissed' | null => {
+    if (neverShowAgain.includes(tipId)) {
+      return 'hidden'
+    }
+    const dismissedTime = dismissedAt[tipId]
+    if (dismissedTime && Date.now() - dismissedTime < cooldownMs) {
+      return 'dismissed'
+    }
+    return null
+  }
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-lg font-semibold">Tips</h2>
+        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+          Manage app tips and hints.
+        </p>
+      </div>
+
+      <div className="space-y-2">
+        {tips.map((tip) => {
+          const status = getTipStatus(tip.id)
+          return (
+            <div
+              key={tip.id}
+              className="flex items-start justify-between gap-4 border-b border-gray-100 py-2 last:border-0 dark:border-gray-800"
+            >
+              <p className="text-sm text-gray-700 dark:text-gray-300">{tip.message}</p>
+              {status && (
+                <span className="shrink-0 text-xs text-gray-400 dark:text-gray-500">
+                  {status === 'hidden' ? 'Hidden' : 'Dismissed'}
+                </span>
+              )}
+            </div>
+          )
+        })}
+      </div>
+
+      <InvertedButton onClick={reset}>Reset All Tips</InvertedButton>
+    </div>
+  )
+}
+
 const GITHUB_URL = 'https://github.com/tianpai/kairos'
 
 function AboutSection() {
@@ -241,6 +291,7 @@ export default function SettingsPage() {
         <main className="flex-1 overflow-auto p-8">
           {activeSection === 'api-keys' && <ApiKeysSection />}
           {activeSection === 'appearance' && <AppearanceSection />}
+          {activeSection === 'tips' && <TipsSection />}
           {activeSection === 'about' && <AboutSection />}
         </main>
       </div>
