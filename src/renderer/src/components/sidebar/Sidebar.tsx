@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { Settings } from 'lucide-react'
-import EditJobModal from '@dashboard/EditJobModal'
+import EditJobModal from '@sidebar/EditJobModal'
 import { SidebarItem } from './SidebarItem'
 import UploadButton from '@/components/upload/UploadButton'
 import BuilderButton from '@/components/resume-builder/BuilderButton'

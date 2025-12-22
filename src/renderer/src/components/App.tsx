@@ -17,10 +17,10 @@ import ResumeParsingLoader from '@editor/ResumeParsingLoader'
 import DownloadResumeButton from '@editor/DownloadResumeButton'
 import SaveResumeButton from '@editor/SaveResumeButton'
 import { DocumentConfigButton } from '@resumeForm/DocumentConfigButton'
-import { EmptyState } from './EmptyState'
-import { Sidebar } from './Sidebar'
-import { AppLayout } from './AppLayout'
-import { useLayoutStore } from './layout.store'
+import { EmptyState } from '@layout/EmptyState'
+import { Sidebar } from '@sidebar/Sidebar'
+import { AppLayout } from '@layout/AppLayout'
+import { useLayoutStore } from '@layout/layout.store'
 import { getScoreColor } from '@/utils/scoreThresholds'
 
 export default function App() {
@@ -94,7 +94,9 @@ export default function App() {
                 <InvertedButton
                   onClick={toggleChecklist}
                   ariaLabel={
-                    showChecklist ? 'Switch to 2 columns' : 'Switch to 3 columns'
+                    showChecklist
+                      ? 'Switch to 2 columns'
+                      : 'Switch to 3 columns'
                   }
                   title="Toggle columns"
                   className="-mr-0.5"

@@ -41,6 +41,8 @@ export default defineConfig({
       '@utils/': `${__dirname}/src/utils/`,
       '@workflow/': `${__dirname}/src/workflow/`,
       '@tips/': `${__dirname}/src/tips/`,
+      '@sidebar/': `${__dirname}/src/components/sidebar/`,
+      '@layout/': `${__dirname}/src/components/layout/`,
     },
   },
 })

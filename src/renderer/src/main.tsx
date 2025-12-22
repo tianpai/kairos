@@ -11,7 +11,7 @@ import {
 // import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
 
 import reportWebVitals from './reportWebVitals.ts'
-import App from '@/components/layout/App'
+import App from '@/components/App'
 import SettingsPage from '@/components/settings/SettingsPage'
 import * as TanStackQueryProvider from '@/integrations/tanstack-query/root-provider.tsx'
 import { useShortcutListener } from '@/hooks/useShortcutListener'
