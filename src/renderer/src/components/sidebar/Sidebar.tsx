@@ -1,10 +1,8 @@
 import { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { Settings } from 'lucide-react'
-import EditJobModal from '@dashboard/EditJobModal'
+import EditJobModal from '@sidebar/EditJobModal'
 import { SidebarItem } from './SidebarItem'
-import UploadButton from '@/components/upload/UploadButton'
-import BuilderButton from '@/components/resume-builder/BuilderButton'
 
 interface Application {
   id: string
@@ -20,7 +18,6 @@ interface SidebarProps {
   selectedId: string | undefined
   onSelect: (id: string) => void
   collapsed: boolean
-  onUploadSuccess: (jobId: string) => void
   onEdit: (
     id: string,
     data: { companyName: string; position: string; dueDate: string },
@@ -33,7 +30,6 @@ export function Sidebar({
   selectedId,
   onSelect,
   collapsed,
-  onUploadSuccess,
   onEdit,
   onDelete,
 }: SidebarProps) {
@@ -67,14 +63,8 @@ export function Sidebar({
       >
         {/* Inner container to prevent content reflow during animation */}
         <div className="flex h-full w-60 flex-col">
-          {/* Action Buttons */}
-          <div className="flex gap-2 p-3">
-            <UploadButton onSuccess={onUploadSuccess} />
-            <BuilderButton onSuccess={onUploadSuccess} />
-          </div>
-
           {/* Applications List */}
-          <div className="flex-1 overflow-y-auto">
+          <div className="flex-1 overflow-y-auto pt-3">
             {applications.map((app) => (
               <SidebarItem
                 key={app.id}

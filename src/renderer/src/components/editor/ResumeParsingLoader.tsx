@@ -105,7 +105,7 @@ export default function ResumeParsingLoader({
         </div>
         <div className="absolute top-4 left-4 z-20">
           <InvertedButton
-            onClick={() => navigate({ to: '/' })}
+            onClick={() => navigate({ to: '/', search: { jobId: undefined } })}
             ariaLabel="Back to home"
             title="Back to home"
           >

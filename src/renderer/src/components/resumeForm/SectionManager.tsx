@@ -1,4 +1,5 @@
 import { memo, useCallback, useMemo, useState } from 'react'
+import { GripVertical } from 'lucide-react'
 import {
   DndContext,
   DragOverlay,
@@ -25,25 +26,15 @@ interface SectionCardProps {
   id: string
   label: string
   styleId: string
-  inverted?: boolean
 }
 
-function SectionCard({
-  id,
-  label,
-  styleId,
-  inverted = false,
-}: SectionCardProps) {
+function SectionCard({ id, label, styleId }: SectionCardProps) {
   return (
     <>
-      <div
-        className={`font-medium ${inverted ? 'text-gray-200' : 'text-black group-hover:text-gray-200 dark:text-gray-200'}`}
-      >
+      <div className="text-sm font-medium text-black dark:text-gray-200">
         {label}
       </div>
-      <div
-        className={`text-sm ${inverted ? 'text-gray-200' : 'text-gray-500 group-hover:text-gray-200 dark:text-gray-400'}`}
-      >
+      <div className="text-xs text-gray-500 dark:text-gray-400">
         ID: {id} | Style: {styleId}
       </div>
     </>
@@ -54,14 +45,12 @@ interface DraggableSectionProps {
   id: string
   label: string
   styleId: string
-  isDragOverlay?: boolean
 }
 
 const DraggableSection = memo(function DraggableSection({
   id,
   label,
   styleId,
-  isDragOverlay,
 }: DraggableSectionProps) {
   const {
     attributes,
@@ -79,12 +68,11 @@ const DraggableSection = memo(function DraggableSection({
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    opacity: isDragging ? 0 : 1,
+    opacity: isDragging ? 0.5 : 1,
   }
 
   // Show drop indicator when dragging over this item
-  const showDropIndicator =
-    isOver && active && active.id !== id && !isDragOverlay
+  const showDropIndicator = isOver && active && active.id !== id
 
   return (
     <div className="relative">
@@ -95,12 +83,20 @@ const DraggableSection = memo(function DraggableSection({
         ref={setNodeRef}
         style={style}
         {...attributes}
-        {...listeners}
-        className={`group cursor-move border p-3 transition-colors ${
+        className={`group flex items-center rounded-md border p-2 transition-colors ${
           showDropIndicator ? 'mt-2' : ''
-        } bg-white hover:border-black hover:bg-black dark:border-gray-600 dark:bg-[#2a2a2a] dark:hover:border-gray-400 dark:hover:bg-[#3a3a3a]`}
+        } bg-white dark:border-gray-600 dark:bg-[#2a2a2a]`}
       >
-        <SectionCard id={id} label={label} styleId={styleId} />
+        <button
+          type="button"
+          {...listeners}
+          className="mr-1.5 cursor-grab text-gray-400 opacity-0 transition-opacity group-hover:opacity-100 active:cursor-grabbing dark:text-gray-500"
+        >
+          <GripVertical size={16} />
+        </button>
+        <div className="flex-1">
+          <SectionCard id={id} label={label} styleId={styleId} />
+        </div>
       </div>
     </div>
   )
@@ -129,17 +125,17 @@ const SortableZone = memo(function SortableZone<T>({
 
   return (
     <div className="space-y-2">
-      <h3 className="font-medium dark:text-gray-200">{title}</h3>
+      <div className="text-sm font-medium dark:text-gray-200">{title}</div>
 
       <SortableContext items={itemIds} strategy={verticalListSortingStrategy}>
         <div
           ref={setNodeRef}
-          className={`min-h-25 space-y-2 transition-colors ${
+          className={`min-h-25 space-y-2 rounded-md transition-colors ${
             isOver ? 'ring-2 ring-gray-300' : ''
           }`}
         >
           {isEmpty && !isOver && (
-            <div className="border border-dashed p-4 text-center text-sm text-gray-500 dark:border-gray-600 dark:text-gray-400">
+            <div className="rounded-md border border-dashed p-4 text-center text-sm text-gray-500 dark:border-gray-600 dark:text-gray-400">
               {emptyMessage}
             </div>
           )}
@@ -233,10 +229,10 @@ export function SectionManagerContent() {
   return (
     <div>
       <div className="mb-4">
-        <h3 className="text-lg font-medium dark:text-gray-200">Sections</h3>
-        <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+        <div className="text-lg font-medium dark:text-gray-200">Sections</div>
+        <div className="mt-1 text-sm text-gray-600 dark:text-gray-400">
           Data will be lost if sections are removed (dragged out)
-        </p>
+        </div>
       </div>
 
       <DndContext
@@ -258,13 +254,17 @@ export function SectionManagerContent() {
 
         <DragOverlay>
           {activeId ? (
-            <div className="cursor-move border bg-black p-3">
-              <SectionCard
-                id={activeId}
-                label={getActiveItemLabel(activeId)}
-                styleId="default"
-                inverted={true}
-              />
+            <div className="flex items-center rounded-md border bg-white p-2 shadow-lg dark:border-gray-600 dark:bg-[#2a2a2a]">
+              <div className="mr-1.5 cursor-grabbing text-gray-400 dark:text-gray-500">
+                <GripVertical size={16} />
+              </div>
+              <div className="flex-1">
+                <SectionCard
+                  id={activeId}
+                  label={getActiveItemLabel(activeId)}
+                  styleId="default"
+                />
+              </div>
             </div>
           ) : null}
         </DragOverlay>

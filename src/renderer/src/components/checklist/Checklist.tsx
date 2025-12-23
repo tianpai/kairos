@@ -52,7 +52,7 @@ export default function Checklist({ jobId }: ChecklistProps) {
 
   // Check if checklist parsing is running
   const isParsingChecklist = useWorkflowStore((state) =>
-    state.isTaskRunning(CHECKLIST_PARSING),
+    jobId ? state.isTaskRunning(jobId, CHECKLIST_PARSING) : false,
   )
 
   const checklist = jobApplication?.checklist

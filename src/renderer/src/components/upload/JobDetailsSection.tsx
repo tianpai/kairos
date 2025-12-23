@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { InputField } from '@ui/InputField'
 import { DatePicker } from '@ui/DatePicker'
 import type { JobApplicationInput } from '@/api/jobs'
+import { INPUT_TEXTAREA, LABEL_BASE } from '@/components/resumeForm/fieldStyles'
 
 export type JobApplicationFormData = Omit<
   JobApplicationInput,
@@ -10,10 +11,12 @@ export type JobApplicationFormData = Omit<
 
 export interface JobDetailsSectionProps {
   onFormChange: (data: JobApplicationFormData, isValid: boolean) => void
+  requireJobDescription?: boolean
 }
 
 export default function JobDetailsSection({
   onFormChange,
+  requireJobDescription = true,
 }: JobDetailsSectionProps) {
   const [jobDescription, setJobDescription] = useState('')
   const [companyName, setCompanyName] = useState('')
@@ -38,18 +41,18 @@ export default function JobDetailsSection({
       dueDate: currentDueDate,
     }
     const isValid = Boolean(
-      currentJobDescription.trim() &&
-        currentCompanyName.trim() &&
+      currentCompanyName.trim() &&
         currentPosition.trim() &&
-        currentDueDate,
+        currentDueDate &&
+        (requireJobDescription ? currentJobDescription.trim() : true),
     )
     onFormChange(formData, isValid)
   }
 
   return (
-    <section className="flex min-w-0 flex-col pl-6">
+    <section className="flex min-w-0 flex-col">
       <h2 className="text-lg font-semibold">Job details</h2>
-      <div className="mt-2 flex flex-1 flex-col space-y-2">
+      <div className="mt-2 flex flex-col space-y-2">
         <div className="grid grid-cols-2 gap-4">
           <InputField
             id="companyName"
@@ -86,12 +89,14 @@ export default function JobDetailsSection({
           disablePastDates
         />
 
-        <div className="flex flex-1 flex-col">
-          <label
-            htmlFor="jobDescription"
-            className="mb-1 block text-sm font-medium"
-          >
+        <div className="flex flex-col">
+          <label htmlFor="jobDescription" className={LABEL_BASE}>
             Job Description
+            {!requireJobDescription && (
+              <span className="ml-1 text-gray-400 dark:text-gray-500">
+                (optional)
+              </span>
+            )}
           </label>
           <textarea
             id="jobDescription"
@@ -102,7 +107,8 @@ export default function JobDetailsSection({
               handleFormChange({ jobDescription: event.target.value })
             }}
             placeholder="Paste the job description here..."
-            className="mt-1 min-h-[15rem] w-full flex-1 resize-none border-b border-gray-300 bg-transparent p-3 leading-relaxed text-slate-800 outline-none focus:border-black dark:border-gray-600 dark:text-gray-200 dark:placeholder-gray-500 dark:focus:border-white"
+            rows={8}
+            className={`${INPUT_TEXTAREA} !overflow-y-auto`}
           />
         </div>
       </div>

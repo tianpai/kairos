@@ -44,7 +44,11 @@
       "@templates/*": ["./src/templates/*"],
       "@typst-compiler/*": ["./src/typst-compiler/*"],
       "@utils/*": ["./src/utils/*"],
-      "@workflow/*": ["./src/workflow/*"]
+      "@workflow/*": ["./src/workflow/*"],
+      "@tips/*": ["./src/tips/*"],
+      "@sidebar/*": ["./src/components/sidebar/*"],
+      "@layout/*": ["./src/components/layout/*"],
+      "@root/*": ["../../*"]
     }
   }
 }

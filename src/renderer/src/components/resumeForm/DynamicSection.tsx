@@ -1,5 +1,21 @@
 import { useResumeStore } from '@typst-compiler/resumeState'
-import { CircleX, Plus } from 'lucide-react'
+import { CircleX, GripVertical, Plus } from 'lucide-react'
+import {
+  DndContext,
+  KeyboardSensor,
+  PointerSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core'
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
+import type { DragEndEvent } from '@dnd-kit/core'
 import { DynamicField } from './DynamicField'
 import type {
   FieldSchema,
@@ -38,6 +54,7 @@ function FieldList({ fields, data, onFieldChange }: FieldListProps) {
 }
 
 interface EntryItemProps {
+  id: string
   label: string
   index: number
   fields: Array<FieldSchema>
@@ -48,6 +65,7 @@ interface EntryItemProps {
 }
 
 function EntryItem({
+  id,
   label,
   index,
   fields,
@@ -56,12 +74,36 @@ function EntryItem({
   onFieldChange,
   onRemove,
 }: EntryItemProps) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id })
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  }
+
   return (
-    <div className="mb-2 p-2">
+    <div ref={setNodeRef} style={style} {...attributes} className="group mb-2 p-2">
       <div className="mb-2 flex items-center justify-between">
-        <h4 className="text-xs font-semibold">
-          {label} #{index + 1}
-        </h4>
+        <div className="flex items-center gap-1">
+          <button
+            type="button"
+            {...listeners}
+            className="cursor-grab text-gray-400 opacity-0 transition-opacity group-hover:opacity-100 active:cursor-grabbing dark:text-gray-500"
+          >
+            <GripVertical size={14} />
+          </button>
+          <h4 className="text-xs font-semibold">
+            {label} #{index + 1}
+          </h4>
+        </div>
         {canRemove && (
           <button
             type="button"
@@ -111,7 +153,19 @@ function MultipleEntrySection({ schema, entries }: MultipleEntrySectionProps) {
   const updateField = useResumeStore((state) => state.updateField)
   const addEntry = useResumeStore((state) => state.addEntry)
   const removeEntry = useResumeStore((state) => state.removeEntry)
+  const reorderEntries = useResumeStore((state) => state.reorderEntries)
   const compile = useResumeStore((state) => state.compile)
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
+  )
+
+  const entryIds = entries.map(
+    (entry, index) => (entry._id as string) || `entry-${index}`,
+  )
 
   const handleFieldChange = (
     index: number,
@@ -129,6 +183,15 @@ function MultipleEntrySection({ schema, entries }: MultipleEntrySectionProps) {
 
   const handleAdd = () => {
     addEntry(schema.id)
+  }
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event
+    if (over && active.id !== over.id) {
+      const oldIndex = entryIds.indexOf(active.id as string)
+      const newIndex = entryIds.indexOf(over.id as string)
+      reorderEntries(schema.id, oldIndex, newIndex)
+    }
   }
 
   const canRemoveAny = !schema.required || entries.length > 1
@@ -150,20 +213,32 @@ function MultipleEntrySection({ schema, entries }: MultipleEntrySectionProps) {
         </p>
       )}
 
-      {entries.map((entry: SectionEntry, index: number) => (
-        <EntryItem
-          key={(entry._id as string) || index}
-          label={schema.label}
-          index={index}
-          fields={schema.fields}
-          data={entry}
-          canRemove={canRemoveAny || index !== entries.length - 1}
-          onFieldChange={(fieldKey, value) =>
-            handleFieldChange(index, fieldKey, value)
-          }
-          onRemove={() => handleRemove(index)}
-        />
-      ))}
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={handleDragEnd}
+      >
+        <SortableContext
+          items={entryIds}
+          strategy={verticalListSortingStrategy}
+        >
+          {entries.map((entry: SectionEntry, index: number) => (
+            <EntryItem
+              key={entryIds[index]}
+              id={entryIds[index]}
+              label={schema.label}
+              index={index}
+              fields={schema.fields}
+              data={entry}
+              canRemove={canRemoveAny || index !== entries.length - 1}
+              onFieldChange={(fieldKey, value) =>
+                handleFieldChange(index, fieldKey, value)
+              }
+              onRemove={() => handleRemove(index)}
+            />
+          ))}
+        </SortableContext>
+      </DndContext>
     </SectionWrapper>
   )
 }

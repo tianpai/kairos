@@ -17,10 +17,10 @@ export function TailoringButton() {
 
   // Get loading states from workflow store
   const isTailoringResume = useWorkflowStore((state) =>
-    state.isTaskRunning(RESUME_TAILORING),
+    jobId ? state.isTaskRunning(jobId, RESUME_TAILORING) : false,
   )
   const isMatchingTailoredResume = useWorkflowStore((state) =>
-    state.isTaskRunning(CHECKLIST_MATCHING),
+    jobId ? state.isTaskRunning(jobId, CHECKLIST_MATCHING) : false,
   )
 
   // Check if checklist matching is completed

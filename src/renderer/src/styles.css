@@ -44,6 +44,10 @@ body {
   width: 100vw;
 }
 
+button {
+  cursor: pointer;
+}
+
 @media (prefers-color-scheme: dark) {
   body {
     color: #e5e5e5;
