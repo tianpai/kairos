@@ -30,6 +30,7 @@ interface ResumeState {
   // entry is within a section
   addEntry: (sectionId: string) => void
   removeEntry: (sectionId: string, index: number) => void
+  reorderEntries: (sectionId: string, oldIndex: number, newIndex: number) => void
 
   // sections are like work experiences, education
   addSection: (sectionId: string, styleId?: string) => void
@@ -117,6 +118,30 @@ export const useResumeStore = create<ResumeState>()(
           newData[sectionId] = currentArray.filter((_, i) => i !== index)
           return { data: newData }
         })
+      },
+
+      reorderEntries: (sectionId, oldIndex, newIndex) => {
+        set((state) => {
+          const newData: TemplateData = { ...state.data }
+          const currentArray = newData[sectionId]
+          if (!Array.isArray(currentArray)) {
+            console.error(`Section ${sectionId} is not an array`)
+            return state
+          }
+          const reordered = [...currentArray]
+          const [removed] = reordered.splice(oldIndex, 1)
+          reordered.splice(newIndex, 0, removed)
+          newData[sectionId] = reordered
+          return { data: newData }
+        })
+        get()
+          .compile()
+          .catch((error) => {
+            console.error(
+              'Failed to compile resume after reordering entries',
+              error,
+            )
+          })
       },
 
       compile: async () => {
