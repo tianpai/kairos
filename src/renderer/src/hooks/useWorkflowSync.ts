@@ -1,33 +1,94 @@
 import { useEffect, useRef } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { useWorkflowStore } from '@workflow/workflow.store'
+import { recoverStaleWorkflow } from '@workflow/workflow.recovery'
 import { useResumeStore } from '@typst-compiler/resumeState'
+import { saveWorkflowState } from '@api/jobs'
+import type { JobApplicationDetails } from '@api/jobs'
 import type { TemplateData } from '@templates/template.types'
+import type { WorkflowName, TaskStateMap } from '@workflow/workflow.types'
 
 /**
- * Syncs workflow state changes to TanStack Query cache and resume store
+ * Syncs workflow state between DB, Zustand store, and React Query cache
  *
- * When tasks complete, this hook:
- * 1. Invalidates the jobApplication query to refetch fresh data from DB
- * 2. Loads the new resume data into the resume store
+ * Responsibilities:
+ * 1. Load workflow state from DB when navigating to a job (if not in store)
+ * 2. Recover stale "running" workflows that were interrupted
+ * 3. Invalidate queries when tasks complete
+ * 4. Load resume data into resume store when parsing/tailoring completes
  */
-export function useWorkflowSync(jobId: string | undefined) {
+export function useWorkflowSync(
+  jobId: string | undefined,
+  jobApplication: JobApplicationDetails | undefined,
+) {
   const queryClient = useQueryClient()
   const loadParsedResume = useResumeStore((state) => state.loadParsedResume)
-  const activeWorkflow = useWorkflowStore((state) => state.activeWorkflow)
-  const context = useWorkflowStore((state) => state.context)
 
-  // Track previous task states to detect completions
-  const prevTaskStatesRef = useRef<Record<string, string>>({})
+  // Store actions
+  const loadWorkflow = useWorkflowStore((state) => state.loadWorkflow)
 
+  // Track previous task states to detect completions (per jobId)
+  const prevTaskStatesRef = useRef<Record<string, Record<string, string>>>({})
+
+  // Effect 1: Load workflow from DB when navigating to a job
   useEffect(() => {
-    if (!jobId || !activeWorkflow || activeWorkflow.jobId !== jobId) {
+    if (!jobId || !jobApplication?.workflowSteps) return
+
+    // Check if we already have this workflow in memory
+    const existingWorkflow = useWorkflowStore.getState().getWorkflow(jobId)
+    if (existingWorkflow) {
+      // Already loaded - don't overwrite (could be actively running)
+      return
+    }
+
+    const { workflowSteps } = jobApplication
+
+    // Recover from any stale running states
+    const { recovered, wasStale } = recoverStaleWorkflow(workflowSteps)
+
+    // If recovery changed the state, persist it back to DB
+    if (wasStale) {
+      saveWorkflowState(jobId, recovered, recovered.status).catch((error) => {
+        console.error('[WorkflowSync] Failed to save recovered workflow state:', error)
+      })
+    }
+
+    // Load into store
+    loadWorkflow(
+      jobId,
+      {
+        jobId,
+        workflowName: recovered.workflowName as WorkflowName,
+        taskStates: recovered.taskStates as TaskStateMap,
+        status: recovered.status,
+        error: recovered.error,
+      },
+      {
+        jobId,
+        resumeStructure: jobApplication.tailoredResume ?? jobApplication.parsedResume ?? undefined,
+        checklist: jobApplication.checklist ?? undefined,
+      },
+    )
+  }, [jobId, jobApplication?.workflowSteps, loadWorkflow])
+
+  // Effect 2: Detect task completions and sync to React Query / resume store
+  useEffect(() => {
+    if (!jobId) {
       prevTaskStatesRef.current = {}
       return
     }
 
-    const currentTaskStates = activeWorkflow.taskStates
-    const prevTaskStates = prevTaskStatesRef.current
+    const workflow = useWorkflowStore.getState().getWorkflow(jobId)
+    const context = useWorkflowStore.getState().getContext(jobId)
+
+    if (!workflow) {
+      // Clean up prev states for this job if workflow doesn't exist
+      delete prevTaskStatesRef.current[jobId]
+      return
+    }
+
+    const currentTaskStates = workflow.taskStates
+    const prevTaskStates = prevTaskStatesRef.current[jobId] || {}
 
     // Find tasks that just completed
     const justCompleted: string[] = []
@@ -38,7 +99,7 @@ export function useWorkflowSync(jobId: string | undefined) {
     }
 
     // Update ref for next comparison
-    prevTaskStatesRef.current = { ...currentTaskStates }
+    prevTaskStatesRef.current[jobId] = { ...currentTaskStates }
 
     if (justCompleted.length === 0) return
 
@@ -59,5 +120,12 @@ export function useWorkflowSync(jobId: string | undefined) {
         loadParsedResume(context.resumeStructure as TemplateData)
       }
     }
-  }, [jobId, activeWorkflow, context, queryClient, loadParsedResume])
+  }, [
+    jobId,
+    // Subscribe to workflow changes for the current job
+    useWorkflowStore((state) => jobId ? state.workflows[jobId] : undefined),
+    useWorkflowStore((state) => jobId ? state.contexts[jobId] : undefined),
+    queryClient,
+    loadParsedResume,
+  ])
 }

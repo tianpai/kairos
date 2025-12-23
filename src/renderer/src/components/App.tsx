@@ -47,16 +47,16 @@ export default function App() {
   // Mutations for edit and delete
   const { handleUpdate, handleDelete } = useJobApplicationMutations(jobId)
 
-  // Get loading states from workflow store
+  // Sync workflow state between DB and store
+  useWorkflowSync(jobId, jobApplication)
+
+  // Get loading states from workflow store (requires jobId)
   const isParsingResume = useWorkflowStore((state) =>
-    state.isTaskRunning(RESUME_PARSING),
+    jobId ? state.isTaskRunning(jobId, RESUME_PARSING) : false,
   )
   const isParsingChecklist = useWorkflowStore((state) =>
-    state.isTaskRunning(CHECKLIST_PARSING),
+    jobId ? state.isTaskRunning(jobId, CHECKLIST_PARSING) : false,
   )
-
-  // Sync workflow state changes to TanStack Query cache
-  useWorkflowSync(jobId)
 
   // Sync job application data to store (templateId + tailored resume)
   useSyncJobApplicationToStore(jobApplication)

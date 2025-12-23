@@ -168,6 +168,7 @@ export class JobApplicationService {
     originalResume: string | null
     checklist: Record<string, unknown> | null
     workflowStatus: string | null
+    workflowSteps: Record<string, unknown> | null
     failedTasks: Record<string, unknown>
   }> {
     const jobApplication = await requireJobApplication(this.database, id, {
@@ -205,6 +206,7 @@ export class JobApplicationService {
       originalResume: jobApplication.originalResume,
       checklist: jobApplication.checklist as Record<string, unknown> | null,
       workflowStatus: jobApplication.workflowStatus,
+      workflowSteps: workflowSteps ?? null,
       failedTasks,
     }
   }
