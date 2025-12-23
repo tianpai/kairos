@@ -1,3 +1,4 @@
+import { CircleX } from 'lucide-react'
 import { InvertedButton } from '@ui/InvertedButton'
 import { DateInput } from './DateInput'
 import { asString, asStringArray } from './fieldUtils'
@@ -57,11 +58,16 @@ function TextArrayField({ schema, value, onChange }: FieldProps) {
 
   const addItem = () => onChange([...items, ''])
 
+  const removeItem = (index: number) => {
+    const updated = items.filter((_, i) => i !== index)
+    onChange(updated)
+  }
+
   return (
     <FieldWrapper label={label}>
       <div className="space-y-1.5">
         {items.map((item: string, index: number) => (
-          <div key={index}>
+          <div key={index} className="group relative">
             <textarea
               ref={ref}
               value={item}
@@ -69,8 +75,18 @@ function TextArrayField({ schema, value, onChange }: FieldProps) {
               onInput={handleInput}
               placeholder={placeholder}
               rows={1}
-              className={INPUT_TEXTAREA}
+              className={`${INPUT_TEXTAREA} pr-8`}
             />
+            <button
+              type="button"
+              onClick={() => removeItem(index)}
+              className="absolute right-2 top-2 p-0.5 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100"
+            >
+              <CircleX
+                size={14}
+                className="text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
+              />
+            </button>
           </div>
         ))}
         <div className="text-right">
