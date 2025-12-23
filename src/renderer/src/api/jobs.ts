@@ -47,12 +47,23 @@ export interface JobApplication {
   updatedAt: string
 }
 
+export type WorkflowStatus = 'idle' | 'running' | 'completed' | 'failed'
+
+export interface WorkflowStepsData {
+  workflowName: string
+  taskStates: Record<string, string>
+  status: WorkflowStatus
+  error?: string
+}
+
 export interface JobApplicationDetails extends JobApplication {
   templateId: string
   jobDescription: string | null
   parsedResume: Record<string, unknown> | null
   tailoredResume: Record<string, unknown> | null
   checklist: Checklist | null
+  workflowStatus: WorkflowStatus | null
+  workflowSteps: WorkflowStepsData | null
   failedTasks: FailedTasksMap
 }
 

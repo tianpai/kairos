@@ -51,11 +51,12 @@ export function SidebarItem({
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-1 truncate text-sm font-medium text-gray-900 dark:text-white">
           {isBuiltFromScratch && (
-            <Hammer
-              size={12}
-              className="shrink-0 text-gray-400 dark:text-gray-500"
-              title="Built from scratch"
-            />
+            <span title="Built from scratch">
+              <Hammer
+                size={12}
+                className="shrink-0 text-gray-400 dark:text-gray-500"
+              />
+            </span>
           )}
           <span className="truncate">{companyName}</span>
         </div>

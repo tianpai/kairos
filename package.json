@@ -1,10 +1,10 @@
 {
   "name": "kairos",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "AI-powered resume optimization desktop application",
   "main": "./out/main/index.js",
   "author": "",
-  "license": "ISC",
+  "license": "AGPL-3.0",
   "scripts": {
     "dev": "electron-vite dev",
     "build": "electron-vite build",
@@ -18,7 +18,9 @@
     "format": "prettier --write .",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "vitest run",
-    "test:watch": "vitest watch"
+    "test:watch": "vitest watch",
+    "release": "standard-version",
+    "release:first": "standard-version --first-release"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
@@ -35,7 +37,7 @@
     "@tanstack/react-query-devtools": "^5.84.2",
     "@tanstack/react-router": "^1.130.2",
     "@tanstack/react-router-devtools": "^1.131.5",
-    "docx-preview": "^0.3.6",
+    "clsx": "^2.1.1",
     "electron-log": "^5.4.3",
     "electron-store": "^11.0.2",
     "gsap": "^3.13.0",
@@ -43,12 +45,13 @@
     "mammoth": "^1.11.0",
     "ogl": "^1.0.11",
     "openai": "^6.10.0",
-    "pdfjs-dist": "^5.4.394",
     "prisma": "^6.17.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "tailwind-merge": "^3.4.0",
     "tailwindcss": "^4.0.6",
     "undici": "^6.22.0",
+    "unpdf": "^1.4.0",
     "zod": "^4.1.13",
     "zustand": "^5.0.8"
   },
@@ -83,6 +86,7 @@
     "prettier-plugin-tailwindcss": "^0.7.1",
     "rollup-plugin-visualizer": "^6.0.5",
     "source-map-support": "^0.5.21",
+    "standard-version": "^9.5.0",
     "supertest": "^7.1.4",
     "ts-jest": "^29.4.5",
     "ts-loader": "^9.5.4",

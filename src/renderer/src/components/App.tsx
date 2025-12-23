@@ -17,11 +17,12 @@ import ResumeParsingLoader from '@editor/ResumeParsingLoader'
 import DownloadResumeButton from '@editor/DownloadResumeButton'
 import SaveResumeButton from '@editor/SaveResumeButton'
 import { DocumentConfigButton } from '@resumeForm/DocumentConfigButton'
-import { EmptyState } from './EmptyState'
-import { Sidebar } from './Sidebar'
-import { AppLayout } from './AppLayout'
-import { useLayoutStore } from './layout.store'
+import { EmptyState } from '@layout/EmptyState'
+import { Sidebar } from '@sidebar/Sidebar'
+import { AppLayout } from '@layout/AppLayout'
+import { useLayoutStore } from '@layout/layout.store'
 import { getScoreColor } from '@/utils/scoreThresholds'
+import NewApplicationButton from '@/components/upload/NewApplicationButton'
 
 export default function App() {
   const navigate = useNavigate()
@@ -47,16 +48,16 @@ export default function App() {
   // Mutations for edit and delete
   const { handleUpdate, handleDelete } = useJobApplicationMutations(jobId)
 
-  // Get loading states from workflow store
+  // Sync workflow state between DB and store
+  useWorkflowSync(jobId, jobApplication)
+
+  // Get loading states from workflow store (requires jobId)
   const isParsingResume = useWorkflowStore((state) =>
-    state.isTaskRunning(RESUME_PARSING),
+    jobId ? state.isTaskRunning(jobId, RESUME_PARSING) : false,
   )
   const isParsingChecklist = useWorkflowStore((state) =>
-    state.isTaskRunning(CHECKLIST_PARSING),
+    jobId ? state.isTaskRunning(jobId, CHECKLIST_PARSING) : false,
   )
-
-  // Sync workflow state changes to TanStack Query cache
-  useWorkflowSync(jobId)
 
   // Sync job application data to store (templateId + tailored resume)
   useSyncJobApplicationToStore(jobApplication)
@@ -90,22 +91,7 @@ export default function App() {
               >
                 <PanelLeft size={16} />
               </InvertedButton>
-              {hasSelection && (
-                <InvertedButton
-                  onClick={toggleChecklist}
-                  ariaLabel={
-                    showChecklist ? 'Switch to 2 columns' : 'Switch to 3 columns'
-                  }
-                  title="Toggle columns"
-                  className="-mr-0.5"
-                >
-                  {showChecklist ? (
-                    <Columns2 size={16} />
-                  ) : (
-                    <Columns3 size={16} />
-                  )}
-                </InvertedButton>
-              )}
+              <NewApplicationButton onSuccess={handleUploadSuccess} />
             </>
           }
           center={
@@ -130,6 +116,21 @@ export default function App() {
                 </span>
                 <TailoringButton />
                 <DocumentConfigButton />
+                <InvertedButton
+                  onClick={toggleChecklist}
+                  ariaLabel={
+                    showChecklist
+                      ? 'Switch to 2 columns'
+                      : 'Switch to 3 columns'
+                  }
+                  title="Toggle columns"
+                >
+                  {showChecklist ? (
+                    <Columns2 size={16} />
+                  ) : (
+                    <Columns3 size={16} />
+                  )}
+                </InvertedButton>
                 <SaveResumeButton
                   jobId={jobId}
                   isBuiltFromScratch={isBuiltFromScratch}
@@ -149,7 +150,6 @@ export default function App() {
           selectedId={jobId}
           onSelect={handleSelectApplication}
           collapsed={sidebarCollapsed}
-          onUploadSuccess={handleUploadSuccess}
           onEdit={handleUpdate}
           onDelete={handleDelete}
         />

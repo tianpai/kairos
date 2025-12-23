@@ -2,6 +2,11 @@ type ThemeSource = 'system' | 'light' | 'dark'
 type ThemeMode = 'light' | 'dark'
 
 interface IElectronAPI {
+  shortcuts: {
+    onSettings: (callback: () => void) => () => void
+    onNewApplication: (callback: () => void) => () => void
+    onBuildFromScratch: (callback: () => void) => () => void
+  }
   platform: NodeJS.Platform
   settings: {
     getApiKey: () => Promise<string | null>

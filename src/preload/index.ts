@@ -1,6 +1,18 @@
 import { contextBridge, ipcRenderer } from 'electron'
 
 contextBridge.exposeInMainWorld('electron', {
+  shortcuts: {
+    onSettings: (callback: () => void) => {
+      const handler = () => callback()
+      ipcRenderer.on('shortcut:settings', handler)
+      return () => ipcRenderer.removeListener('shortcut:settings', handler)
+    },
+    onNewApplication: (callback: () => void) => {
+      const handler = () => callback()
+      ipcRenderer.on('shortcut:new-application', handler)
+      return () => ipcRenderer.removeListener('shortcut:new-application', handler)
+    },
+  },
   platform: process.platform,
   settings: {
     getApiKey: (): Promise<string | null> => ipcRenderer.invoke('settings:getApiKey'),

@@ -10,6 +10,7 @@ import {
 import type { Task, Workflow, WorkflowName, TaskStateMap } from './workflow.types'
 import type { Checklist } from '@type/checklist'
 import { saveWorkflowState as saveWorkflowStateToDb } from '@api/jobs'
+import { tip } from '@tips/tips.service'
 
 import {
   executeResumeParsing,
@@ -45,6 +46,7 @@ export async function startCreateApplicationWorkflow(
     jsonSchema: Record<string, unknown>
   },
 ): Promise<void> {
+  console.log('[Workflow] Starting create-application workflow for job:', jobId)
   const workflowName: WorkflowName = 'create-application'
   const workflow = WORKFLOWS[workflowName]
   const tasks = Object.keys(workflow) as Task[]
@@ -141,14 +143,15 @@ async function runTask(
   executor: () => Promise<unknown>,
 ): Promise<void> {
   const store = useWorkflowStore.getState()
+  const workflow = store.getWorkflow(jobId)
 
-  // Verify this task belongs to the active workflow
-  if (store.activeWorkflow?.jobId !== jobId) {
-    console.warn(`[Workflow] Task ${taskType} skipped - workflow changed`)
+  // Verify workflow exists and is running
+  if (!workflow || workflow.status !== 'running') {
+    console.warn(`[Workflow] Task ${taskType} skipped - workflow not running for job ${jobId}`)
     return
   }
 
-  store.setTaskStatus(taskType, 'running')
+  store.setTaskStatus(jobId, taskType, 'running')
 
   try {
     const result = await executor()
@@ -171,49 +174,56 @@ async function handleTaskSuccess(
   result: unknown,
 ): Promise<void> {
   const store = useWorkflowStore.getState()
-  const context = store.context
+  const workflow = store.getWorkflow(jobId)
 
-  if (!context || store.activeWorkflow?.jobId !== jobId) {
-    console.warn(`[Workflow] Task ${taskType} success ignored - workflow changed`)
-    return
-  }
-
-  // Call task-specific success handler (persists to DB)
-  // and update context with result for downstream tasks
+  // Always persist task results to database (prevents data loss on navigation)
   switch (taskType) {
     case RESUME_PARSING: {
       const resumeStructure = result as Record<string, unknown>
       await onResumeParsingSuccess(jobId, resumeStructure)
-      store.updateContext({ resumeStructure })
+      if (workflow) store.updateContext(jobId, { resumeStructure })
       break
     }
     case CHECKLIST_PARSING: {
       const checklist = result as Checklist
       await onChecklistParsingSuccess(jobId, checklist)
-      store.updateContext({ checklist })
+      if (workflow) {
+        store.updateContext(jobId, { checklist })
+        tip.trigger('checklist.parsed')
+      }
       break
     }
     case RESUME_TAILORING: {
       const tailoredResume = result as Record<string, unknown>
       await onResumeTailoringSuccess(jobId, tailoredResume)
-      store.updateContext({ resumeStructure: tailoredResume })
+      if (workflow) {
+        store.updateContext(jobId, { resumeStructure: tailoredResume })
+        tip.trigger('tailoring.complete')
+      }
       break
     }
     case CHECKLIST_MATCHING: {
       const matchedChecklist = result as Checklist
       await onChecklistMatchingSuccess(jobId, matchedChecklist)
-      store.updateContext({ checklist: matchedChecklist })
+      if (workflow) store.updateContext(jobId, { checklist: matchedChecklist })
       break
     }
     case SCORE_UPDATING: {
       const matchPercentage = result as number
       await onScoreUpdatingSuccess(jobId, matchPercentage)
+      if (workflow) tip.trigger('score.updated', { score: matchPercentage })
       break
     }
   }
 
+  // Only update workflow state and trigger downstream tasks if workflow exists
+  if (!workflow) {
+    console.log(`[Workflow] Task ${taskType} saved to DB, but workflow not in store - skipping state update`)
+    return
+  }
+
   // Update task state to completed
-  store.setTaskStatus(taskType, 'completed')
+  store.setTaskStatus(jobId, taskType, 'completed')
   await saveWorkflowState(jobId)
 
   // Find and start ready tasks
@@ -229,16 +239,17 @@ async function handleTaskFailure(
   error: string,
 ): Promise<void> {
   const store = useWorkflowStore.getState()
+  const workflow = store.getWorkflow(jobId)
 
-  if (store.activeWorkflow?.jobId !== jobId) {
-    console.warn(`[Workflow] Task ${taskType} failure ignored - workflow changed`)
+  if (!workflow) {
+    console.warn(`[Workflow] Task ${taskType} failure ignored - workflow not in store for job ${jobId}`)
     return
   }
 
   console.error(`[Workflow] Task ${taskType} failed:`, error)
 
-  store.setTaskStatus(taskType, 'failed', error)
-  store.failWorkflow(error)
+  store.setTaskStatus(jobId, taskType, 'failed', error)
+  store.failWorkflow(jobId, error)
 
   await saveWorkflowState(jobId)
 }
@@ -248,10 +259,10 @@ async function handleTaskFailure(
  */
 async function startReadyTasks(jobId: string): Promise<void> {
   const store = useWorkflowStore.getState()
-  const workflow = store.activeWorkflow
-  const context = store.context
+  const workflow = store.getWorkflow(jobId)
+  const context = store.getContext(jobId)
 
-  if (!workflow || workflow.status !== 'running' || workflow.jobId !== jobId) {
+  if (!workflow || workflow.status !== 'running') {
     return
   }
 
@@ -266,7 +277,7 @@ async function startReadyTasks(jobId: string): Promise<void> {
       (s) => s === 'completed',
     )
     if (allCompleted) {
-      store.completeWorkflow()
+      store.completeWorkflow(jobId)
       await saveWorkflowState(jobId)
     }
     return
@@ -316,9 +327,9 @@ function findReadyTasks(taskStates: TaskStateMap, workflow: Workflow): Task[] {
  */
 async function saveWorkflowState(jobId: string): Promise<void> {
   const store = useWorkflowStore.getState()
-  const workflow = store.activeWorkflow
+  const workflow = store.getWorkflow(jobId)
 
-  if (!workflow || workflow.jobId !== jobId) return
+  if (!workflow) return
 
   await saveWorkflowStateToDb(jobId, workflow, workflow.status)
 }
@@ -328,9 +339,9 @@ async function saveWorkflowState(jobId: string): Promise<void> {
  */
 export async function retryFailedTasks(jobId: string): Promise<Task[]> {
   const store = useWorkflowStore.getState()
-  const workflow = store.activeWorkflow
+  const workflow = store.getWorkflow(jobId)
 
-  if (!workflow || workflow.jobId !== jobId) {
+  if (!workflow) {
     throw new Error('No workflow found for job')
   }
 
@@ -346,11 +357,19 @@ export async function retryFailedTasks(jobId: string): Promise<Task[]> {
   if (failedTasks.length === 0) return []
 
   // Reset failed tasks to pending
-  failedTasks.forEach((task) => store.setTaskStatus(task, 'pending'))
+  failedTasks.forEach((task) => store.setTaskStatus(jobId, task, 'pending'))
 
-  // Reset workflow status to running
-  store.activeWorkflow!.status = 'running'
-  store.activeWorkflow!.error = undefined
+  // Reset workflow status to running (need to update directly since we don't have a setter)
+  // We'll use loadWorkflow to reset the status
+  store.loadWorkflow(jobId, {
+    ...workflow,
+    taskStates: {
+      ...workflow.taskStates,
+      ...Object.fromEntries(failedTasks.map((task) => [task, 'pending'])),
+    },
+    status: 'running',
+    error: undefined,
+  })
 
   await saveWorkflowState(jobId)
 
@@ -358,54 +377,4 @@ export async function retryFailedTasks(jobId: string): Promise<Task[]> {
   await startReadyTasks(jobId)
 
   return failedTasks
-}
-
-/**
- * Load workflow state from database and resume if needed
- */
-export function loadWorkflowFromJob(
-  jobId: string,
-  job: {
-    workflowSteps?: {
-      workflowName: WorkflowName
-      taskStates: TaskStateMap
-      status: string
-    }
-    rawResumeContent?: string
-    jobDescription?: string
-    jsonSchema?: Record<string, unknown>
-    parsedResume?: Record<string, unknown>
-    tailoredResume?: Record<string, unknown>
-    checklist?: Checklist
-  },
-): void {
-  if (!job.workflowSteps) return
-
-  const store = useWorkflowStore.getState()
-
-  // Reconstruct workflow instance
-  store.startWorkflow(
-    jobId,
-    job.workflowSteps.workflowName,
-    Object.keys(job.workflowSteps.taskStates) as Task[],
-    {
-      rawResumeContent: job.rawResumeContent,
-      jobDescription: job.jobDescription,
-      jsonSchema: job.jsonSchema,
-      resumeStructure: job.tailoredResume ?? job.parsedResume,
-      checklist: job.checklist,
-    },
-  )
-
-  // Restore task states
-  for (const [task, status] of Object.entries(job.workflowSteps.taskStates)) {
-    store.setTaskStatus(task as Task, status as 'pending' | 'running' | 'completed' | 'failed')
-  }
-
-  // Restore workflow status
-  if (job.workflowSteps.status === 'failed') {
-    store.failWorkflow('Workflow was previously failed')
-  } else if (job.workflowSteps.status === 'completed') {
-    store.completeWorkflow()
-  }
 }
