@@ -1,4 +1,21 @@
-import { CircleX } from 'lucide-react'
+import { CircleX, GripVertical } from 'lucide-react'
+import {
+  DndContext,
+  KeyboardSensor,
+  PointerSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core'
+import {
+  SortableContext,
+  arrayMove,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
+import type { DragEndEvent } from '@dnd-kit/core'
 import { InvertedButton } from '@ui/InvertedButton'
 import { DateInput } from './DateInput'
 import { asString, asStringArray } from './fieldUtils'
@@ -45,10 +62,88 @@ function useAutoResizeTextarea() {
   return { ref, handleInput }
 }
 
+interface SortableTextItemProps {
+  id: string
+  value: string
+  placeholder?: string
+  onUpdate: (value: string) => void
+  onRemove: () => void
+}
+
+function SortableTextItem({
+  id,
+  value,
+  placeholder,
+  onUpdate,
+  onRemove,
+}: SortableTextItemProps) {
+  const { ref: textareaRef, handleInput } = useAutoResizeTextarea()
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id })
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  }
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      className="group relative flex items-start"
+    >
+      <button
+        type="button"
+        {...listeners}
+        className="mt-2.5 cursor-grab text-gray-400 opacity-0 transition-opacity group-hover:opacity-100 active:cursor-grabbing dark:text-gray-500"
+      >
+        <GripVertical size={12} />
+      </button>
+      <div className="relative flex-1">
+        <textarea
+          ref={textareaRef}
+          value={value}
+          onChange={(e) => onUpdate(e.target.value)}
+          onInput={handleInput}
+          placeholder={placeholder}
+          rows={1}
+          className={`${INPUT_TEXTAREA} pr-8`}
+        />
+        <button
+          type="button"
+          onClick={onRemove}
+          className="absolute right-2 top-2 p-0.5 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100"
+        >
+          <CircleX
+            size={14}
+            className="text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
+          />
+        </button>
+      </div>
+    </div>
+  )
+}
+
 function TextArrayField({ schema, value, onChange }: FieldProps) {
   const { label, placeholder } = schema
   const items = asStringArray(value)
-  const { ref, handleInput } = useAutoResizeTextarea()
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
+  )
+
+  const itemIds = items.map((_, index) => `item-${index}`)
 
   const updateItem = (index: number, newValue: string) => {
     const updated = [...items]
@@ -63,32 +158,40 @@ function TextArrayField({ schema, value, onChange }: FieldProps) {
     onChange(updated)
   }
 
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event
+    if (over && active.id !== over.id) {
+      const oldIndex = itemIds.indexOf(active.id as string)
+      const newIndex = itemIds.indexOf(over.id as string)
+      const newOrder = arrayMove(items, oldIndex, newIndex)
+      onChange(newOrder)
+    }
+  }
+
   return (
     <FieldWrapper label={label}>
       <div className="space-y-1.5">
-        {items.map((item: string, index: number) => (
-          <div key={index} className="group relative">
-            <textarea
-              ref={ref}
-              value={item}
-              onChange={(e) => updateItem(index, e.target.value)}
-              onInput={handleInput}
-              placeholder={placeholder}
-              rows={1}
-              className={`${INPUT_TEXTAREA} pr-8`}
-            />
-            <button
-              type="button"
-              onClick={() => removeItem(index)}
-              className="absolute right-2 top-2 p-0.5 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100"
-            >
-              <CircleX
-                size={14}
-                className="text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext
+            items={itemIds}
+            strategy={verticalListSortingStrategy}
+          >
+            {items.map((item: string, index: number) => (
+              <SortableTextItem
+                key={itemIds[index]}
+                id={itemIds[index]}
+                value={item}
+                placeholder={placeholder}
+                onUpdate={(newValue) => updateItem(index, newValue)}
+                onRemove={() => removeItem(index)}
               />
-            </button>
-          </div>
-        ))}
+            ))}
+          </SortableContext>
+        </DndContext>
         <div className="text-right">
           <InvertedButton type="button" onClick={addItem}>
             <p className="text-xs"> Add {label} </p>
