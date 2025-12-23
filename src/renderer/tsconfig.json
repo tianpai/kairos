@@ -47,7 +47,8 @@
       "@workflow/*": ["./src/workflow/*"],
       "@tips/*": ["./src/tips/*"],
       "@sidebar/*": ["./src/components/sidebar/*"],
-      "@layout/*": ["./src/components/layout/*"]
+      "@layout/*": ["./src/components/layout/*"],
+      "@root/*": ["../../*"]
     }
   }
 }

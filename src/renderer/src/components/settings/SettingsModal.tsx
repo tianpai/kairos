@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Modal } from '@ui/Modal'
 import { InvertedButton } from '@ui/InvertedButton'
-import { useApiKey, useSetApiKey, useDeleteApiKey } from '@hooks/useSettings'
+import { useApiKey, useDeleteApiKey, useSetApiKey } from '@hooks/useSettings'
 
 interface SettingsModalProps {
   open: boolean
@@ -63,7 +63,9 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
             className="mt-1 w-full border-2 border-gray-300 px-3 py-2 focus:border-black focus:outline-none"
           />
           <p className="mt-1 text-xs text-gray-500">
-            {currentKey ? 'Key is set. Enter new key to replace.' : 'Enter your OpenAI API key.'}
+            {currentKey
+              ? 'Key is set. Enter new key to replace.'
+              : 'Enter your OpenAI API key.'}
           </p>
         </div>
       </div>

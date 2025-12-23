@@ -86,6 +86,7 @@ export default defineConfig({
         "@tips/": `${rendererRoot}/src/tips/`,
         "@sidebar/": `${rendererRoot}/src/components/sidebar/`,
         "@layout/": `${rendererRoot}/src/components/layout/`,
+        "@root": resolve(__dirname, "."),
       },
     },
     server: {

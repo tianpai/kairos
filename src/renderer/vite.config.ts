@@ -1,5 +1,5 @@
 import { fileURLToPath } from 'node:url'
-import { dirname } from 'node:path'
+import { dirname, resolve } from 'node:path'
 import { defineConfig } from 'vitest/config'
 import viteReact from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
@@ -7,6 +7,7 @@ import { visualizer } from 'rollup-plugin-visualizer'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
+const rootDir = resolve(__dirname, '../..')
 
 export default defineConfig({
   plugins: [
@@ -43,6 +44,7 @@ export default defineConfig({
       '@tips/': `${__dirname}/src/tips/`,
       '@sidebar/': `${__dirname}/src/components/sidebar/`,
       '@layout/': `${__dirname}/src/components/layout/`,
+      '@root': rootDir,
     },
   },
 })
