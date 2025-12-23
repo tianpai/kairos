@@ -43,6 +43,7 @@ export default function EditJobModal({
     <Modal
       open={open}
       onClose={onClose}
+      variant="popup"
       maxWidth="md"
       leftActions={
         <HoldButton

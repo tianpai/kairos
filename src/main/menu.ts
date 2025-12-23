@@ -42,13 +42,6 @@ export function createAppMenu(mainWindow: BrowserWindow | null) {
             mainWindow?.webContents.send('shortcut:new-application')
           },
         },
-        {
-          label: 'Build from Scratch',
-          accelerator: 'CommandOrControl+B',
-          click: () => {
-            mainWindow?.webContents.send('shortcut:build-from-scratch')
-          },
-        },
         { type: 'separator' },
         isMac ? { role: 'close' } : { role: 'quit' },
       ],

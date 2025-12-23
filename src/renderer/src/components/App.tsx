@@ -22,6 +22,7 @@ import { Sidebar } from '@sidebar/Sidebar'
 import { AppLayout } from '@layout/AppLayout'
 import { useLayoutStore } from '@layout/layout.store'
 import { getScoreColor } from '@/utils/scoreThresholds'
+import NewApplicationButton from '@/components/upload/NewApplicationButton'
 
 export default function App() {
   const navigate = useNavigate()
@@ -90,24 +91,7 @@ export default function App() {
               >
                 <PanelLeft size={16} />
               </InvertedButton>
-              {hasSelection && (
-                <InvertedButton
-                  onClick={toggleChecklist}
-                  ariaLabel={
-                    showChecklist
-                      ? 'Switch to 2 columns'
-                      : 'Switch to 3 columns'
-                  }
-                  title="Toggle columns"
-                  className="-mr-0.5"
-                >
-                  {showChecklist ? (
-                    <Columns2 size={16} />
-                  ) : (
-                    <Columns3 size={16} />
-                  )}
-                </InvertedButton>
-              )}
+              <NewApplicationButton onSuccess={handleUploadSuccess} />
             </>
           }
           center={
@@ -132,6 +116,21 @@ export default function App() {
                 </span>
                 <TailoringButton />
                 <DocumentConfigButton />
+                <InvertedButton
+                  onClick={toggleChecklist}
+                  ariaLabel={
+                    showChecklist
+                      ? 'Switch to 2 columns'
+                      : 'Switch to 3 columns'
+                  }
+                  title="Toggle columns"
+                >
+                  {showChecklist ? (
+                    <Columns2 size={16} />
+                  ) : (
+                    <Columns3 size={16} />
+                  )}
+                </InvertedButton>
                 <SaveResumeButton
                   jobId={jobId}
                   isBuiltFromScratch={isBuiltFromScratch}
@@ -151,7 +150,6 @@ export default function App() {
           selectedId={jobId}
           onSelect={handleSelectApplication}
           collapsed={sidebarCollapsed}
-          onUploadSuccess={handleUploadSuccess}
           onEdit={handleUpdate}
           onDelete={handleDelete}
         />

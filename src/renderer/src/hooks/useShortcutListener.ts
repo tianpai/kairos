@@ -7,9 +7,6 @@ export function useShortcutListener() {
   const requestNewApplication = useShortcutStore(
     (state) => state.requestNewApplication,
   )
-  const requestBuildFromScratch = useShortcutStore(
-    (state) => state.requestBuildFromScratch,
-  )
 
   useEffect(() => {
     const unsubSettings = window.electron.shortcuts.onSettings(() => {
@@ -20,14 +17,9 @@ export function useShortcutListener() {
       requestNewApplication()
     })
 
-    const unsubBuild = window.electron.shortcuts.onBuildFromScratch(() => {
-      requestBuildFromScratch()
-    })
-
     return () => {
       unsubSettings()
       unsubNewApp()
-      unsubBuild()
     }
-  }, [navigate, requestNewApplication, requestBuildFromScratch])
+  }, [navigate, requestNewApplication])
 }

@@ -2,32 +2,49 @@ import { useEffect, useRef, useState } from 'react'
 import { FilePlus } from 'lucide-react'
 import type { JobApplicationInput } from '@/api/jobs'
 import { InvertedButton } from '@/components/ui/InvertedButton'
-import UploadModal from '@/components/upload/UploadModal'
+import NewApplicationModal from '@/components/upload/NewApplicationModal'
+import type { NewApplicationSubmitPayload } from '@/components/upload/NewApplicationModal'
 import { useCreateJobApplication } from '@/hooks/useCreateJobApplication'
+import { useCreateFromScratch } from '@/hooks/useCreateFromScratch'
 import { useHasApiKey } from '@/hooks/useSettings'
 import { extractResumeText } from '@/utils/resumeTextExtractor'
 import { useShortcutStore } from '@/components/layout/shortcut.store'
 
-export interface UploadModalSubmitPayload {
-  resumeFile: File
-  jobDescription: string
-  companyName: string
-  position: string
-  dueDate: string
-}
-
-interface UploadButtonProps {
+interface NewApplicationButtonProps {
   onSuccess?: (jobId: string) => void
 }
 
-export default function UploadButton({ onSuccess }: UploadButtonProps) {
+export default function NewApplicationButton({
+  onSuccess,
+}: NewApplicationButtonProps) {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [extractionError, setExtractionError] = useState<string | null>(null)
   const handledJobIdRef = useRef<string | null>(null)
 
   const { data: hasApiKey } = useHasApiKey()
-  const { handleSubmit, isPending, isSuccess, error, data } =
-    useCreateJobApplication()
+
+  // AI mode hook (with resume file)
+  const {
+    handleSubmit: handleAISubmit,
+    isPending: isAIPending,
+    isSuccess: isAISuccess,
+    error: aiError,
+    data: aiData,
+  } = useCreateJobApplication()
+
+  // Scratch mode hook (no resume file)
+  const {
+    handleSubmit: handleScratchSubmit,
+    isPending: isScratchPending,
+    isSuccess: isScratchSuccess,
+    error: scratchError,
+    data: scratchData,
+  } = useCreateFromScratch()
+
+  const isPending = isAIPending || isScratchPending
+  const error = aiError || scratchError
+  const isSuccess = isAISuccess || isScratchSuccess
+  const data = aiData || scratchData
 
   // Listen for keyboard shortcut to open modal
   const newApplicationRequested = useShortcutStore(
@@ -39,13 +56,10 @@ export default function UploadButton({ onSuccess }: UploadButtonProps) {
 
   useEffect(() => {
     if (newApplicationRequested) {
-      // Only open modal if API key is configured
-      if (hasApiKey) {
-        setIsModalOpen(true)
-      }
+      setIsModalOpen(true)
       clearNewApplicationRequest()
     }
-  }, [newApplicationRequested, clearNewApplicationRequest, hasApiKey])
+  }, [newApplicationRequested, clearNewApplicationRequest])
 
   const errorMessage =
     extractionError ||
@@ -70,21 +84,32 @@ export default function UploadButton({ onSuccess }: UploadButtonProps) {
     }
   }
 
-  const handleModalSubmit = async (payload: UploadModalSubmitPayload) => {
+  const handleModalSubmit = async (payload: NewApplicationSubmitPayload) => {
     setExtractionError(null)
 
-    try {
-      const rawResumeContent = await extractResumeText(payload.resumeFile)
-      const input: JobApplicationInput = {
-        rawResumeContent,
-        jobDescription: payload.jobDescription,
+    if (payload.resumeFile) {
+      // AI mode - extract text and submit with resume
+      try {
+        const rawResumeContent = await extractResumeText(payload.resumeFile)
+        const input: JobApplicationInput = {
+          rawResumeContent,
+          jobDescription: payload.jobDescription,
+          companyName: payload.companyName,
+          position: payload.position,
+          dueDate: payload.dueDate,
+        }
+        handleAISubmit(input)
+      } catch {
+        setExtractionError('Failed to read resume file. Please try again.')
+      }
+    } else {
+      // Scratch mode - submit without resume
+      handleScratchSubmit({
         companyName: payload.companyName,
         position: payload.position,
         dueDate: payload.dueDate,
-      }
-      handleSubmit(input)
-    } catch (err) {
-      setExtractionError('Failed to read resume file. Please try again.')
+        jobDescription: payload.jobDescription || undefined,
+      })
     }
   }
 
@@ -93,15 +118,14 @@ export default function UploadButton({ onSuccess }: UploadButtonProps) {
       <InvertedButton
         onClick={() => setIsModalOpen(true)}
         disabled={!hasApiKey}
-        title={hasApiKey ? 'New application' : 'Configure API key in Settings first'}
+        title={
+          hasApiKey ? 'New application' : 'Configure API key in Settings first'
+        }
       >
-        <div className="flex flex-row items-center gap-2">
-          <FilePlus size={16} />
-          <span>NEW</span>
-        </div>
+        <FilePlus size={16} />
       </InvertedButton>
 
-      <UploadModal
+      <NewApplicationModal
         isOpen={isModalOpen}
         onClose={handleClose}
         onSubmit={handleModalSubmit}

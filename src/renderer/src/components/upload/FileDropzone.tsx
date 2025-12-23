@@ -26,15 +26,19 @@ export function FileDropzone({
       onDrop={onDrop}
       onDragOver={onDragOver}
       onDragLeave={onDragLeave}
-      className={`mt-2 flex min-h-[24rem] flex-1 cursor-pointer flex-col items-center justify-center gap-2 rounded border-2 border-transparent text-center transition hover:border-gray-300 dark:hover:border-gray-600 ${
-        isDragActive ? 'bg-gray-300 dark:bg-gray-700' : 'bg-gray-100 dark:bg-gray-800'
+      className={`mt-2 flex cursor-pointer flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed px-4 py-6 text-center transition ${
+        isDragActive
+          ? 'border-gray-400 bg-gray-200 dark:border-gray-500 dark:bg-gray-700'
+          : 'border-gray-300 bg-gray-50 hover:border-gray-400 dark:border-gray-600 dark:bg-gray-800 dark:hover:border-gray-500'
       }`}
     >
-      <UploadCloud className="text-gray-400 dark:text-gray-500" />
-      <span className="text-sm text-gray-600 dark:text-gray-400">Drop your resume here</span>
-      <span className="text-xs text-gray-500 dark:text-gray-500">or click to browse</span>
-      <p className="mt-3 text-xs text-gray-500 dark:text-gray-500">Supported formats: {acceptedFileTypes}</p>
-      <p className="mt-4 text-xs text-gray-500 dark:text-gray-500">Max file size: 5MB</p>
+      <UploadCloud className="h-6 w-6 text-gray-400 dark:text-gray-500" />
+      <span className="text-sm text-gray-600 dark:text-gray-400">
+        Drop your resume here or click to browse
+      </span>
+      <span className="text-xs text-gray-500 dark:text-gray-500">
+        {acceptedFileTypes} (max 5MB)
+      </span>
     </div>
   )
 }

@@ -4,26 +4,16 @@
  */
 
 /**
- * Extract text from a PDF file using pdf.js
+ * Extract text from a PDF file using unpdf
  */
 async function extractTextFromPDF(file: File): Promise<string> {
-  const pdfjsLib = await import('pdfjs-dist')
-
-  // Set worker path for pdf.js - use unpkg CDN
-  pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`
+  const { extractText, getDocumentProxy } = await import('unpdf')
 
   const arrayBuffer = await file.arrayBuffer()
-  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise
+  const pdf = await getDocumentProxy(new Uint8Array(arrayBuffer))
+  const { text } = await extractText(pdf, { mergePages: true })
 
-  const textParts: Array<string> = []
-  for (let i = 1; i <= pdf.numPages; i++) {
-    const page = await pdf.getPage(i)
-    const textContent = await page.getTextContent()
-    const pageText = textContent.items.map((item: any) => item.str).join(' ')
-    textParts.push(pageText)
-  }
-
-  return textParts.join('\n\n')
+  return text
 }
 
 /**

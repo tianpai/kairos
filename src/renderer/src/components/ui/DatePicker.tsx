@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { InvertedCircleButton } from './InvertedCircleButton'
+import { INPUT_BASE, LABEL_BASE } from '@/components/resumeForm/fieldStyles'
 
 // DatePicker displays dates in MMM DD, YYYY format (e.g., "Jan 15, 2025") by default
 // and returns ISO format YYYY-MM-DD (e.g., "2025-01-15") by default
@@ -70,18 +71,16 @@ function DatePickerInput({
 }: DatePickerInputProps) {
   return (
     <>
-      <label htmlFor={id} className="mb-1 block text-sm font-medium">
+      <label htmlFor={id} className={LABEL_BASE}>
         {label}
       </label>
       <button
         type="button"
         onClick={onClick}
-        className="w-full border-b border-gray-400 px-3 py-2 text-left focus:border-b focus:border-black focus:outline-none dark:border-gray-600 dark:focus:border-white"
+        className={`${INPUT_BASE} text-left`}
       >
         {value ? (
-          <span className="text-slate-800 dark:text-gray-200">
-            {formatDate(value, displayFormat)}
-          </span>
+          <span>{formatDate(value, displayFormat)}</span>
         ) : (
           <span className="text-gray-400 dark:text-gray-500">Select a date</span>
         )}

@@ -12,11 +12,6 @@ contextBridge.exposeInMainWorld('electron', {
       ipcRenderer.on('shortcut:new-application', handler)
       return () => ipcRenderer.removeListener('shortcut:new-application', handler)
     },
-    onBuildFromScratch: (callback: () => void) => {
-      const handler = () => callback()
-      ipcRenderer.on('shortcut:build-from-scratch', handler)
-      return () => ipcRenderer.removeListener('shortcut:build-from-scratch', handler)
-    },
   },
   platform: process.platform,
   settings: {

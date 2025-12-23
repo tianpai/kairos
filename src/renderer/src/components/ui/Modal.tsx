@@ -7,7 +7,16 @@ interface ModalProps {
   children: ReactNode
   actions?: ReactNode
   leftActions?: ReactNode
+  variant?: 'fullscreen' | 'popup'
   maxWidth?: 'sm' | 'md' | 'lg' | 'xl'
+  closeOnBackdropClick?: boolean
+}
+
+const maxWidthClasses = {
+  sm: 'max-w-sm',
+  md: 'max-w-md',
+  lg: 'max-w-lg',
+  xl: 'max-w-xl',
 }
 
 export function Modal({
@@ -16,6 +25,9 @@ export function Modal({
   children,
   actions,
   leftActions,
+  variant = 'fullscreen',
+  maxWidth = 'lg',
+  closeOnBackdropClick = true,
 }: ModalProps) {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -34,6 +46,28 @@ export function Modal({
   }, [open, onClose])
 
   if (!open) return null
+
+  if (variant === 'popup') {
+    return (
+      <div
+        className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+        onClick={closeOnBackdropClick ? onClose : undefined}
+      >
+        <div
+          className={`flex max-h-[85vh] w-[90%] ${maxWidthClasses[maxWidth]} flex-col rounded-lg bg-[#fafafa] shadow-xl dark:bg-[#1a1a1a]`}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="flex-1 overflow-y-auto p-6">{children}</div>
+          {(actions || leftActions) && (
+            <div className="flex justify-between border-t border-gray-200 p-4 dark:border-gray-700">
+              <div>{leftActions}</div>
+              <div>{actions}</div>
+            </div>
+          )}
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex h-screen flex-col bg-[#fafafa] dark:bg-[#1a1a1a]">

@@ -1,26 +1,35 @@
 import { useEffect, useState } from 'react'
 import { InvertedButton } from '@ui/InvertedButton'
 import { Modal } from '@ui/Modal'
-import type { UploadModalSubmitPayload } from './UploadButton'
+import { Toggle } from '@ui/Toggle'
 import type { JobApplicationFormData } from '@/components/upload/JobDetailsSection'
 import ResumeUploadSection from '@/components/upload/ResumeUploadSection'
 import JobDetailsSection from '@/components/upload/JobDetailsSection'
 
-interface UploadModalProps {
+export interface NewApplicationSubmitPayload {
+  resumeFile?: File
+  jobDescription: string
+  companyName: string
+  position: string
+  dueDate: string
+}
+
+interface NewApplicationModalProps {
   isOpen: boolean
   onClose: () => void
-  onSubmit: (payload: UploadModalSubmitPayload) => void
+  onSubmit: (payload: NewApplicationSubmitPayload) => void
   isSubmitting?: boolean
   errorMessage?: string | null
 }
 
-export default function UploadModal({
+export default function NewApplicationModal({
   isOpen,
   onClose,
   onSubmit,
   isSubmitting = false,
   errorMessage = null,
-}: UploadModalProps) {
+}: NewApplicationModalProps) {
+  const [useAI, setUseAI] = useState(true)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [jobFormData, setJobFormData] = useState<JobApplicationFormData | null>(
     null,
@@ -29,6 +38,7 @@ export default function UploadModal({
 
   useEffect(() => {
     if (!isOpen) {
+      setUseAI(true)
       setSelectedFile(null)
       setJobFormData(null)
       setIsJobFormValid(false)
@@ -44,22 +54,29 @@ export default function UploadModal({
   }
 
   function handleSubmit() {
-    if (!selectedFile || !jobFormData || !isJobFormValid || isSubmitting) {
+    if (!jobFormData || !isJobFormValid || isSubmitting) {
+      return
+    }
+
+    if (useAI && !selectedFile) {
       return
     }
 
     onSubmit({
-      resumeFile: selectedFile,
+      resumeFile: useAI ? selectedFile ?? undefined : undefined,
       ...jobFormData,
     })
   }
 
-  const canSubmit = Boolean(selectedFile && isJobFormValid)
+  const canSubmit = useAI
+    ? Boolean(selectedFile && isJobFormValid)
+    : isJobFormValid
 
   return (
     <Modal
       open={isOpen}
       onClose={onClose}
+      variant="popup"
       maxWidth="xl"
       actions={
         <>
@@ -74,16 +91,32 @@ export default function UploadModal({
         </>
       }
     >
-      <div className="mx-auto grid h-full max-w-5xl grid-cols-2 gap-10">
-        <ResumeUploadSection
-          selectedFile={selectedFile}
-          onFileChange={setSelectedFile}
+      <div className="mx-auto flex max-w-2xl flex-col gap-6">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold">New application</h2>
+          <Toggle
+            checked={useAI}
+            onChange={setUseAI}
+            labelOff="Build from scratch"
+            labelOn="Use AI"
+          />
+        </div>
+
+        {useAI && (
+          <ResumeUploadSection
+            selectedFile={selectedFile}
+            onFileChange={setSelectedFile}
+          />
+        )}
+
+        <JobDetailsSection
+          onFormChange={handleJobFormChange}
+          requireJobDescription={useAI}
         />
-        <JobDetailsSection onFormChange={handleJobFormChange} />
       </div>
 
       {errorMessage && (
-        <p className="mt-2 text-sm text-rose-500">{errorMessage}</p>
+        <p className="mt-4 text-center text-sm text-rose-500">{errorMessage}</p>
       )}
     </Modal>
   )
