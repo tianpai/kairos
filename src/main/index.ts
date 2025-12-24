@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, nativeTheme } from 'electron'
+import { app, BrowserWindow, ipcMain, nativeTheme, shell } from 'electron'
 import { join } from 'path'
 import log from 'electron-log/main'
 import { SettingsService } from './config/settings.service'
@@ -44,6 +44,11 @@ ipcMain.handle('theme:set', (_, theme: 'system' | 'light' | 'dark') => {
 
 ipcMain.handle('theme:getCurrent', () => {
   return nativeTheme.shouldUseDarkColors ? 'dark' : 'light'
+})
+
+// Shell IPC handler
+ipcMain.handle('shell:openExternal', (_, url: string) => {
+  return shell.openExternal(url)
 })
 
 async function initializeDatabase() {

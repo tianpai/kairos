@@ -63,7 +63,7 @@ export default function NewApplicationModal({
     }
 
     onSubmit({
-      resumeFile: useAI ? selectedFile ?? undefined : undefined,
+      resumeFile: useAI ? (selectedFile ?? undefined) : undefined,
       ...jobFormData,
     })
   }
@@ -91,9 +91,9 @@ export default function NewApplicationModal({
         </>
       }
     >
-      <div className="mx-auto flex max-w-2xl flex-col gap-6">
+      <div className="mx-auto flex max-w-2xl flex-col gap-3">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold">New application</h2>
+          <h1 className="text-lg font-semibold">New Application</h1>
           <Toggle
             checked={useAI}
             onChange={setUseAI}

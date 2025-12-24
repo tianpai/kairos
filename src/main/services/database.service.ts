@@ -3,6 +3,9 @@ import log from "electron-log/main";
 
 let prisma: PrismaClient | null = null;
 
+// Current schema version - increment when adding new migrations
+const CURRENT_SCHEMA_VERSION = 2;
+
 export function getDatabase(): PrismaClient {
   if (!prisma) {
     prisma = new PrismaClient();
@@ -10,19 +13,46 @@ export function getDatabase(): PrismaClient {
   return prisma;
 }
 
-export async function runMigrations(): Promise<void> {
-  const db = getDatabase();
-
-  // Check if tables exist by trying to query them
+async function getSchemaVersion(db: PrismaClient): Promise<number> {
   try {
-    await db.$queryRaw`SELECT 1 FROM companies LIMIT 1`;
-    log.info("Database tables already exist, skipping migration");
-    return;
+    const result = await db.$queryRaw<Array<{ version: number }>>`
+      SELECT version FROM _schema_version LIMIT 1
+    `;
+    return result[0]?.version ?? 0;
   } catch {
-    log.info("Tables do not exist, running initial migration...");
-  }
+    // Version table doesn't exist, detect schema state
+    try {
+      await db.$queryRaw`SELECT 1 FROM companies LIMIT 1`;
+      // Tables exist, check which columns exist to determine version
+      const columns = await db.$queryRaw<Array<{ name: string }>>`
+        SELECT name FROM pragma_table_info('job_applications')
+      `;
+      const columnNames = columns.map((c) => c.name);
 
-  // Create tables using raw SQL
+      // Detect version based on columns
+      if (columnNames.includes('jobUrl')) return 2;
+      return 1;
+    } catch {
+      // Fresh database
+      return 0;
+    }
+  }
+}
+
+async function setSchemaVersion(db: PrismaClient, version: number): Promise<void> {
+  await db.$executeRaw`
+    CREATE TABLE IF NOT EXISTS "_schema_version" (
+      "version" INTEGER NOT NULL
+    )
+  `;
+  await db.$executeRaw`DELETE FROM "_schema_version"`;
+  await db.$executeRaw`INSERT INTO "_schema_version" (version) VALUES (${version})`;
+}
+
+// Migration functions
+async function migrateV0toV1(db: PrismaClient): Promise<void> {
+  log.info("Running migration v0 -> v1: Initial schema");
+
   await db.$executeRaw`
     CREATE TABLE IF NOT EXISTS "companies" (
       "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
@@ -56,8 +86,31 @@ export async function runMigrations(): Promise<void> {
   await db.$executeRaw`
     CREATE UNIQUE INDEX IF NOT EXISTS "companies_name_key" ON "companies"("name")
   `;
+}
 
-  log.info("Database migration completed successfully");
+async function migrateV1toV2(db: PrismaClient): Promise<void> {
+  log.info("Running migration v1 -> v2: Add jobUrl column");
+  await db.$executeRaw`ALTER TABLE "job_applications" ADD COLUMN "jobUrl" TEXT`;
+}
+
+export async function runMigrations(): Promise<void> {
+  const db = getDatabase();
+  const currentVersion = await getSchemaVersion(db);
+
+  log.info(`Database schema version: ${currentVersion}, target: ${CURRENT_SCHEMA_VERSION}`);
+
+  if (currentVersion >= CURRENT_SCHEMA_VERSION) {
+    log.info("Database schema is up to date");
+    return;
+  }
+
+  // Run migrations sequentially
+  if (currentVersion < 1) await migrateV0toV1(db);
+  if (currentVersion < 2) await migrateV1toV2(db);
+
+  // Update schema version
+  await setSchemaVersion(db, CURRENT_SCHEMA_VERSION);
+  log.info(`Database migrated to version ${CURRENT_SCHEMA_VERSION}`);
 }
 
 export async function connectDatabase(): Promise<void> {

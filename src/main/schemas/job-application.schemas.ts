@@ -6,6 +6,7 @@ export const CreateJobApplicationSchema = z.object({
   position: z.string().min(1),
   dueDate: z.string().date(),
   jobDescription: z.string().min(1),
+  jobUrl: z.string().url().optional(),
   templateId: z.string().min(1),
   jsonSchema: z.record(z.string(), z.unknown()),
   rawResumeContent: z.string().min(1),
@@ -17,6 +18,7 @@ export const CreateFromScratchSchema = z.object({
   position: z.string().min(1),
   dueDate: z.string().date(),
   jobDescription: z.string().optional(),
+  jobUrl: z.string().url().optional(),
   templateId: z.string().min(1),
 })
 
@@ -25,6 +27,7 @@ export const UpdateJobApplicationSchema = z.object({
   companyName: z.string().min(1).optional(),
   position: z.string().min(1).optional(),
   dueDate: z.string().date().optional(),
+  jobUrl: z.string().url().nullable().optional(),
 })
 
 // Save resume

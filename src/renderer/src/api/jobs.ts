@@ -20,6 +20,7 @@ export interface JobApplicationInput {
   companyName: string
   position: string
   dueDate: string
+  jobUrl?: string
 }
 
 export interface CreateJobApplicationPayload extends JobApplicationInput {
@@ -32,6 +33,7 @@ export interface CreateFromScratchPayload {
   position: string
   dueDate: string
   jobDescription?: string
+  jobUrl?: string
   templateId: string
 }
 
@@ -42,6 +44,7 @@ export interface JobApplication {
   dueDate: string
   matchPercentage: number
   applicationStatus: string | null
+  jobUrl: string | null
   originalResume: string | null
   createdAt: string
   updatedAt: string
@@ -75,6 +78,7 @@ export interface UpdateJobApplicationPayload {
   companyName: string
   position: string
   dueDate: string
+  jobUrl?: string | null
 }
 
 // CRUD operations

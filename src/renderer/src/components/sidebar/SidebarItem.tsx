@@ -1,4 +1,4 @@
-import { Hammer, SquarePen } from 'lucide-react'
+import { Hammer, Info } from 'lucide-react'
 import { getScoreColor } from '@/utils/scoreThresholds'
 
 interface SidebarItemProps {
@@ -80,9 +80,9 @@ export function SidebarItem({
             onEdit()
           }}
           className="rounded p-1 opacity-0 transition-opacity group-hover:opacity-100 hover:bg-gray-300 dark:hover:bg-gray-600"
-          title="Edit"
+          title="Job Info"
         >
-          <SquarePen size={14} className="text-gray-500 dark:text-gray-400" />
+          <Info size={14} className="text-gray-500 dark:text-gray-400" />
         </button>
         <span
           className="text-xs font-medium"

@@ -1,41 +1,53 @@
 import { useEffect, useState } from 'react'
+import { ExternalLink } from 'lucide-react'
 import { InvertedButton } from '@ui/InvertedButton'
 import { Modal } from '@ui/Modal'
 import { InputField } from '@ui/InputField'
 import { HoldButton } from '@ui/HoldButton'
 
-interface EditJobDialogProps {
+function normalizeUrl(url: string): string | null {
+  const trimmed = url.trim()
+  if (!trimmed) return null
+  if (/^https?:\/\//i.test(trimmed)) return trimmed
+  return `https://${trimmed}`
+}
+
+interface JobInfoModalProps {
   open: boolean
   onClose: () => void
   onSave: (data: {
     companyName: string
     position: string
     dueDate: string
+    jobUrl: string | null
   }) => void
   onDelete: () => void
   initialData: {
     companyName: string
     position: string
     dueDate: string
+    jobUrl: string | null
   }
 }
 
-export default function EditJobModal({
+export default function JobInfoModal({
   open,
   onClose,
   onSave,
   onDelete,
   initialData,
-}: EditJobDialogProps) {
+}: JobInfoModalProps) {
   const [companyName, setCompanyName] = useState(initialData.companyName)
   const [position, setPosition] = useState(initialData.position)
   const [dueDate, setDueDate] = useState(initialData.dueDate)
+  const [jobUrl, setJobUrl] = useState(initialData.jobUrl ?? '')
 
   useEffect(() => {
     if (open) {
       setCompanyName(initialData.companyName)
       setPosition(initialData.position)
       setDueDate(initialData.dueDate)
+      setJobUrl(initialData.jobUrl ?? '')
     }
   }, [open, initialData])
 
@@ -60,14 +72,21 @@ export default function EditJobModal({
         <>
           <InvertedButton onClick={onClose}>Cancel</InvertedButton>
           <InvertedButton
-            onClick={() => onSave({ companyName, position, dueDate })}
+            onClick={() =>
+              onSave({
+                companyName,
+                position,
+                dueDate,
+                jobUrl: normalizeUrl(jobUrl),
+              })
+            }
           >
             Save
           </InvertedButton>
         </>
       }
     >
-      <h3 className="mb-4 text-lg">Edit Job Application</h3>
+      <h3 className="mb-4 text-lg">Job Info</h3>
       <div className="mb-6 space-y-6">
         <InputField
           id="companyName"
@@ -90,6 +109,31 @@ export default function EditJobModal({
           value={dueDate}
           onChange={setDueDate}
         />
+        <div className="flex items-end gap-2">
+          <div className="flex-1">
+            <InputField
+              id="jobUrl"
+              label="Job URL"
+              type="url"
+              value={jobUrl}
+              onChange={setJobUrl}
+              placeholder="https://..."
+            />
+          </div>
+          {jobUrl.trim() && (
+            <button
+              type="button"
+              onClick={() => {
+                const url = normalizeUrl(jobUrl)
+                if (url) window.electron.shell.openExternal(url)
+              }}
+              className="mb-0.5 rounded p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-200"
+              title="Open in browser"
+            >
+              <ExternalLink size={18} />
+            </button>
+          )}
+        </div>
       </div>
     </Modal>
   )

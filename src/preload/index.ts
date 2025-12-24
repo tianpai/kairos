@@ -64,6 +64,9 @@ contextBridge.exposeInMainWorld('electron', {
     },
   },
   platform: process.platform,
+  shell: {
+    openExternal: (url: string): Promise<void> => ipcRenderer.invoke('shell:openExternal', url),
+  },
   settings: {
     getApiKey: (): Promise<string | null> => ipcRenderer.invoke('settings:getApiKey'),
     setApiKey: (key: string): Promise<void> => ipcRenderer.invoke('settings:setApiKey', key),

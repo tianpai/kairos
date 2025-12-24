@@ -76,6 +76,7 @@ export class JobApplicationService {
         matchPercentage: 0,
         templateId: dto.templateId,
         jobDescription: dto.jobDescription,
+        jobUrl: dto.jobUrl ?? null,
         originalResume: dto.rawResumeContent,
       },
     })
@@ -108,6 +109,7 @@ export class JobApplicationService {
         matchPercentage: 0,
         templateId: dto.templateId,
         jobDescription: dto.jobDescription ?? null,
+        jobUrl: dto.jobUrl ?? null,
         originalResume: null,
       },
     })
@@ -125,6 +127,7 @@ export class JobApplicationService {
       dueDate: string
       matchPercentage: number
       applicationStatus: string | null
+      jobUrl: string | null
       originalResume: string | null
       createdAt: string
       updatedAt: string
@@ -146,6 +149,7 @@ export class JobApplicationService {
       dueDate: app.dueDate.toISOString().split('T')[0],
       matchPercentage: app.matchPercentage,
       applicationStatus: app.applicationStatus,
+      jobUrl: app.jobUrl,
       originalResume: app.originalResume,
       createdAt: app.createdAt.toISOString(),
       updatedAt: app.updatedAt.toISOString(),
@@ -159,6 +163,7 @@ export class JobApplicationService {
     dueDate: string
     matchPercentage: number
     applicationStatus: string | null
+    jobUrl: string | null
     createdAt: string
     updatedAt: string
     templateId: string
@@ -197,6 +202,7 @@ export class JobApplicationService {
       dueDate: jobApplication.dueDate.toISOString().split('T')[0],
       matchPercentage: jobApplication.matchPercentage,
       applicationStatus: jobApplication.applicationStatus,
+      jobUrl: jobApplication.jobUrl,
       createdAt: jobApplication.createdAt.toISOString(),
       updatedAt: jobApplication.updatedAt.toISOString(),
       templateId: jobApplication.templateId,
@@ -262,6 +268,9 @@ export class JobApplicationService {
     }
     if (dto.dueDate) {
       updateData.dueDate = new Date(dto.dueDate)
+    }
+    if (dto.jobUrl !== undefined) {
+      updateData.jobUrl = dto.jobUrl
     }
 
     const updated = await this.database.jobApplication.update({

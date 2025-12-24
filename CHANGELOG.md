@@ -9,6 +9,7 @@ All notable changes to this project will be documented in this file. See [standa
 ### Features
 
 - Keyboard shortcuts for all header buttons (save, export, tailor, document settings, navigation)
+- Job URL field to save link to original job posting (opens in default browser)
 
 ## 0.0.2 (2024-12-22)
 

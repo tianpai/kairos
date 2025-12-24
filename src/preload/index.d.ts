@@ -17,6 +17,9 @@ interface IElectronAPI {
     onToggleColumns: (callback: () => void) => () => void
   }
   platform: NodeJS.Platform
+  shell: {
+    openExternal: (url: string) => Promise<void>
+  }
   settings: {
     getApiKey: () => Promise<string | null>
     setApiKey: (key: string) => Promise<void>
