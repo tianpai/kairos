@@ -12,6 +12,56 @@ contextBridge.exposeInMainWorld('electron', {
       ipcRenderer.on('shortcut:new-application', handler)
       return () => ipcRenderer.removeListener('shortcut:new-application', handler)
     },
+    onSave: (callback: () => void) => {
+      const handler = () => callback()
+      ipcRenderer.on('shortcut:save', handler)
+      return () => ipcRenderer.removeListener('shortcut:save', handler)
+    },
+    onExportPdf: (callback: () => void) => {
+      const handler = () => callback()
+      ipcRenderer.on('shortcut:export-pdf', handler)
+      return () => ipcRenderer.removeListener('shortcut:export-pdf', handler)
+    },
+    onDocumentSettings: (callback: () => void) => {
+      const handler = () => callback()
+      ipcRenderer.on('shortcut:document-settings', handler)
+      return () => ipcRenderer.removeListener('shortcut:document-settings', handler)
+    },
+    onPrevApp: (callback: () => void) => {
+      const handler = () => callback()
+      ipcRenderer.on('shortcut:prev-app', handler)
+      return () => ipcRenderer.removeListener('shortcut:prev-app', handler)
+    },
+    onNextApp: (callback: () => void) => {
+      const handler = () => callback()
+      ipcRenderer.on('shortcut:next-app', handler)
+      return () => ipcRenderer.removeListener('shortcut:next-app', handler)
+    },
+    onLatestApp: (callback: () => void) => {
+      const handler = () => callback()
+      ipcRenderer.on('shortcut:latest-app', handler)
+      return () => ipcRenderer.removeListener('shortcut:latest-app', handler)
+    },
+    onOldestApp: (callback: () => void) => {
+      const handler = () => callback()
+      ipcRenderer.on('shortcut:oldest-app', handler)
+      return () => ipcRenderer.removeListener('shortcut:oldest-app', handler)
+    },
+    onTailor: (callback: () => void) => {
+      const handler = () => callback()
+      ipcRenderer.on('shortcut:tailor', handler)
+      return () => ipcRenderer.removeListener('shortcut:tailor', handler)
+    },
+    onToggleSidebar: (callback: () => void) => {
+      const handler = () => callback()
+      ipcRenderer.on('shortcut:toggle-sidebar', handler)
+      return () => ipcRenderer.removeListener('shortcut:toggle-sidebar', handler)
+    },
+    onToggleColumns: (callback: () => void) => {
+      const handler = () => callback()
+      ipcRenderer.on('shortcut:toggle-columns', handler)
+      return () => ipcRenderer.removeListener('shortcut:toggle-columns', handler)
+    },
   },
   platform: process.platform,
   settings: {

@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { useNavigate, useSearch } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { Columns2, Columns3, PanelLeft } from 'lucide-react'
@@ -21,6 +22,7 @@ import { EmptyState } from '@layout/EmptyState'
 import { Sidebar } from '@sidebar/Sidebar'
 import { AppLayout } from '@layout/AppLayout'
 import { useLayoutStore } from '@layout/layout.store'
+import { useShortcutStore } from '@layout/shortcut.store'
 import { getScoreColor } from '@/utils/scoreThresholds'
 import NewApplicationButton from '@/components/upload/NewApplicationButton'
 
@@ -31,6 +33,14 @@ export default function App() {
   // Layout state from store
   const { sidebarCollapsed, showChecklist, toggleSidebar, toggleChecklist } =
     useLayoutStore()
+
+  // Navigation shortcut state
+  const navigationRequested = useShortcutStore(
+    (state) => state.navigationRequested,
+  )
+  const clearNavigationRequest = useShortcutStore(
+    (state) => state.clearNavigationRequest,
+  )
 
   // Fetch all applications for sidebar
   const { data: applications = [] } = useQuery({
@@ -61,6 +71,44 @@ export default function App() {
 
   // Sync job application data to store (templateId + tailored resume)
   useSyncJobApplicationToStore(jobApplication)
+
+  // Handle navigation shortcuts
+  useEffect(() => {
+    if (!navigationRequested || applications.length === 0) {
+      if (navigationRequested) {
+        clearNavigationRequest()
+      }
+      return
+    }
+
+    const currentIndex = applications.findIndex((app) => app.id === jobId)
+    let targetId: string | undefined
+
+    switch (navigationRequested) {
+      case 'prev':
+        // Move UP in sidebar (toward newer items at top)
+        targetId = applications[Math.max(0, currentIndex - 1)]?.id
+        break
+      case 'next':
+        // Move DOWN in sidebar (toward older items at bottom)
+        targetId = applications[Math.min(applications.length - 1, currentIndex + 1)]?.id
+        break
+      case 'oldest':
+        // Jump to bottom of sidebar
+        targetId = applications[applications.length - 1]?.id
+        break
+      case 'latest':
+        // Jump to top of sidebar
+        targetId = applications[0]?.id
+        break
+    }
+
+    if (targetId && targetId !== jobId) {
+      navigate({ to: '/', search: { jobId: targetId } })
+    }
+
+    clearNavigationRequest()
+  }, [navigationRequested, applications, jobId, navigate, clearNavigationRequest])
 
   const handleSelectApplication = (id: string) => {
     navigate({ to: '/', search: { jobId: id } })

@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## 0.0.3 (WIP)
+
+"I need you to hurry up now, 'Cause I can't wait much longer"
+
+### Features
+
+- Keyboard shortcuts for all header buttons (save, export, tailor, document settings, navigation)
+
 ## 0.0.2 (2024-12-22)
 
 "Damn! It even uses like a desktop app"
