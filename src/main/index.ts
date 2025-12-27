@@ -52,19 +52,11 @@ ipcMain.handle('shell:openExternal', (_, url: string) => {
 })
 
 async function initializeDatabase() {
-  // Set database path
-  const dbPath = app.isPackaged
-    ? join(app.getPath('userData'), 'kairos.db')
-    : join(app.getAppPath(), 'prisma/dev.db')
-
-  process.env.DATABASE_URL = `file:${dbPath}`
-
-  // Run migrations to ensure schema is up to date
-  log.info('Running database migrations...')
-  await runMigrations()
-
-  // Connect to database
+  // Connect to database (creates tables if needed)
   await connectDatabase()
+
+  // Run any pending migrations
+  await runMigrations()
 
   // Register IPC handlers
   registerAllHandlers()
