@@ -160,7 +160,7 @@ export async function saveMatchScore(
 
 export async function saveWorkflowState(
   jobId: string,
-  workflowSteps: Record<string, unknown>,
+  workflowSteps: WorkflowStepsData,
   workflowStatus: string,
 ): Promise<GeneralAPIResponse> {
   return window.electron.jobs.saveWorkflowState(jobId, {

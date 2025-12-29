@@ -5,7 +5,7 @@ import { z } from 'zod'
 import { useResumeStore } from '@typst-compiler/resumeState'
 import { TemplateBuilder } from '@templates/builder'
 import { getJobApplication } from '@api/jobs'
-import type { TemplateData, SectionEntry } from '@templates/template.types'
+import type { SectionEntry, TemplateData } from '@templates/template.types'
 
 /**
  * Check if resume has any meaningful content (at least one non-empty section)
@@ -33,8 +33,8 @@ function hasResumeContent(data: TemplateData): boolean {
 
 export function useTailoringData() {
   // Get jobId from URL search params (works on any route)
-  const search = useSearch({ strict: false }) as { jobId?: string }
-  const jobId = search?.jobId
+  const search = useSearch({ strict: false })
+  const jobId = search.jobId
 
   // Get checklist from React Query
   const { data: jobApplication } = useQuery({

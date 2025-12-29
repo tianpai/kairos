@@ -16,9 +16,7 @@ export function useShortcutListener() {
     (state) => state.requestDocumentSettings,
   )
   const requestTailor = useShortcutStore((state) => state.requestTailor)
-  const requestNavigation = useShortcutStore(
-    (state) => state.requestNavigation,
-  )
+  const requestNavigation = useShortcutStore((state) => state.requestNavigation)
 
   useEffect(() => {
     // Settings - direct navigation
@@ -71,18 +69,14 @@ export function useShortcutListener() {
     })
 
     // Toggle Sidebar - direct store call
-    const unsubToggleSidebar = window.electron.shortcuts.onToggleSidebar(
-      () => {
-        useLayoutStore.getState().toggleSidebar()
-      },
-    )
+    const unsubToggleSidebar = window.electron.shortcuts.onToggleSidebar(() => {
+      useLayoutStore.getState().toggleSidebar()
+    })
 
     // Toggle Columns - direct store call
-    const unsubToggleColumns = window.electron.shortcuts.onToggleColumns(
-      () => {
-        useLayoutStore.getState().toggleChecklist()
-      },
-    )
+    const unsubToggleColumns = window.electron.shortcuts.onToggleColumns(() => {
+      useLayoutStore.getState().toggleChecklist()
+    })
 
     return () => {
       unsubSettings()

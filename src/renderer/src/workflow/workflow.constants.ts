@@ -1,8 +1,8 @@
 import {
+  CHECKLIST_MATCHING,
+  CHECKLIST_PARSING,
   RESUME_PARSING,
   RESUME_TAILORING,
-  CHECKLIST_PARSING,
-  CHECKLIST_MATCHING,
   SCORE_UPDATING,
 } from './workflow.types'
 import type { Workflow } from './workflow.types'
@@ -81,7 +81,10 @@ export const CHECKLIST_ONLY_WORKFLOW: Workflow = {
   },
 }
 
-export const WORKFLOWS: Record<'create-application' | 'tailoring' | 'checklist-only', Workflow> = {
+export const WORKFLOWS: Record<
+  'create-application' | 'tailoring' | 'checklist-only',
+  Workflow
+> = {
   'create-application': CREATE_APPLICATION_WORKFLOW,
   tailoring: TAILORING_WORKFLOW,
   'checklist-only': CHECKLIST_ONLY_WORKFLOW,

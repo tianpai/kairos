@@ -36,17 +36,20 @@ self.onmessage = async ({ data }: MessageEvent<AIWorkerMessage>) => {
         result = await parseResume(
           provider,
           payload.rawResumeContent as string,
-          payload.jsonSchema as Record<string, unknown>
+          payload.jsonSchema as Record<string, unknown>,
         )
         break
       case 'checklist.parsing':
-        result = await parseChecklist(provider, payload.jobDescription as string)
+        result = await parseChecklist(
+          provider,
+          payload.jobDescription as string,
+        )
         break
       case 'checklist.matching':
         result = await matchChecklist(
           provider,
           payload.checklist as Parameters<typeof matchChecklist>[1],
-          payload.resumeStructure as Record<string, unknown>
+          payload.resumeStructure as Record<string, unknown>,
         )
         break
       case 'resume.tailoring':
@@ -54,14 +57,18 @@ self.onmessage = async ({ data }: MessageEvent<AIWorkerMessage>) => {
           provider,
           payload.checklist as Parameters<typeof tailorResume>[1],
           payload.resumeStructure as Record<string, unknown>,
-          payload.jsonSchema as Record<string, unknown>
+          payload.jsonSchema as Record<string, unknown>,
         )
         break
       default:
         throw new Error(`Unknown task type: ${taskType}`)
     }
 
-    self.postMessage({ id, status: 'completed', result } satisfies AIWorkerResponse)
+    self.postMessage({
+      id,
+      status: 'completed',
+      result,
+    } satisfies AIWorkerResponse)
   } catch (error) {
     self.postMessage({
       id,

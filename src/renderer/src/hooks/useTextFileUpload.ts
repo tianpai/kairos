@@ -6,7 +6,7 @@ const DEFAULT_ACCEPTED_EXTENSIONS = ['.md', '.txt']
 
 interface UseTextFileUploadOptions {
   maxSizeKB?: number
-  acceptedExtensions?: string[]
+  acceptedExtensions?: Array<string>
   onTextRead?: (text: string) => void
 }
 
@@ -59,9 +59,7 @@ export function useTextFileUpload(options: UseTextFileUploadOptions = {}) {
     event.stopPropagation()
     setIsDragActive(false)
     const file = event.dataTransfer.files[0]
-    if (file) {
-      readFileAsText(file)
-    }
+    readFileAsText(file)
   }
 
   function handleDragOver(event: DragEvent<HTMLElement>) {

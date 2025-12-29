@@ -1,11 +1,11 @@
 import { create } from 'zustand'
 import type {
   Task,
-  TaskStatus,
   TaskStateMap,
+  TaskStatus,
+  WorkflowContext,
   WorkflowInstance,
   WorkflowName,
-  WorkflowContext,
 } from './workflow.types'
 
 interface WorkflowState {
@@ -18,7 +18,7 @@ interface WorkflowState {
   startWorkflow: (
     jobId: string,
     workflowName: WorkflowName,
-    tasks: Task[],
+    tasks: Array<Task>,
     initialContext: Partial<WorkflowContext>,
   ) => void
   loadWorkflow: (
@@ -26,7 +26,12 @@ interface WorkflowState {
     workflow: WorkflowInstance,
     context?: WorkflowContext,
   ) => void
-  setTaskStatus: (jobId: string, task: Task, status: TaskStatus, error?: string) => void
+  setTaskStatus: (
+    jobId: string,
+    task: Task,
+    status: TaskStatus,
+    error?: string,
+  ) => void
   updateContext: (jobId: string, updates: Partial<WorkflowContext>) => void
   completeWorkflow: (jobId: string) => void
   failWorkflow: (jobId: string, error: string) => void
@@ -86,7 +91,6 @@ export const useWorkflowStore = create<WorkflowState>()((set, get) => ({
   setTaskStatus: (jobId, task, status, error) => {
     set((state) => {
       const workflow = state.workflows[jobId]
-      if (!workflow) return state
       return {
         workflows: {
           ...state.workflows,
@@ -106,7 +110,6 @@ export const useWorkflowStore = create<WorkflowState>()((set, get) => ({
   updateContext: (jobId, updates) => {
     set((state) => {
       const context = state.contexts[jobId]
-      if (!context) return state
       return {
         contexts: {
           ...state.contexts,
@@ -122,7 +125,6 @@ export const useWorkflowStore = create<WorkflowState>()((set, get) => ({
   completeWorkflow: (jobId) => {
     set((state) => {
       const workflow = state.workflows[jobId]
-      if (!workflow) return state
       return {
         workflows: {
           ...state.workflows,
@@ -138,7 +140,6 @@ export const useWorkflowStore = create<WorkflowState>()((set, get) => ({
   failWorkflow: (jobId, error) => {
     set((state) => {
       const workflow = state.workflows[jobId]
-      if (!workflow) return state
       return {
         workflows: {
           ...state.workflows,
@@ -174,7 +175,7 @@ export const useWorkflowStore = create<WorkflowState>()((set, get) => ({
 
   getTaskStatus: (jobId, task) => {
     const workflow = get().workflows[jobId]
-    return workflow?.taskStates[task]
+    return workflow.taskStates[task]
   },
 
   isTaskRunning: (jobId, task) => {
@@ -182,12 +183,11 @@ export const useWorkflowStore = create<WorkflowState>()((set, get) => ({
   },
 
   isWorkflowRunning: (jobId) => {
-    return get().workflows[jobId]?.status === 'running'
+    return get().workflows[jobId].status === 'running'
   },
 
   hasFailedTask: (jobId) => {
     const workflow = get().workflows[jobId]
-    if (!workflow) return false
     return Object.values(workflow.taskStates).some((s) => s === 'failed')
   },
 }))

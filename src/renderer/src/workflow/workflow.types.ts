@@ -30,8 +30,8 @@ export type TaskStateMap = Partial<Record<Task, TaskStatus>>
  * Task dependencies - defines what comes before and after
  */
 export interface TaskDep {
-  prerequisites: Task[]
-  triggers: Task[]
+  prerequisites: Array<Task>
+  triggers: Array<Task>
 }
 
 /**
