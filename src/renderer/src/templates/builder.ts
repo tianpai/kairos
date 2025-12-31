@@ -91,7 +91,7 @@ export class TemplateBuilder {
 
     // Assemble final document
     const typstString = `${globalStyle}\n${sectionStyles}\n${content}`
-    console.log(typstString)
+    // console.log(typstString)
     return typstString
   }
 

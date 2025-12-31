@@ -134,6 +134,7 @@ export default function NewApplicationButton({
               dueDate: payload.dueDate,
               jobDescription: payload.jobDescription,
               jobUrl: payload.jobUrl,
+              sourceTemplateId: sourceJob.templateId,
             },
             sourceJob.parsedResume,
           )

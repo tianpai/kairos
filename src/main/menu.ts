@@ -56,6 +56,13 @@ export function createAppMenu(mainWindow: BrowserWindow | null) {
             mainWindow?.webContents.send('shortcut:export-pdf')
           },
         },
+        {
+          label: 'Export PDFs...',
+          accelerator: 'CommandOrControl+Shift+B',
+          click: () => {
+            mainWindow?.webContents.send('shortcut:batch-export')
+          },
+        },
         { type: 'separator' },
         {
           label: 'Document Settings...',

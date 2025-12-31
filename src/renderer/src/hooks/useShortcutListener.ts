@@ -12,6 +12,7 @@ export function useShortcutListener() {
   )
   const requestSave = useShortcutStore((state) => state.requestSave)
   const requestExportPdf = useShortcutStore((state) => state.requestExportPdf)
+  const requestBatchExport = useShortcutStore((state) => state.requestBatchExport)
   const requestDocumentSettings = useShortcutStore(
     (state) => state.requestDocumentSettings,
   )
@@ -37,6 +38,11 @@ export function useShortcutListener() {
     // Export PDF - store flag
     const unsubExportPdf = window.electron.shortcuts.onExportPdf(() => {
       requestExportPdf()
+    })
+
+    // Batch Export - store flag
+    const unsubBatchExport = window.electron.shortcuts.onBatchExport(() => {
+      requestBatchExport()
     })
 
     // Document Settings - store flag
@@ -83,6 +89,7 @@ export function useShortcutListener() {
       unsubNewApp()
       unsubSave()
       unsubExportPdf()
+      unsubBatchExport()
       unsubDocSettings()
       unsubTailor()
       unsubPrevApp()
@@ -97,6 +104,7 @@ export function useShortcutListener() {
     requestNewApplication,
     requestSave,
     requestExportPdf,
+    requestBatchExport,
     requestDocumentSettings,
     requestTailor,
     requestNavigation,

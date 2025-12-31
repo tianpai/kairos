@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
+import { Select } from '@ui/Select'
 import { getAllJobApplications } from '@/api/jobs'
 
 interface ExistingApplicationSelectProps {
@@ -28,11 +29,11 @@ export function ExistingApplicationSelect({
   return (
     <div className="flex flex-col gap-1">
       <label className="block text-xs font-medium">Source Resume</label>
-      <select
+      <Select
         value={value ?? ''}
         onChange={handleChange}
         disabled={isLoading}
-        className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:border-gray-900 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:focus:border-gray-200"
+        className="w-full"
       >
         <option value="">Select an application...</option>
         {applicationsWithResume.map((app) => (
@@ -40,7 +41,7 @@ export function ExistingApplicationSelect({
             {app.companyName} - {app.position}
           </option>
         ))}
-      </select>
+      </Select>
       {applicationsWithResume.length === 0 && !isLoading && (
         <p className="text-xs text-gray-500 dark:text-gray-400">
           No applications with resumes found. Upload a resume first.

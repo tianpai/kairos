@@ -15,10 +15,21 @@ interface IElectronAPI {
     onTailor: (callback: () => void) => () => void
     onToggleSidebar: (callback: () => void) => () => void
     onToggleColumns: (callback: () => void) => () => void
+    onBatchExport: (callback: () => void) => () => void
   }
   platform: NodeJS.Platform
   shell: {
     openExternal: (url: string) => Promise<void>
+  }
+  dialog: {
+    selectFolder: () => Promise<string | null>
+  }
+  fs: {
+    writeFile: (
+      folderPath: string,
+      filename: string,
+      data: ArrayBuffer,
+    ) => Promise<{ success: boolean; path: string }>
   }
   settings: {
     getApiKey: () => Promise<string | null>

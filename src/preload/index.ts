@@ -62,10 +62,26 @@ contextBridge.exposeInMainWorld('electron', {
       ipcRenderer.on('shortcut:toggle-columns', handler)
       return () => ipcRenderer.removeListener('shortcut:toggle-columns', handler)
     },
+    onBatchExport: (callback: () => void) => {
+      const handler = () => callback()
+      ipcRenderer.on('shortcut:batch-export', handler)
+      return () => ipcRenderer.removeListener('shortcut:batch-export', handler)
+    },
   },
   platform: process.platform,
   shell: {
     openExternal: (url: string): Promise<void> => ipcRenderer.invoke('shell:openExternal', url),
+  },
+  dialog: {
+    selectFolder: (): Promise<string | null> => ipcRenderer.invoke('dialog:selectFolder'),
+  },
+  fs: {
+    writeFile: (
+      folderPath: string,
+      filename: string,
+      data: ArrayBuffer,
+    ): Promise<{ success: boolean; path: string }> =>
+      ipcRenderer.invoke('fs:writeFile', folderPath, filename, data),
   },
   settings: {
     getApiKey: (): Promise<string | null> => ipcRenderer.invoke('settings:getApiKey'),

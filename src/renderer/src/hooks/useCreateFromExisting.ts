@@ -1,11 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { z } from 'zod'
 import { TemplateBuilder } from '@templates/builder'
-import {
-  DEFAULT_TEMPLATE_NAME,
-  premadeTemplates,
-} from '@templates/premade-tmpl'
-import { TemplateId } from '@templates/templateId'
 import { startChecklistOnlyWorkflow } from '@workflow/workflow.service'
 import type { CreateFromExistingPayload } from '@/api/jobs'
 import { createFromExisting } from '@/api/jobs'
@@ -17,6 +12,7 @@ export interface CreateFromExistingInput {
   dueDate: string
   jobDescription: string
   jobUrl?: string
+  sourceTemplateId: string
 }
 
 export function useCreateFromExisting() {
@@ -47,16 +43,16 @@ export function useCreateFromExisting() {
     input: CreateFromExistingInput,
     sourceResumeStructure: Record<string, unknown>,
   ) {
-    const defaultConfig = premadeTemplates[DEFAULT_TEMPLATE_NAME]
-    const defaultTemplateId = TemplateId.toJSON(defaultConfig)
-    const jsonSchema = buildResumeJsonSchema(defaultTemplateId)
+    // Use source's templateId to ensure data structure matches
+    const templateId = input.sourceTemplateId
+    const jsonSchema = buildResumeJsonSchema(templateId)
 
     const payload: CreateFromExistingPayload & {
       jsonSchema: Record<string, unknown>
       sourceResumeStructure: Record<string, unknown>
     } = {
       ...input,
-      templateId: defaultTemplateId,
+      templateId,
       jsonSchema,
       sourceResumeStructure,
     }

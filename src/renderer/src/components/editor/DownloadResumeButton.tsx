@@ -1,4 +1,4 @@
-import { memo, useState, useEffect, useCallback } from 'react'
+import { memo, useCallback, useEffect, useState } from 'react'
 import { useResumeStore } from '@typst-compiler/resumeState'
 import { compileToPDF } from '@typst-compiler/compile'
 import { FileDown } from 'lucide-react'

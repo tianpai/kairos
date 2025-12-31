@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate, useSearch } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { Columns2, Columns3, PanelLeft } from 'lucide-react'
@@ -25,6 +25,7 @@ import { useLayoutStore } from '@layout/layout.store'
 import { useShortcutStore } from '@layout/shortcut.store'
 import { getScoreColor } from '@/utils/scoreThresholds'
 import NewApplicationButton from '@/components/upload/NewApplicationButton'
+import { BatchExportModal } from '@/components/export/BatchExportModal'
 
 export default function App() {
   const navigate = useNavigate()
@@ -40,6 +41,15 @@ export default function App() {
   )
   const clearNavigationRequest = useShortcutStore(
     (state) => state.clearNavigationRequest,
+  )
+
+  // Batch export state
+  const [showBatchExport, setShowBatchExport] = useState(false)
+  const batchExportRequested = useShortcutStore(
+    (state) => state.batchExportRequested,
+  )
+  const clearBatchExportRequest = useShortcutStore(
+    (state) => state.clearBatchExportRequest,
   )
 
   // Fetch all applications for sidebar
@@ -71,6 +81,14 @@ export default function App() {
 
   // Sync job application data to store (templateId + tailored resume)
   useSyncJobApplicationToStore(jobApplication)
+
+  // Handle batch export shortcut
+  useEffect(() => {
+    if (batchExportRequested) {
+      setShowBatchExport(true)
+      clearBatchExportRequest()
+    }
+  }, [batchExportRequested, clearBatchExportRequest])
 
   // Handle navigation shortcuts
   useEffect(() => {
@@ -127,6 +145,7 @@ export default function App() {
   const hasSelection = !!jobId && !!jobApplication
 
   return (
+    <>
     <AppLayout
       header={
         <PageHeader
@@ -229,5 +248,12 @@ export default function App() {
         <EmptyState hasApplications={hasApplications} />
       )}
     </AppLayout>
+
+    <BatchExportModal
+      open={showBatchExport}
+      onClose={() => setShowBatchExport(false)}
+      applications={applications}
+    />
+  </>
   )
 }
