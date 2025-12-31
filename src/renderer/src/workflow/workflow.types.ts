@@ -11,6 +11,7 @@ export const RESUME_TAILORING = 'resume.tailoring' as const
 export const CHECKLIST_PARSING = 'checklist.parsing' as const
 export const CHECKLIST_MATCHING = 'checklist.matching' as const
 export const SCORE_UPDATING = 'score.updating' as const
+export const JOBINFO_EXTRACTING = 'jobinfo.extracting' as const
 
 export type Task =
   | typeof RESUME_PARSING
@@ -18,6 +19,7 @@ export type Task =
   | typeof CHECKLIST_PARSING
   | typeof CHECKLIST_MATCHING
   | typeof SCORE_UPDATING
+  | typeof JOBINFO_EXTRACTING
 
 export type TaskStatus = 'pending' | 'running' | 'completed' | 'failed'
 export type WorkflowStatus = 'idle' | 'running' | 'completed' | 'failed'

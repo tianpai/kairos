@@ -3,12 +3,14 @@ import { parseResume } from './prompts/resume-parsing'
 import { parseChecklist } from './prompts/checklist-parsing'
 import { matchChecklist } from './prompts/checklist-matching'
 import { tailorResume } from './prompts/resume-tailoring'
+import { extractJobInfo } from './prompts/jobinfo-extracting'
 
 export type AITaskType =
   | 'resume.parsing'
   | 'checklist.parsing'
   | 'checklist.matching'
   | 'resume.tailoring'
+  | 'jobinfo.extracting'
 
 export interface AIWorkerMessage {
   id: string
@@ -58,6 +60,12 @@ self.onmessage = async ({ data }: MessageEvent<AIWorkerMessage>) => {
           payload.checklist as Parameters<typeof tailorResume>[1],
           payload.resumeStructure as Record<string, unknown>,
           payload.jsonSchema as Record<string, unknown>,
+        )
+        break
+      case 'jobinfo.extracting':
+        result = await extractJobInfo(
+          provider,
+          payload.jobDescription as string,
         )
         break
       default:

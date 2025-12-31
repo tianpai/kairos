@@ -22,8 +22,13 @@ import {
   onScoreUpdatingSuccess,
 } from '../tasks/score-updating.task'
 import {
+  executeJobInfoExtraction,
+  onJobInfoExtractionSuccess,
+} from '../tasks/jobinfo-extracting.task'
+import {
   CHECKLIST_MATCHING,
   CHECKLIST_PARSING,
+  JOBINFO_EXTRACTING,
   RESUME_PARSING,
   RESUME_TAILORING,
   SCORE_UPDATING,
@@ -71,6 +76,9 @@ export async function startCreateApplicationWorkflow(
   )
   runTask(jobId, CHECKLIST_PARSING, () =>
     executeChecklistParsing(data.jobDescription),
+  )
+  runTask(jobId, JOBINFO_EXTRACTING, () =>
+    executeJobInfoExtraction(data.jobDescription),
   )
 }
 
@@ -141,6 +149,13 @@ export async function startChecklistOnlyWorkflow(
   runTask(jobId, CHECKLIST_PARSING, () =>
     executeChecklistParsing(data.jobDescription),
   )
+
+  // Start job info extraction if JD is provided (existing mode, not scratch)
+  if (data.jobDescription) {
+    runTask(jobId, JOBINFO_EXTRACTING, () =>
+      executeJobInfoExtraction(data.jobDescription),
+    )
+  }
 }
 
 /**
@@ -223,6 +238,13 @@ async function handleTaskSuccess(
       const matchPercentage = result as number
       await onScoreUpdatingSuccess(jobId, matchPercentage)
       if (workflow) tip.trigger('score.updated', { score: matchPercentage })
+      break
+    }
+    case JOBINFO_EXTRACTING: {
+      const extractedJobInfo = result as Parameters<
+        typeof onJobInfoExtractionSuccess
+      >[1]
+      await onJobInfoExtractionSuccess(jobId, extractedJobInfo)
       break
     }
   }

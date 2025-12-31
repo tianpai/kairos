@@ -1,6 +1,7 @@
 import {
   CHECKLIST_MATCHING,
   CHECKLIST_PARSING,
+  JOBINFO_EXTRACTING,
   RESUME_PARSING,
   RESUME_TAILORING,
   SCORE_UPDATING,
@@ -10,12 +11,14 @@ import type { Workflow } from './workflow.types'
 /**
  * CREATE_APPLICATION_WORKFLOW
  *
- * Entry tasks: resume.parsing, checklist.parsing (run in parallel)
+ * Entry tasks: resume.parsing, checklist.parsing, jobinfo.extracting (run in parallel)
  *
  * Flow:
  *   resume.parsing ---|
  *                      |---> checklist.matching ---> score.updating
  *   checklist.parsing |
+ *
+ *   jobinfo.extracting (independent - extracts company/position/dueDate from JD)
  */
 export const CREATE_APPLICATION_WORKFLOW: Workflow = {
   [RESUME_PARSING]: {
@@ -25,6 +28,10 @@ export const CREATE_APPLICATION_WORKFLOW: Workflow = {
   [CHECKLIST_PARSING]: {
     prerequisites: [],
     triggers: [CHECKLIST_MATCHING],
+  },
+  [JOBINFO_EXTRACTING]: {
+    prerequisites: [],
+    triggers: [], // Independent - updates DB directly, doesn't block other tasks
   },
   [CHECKLIST_MATCHING]: {
     prerequisites: [RESUME_PARSING, CHECKLIST_PARSING],
@@ -65,11 +72,17 @@ export const TAILORING_WORKFLOW: Workflow = {
  * For scratch builds where resume is already structured (no parsing needed).
  * Entry task: checklist.parsing
  * Flow: checklist.parsing -> checklist.matching -> score.updating
+ *
+ * Note: jobinfo.extracting is optionally started if JD is provided (existing mode)
  */
 export const CHECKLIST_ONLY_WORKFLOW: Workflow = {
   [CHECKLIST_PARSING]: {
     prerequisites: [],
     triggers: [CHECKLIST_MATCHING],
+  },
+  [JOBINFO_EXTRACTING]: {
+    prerequisites: [],
+    triggers: [], // Independent - updates DB directly, doesn't block other tasks
   },
   [CHECKLIST_MATCHING]: {
     prerequisites: [CHECKLIST_PARSING],

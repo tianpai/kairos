@@ -6,11 +6,19 @@ import type { JobApplicationInput } from '@/api/jobs'
 import { INPUT_TEXTAREA, LABEL_BASE } from '@/components/resumeForm/fieldStyles'
 import { useTextFileUpload } from '@/hooks/useTextFileUpload'
 
+const EXTRACTING_PLACEHOLDER = 'Extracting...'
+
 function normalizeUrl(url: string): string | undefined {
   const trimmed = url.trim()
   if (!trimmed) return undefined
   if (/^https?:\/\//i.test(trimmed)) return trimmed
   return `https://${trimmed}`
+}
+
+function getDefaultDueDate(): string {
+  const date = new Date()
+  date.setDate(date.getDate() + 14) // 14 days from now
+  return date.toISOString().split('T')[0] // YYYY-MM-DD format
 }
 
 export type JobApplicationFormData = Omit<
@@ -53,17 +61,26 @@ export default function JobDetailsSection({
     const currentDueDate = updates?.dueDate ?? dueDate
     const currentJobUrl = updates?.jobUrl ?? jobUrl
 
+    const hasJobDescription = currentJobDescription.trim().length > 0
+
+    // When JD is provided, use placeholders for empty fields (AI will extract)
+    const finalCompanyName = currentCompanyName.trim() || (hasJobDescription ? EXTRACTING_PLACEHOLDER : '')
+    const finalPosition = currentPosition.trim() || (hasJobDescription ? EXTRACTING_PLACEHOLDER : '')
+    const finalDueDate = currentDueDate || (hasJobDescription ? getDefaultDueDate() : '')
+
     const formData: JobApplicationFormData = {
       jobDescription: currentJobDescription.trim(),
-      companyName: currentCompanyName.trim(),
-      position: currentPosition.trim(),
-      dueDate: currentDueDate,
+      companyName: finalCompanyName,
+      position: finalPosition,
+      dueDate: finalDueDate,
       jobUrl: normalizeUrl(currentJobUrl),
     }
+
+    // Form is valid if company/position/dueDate are filled (including placeholders)
     const isValid = Boolean(
-      currentCompanyName.trim() &&
-      currentPosition.trim() &&
-      currentDueDate &&
+      finalCompanyName &&
+      finalPosition &&
+      finalDueDate &&
       (requireJobDescription ? currentJobDescription.trim() : true),
     )
     onFormChange(formData, isValid)
