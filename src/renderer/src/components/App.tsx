@@ -9,12 +9,9 @@ import { getAllJobApplications, getJobApplication } from '@api/jobs'
 import { useWorkflowSync } from '@hooks/useWorkflowSync'
 import { useSyncJobApplicationToStore } from '@hooks/useSyncJobApplicationToStore'
 import { useJobApplicationMutations } from '@hooks/useJobApplicationMutations'
-import { useWorkflowStore } from '@workflow/workflow.store'
-import { CHECKLIST_PARSING, RESUME_PARSING } from '@workflow/workflow.types'
 import ResumeRender from '@editor/ResumeRender'
 import ResumeForm from '@resumeForm/ResumeForm'
 import Checklist from '@checklist/Checklist'
-import ResumeParsingLoader from '@editor/ResumeParsingLoader'
 import DownloadResumeButton from '@editor/DownloadResumeButton'
 import SaveResumeButton from '@editor/SaveResumeButton'
 import { DocumentConfigButton } from '@resumeForm/DocumentConfigButton'
@@ -70,14 +67,6 @@ export default function App() {
 
   // Sync workflow state between DB and store
   useWorkflowSync(jobId, jobApplication)
-
-  // Get loading states from workflow store (requires jobId)
-  const isParsingResume = useWorkflowStore((state) =>
-    jobId ? state.isTaskRunning(jobId, RESUME_PARSING) : false,
-  )
-  const isParsingChecklist = useWorkflowStore((state) =>
-    jobId ? state.isTaskRunning(jobId, CHECKLIST_PARSING) : false,
-  )
 
   // Sync job application data to store (templateId + tailored resume)
   useSyncJobApplicationToStore(jobApplication)
@@ -239,10 +228,6 @@ export default function App() {
               <Checklist jobId={jobId} />
             </div>
           )}
-          <ResumeParsingLoader
-            isParsingResume={isParsingResume}
-            isParsingChecklist={isParsingChecklist}
-          />
         </div>
       ) : (
         <EmptyState hasApplications={hasApplications} />
