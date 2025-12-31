@@ -6,6 +6,7 @@ import { companies, jobApplications } from '../db/schema'
 import type {
   CreateJobApplicationInput,
   CreateFromScratchInput,
+  CreateFromExistingInput,
   UpdateJobApplicationInput,
   UpdateJobDescriptionInput,
   SaveResumeInput,
@@ -99,6 +100,34 @@ export class JobApplicationService {
         jobDescription: dto.jobDescription ?? null,
         jobUrl: dto.jobUrl ?? null,
         originalResume: null,
+        createdAt: now,
+        updatedAt: now,
+      })
+      .run()
+
+    return { id: jobId }
+  }
+
+  async createFromExisting(dto: CreateFromExistingInput): Promise<{ id: string }> {
+    const sourceJob = this.requireJobApplication(dto.sourceJobId)
+    const jobId = randomUUID()
+    const company = this.getOrCreateCompany(dto.companyName)
+    const now = nowISO()
+
+    this.db
+      .insert(jobApplications)
+      .values({
+        id: jobId,
+        companyId: company.id,
+        position: dto.position,
+        dueDate: dto.dueDate,
+        matchPercentage: 0,
+        templateId: dto.templateId,
+        jobDescription: dto.jobDescription,
+        jobUrl: dto.jobUrl ?? null,
+        originalResume: sourceJob.originalResume,
+        parsedResume: sourceJob.parsedResume,
+        tailoredResume: sourceJob.parsedResume,
         createdAt: now,
         updatedAt: now,
       })

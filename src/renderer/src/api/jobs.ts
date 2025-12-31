@@ -37,6 +37,16 @@ export interface CreateFromScratchPayload {
   templateId: string
 }
 
+export interface CreateFromExistingPayload {
+  sourceJobId: string
+  companyName: string
+  position: string
+  dueDate: string
+  jobDescription: string
+  jobUrl?: string
+  templateId: string
+}
+
 export interface JobApplication {
   id: string
   companyName: string
@@ -93,6 +103,12 @@ export function createFromScratch(
   payload: CreateFromScratchPayload,
 ): Promise<CreateJobApplicationResponse> {
   return window.electron.jobs.createFromScratch(payload)
+}
+
+export function createFromExisting(
+  payload: CreateFromExistingPayload,
+): Promise<CreateJobApplicationResponse> {
+  return window.electron.jobs.createFromExisting(payload)
 }
 
 export async function getAllJobApplications(): Promise<Array<JobApplication>> {

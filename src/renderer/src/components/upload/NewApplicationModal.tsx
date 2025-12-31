@@ -1,17 +1,24 @@
 import { useEffect, useState } from 'react'
 import { InvertedButton } from '@ui/InvertedButton'
 import { Modal } from '@ui/Modal'
-import { Toggle } from '@ui/Toggle'
 import type { JobApplicationFormData } from '@/components/upload/JobDetailsSection'
 import ResumeUploadSection from '@/components/upload/ResumeUploadSection'
 import JobDetailsSection from '@/components/upload/JobDetailsSection'
+import {
+  ResumeSourceSelector,
+  type ResumeSource,
+} from '@/components/upload/ResumeSourceSelector'
+import { ExistingApplicationSelect } from '@/components/upload/ExistingApplicationSelect'
 
 export interface NewApplicationSubmitPayload {
+  resumeSource: ResumeSource
   resumeFile?: File
+  sourceJobId?: string
   jobDescription: string
   companyName: string
   position: string
   dueDate: string
+  jobUrl?: string
 }
 
 interface NewApplicationModalProps {
@@ -29,8 +36,9 @@ export default function NewApplicationModal({
   isSubmitting = false,
   errorMessage = null,
 }: NewApplicationModalProps) {
-  const [useAI, setUseAI] = useState(true)
+  const [resumeSource, setResumeSource] = useState<ResumeSource>('upload')
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [selectedSourceId, setSelectedSourceId] = useState<string | null>(null)
   const [jobFormData, setJobFormData] = useState<JobApplicationFormData | null>(
     null,
   )
@@ -38,8 +46,9 @@ export default function NewApplicationModal({
 
   useEffect(() => {
     if (!isOpen) {
-      setUseAI(true)
+      setResumeSource('upload')
       setSelectedFile(null)
+      setSelectedSourceId(null)
       setJobFormData(null)
       setIsJobFormValid(false)
     }
@@ -58,19 +67,36 @@ export default function NewApplicationModal({
       return
     }
 
-    if (useAI && !selectedFile) {
+    if (resumeSource === 'upload' && !selectedFile) {
+      return
+    }
+
+    if (resumeSource === 'existing' && !selectedSourceId) {
       return
     }
 
     onSubmit({
-      resumeFile: useAI ? (selectedFile ?? undefined) : undefined,
+      resumeSource,
+      resumeFile: resumeSource === 'upload' ? (selectedFile ?? undefined) : undefined,
+      sourceJobId: resumeSource === 'existing' ? (selectedSourceId ?? undefined) : undefined,
       ...jobFormData,
     })
   }
 
-  const canSubmit = useAI
-    ? Boolean(selectedFile && isJobFormValid)
-    : isJobFormValid
+  const canSubmit = (() => {
+    if (!isJobFormValid) return false
+    switch (resumeSource) {
+      case 'upload':
+        return Boolean(selectedFile)
+      case 'existing':
+        return Boolean(selectedSourceId)
+      case 'scratch':
+        return true
+    }
+  })()
+
+  // Job description is required for upload and existing modes (AI needs it)
+  const requireJobDescription = resumeSource !== 'scratch'
 
   return (
     <Modal
@@ -94,24 +120,27 @@ export default function NewApplicationModal({
       <div className="mx-auto flex max-w-2xl flex-col gap-3">
         <div className="flex items-center justify-between">
           <h1 className="text-lg font-semibold">New Application</h1>
-          <Toggle
-            checked={useAI}
-            onChange={setUseAI}
-            labelOff="Build from scratch"
-            labelOn="Use AI"
-          />
         </div>
 
-        {useAI && (
+        <ResumeSourceSelector value={resumeSource} onChange={setResumeSource} />
+
+        {resumeSource === 'upload' && (
           <ResumeUploadSection
             selectedFile={selectedFile}
             onFileChange={setSelectedFile}
           />
         )}
 
+        {resumeSource === 'existing' && (
+          <ExistingApplicationSelect
+            value={selectedSourceId}
+            onChange={setSelectedSourceId}
+          />
+        )}
+
         <JobDetailsSection
           onFormChange={handleJobFormChange}
-          requireJobDescription={useAI}
+          requireJobDescription={requireJobDescription}
         />
       </div>
 

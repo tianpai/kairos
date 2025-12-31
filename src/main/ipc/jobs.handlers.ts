@@ -4,6 +4,7 @@ import { JobApplicationService, JobNotFoundError } from '../services/job-applica
 import {
   CreateJobApplicationSchema,
   CreateFromScratchSchema,
+  CreateFromExistingSchema,
   UpdateJobApplicationSchema,
   UpdateJobDescriptionSchema,
   SaveResumeSchema,
@@ -37,6 +38,22 @@ export function registerJobsHandlers(service: JobApplicationService): void {
       return result
     } catch (error) {
       log.error('jobs:createFromScratch failed', error)
+      throw error
+    }
+  })
+
+  ipcMain.handle('jobs:createFromExisting', async (_, data: unknown) => {
+    try {
+      const validated = CreateFromExistingSchema.parse(data)
+      const result = await service.createFromExisting(validated)
+      log.info(`Job created from existing: ${result.id} (source: ${validated.sourceJobId})`)
+      return result
+    } catch (error) {
+      if (error instanceof JobNotFoundError) {
+        log.warn(`Source job not found: ${(error as JobNotFoundError).message}`)
+        throw new Error(error.message)
+      }
+      log.error('jobs:createFromExisting failed', error)
       throw error
     }
   })
