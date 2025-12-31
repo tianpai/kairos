@@ -269,7 +269,26 @@ export function BatchExportModal({
         }
 
         const builder = new TemplateBuilder(details.templateId)
-        const typstCode = builder.build(resumeData as TemplateData)
+        const schemas = builder.getSchemas()
+
+        // Apply schema defaults to fill in missing UI formatting fields
+        const dataWithDefaults: TemplateData = {}
+        for (const [sectionId, rawData] of Object.entries(resumeData)) {
+          const schema = schemas[sectionId]
+          if (schema && rawData !== undefined) {
+            if (Array.isArray(rawData)) {
+              dataWithDefaults[sectionId] = rawData.map((item) =>
+                schema.parse(item),
+              )
+            } else {
+              dataWithDefaults[sectionId] = schema.parse(rawData)
+            }
+          } else {
+            dataWithDefaults[sectionId] = rawData
+          }
+        }
+
+        const typstCode = builder.build(dataWithDefaults)
         const pdfBinary = await compileToPDF(typstCode)
 
         const personalInfo = resumeData.personalInfo as
@@ -281,7 +300,7 @@ export function BatchExportModal({
         await window.electron.fs.writeFile(
           folderPath,
           filename,
-          pdfBinary.slice().buffer,
+          new Uint8Array(pdfBinary).buffer,
         )
       } catch (error) {
         console.error(`Failed to export ${app.companyName}`, error)
