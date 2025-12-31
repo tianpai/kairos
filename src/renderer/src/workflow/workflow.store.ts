@@ -175,7 +175,7 @@ export const useWorkflowStore = create<WorkflowState>()((set, get) => ({
 
   getTaskStatus: (jobId, task) => {
     const workflow = get().workflows[jobId]
-    return workflow.taskStates[task]
+    return workflow?.taskStates[task]
   },
 
   isTaskRunning: (jobId, task) => {
@@ -183,11 +183,13 @@ export const useWorkflowStore = create<WorkflowState>()((set, get) => ({
   },
 
   isWorkflowRunning: (jobId) => {
-    return get().workflows[jobId].status === 'running'
+    return get().workflows[jobId]?.status === 'running'
   },
 
   hasFailedTask: (jobId) => {
     const workflow = get().workflows[jobId]
-    return Object.values(workflow.taskStates).some((s) => s === 'failed')
+    return workflow
+      ? Object.values(workflow.taskStates).some((s) => s === 'failed')
+      : false
   },
 }))
