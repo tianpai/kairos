@@ -1,4 +1,4 @@
-import { memo, useCallback, useMemo, useState } from 'react'
+import { Fragment, memo, useCallback, useMemo, useState } from 'react'
 import { GripVertical } from 'lucide-react'
 import {
   DndContext,
@@ -140,7 +140,9 @@ const SortableZone = memo(function SortableZone<T>({
             </div>
           )}
 
-          {items.map((item) => renderItem(item))}
+          {items.map((item) => (
+            <Fragment key={getItemId(item)}>{renderItem(item)}</Fragment>
+          ))}
         </div>
       </SortableContext>
     </div>

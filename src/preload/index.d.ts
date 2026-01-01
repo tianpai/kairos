@@ -5,9 +5,32 @@ interface IElectronAPI {
   shortcuts: {
     onSettings: (callback: () => void) => () => void
     onNewApplication: (callback: () => void) => () => void
-    onBuildFromScratch: (callback: () => void) => () => void
+    onSave: (callback: () => void) => () => void
+    onExportPdf: (callback: () => void) => () => void
+    onDocumentSettings: (callback: () => void) => () => void
+    onPrevApp: (callback: () => void) => () => void
+    onNextApp: (callback: () => void) => () => void
+    onLatestApp: (callback: () => void) => () => void
+    onOldestApp: (callback: () => void) => () => void
+    onTailor: (callback: () => void) => () => void
+    onToggleSidebar: (callback: () => void) => () => void
+    onToggleColumns: (callback: () => void) => () => void
+    onBatchExport: (callback: () => void) => () => void
   }
   platform: NodeJS.Platform
+  shell: {
+    openExternal: (url: string) => Promise<void>
+  }
+  dialog: {
+    selectFolder: () => Promise<string | null>
+  }
+  fs: {
+    writeFile: (
+      folderPath: string,
+      filename: string,
+      data: ArrayBuffer,
+    ) => Promise<{ success: boolean; path: string }>
+  }
   settings: {
     getApiKey: () => Promise<string | null>
     setApiKey: (key: string) => Promise<void>

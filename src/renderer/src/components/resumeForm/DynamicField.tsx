@@ -17,6 +17,7 @@ import {
 import { CSS } from '@dnd-kit/utilities'
 import type { DragEndEvent } from '@dnd-kit/core'
 import { InvertedButton } from '@ui/InvertedButton'
+import { Select } from '@ui/Select'
 import { DateInput } from './DateInput'
 import { asString, asStringArray } from './fieldUtils'
 import { INPUT_BASE, INPUT_TEXTAREA, LABEL_BASE } from './fieldStyles'
@@ -207,18 +208,18 @@ function SelectField({ schema, value, onChange }: FieldProps) {
 
   return (
     <FieldWrapper label={label} htmlFor={key}>
-      <select
+      <Select
         id={key}
         value={asString(value)}
         onChange={(e) => onChange(e.target.value)}
-        className={INPUT_BASE}
+        className="w-full"
       >
         {options?.map((option) => (
           <option key={option} value={option}>
             {option}
           </option>
         ))}
-      </select>
+      </Select>
     </FieldWrapper>
   )
 }

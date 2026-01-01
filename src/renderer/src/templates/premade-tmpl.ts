@@ -3,9 +3,9 @@
  * Registry of ready-to-use template configurations
  */
 
-import type { TemplateConfig } from '@templates/templateId'
 import { DocumentSetupSchema } from '@templates/shared/document-config'
 import { SECTION_IDS } from '@templates/template.types'
+import type { TemplateConfig } from '@templates/templateId'
 
 /**
  * Default template with all available sections

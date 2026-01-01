@@ -1,5 +1,5 @@
-import { aiWorker } from '../workers/ai-worker-manager'
 import { saveTailoredResume } from '@api/jobs'
+import { aiWorker } from '../workers/ai-worker-manager'
 import type { Checklist } from '@type/checklist'
 
 export async function executeResumeTailoring(

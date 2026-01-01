@@ -53,7 +53,9 @@ export default function ResumeForm() {
 
       {/* Active Section Content */}
       <div className="flex-1 overflow-y-auto">
-        <DynamicSection key={activeTab} schema={activeSectionSchema} />
+        {activeSectionSchema && (
+          <DynamicSection key={activeTab} schema={activeSectionSchema} />
+        )}
       </div>
     </div>
   )

@@ -1,23 +1,16 @@
-import { useEffect, useState } from 'react'
 import { InvertedButton } from '@ui/InvertedButton'
 import { Modal } from '@ui/Modal'
-import { Toggle } from '@ui/Toggle'
-import type { JobApplicationFormData } from '@/components/upload/JobDetailsSection'
+import { useNewApplicationStore } from './newApplication.store'
+import type { SubmitPayload } from './newApplication.store'
 import ResumeUploadSection from '@/components/upload/ResumeUploadSection'
 import JobDetailsSection from '@/components/upload/JobDetailsSection'
-
-export interface NewApplicationSubmitPayload {
-  resumeFile?: File
-  jobDescription: string
-  companyName: string
-  position: string
-  dueDate: string
-}
+import { ResumeSourceSelector } from '@/components/upload/ResumeSourceSelector'
+import { ExistingApplicationSelect } from '@/components/upload/ExistingApplicationSelect'
 
 interface NewApplicationModalProps {
   isOpen: boolean
   onClose: () => void
-  onSubmit: (payload: NewApplicationSubmitPayload) => void
+  onSubmit: (payload: SubmitPayload) => void
   isSubmitting?: boolean
   errorMessage?: string | null
 }
@@ -29,48 +22,28 @@ export default function NewApplicationModal({
   isSubmitting = false,
   errorMessage = null,
 }: NewApplicationModalProps) {
-  const [useAI, setUseAI] = useState(true)
-  const [selectedFile, setSelectedFile] = useState<File | null>(null)
-  const [jobFormData, setJobFormData] = useState<JobApplicationFormData | null>(
-    null,
+  const resumeSource = useNewApplicationStore((s) => s.resumeSource)
+  const setResumeSource = useNewApplicationStore((s) => s.setResumeSource)
+  const selectedFile = useNewApplicationStore((s) => s.selectedFile)
+  const setSelectedFile = useNewApplicationStore((s) => s.setSelectedFile)
+  const selectedSourceId = useNewApplicationStore((s) => s.selectedSourceId)
+  const setSelectedSourceId = useNewApplicationStore(
+    (s) => s.setSelectedSourceId,
   )
-  const [isJobFormValid, setIsJobFormValid] = useState(false)
+  const canSubmit = useNewApplicationStore((s) => s.canSubmit)
+  const buildPayload = useNewApplicationStore((s) => s.buildPayload)
+  const entries = useNewApplicationStore((s) => s.entries)
 
-  useEffect(() => {
-    if (!isOpen) {
-      setUseAI(true)
-      setSelectedFile(null)
-      setJobFormData(null)
-      setIsJobFormValid(false)
-    }
-  }, [isOpen])
-
-  function handleJobFormChange(
-    formData: JobApplicationFormData,
-    isValid: boolean,
-  ) {
-    setJobFormData(formData)
-    setIsJobFormValid(isValid)
-  }
+  const entryCount = entries.length
 
   function handleSubmit() {
-    if (!jobFormData || !isJobFormValid || isSubmitting) {
-      return
-    }
-
-    if (useAI && !selectedFile) {
-      return
-    }
-
-    onSubmit({
-      resumeFile: useAI ? selectedFile ?? undefined : undefined,
-      ...jobFormData,
-    })
+    if (isSubmitting) return
+    const payload = buildPayload()
+    if (payload) onSubmit(payload)
   }
 
-  const canSubmit = useAI
-    ? Boolean(selectedFile && isJobFormValid)
-    : isJobFormValid
+  const buttonText =
+    entryCount > 1 ? `Create ${entryCount} applications` : 'Create application'
 
   return (
     <Modal
@@ -83,36 +56,34 @@ export default function NewApplicationModal({
           <InvertedButton onClick={onClose}>Cancel</InvertedButton>
           <InvertedButton
             onClick={handleSubmit}
-            disabled={!canSubmit}
+            disabled={!canSubmit()}
             loading={isSubmitting}
           >
-            Create application
+            {buttonText}
           </InvertedButton>
         </>
       }
     >
-      <div className="mx-auto flex max-w-2xl flex-col gap-6">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold">New application</h2>
-          <Toggle
-            checked={useAI}
-            onChange={setUseAI}
-            labelOff="Build from scratch"
-            labelOn="Use AI"
-          />
-        </div>
+      <div className="mx-auto flex max-w-2xl flex-col gap-3">
+        <h1 className="text-lg font-semibold">New Application</h1>
 
-        {useAI && (
+        <ResumeSourceSelector value={resumeSource} onChange={setResumeSource} />
+
+        {resumeSource === 'upload' && (
           <ResumeUploadSection
             selectedFile={selectedFile}
             onFileChange={setSelectedFile}
           />
         )}
 
-        <JobDetailsSection
-          onFormChange={handleJobFormChange}
-          requireJobDescription={useAI}
-        />
+        {resumeSource === 'existing' && (
+          <ExistingApplicationSelect
+            value={selectedSourceId}
+            onChange={setSelectedSourceId}
+          />
+        )}
+
+        <JobDetailsSection requireJobDescription={resumeSource !== 'scratch'} />
       </div>
 
       {errorMessage && (

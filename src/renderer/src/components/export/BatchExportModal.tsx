@@ -1,0 +1,391 @@
+import { useCallback, useMemo, useState } from 'react'
+import { Modal } from '@ui/Modal'
+import { getJobApplication } from '@api/jobs'
+import { compileToPDF } from '@typst-compiler/compile'
+import type { JobApplication } from '@api/jobs'
+import type { TemplateData } from '@templates/template.types'
+import { TemplateBuilder } from '@/templates/builder'
+
+interface ExportProgress {
+  current: number
+  total: number
+  currentApp: string
+  failed: Array<string>
+}
+
+interface BatchExportModalProps {
+  open: boolean
+  onClose: () => void
+  applications: Array<JobApplication>
+}
+
+interface FailedExportsListProps {
+  failed: Array<string>
+  title?: string
+  className?: string
+}
+
+interface ExportProgressViewProps {
+  progress: ExportProgress
+}
+
+interface SelectAllToggleProps {
+  allSelected: boolean
+  onToggle: () => void
+}
+
+interface ApplicationListItemProps {
+  app: JobApplication
+  checked: boolean
+  onToggle: (id: string) => void
+}
+
+interface ApplicationListProps {
+  applications: Array<JobApplication>
+  selectedIds: Set<string>
+  onToggle: (id: string) => void
+}
+
+function sanitizeForFilename(str: string): string {
+  return str
+    .replace(/[^a-zA-Z0-9\s-]/g, '')
+    .replace(/\s+/g, '_')
+    .toLowerCase()
+}
+
+function generateFilename(
+  name: string,
+  companyName: string,
+  position: string,
+): string {
+  const sanitizedName = sanitizeForFilename(name || 'resume')
+  const sanitizedCompany = sanitizeForFilename(companyName)
+  const sanitizedPosition = sanitizeForFilename(position)
+  return `${sanitizedName}_${sanitizedCompany}_${sanitizedPosition}.pdf`
+}
+
+function formatDate(dateStr: string): string {
+  if (!dateStr) return '-'
+  const date = new Date(dateStr)
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+}
+
+function FailedExportsList({
+  failed,
+  title = 'Failed exports:',
+  className = '',
+}: FailedExportsListProps) {
+  if (failed.length === 0) return null
+
+  return (
+    <div className={className}>
+      <div className="text-sm font-medium text-red-600 dark:text-red-400">
+        {title}
+      </div>
+      <ul className="mt-1 list-inside list-disc text-sm text-gray-600 dark:text-gray-400">
+        {failed.map((item, i) => (
+          <li key={i}>{item}</li>
+        ))}
+      </ul>
+    </div>
+  )
+}
+
+function ExportProgressView({ progress }: ExportProgressViewProps) {
+  return (
+    <div className="flex flex-col gap-2">
+      <div className="text-sm text-gray-600 dark:text-gray-400">
+        Exporting {progress.current} of {progress.total}...
+      </div>
+      {progress.currentApp && (
+        <div className="text-sm text-gray-500 dark:text-gray-500">
+          {progress.currentApp}
+        </div>
+      )}
+      <FailedExportsList failed={progress.failed} className="mt-2" />
+    </div>
+  )
+}
+
+function SelectAllToggle({ allSelected, onToggle }: SelectAllToggleProps) {
+  return (
+    <button
+      onClick={onToggle}
+      className="flex cursor-pointer items-center gap-2 text-sm text-gray-600 dark:text-gray-400"
+    >
+      <span
+        className={
+          allSelected
+            ? 'text-gray-400 dark:text-gray-500'
+            : 'font-medium text-gray-900 dark:text-gray-100'
+        }
+      >
+        Select All
+      </span>
+      <div className="relative h-5 w-9 rounded-full bg-gray-300 transition-colors dark:bg-gray-600">
+        <div
+          className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition-all dark:bg-gray-200 ${
+            allSelected ? 'left-4.5' : 'left-0.5'
+          }`}
+        />
+      </div>
+      <span
+        className={
+          allSelected
+            ? 'font-medium text-gray-900 dark:text-gray-100'
+            : 'text-gray-400 dark:text-gray-500'
+        }
+      >
+        Select None
+      </span>
+    </button>
+  )
+}
+
+function ApplicationListItem({
+  app,
+  checked,
+  onToggle,
+}: ApplicationListItemProps) {
+  return (
+    <label className="flex cursor-pointer items-center gap-3 border-b border-gray-100 px-4 py-3 transition-colors last:border-b-0 hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-gray-800/50">
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={() => onToggle(app.id)}
+        className="h-4 w-4 rounded border-gray-300 accent-black focus:ring-0 focus:ring-offset-0 dark:border-gray-600 dark:accent-white"
+      />
+      <div className="flex flex-1 items-center justify-between">
+        <div>
+          <span className="font-medium text-gray-900 dark:text-gray-100">
+            {app.companyName}
+          </span>
+          <span className="mx-2 text-gray-400">-</span>
+          <span className="text-gray-600 dark:text-gray-400">
+            {app.position}
+          </span>
+        </div>
+        <span className="text-sm text-gray-500 dark:text-gray-500">
+          {app.dueDate ? `Due ${formatDate(app.dueDate)}` : 'No due date'}
+        </span>
+      </div>
+    </label>
+  )
+}
+
+function ApplicationList({
+  applications,
+  selectedIds,
+  onToggle,
+}: ApplicationListProps) {
+  return (
+    <div className="max-h-96 overflow-y-auto rounded border border-gray-200 dark:border-gray-700">
+      {applications.length === 0 ? (
+        <div className="p-4 text-center text-gray-500 dark:text-gray-400">
+          No applications match the current filter
+        </div>
+      ) : (
+        applications.map((app) => (
+          <ApplicationListItem
+            key={app.id}
+            app={app}
+            checked={selectedIds.has(app.id)}
+            onToggle={onToggle}
+          />
+        ))
+      )}
+    </div>
+  )
+}
+
+export function BatchExportModal({
+  open,
+  onClose,
+  applications,
+}: BatchExportModalProps) {
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [exporting, setExporting] = useState(false)
+  const [progress, setProgress] = useState<ExportProgress | null>(null)
+
+  const allSelected = useMemo(() => {
+    return (
+      applications.length > 0 &&
+      applications.every((app) => selectedIds.has(app.id))
+    )
+  }, [applications, selectedIds])
+
+  const handleToggleSelectAll = useCallback(() => {
+    if (allSelected) {
+      setSelectedIds(new Set())
+    } else {
+      setSelectedIds(new Set(applications.map((app) => app.id)))
+    }
+  }, [allSelected, applications])
+
+  const handleToggle = useCallback((id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) {
+        next.delete(id)
+      } else {
+        next.add(id)
+      }
+      return next
+    })
+  }, [])
+
+  const handleExport = useCallback(async () => {
+    if (selectedIds.size === 0) return
+
+    const folderPath = await window.electron.dialog.selectFolder()
+    if (!folderPath) return
+
+    setExporting(true)
+    const selectedApps = applications.filter((app) => selectedIds.has(app.id))
+    const failed: Array<string> = []
+
+    setProgress({
+      current: 0,
+      total: selectedApps.length,
+      currentApp: '',
+      failed: [],
+    })
+
+    for (let i = 0; i < selectedApps.length; i++) {
+      const app = selectedApps[i]
+      setProgress({
+        current: i,
+        total: selectedApps.length,
+        currentApp: `${app.companyName} - ${app.position}`,
+        failed,
+      })
+
+      try {
+        const details = await getJobApplication(app.id)
+        const resumeData = details.tailoredResume || details.parsedResume
+        if (!resumeData) {
+          failed.push(`${app.companyName} - ${app.position} (no resume data)`)
+          continue
+        }
+
+        const builder = new TemplateBuilder(details.templateId)
+        const schemas = builder.getSchemas()
+
+        // Apply schema defaults to fill in missing UI formatting fields
+        const dataWithDefaults: TemplateData = {}
+        for (const [sectionId, rawData] of Object.entries(resumeData)) {
+          const schema = schemas[sectionId]
+          if (schema && rawData !== undefined) {
+            if (Array.isArray(rawData)) {
+              dataWithDefaults[sectionId] = rawData.map((item) =>
+                schema.parse(item),
+              )
+            } else {
+              dataWithDefaults[sectionId] = schema.parse(rawData)
+            }
+          } else {
+            dataWithDefaults[sectionId] = rawData
+          }
+        }
+
+        const typstCode = builder.build(dataWithDefaults)
+        const pdfBinary = await compileToPDF(typstCode)
+
+        const personalInfo = resumeData.personalInfo as
+          | { name?: string }
+          | undefined
+        const name = personalInfo?.name?.trim() || 'resume'
+        const filename = generateFilename(name, app.companyName, app.position)
+
+        await window.electron.fs.writeFile(
+          folderPath,
+          filename,
+          new Uint8Array(pdfBinary).buffer,
+        )
+      } catch (error) {
+        console.error(`Failed to export ${app.companyName}`, error)
+        failed.push(`${app.companyName} - ${app.position}`)
+      }
+    }
+
+    setProgress({
+      current: selectedApps.length,
+      total: selectedApps.length,
+      currentApp: '',
+      failed,
+    })
+
+    setExporting(false)
+
+    if (failed.length === 0) {
+      onClose()
+    }
+  }, [selectedIds, applications, onClose])
+
+  const handleClose = useCallback(() => {
+    if (!exporting) {
+      setSelectedIds(new Set())
+      setProgress(null)
+      onClose()
+    }
+  }, [exporting, onClose])
+
+  return (
+    <Modal
+      open={open}
+      onClose={handleClose}
+      variant="popup"
+      maxWidth="2xl"
+      closeOnBackdropClick={!exporting}
+      actions={
+        <div className="flex gap-2">
+          <button
+            onClick={handleClose}
+            disabled={exporting}
+            className="cursor-pointer rounded px-4 py-2 text-gray-600 transition-colors hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50 dark:text-gray-400 dark:hover:bg-gray-800"
+          >
+            {progress?.failed.length ? 'Close' : 'Cancel'}
+          </button>
+          <button
+            onClick={handleExport}
+            disabled={selectedIds.size === 0 || exporting}
+            className="cursor-pointer rounded bg-black px-4 py-2 text-white transition-colors hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-white dark:text-black dark:hover:bg-gray-200"
+          >
+            {exporting
+              ? 'Exporting...'
+              : `Export ${selectedIds.size} PDF${selectedIds.size !== 1 ? 's' : ''}`}
+          </button>
+        </div>
+      }
+    >
+      <div className="flex flex-col gap-4">
+        <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+          Export PDFs
+        </h2>
+
+        {exporting && progress ? (
+          <ExportProgressView progress={progress} />
+        ) : (
+          <>
+            <SelectAllToggle
+              allSelected={allSelected}
+              onToggle={handleToggleSelectAll}
+            />
+            <ApplicationList
+              applications={applications}
+              selectedIds={selectedIds}
+              onToggle={handleToggle}
+            />
+            {progress?.failed.length ? (
+              <FailedExportsList
+                failed={progress.failed}
+                title="Some exports failed:"
+                className="mt-2"
+              />
+            ) : null}
+          </>
+        )}
+      </div>
+    </Modal>
+  )
+}

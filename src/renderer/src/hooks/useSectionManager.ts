@@ -1,10 +1,10 @@
 import { useMemo } from 'react'
 import { useResumeStore } from '@typst-compiler/resumeState'
 import { arrayMove } from '@dnd-kit/sortable'
-import type { DragEndEvent } from '@dnd-kit/core'
 import { TemplateBuilder, getSectionLabel } from '@templates/builder'
 import { TemplateId } from '@templates/templateId'
 import { SECTION_IDS } from '@templates/template.types'
+import type { DragEndEvent } from '@dnd-kit/core'
 
 export function useSectionManager() {
   // Store selectors
