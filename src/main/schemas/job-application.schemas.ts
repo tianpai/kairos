@@ -8,7 +8,6 @@ export const CreateJobApplicationSchema = z.object({
   jobDescription: z.string().min(1),
   jobUrl: z.string().url().optional(),
   templateId: z.string().min(1),
-  jsonSchema: z.record(z.string(), z.unknown()),
   rawResumeContent: z.string().min(1),
 })
 

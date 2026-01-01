@@ -4,8 +4,14 @@ import type { AITaskType, AIWorkerMessage, AIWorkerResponse } from './ai.worker'
 type PendingTask = {
   resolve: (value: unknown) => void
   reject: (reason: Error) => void
+  onPartial?: (partial: unknown) => void
   taskType: AITaskType
   startTime: number
+}
+
+export interface ExecuteOptions {
+  streaming?: boolean
+  onPartial?: (partial: unknown) => void
 }
 
 class AIWorkerManager {
@@ -26,6 +32,7 @@ class AIWorkerManager {
   async execute<T>(
     taskType: AITaskType,
     payload: Record<string, unknown>,
+    options?: ExecuteOptions,
   ): Promise<T> {
     const id = crypto.randomUUID()
     const apiKey = await window.electron.settings.getApiKey()
@@ -40,30 +47,45 @@ class AIWorkerManager {
       this.pendingTasks.set(id, {
         resolve: resolve as (value: unknown) => void,
         reject,
+        onPartial: options?.onPartial,
         taskType,
         startTime: Date.now(),
       })
 
-      log.info(`AI task started: ${taskType}`)
-      const message: AIWorkerMessage = { id, taskType, payload, apiKey }
+      const streamingLabel = options?.streaming ? ' (streaming)' : ''
+      log.info(`AI task started: ${taskType}${streamingLabel}`)
+
+      const message: AIWorkerMessage = {
+        id,
+        taskType,
+        payload,
+        apiKey,
+        streaming: options?.streaming,
+      }
       worker.postMessage(message)
     })
   }
 
   private handleMessage({ data }: MessageEvent<AIWorkerResponse>) {
-    const { id, status, result, error } = data
-    const task = this.pendingTasks.get(id)
+    const task = this.pendingTasks.get(data.id)
+    if (!task) return
 
-    if (task) {
-      const duration = ((Date.now() - task.startTime) / 1000).toFixed(1)
-      if (status === 'completed') {
+    switch (data.type) {
+      case 'partial':
+        task.onPartial?.(data.partial)
+        break
+      case 'completed': {
+        const duration = ((Date.now() - task.startTime) / 1000).toFixed(1)
         log.info(`AI task completed: ${task.taskType} (${duration}s)`)
-        task.resolve(result)
-      } else {
-        log.error(`AI task failed: ${task.taskType} - ${error}`)
-        task.reject(new Error(error ?? 'Unknown error'))
+        task.resolve(data.result)
+        this.pendingTasks.delete(data.id)
+        break
       }
-      this.pendingTasks.delete(id)
+      case 'failed':
+        log.error(`AI task failed: ${task.taskType} - ${data.error}`)
+        task.reject(new Error(data.error ?? 'Unknown error'))
+        this.pendingTasks.delete(data.id)
+        break
     }
   }
 

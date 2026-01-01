@@ -25,7 +25,6 @@ export interface JobApplicationInput {
 
 export interface CreateJobApplicationPayload extends JobApplicationInput {
   templateId: string
-  jsonSchema: Record<string, unknown>
 }
 
 export interface CreateFromScratchPayload {

@@ -1,6 +1,4 @@
 import { useQueryClient } from '@tanstack/react-query'
-import { z } from 'zod'
-import { TemplateBuilder } from '@templates/builder'
 import {
   DEFAULT_TEMPLATE_NAME,
   premadeTemplates,
@@ -24,22 +22,6 @@ import {
   useNewApplicationStore,
 } from '@/components/upload/newApplication.store'
 
-function buildResumeJsonSchema(templateId: string): Record<string, unknown> {
-  const builder = new TemplateBuilder(templateId)
-  const sectionSchemas = builder.getDataSchemas()
-  const uiSchemas = builder.getUISchemas()
-
-  const schemaShape: Record<string, z.ZodTypeAny> = {}
-  for (const [sectionId, sectionSchema] of Object.entries(sectionSchemas)) {
-    const uiSchema = uiSchemas.find((s) => s.id === sectionId)
-    schemaShape[sectionId] = uiSchema?.multiple
-      ? z.array(sectionSchema)
-      : sectionSchema
-  }
-
-  return z.toJSONSchema(z.object(schemaShape)) as Record<string, unknown>
-}
-
 type BatchEntry = { jobDescription: string; jobUrl?: string }
 
 async function createBatchApp(
@@ -47,7 +29,6 @@ async function createBatchApp(
   sourceJobId: string,
   templateId: string,
   parsedResume: Record<string, unknown>,
-  jsonSchema: Record<string, unknown>,
   onProgress: () => void,
 ): Promise<{ success: boolean; id?: string }> {
   try {
@@ -64,7 +45,7 @@ async function createBatchApp(
     startChecklistOnlyWorkflow(response.id, {
       jobDescription: entry.jobDescription,
       resumeStructure: parsedResume,
-      jsonSchema,
+      templateId,
     }).catch((err) =>
       console.error(`[Batch] Workflow failed for ${response.id}:`, err),
     )
@@ -107,7 +88,6 @@ export function useBatchCreation() {
 
       const defaultConfig = premadeTemplates[DEFAULT_TEMPLATE_NAME]
       const defaultTemplateId = TemplateId.toJSON(defaultConfig)
-      const jsonSchema = buildResumeJsonSchema(defaultTemplateId)
 
       // Create first app with full workflow
       const firstResponse = await createJobApplication({
@@ -118,13 +98,12 @@ export function useBatchCreation() {
         dueDate: getDefaultDueDate(),
         jobUrl: firstEntry.jobUrl,
         templateId: defaultTemplateId,
-        jsonSchema,
       })
 
       startCreateApplicationWorkflow(firstResponse.id, {
         rawResumeContent,
         jobDescription: firstEntry.jobDescription,
-        jsonSchema,
+        templateId: defaultTemplateId,
       }).catch((err) => console.error('[Batch] First workflow failed:', err))
 
       invalidateApps()
@@ -149,7 +128,6 @@ export function useBatchCreation() {
             firstResponse.id,
             firstJob.templateId,
             firstJob.parsedResume!,
-            jsonSchema,
             onProgress,
           ),
         ),
@@ -188,8 +166,6 @@ export function useBatchCreation() {
         return
       }
 
-      const jsonSchema = buildResumeJsonSchema(sourceJob.templateId)
-
       await Promise.all(
         entries.map((entry) =>
           createBatchApp(
@@ -197,7 +173,6 @@ export function useBatchCreation() {
             sourceJobId,
             sourceJob.templateId,
             sourceJob.parsedResume!,
-            jsonSchema,
             onProgress,
           ),
         ),

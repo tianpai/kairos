@@ -61,7 +61,7 @@ export interface WorkflowContext {
   jobId: string
   rawResumeContent?: string
   jobDescription?: string
-  jsonSchema?: Record<string, unknown>
+  templateId?: string
   resumeStructure?: Record<string, unknown>
   checklist?: Checklist
 }

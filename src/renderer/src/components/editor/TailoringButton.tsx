@@ -12,7 +12,7 @@ export function TailoringButton() {
     jobId,
     checklist,
     resumeStructure,
-    jsonSchema,
+    templateId,
     hasJobDescription,
     hasResumeContent,
   } = useTailoringData()
@@ -47,9 +47,9 @@ export function TailoringButton() {
     startTailoringWorkflow(jobId, {
       checklist,
       resumeStructure,
-      jsonSchema,
+      templateId,
     })
-  }, [jobId, checklist, resumeStructure, jsonSchema])
+  }, [jobId, checklist, resumeStructure, templateId])
 
   // Determine disabled state and tooltip
   const isProcessing = isTailoringResume || isMatchingTailoredResume

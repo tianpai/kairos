@@ -53,7 +53,7 @@ export async function startCreateApplicationWorkflow(
   data: {
     rawResumeContent: string
     jobDescription: string
-    jsonSchema: Record<string, unknown>
+    templateId: string
   },
 ): Promise<void> {
   console.log('[Workflow] Starting create-application workflow for job:', jobId)
@@ -65,14 +65,14 @@ export async function startCreateApplicationWorkflow(
   store.startWorkflow(jobId, workflowName, tasks, {
     rawResumeContent: data.rawResumeContent,
     jobDescription: data.jobDescription,
-    jsonSchema: data.jsonSchema,
+    templateId: data.templateId,
   })
 
   await saveWorkflowState(jobId)
 
   // Start entry tasks in parallel (don't await - fire and forget)
   runTask(jobId, RESUME_PARSING, () =>
-    executeResumeParsing(data.rawResumeContent, data.jsonSchema),
+    executeResumeParsing(data.rawResumeContent, data.templateId),
   )
   runTask(jobId, CHECKLIST_PARSING, () =>
     executeChecklistParsing(data.jobDescription),
@@ -92,7 +92,7 @@ export async function startTailoringWorkflow(
   data: {
     checklist: Checklist
     resumeStructure: Record<string, unknown>
-    jsonSchema: Record<string, unknown>
+    templateId: string
   },
 ): Promise<void> {
   const workflowName: WorkflowName = 'tailoring'
@@ -103,7 +103,7 @@ export async function startTailoringWorkflow(
   store.startWorkflow(jobId, workflowName, tasks, {
     checklist: data.checklist,
     resumeStructure: data.resumeStructure,
-    jsonSchema: data.jsonSchema,
+    templateId: data.templateId,
   })
 
   await saveWorkflowState(jobId)
@@ -113,7 +113,7 @@ export async function startTailoringWorkflow(
     executeResumeTailoring(
       data.checklist,
       data.resumeStructure,
-      data.jsonSchema,
+      data.templateId,
     ),
   )
 }
@@ -129,7 +129,7 @@ export async function startChecklistOnlyWorkflow(
   data: {
     jobDescription: string
     resumeStructure: Record<string, unknown>
-    jsonSchema: Record<string, unknown>
+    templateId: string
   },
 ): Promise<void> {
   const workflowName: WorkflowName = 'checklist-only'
@@ -140,7 +140,7 @@ export async function startChecklistOnlyWorkflow(
   store.startWorkflow(jobId, workflowName, tasks, {
     jobDescription: data.jobDescription,
     resumeStructure: data.resumeStructure,
-    jsonSchema: data.jsonSchema,
+    templateId: data.templateId,
   })
 
   await saveWorkflowState(jobId)

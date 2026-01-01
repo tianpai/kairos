@@ -5,12 +5,12 @@ import type { Checklist } from '@type/checklist'
 export async function executeResumeTailoring(
   checklist: Checklist,
   resumeStructure: Record<string, unknown>,
-  jsonSchema: Record<string, unknown>,
+  templateId: string,
 ): Promise<Record<string, unknown>> {
   return aiWorker.execute<Record<string, unknown>>('resume.tailoring', {
     checklist,
     resumeStructure,
-    jsonSchema,
+    templateId,
   })
 }
 

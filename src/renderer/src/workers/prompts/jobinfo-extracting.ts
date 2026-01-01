@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import type { AIProvider } from '../../ai/provider.interface'
+import type { AIProvider, DeepPartial } from '../../ai/provider.interface'
 
 export const ExtractedJobInfoSchema = z.object({
   company: z.string().describe('Company name extracted from the job description'),
@@ -12,11 +12,15 @@ export const ExtractedJobInfoSchema = z.object({
 
 export type ExtractedJobInfo = z.infer<typeof ExtractedJobInfoSchema>
 
-const jobInfoJsonSchema = z.toJSONSchema(ExtractedJobInfoSchema)
+interface ExtractOptions {
+  streaming?: boolean
+  onPartial?: (partial: DeepPartial<ExtractedJobInfo>) => void
+}
 
 export async function extractJobInfo(
   provider: AIProvider,
   jobDescription: string,
+  options?: ExtractOptions,
 ): Promise<ExtractedJobInfo> {
   const systemPrompt = `You are a job posting analyzer. Extract key information from job descriptions.
 
@@ -31,11 +35,19 @@ Be conservative - only extract information that is clearly stated. Do not guess 
 
   const userPrompt = `Job Description:\n\n${jobDescription}`
 
-  return provider.generateStructuredOutput<ExtractedJobInfo>({
+  const params = {
     systemPrompt,
     userPrompt,
-    jsonSchema: jobInfoJsonSchema,
-    schemaName: 'job_info',
+    schema: ExtractedJobInfoSchema,
     model: 'gpt-4o-mini',
-  })
+  }
+
+  if (options?.streaming && options.onPartial) {
+    return provider.streamStructuredOutput({
+      ...params,
+      onPartial: options.onPartial,
+    })
+  }
+
+  return provider.generateStructuredOutput(params)
 }

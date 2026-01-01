@@ -1,7 +1,7 @@
 import { getJobApplication, updateJobApplication } from '@api/jobs'
 import { aiWorker } from '../workers/ai-worker-manager'
-import type { ExtractedJobInfo } from '../workers/prompts/jobinfo-extracting'
 import { queryClient } from '../integrations/tanstack-query/root-provider'
+import type { ExtractedJobInfo } from '../workers/prompts/jobinfo-extracting'
 
 const EXTRACTING_PLACEHOLDER = 'Extracting...'
 

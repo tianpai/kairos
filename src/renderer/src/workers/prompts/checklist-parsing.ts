@@ -1,13 +1,16 @@
-import { z } from 'zod'
 import { ChecklistSchema } from '@type/checklist'
 import type { Checklist } from '@type/checklist'
-import type { AIProvider } from '../../ai/provider.interface'
+import type { AIProvider, DeepPartial } from '../../ai/provider.interface'
 
-const checklistJsonSchema = z.toJSONSchema(ChecklistSchema)
+interface ParseOptions {
+  streaming?: boolean
+  onPartial?: (partial: DeepPartial<Checklist>) => void
+}
 
 export async function parseChecklist(
   provider: AIProvider,
   jobDescription: string,
+  options?: ParseOptions,
 ): Promise<Checklist> {
   const systemPrompt = `You are a job description analyzer. Extract requirements from job postings into a structured checklist.
 
@@ -31,11 +34,19 @@ Return empty arrays if no requirements found in that category.`
 
   const userPrompt = `Job Description:\n\n${jobDescription}`
 
-  return provider.generateStructuredOutput<Checklist>({
+  const params = {
     systemPrompt,
     userPrompt,
-    jsonSchema: checklistJsonSchema,
-    schemaName: 'checklist_structure',
+    schema: ChecklistSchema,
     model: 'gpt-4o-mini',
-  })
+  }
+
+  if (options?.streaming && options.onPartial) {
+    return provider.streamStructuredOutput({
+      ...params,
+      onPartial: options.onPartial,
+    })
+  }
+
+  return provider.generateStructuredOutput(params)
 }

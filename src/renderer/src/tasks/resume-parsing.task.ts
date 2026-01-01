@@ -3,11 +3,11 @@ import { aiWorker } from '../workers/ai-worker-manager'
 
 export async function executeResumeParsing(
   rawResumeContent: string,
-  jsonSchema: Record<string, unknown>,
+  templateId: string,
 ): Promise<Record<string, unknown>> {
   return aiWorker.execute<Record<string, unknown>>('resume.parsing', {
     rawResumeContent,
-    jsonSchema,
+    templateId,
   })
 }
 

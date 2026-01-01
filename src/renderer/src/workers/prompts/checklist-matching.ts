@@ -1,14 +1,17 @@
-import { z } from 'zod'
 import { ChecklistSchema } from '@type/checklist'
 import type { Checklist } from '@type/checklist'
-import type { AIProvider } from '../../ai/provider.interface'
+import type { AIProvider, DeepPartial } from '../../ai/provider.interface'
 
-const checklistJsonSchema = z.toJSONSchema(ChecklistSchema)
+interface MatchOptions {
+  streaming?: boolean
+  onPartial?: (partial: DeepPartial<Checklist>) => void
+}
 
 export async function matchChecklist(
   provider: AIProvider,
   checklist: Checklist,
   resumeStructure: Record<string, unknown>,
+  options?: MatchOptions,
 ): Promise<Checklist> {
   const systemPrompt = `You are a resume-to-job matching expert. Your task is to accurately determine which job requirements are fulfilled by the candidate's resume.
 
@@ -42,11 +45,19 @@ ${JSON.stringify(resumeStructure, null, 2)}
 
 Analyze the resume against each requirement and return the updated checklist with fulfilled status.`
 
-  return provider.generateStructuredOutput<Checklist>({
+  const params = {
     systemPrompt,
     userPrompt,
-    jsonSchema: checklistJsonSchema,
-    schemaName: 'checklist_matching',
+    schema: ChecklistSchema,
     model: 'gpt-4o',
-  })
+  }
+
+  if (options?.streaming && options.onPartial) {
+    return provider.streamStructuredOutput({
+      ...params,
+      onPartial: options.onPartial,
+    })
+  }
+
+  return provider.generateStructuredOutput(params)
 }
