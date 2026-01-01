@@ -1,6 +1,8 @@
 import log from 'electron-log/renderer'
 import { getJobApplication, saveMatchScore } from '@api/jobs'
 import type { Checklist, ChecklistRequirement } from '@type/checklist'
+import { Task } from './base.task'
+import type { TaskTypeMap } from './base.task'
 
 const HARD_REQUIREMENT_WEIGHT = 3
 const SOFT_REQUIREMENT_WEIGHT = 1
@@ -53,24 +55,32 @@ export function calculateScore(checklist: Checklist): number {
   return Math.max(0, Math.min(100, score))
 }
 
-export async function executeScoreUpdating(jobId: string): Promise<number> {
-  const job = await getJobApplication(jobId)
+class ScoreUpdatingTask extends Task<'score.updating'> {
+  readonly name = 'score.updating' as const
 
-  const checklist = job.checklist
-  if (!checklist) {
-    log.warn('Score update: no checklist found')
-    return 0
+  async execute(
+    input: TaskTypeMap['score.updating']['input'],
+  ): Promise<TaskTypeMap['score.updating']['output']> {
+    const job = await getJobApplication(input.jobId)
+
+    const checklist = job.checklist
+    if (!checklist) {
+      log.warn('Score update: no checklist found')
+      return 0
+    }
+
+    const score = calculateScore(checklist)
+    log.info(`Score calculated: ${score}%`)
+    return score
   }
 
-  const score = calculateScore(checklist)
-  log.info(`Score calculated: ${score}%`)
-  return score
+  async onSuccess(
+    jobId: string,
+    matchPercentage: TaskTypeMap['score.updating']['output'],
+  ): Promise<void> {
+    await saveMatchScore(jobId, matchPercentage)
+    log.info(`Score saved: ${matchPercentage}% for job ${jobId}`)
+  }
 }
 
-export async function onScoreUpdatingSuccess(
-  jobId: string,
-  matchPercentage: number,
-): Promise<void> {
-  await saveMatchScore(jobId, matchPercentage)
-  log.info(`Score saved: ${matchPercentage}% for job ${jobId}`)
-}
+export const scoreUpdatingTask = new ScoreUpdatingTask()

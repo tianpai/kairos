@@ -1,30 +1,12 @@
 import { saveWorkflowState as saveWorkflowStateToDb } from '@api/jobs'
 import { tip } from '@tips/tips.service'
 
-import {
-  executeResumeParsing,
-  onResumeParsingSuccess,
-} from '../tasks/resume-parsing.task'
-import {
-  executeChecklistParsing,
-  onChecklistParsingSuccess,
-} from '../tasks/checklist-parsing.task'
-import {
-  executeResumeTailoring,
-  onResumeTailoringSuccess,
-} from '../tasks/resume-tailoring.task'
-import {
-  executeChecklistMatching,
-  onChecklistMatchingSuccess,
-} from '../tasks/checklist-matching.task'
-import {
-  executeScoreUpdating,
-  onScoreUpdatingSuccess,
-} from '../tasks/score-updating.task'
-import {
-  executeJobInfoExtraction,
-  onJobInfoExtractionSuccess,
-} from '../tasks/jobinfo-extracting.task'
+import { resumeParsingTask } from '../tasks/resume-parsing.task'
+import { checklistParsingTask } from '../tasks/checklist-parsing.task'
+import { resumeTailoringTask } from '../tasks/resume-tailoring.task'
+import { checklistMatchingTask } from '../tasks/checklist-matching.task'
+import { scoreUpdatingTask } from '../tasks/score-updating.task'
+import { jobInfoExtractingTask } from '../tasks/jobinfo-extracting.task'
 import {
   CHECKLIST_MATCHING,
   CHECKLIST_PARSING,
@@ -35,6 +17,7 @@ import {
 } from './workflow.types'
 import { WORKFLOWS } from './workflow.constants'
 import { useWorkflowStore } from './workflow.store'
+import type { JobInfoExtractingOutput } from '../tasks/base.task'
 import type { Checklist } from '@type/checklist'
 import type {
   Task,
@@ -72,13 +55,16 @@ export async function startCreateApplicationWorkflow(
 
   // Start entry tasks in parallel (don't await - fire and forget)
   runTask(jobId, RESUME_PARSING, () =>
-    executeResumeParsing(data.rawResumeContent, data.templateId),
+    resumeParsingTask.execute({
+      rawResumeContent: data.rawResumeContent,
+      templateId: data.templateId,
+    }),
   )
   runTask(jobId, CHECKLIST_PARSING, () =>
-    executeChecklistParsing(data.jobDescription),
+    checklistParsingTask.execute({ jobDescription: data.jobDescription }),
   )
   runTask(jobId, JOBINFO_EXTRACTING, () =>
-    executeJobInfoExtraction(data.jobDescription),
+    jobInfoExtractingTask.execute({ jobDescription: data.jobDescription }),
   )
 }
 
@@ -110,11 +96,11 @@ export async function startTailoringWorkflow(
 
   // Start entry task
   runTask(jobId, RESUME_TAILORING, () =>
-    executeResumeTailoring(
-      data.checklist,
-      data.resumeStructure,
-      data.templateId,
-    ),
+    resumeTailoringTask.execute({
+      checklist: data.checklist,
+      resumeStructure: data.resumeStructure,
+      templateId: data.templateId,
+    }),
   )
 }
 
@@ -147,13 +133,13 @@ export async function startChecklistOnlyWorkflow(
 
   // Start entry task
   runTask(jobId, CHECKLIST_PARSING, () =>
-    executeChecklistParsing(data.jobDescription),
+    checklistParsingTask.execute({ jobDescription: data.jobDescription }),
   )
 
   // Start job info extraction if JD is provided (existing mode, not scratch)
   if (data.jobDescription) {
     runTask(jobId, JOBINFO_EXTRACTING, () =>
-      executeJobInfoExtraction(data.jobDescription),
+      jobInfoExtractingTask.execute({ jobDescription: data.jobDescription }),
     )
   }
 }
@@ -206,13 +192,13 @@ async function handleTaskSuccess(
   switch (taskType) {
     case RESUME_PARSING: {
       const resumeStructure = result as Record<string, unknown>
-      await onResumeParsingSuccess(jobId, resumeStructure)
+      await resumeParsingTask.onSuccess(jobId, resumeStructure)
       if (workflow) store.updateContext(jobId, { resumeStructure })
       break
     }
     case CHECKLIST_PARSING: {
       const checklist = result as Checklist
-      await onChecklistParsingSuccess(jobId, checklist)
+      await checklistParsingTask.onSuccess(jobId, checklist)
       if (workflow) {
         store.updateContext(jobId, { checklist })
         tip.trigger('checklist.parsed')
@@ -221,7 +207,7 @@ async function handleTaskSuccess(
     }
     case RESUME_TAILORING: {
       const tailoredResume = result as Record<string, unknown>
-      await onResumeTailoringSuccess(jobId, tailoredResume)
+      await resumeTailoringTask.onSuccess(jobId, tailoredResume)
       if (workflow) {
         store.updateContext(jobId, { resumeStructure: tailoredResume })
         tip.trigger('tailoring.complete')
@@ -230,21 +216,19 @@ async function handleTaskSuccess(
     }
     case CHECKLIST_MATCHING: {
       const matchedChecklist = result as Checklist
-      await onChecklistMatchingSuccess(jobId, matchedChecklist)
+      await checklistMatchingTask.onSuccess(jobId, matchedChecklist)
       if (workflow) store.updateContext(jobId, { checklist: matchedChecklist })
       break
     }
     case SCORE_UPDATING: {
       const matchPercentage = result as number
-      await onScoreUpdatingSuccess(jobId, matchPercentage)
+      await scoreUpdatingTask.onSuccess(jobId, matchPercentage)
       if (workflow) tip.trigger('score.updated', { score: matchPercentage })
       break
     }
     case JOBINFO_EXTRACTING: {
-      const extractedJobInfo = result as Parameters<
-        typeof onJobInfoExtractionSuccess
-      >[1]
-      await onJobInfoExtractionSuccess(jobId, extractedJobInfo)
+      const extractedJobInfo = result as JobInfoExtractingOutput
+      await jobInfoExtractingTask.onSuccess(jobId, extractedJobInfo)
       break
     }
   }
@@ -326,15 +310,17 @@ async function startReadyTasks(jobId: string): Promise<void> {
       case CHECKLIST_MATCHING:
         if (context.checklist && context.resumeStructure) {
           runTask(jobId, CHECKLIST_MATCHING, () =>
-            executeChecklistMatching(
-              context.checklist!,
-              context.resumeStructure!,
-            ),
+            checklistMatchingTask.execute({
+              checklist: context.checklist!,
+              resumeStructure: context.resumeStructure!,
+            }),
           )
         }
         break
       case SCORE_UPDATING:
-        runTask(jobId, SCORE_UPDATING, () => executeScoreUpdating(jobId))
+        runTask(jobId, SCORE_UPDATING, () =>
+          scoreUpdatingTask.execute({ jobId }),
+        )
         break
     }
   }

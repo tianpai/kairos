@@ -1,20 +1,29 @@
 import { saveChecklist } from '@api/jobs'
 import { aiWorker } from '../workers/ai-worker-manager'
-import type { Checklist } from '@type/checklist'
+import { Task } from './base.task'
+import type { TaskTypeMap } from './base.task'
 
-export async function executeChecklistMatching(
-  checklist: Checklist,
-  resumeStructure: Record<string, unknown>,
-): Promise<Checklist> {
-  return aiWorker.execute<Checklist>('checklist.matching', {
-    checklist,
-    resumeStructure,
-  })
+class ChecklistMatchingTask extends Task<'checklist.matching'> {
+  readonly name = 'checklist.matching' as const
+
+  async execute(
+    input: TaskTypeMap['checklist.matching']['input'],
+  ): Promise<TaskTypeMap['checklist.matching']['output']> {
+    return aiWorker.execute<TaskTypeMap['checklist.matching']['output']>(
+      'checklist.matching',
+      {
+        checklist: input.checklist,
+        resumeStructure: input.resumeStructure,
+      },
+    )
+  }
+
+  async onSuccess(
+    jobId: string,
+    checklist: TaskTypeMap['checklist.matching']['output'],
+  ): Promise<void> {
+    await saveChecklist(jobId, checklist)
+  }
 }
 
-export async function onChecklistMatchingSuccess(
-  jobId: string,
-  checklist: Checklist,
-): Promise<void> {
-  await saveChecklist(jobId, checklist)
-}
+export const checklistMatchingTask = new ChecklistMatchingTask()
