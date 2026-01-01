@@ -421,3 +421,46 @@ export async function retryFailedTasks(jobId: string): Promise<Array<Task>> {
 
   return failedTasks
 }
+
+/**
+ * Wait for a specific task to complete
+ *
+ * Used for batch creation: wait for resume.parsing before creating remaining apps
+ */
+export function waitForTaskCompletion(
+  jobId: string,
+  taskType: Task,
+): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const store = useWorkflowStore.getState()
+    const workflow = store.getWorkflow(jobId)
+
+    // Check if already completed
+    if (workflow?.taskStates[taskType] === 'completed') {
+      resolve()
+      return
+    }
+
+    // Check if already failed
+    if (workflow?.taskStates[taskType] === 'failed') {
+      reject(new Error(`Task ${taskType} failed`))
+      return
+    }
+
+    // Subscribe to changes
+    const unsubscribe = useWorkflowStore.subscribe((state) => {
+      const instance = state.workflows[jobId]
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+      if (!instance) return
+
+      const taskState = instance.taskStates[taskType]
+      if (taskState === 'completed') {
+        unsubscribe()
+        resolve()
+      } else if (taskState === 'failed') {
+        unsubscribe()
+        reject(new Error(`Task ${taskType} failed`))
+      }
+    })
+  })
+}

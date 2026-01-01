@@ -1,15 +1,16 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import { FilePlus } from 'lucide-react'
-import type { JobApplicationInput } from '@/api/jobs'
-import { getJobApplication } from '@/api/jobs'
+import {
+  EXTRACTING_PLACEHOLDER,
+  getDefaultDueDate,
+  useNewApplicationStore,
+} from './newApplication.store'
+import type { SubmitPayload } from './newApplication.store'
 import { InvertedButton } from '@/components/ui/InvertedButton'
 import NewApplicationModal from '@/components/upload/NewApplicationModal'
-import type { NewApplicationSubmitPayload } from '@/components/upload/NewApplicationModal'
-import { useCreateJobApplication } from '@/hooks/useCreateJobApplication'
 import { useCreateFromScratch } from '@/hooks/useCreateFromScratch'
-import { useCreateFromExisting } from '@/hooks/useCreateFromExisting'
+import { useBatchCreation } from '@/hooks/useBatchCreation'
 import { useHasApiKey } from '@/hooks/useSettings'
-import { extractResumeText } from '@/utils/resumeTextExtractor'
 import { useShortcutStore } from '@/components/layout/shortcut.store'
 
 interface NewApplicationButtonProps {
@@ -19,22 +20,19 @@ interface NewApplicationButtonProps {
 export default function NewApplicationButton({
   onSuccess,
 }: NewApplicationButtonProps) {
-  const [isModalOpen, setIsModalOpen] = useState(false)
-  const [extractionError, setExtractionError] = useState<string | null>(null)
   const handledJobIdRef = useRef<string | null>(null)
-
   const { data: hasApiKey } = useHasApiKey()
 
-  // AI mode hook (with resume file upload)
-  const {
-    handleSubmit: handleAISubmit,
-    isPending: isAIPending,
-    isSuccess: isAISuccess,
-    error: aiError,
-    data: aiData,
-  } = useCreateJobApplication()
+  // Store
+  const isOpen = useNewApplicationStore((s) => s.isOpen)
+  const openModal = useNewApplicationStore((s) => s.openModal)
+  const closeModal = useNewApplicationStore((s) => s.closeModal)
+  const setSubmissionError = useNewApplicationStore((s) => s.setSubmissionError)
+  const submissionError = useNewApplicationStore((s) => s.submissionError)
+  const batchProgress = useNewApplicationStore((s) => s.batchProgress)
+  const reset = useNewApplicationStore((s) => s.reset)
 
-  // Scratch mode hook (no resume file)
+  // Mutation hooks
   const {
     handleSubmit: handleScratchSubmit,
     isPending: isScratchPending,
@@ -42,115 +40,63 @@ export default function NewApplicationButton({
     error: scratchError,
     data: scratchData,
   } = useCreateFromScratch()
+  const { handleBatchUpload, handleBatchExisting } = useBatchCreation()
 
-  // Existing mode hook (copy resume from existing application)
-  const {
-    handleSubmit: handleFromExistingSubmit,
-    isPending: isExistingPending,
-    isSuccess: isExistingSuccess,
-    error: existingError,
-    data: existingData,
-  } = useCreateFromExisting()
+  const isPending = isScratchPending || batchProgress.status === 'processing'
+  const isSuccess = isScratchSuccess
+  const data = scratchData
 
-  const isPending = isAIPending || isScratchPending || isExistingPending
-  const error = aiError || scratchError || existingError
-  const isSuccess = isAISuccess || isScratchSuccess || isExistingSuccess
-  const data = aiData || scratchData || existingData
-
-  // Listen for keyboard shortcut to open modal
+  // Keyboard shortcut
   const newApplicationRequested = useShortcutStore(
-    (state) => state.newApplicationRequested,
+    (s) => s.newApplicationRequested,
   )
   const clearNewApplicationRequest = useShortcutStore(
-    (state) => state.clearNewApplicationRequest,
+    (s) => s.clearNewApplicationRequest,
   )
 
   useEffect(() => {
     if (newApplicationRequested) {
-      setIsModalOpen(true)
+      openModal()
       clearNewApplicationRequest()
     }
-  }, [newApplicationRequested, clearNewApplicationRequest])
+  }, [newApplicationRequested, clearNewApplicationRequest, openModal])
 
-  const errorMessage =
-    extractionError ||
-    (error
-      ? error instanceof Error
-        ? error.message
-        : 'Something went wrong. Please try again.'
-      : null)
-
+  // Success handler
   useEffect(() => {
     if (isSuccess && data && data.id !== handledJobIdRef.current) {
       handledJobIdRef.current = data.id
-      setIsModalOpen(false)
+      reset()
       onSuccess?.(data.id)
     }
-  }, [isSuccess, data, onSuccess])
+  }, [isSuccess, data, onSuccess, reset])
 
-  const handleClose = () => {
-    if (!isPending) {
-      setIsModalOpen(false)
-      setExtractionError(null)
-    }
-  }
+  const errorMessage =
+    submissionError ||
+    (scratchError instanceof Error ? scratchError.message : null)
 
-  const handleModalSubmit = async (payload: NewApplicationSubmitPayload) => {
-    setExtractionError(null)
+  async function handleSubmit(payload: SubmitPayload) {
+    setSubmissionError(null)
 
     switch (payload.resumeSource) {
-      case 'upload': {
-        if (!payload.resumeFile) return
-        try {
-          const rawResumeContent = await extractResumeText(payload.resumeFile)
-          const input: JobApplicationInput = {
-            rawResumeContent,
-            jobDescription: payload.jobDescription,
-            companyName: payload.companyName,
-            position: payload.position,
-            dueDate: payload.dueDate,
-            jobUrl: payload.jobUrl,
-          }
-          handleAISubmit(input)
-        } catch {
-          setExtractionError('Failed to read resume file. Please try again.')
+      case 'upload':
+        if (payload.resumeFile) {
+          await handleBatchUpload(payload.resumeFile, payload.entries)
         }
         break
-      }
-
-      case 'existing': {
-        if (!payload.sourceJobId) return
-        try {
-          const sourceJob = await getJobApplication(payload.sourceJobId)
-          if (!sourceJob.parsedResume) {
-            setExtractionError('Source application has no parsed resume.')
-            return
-          }
-          handleFromExistingSubmit(
-            {
-              sourceJobId: payload.sourceJobId,
-              companyName: payload.companyName,
-              position: payload.position,
-              dueDate: payload.dueDate,
-              jobDescription: payload.jobDescription,
-              jobUrl: payload.jobUrl,
-              sourceTemplateId: sourceJob.templateId,
-            },
-            sourceJob.parsedResume,
-          )
-        } catch {
-          setExtractionError('Failed to load source application.')
+      case 'existing':
+        if (payload.sourceJobId) {
+          await handleBatchExisting(payload.sourceJobId, payload.entries)
         }
         break
-      }
-
       case 'scratch': {
+        const entry = payload.entries[0]
+        const hasJd = entry.jobDescription.length > 0
         handleScratchSubmit({
-          companyName: payload.companyName,
-          position: payload.position,
-          dueDate: payload.dueDate,
-          jobDescription: payload.jobDescription || undefined,
-          jobUrl: payload.jobUrl,
+          companyName: hasJd ? EXTRACTING_PLACEHOLDER : '',
+          position: hasJd ? EXTRACTING_PLACEHOLDER : '',
+          dueDate: getDefaultDueDate(),
+          jobDescription: entry.jobDescription || undefined,
+          jobUrl: entry.jobUrl,
         })
         break
       }
@@ -160,7 +106,7 @@ export default function NewApplicationButton({
   return (
     <>
       <InvertedButton
-        onClick={() => setIsModalOpen(true)}
+        onClick={openModal}
         disabled={!hasApiKey}
         title={
           hasApiKey ? 'New application' : 'Configure API key in Settings first'
@@ -170,9 +116,9 @@ export default function NewApplicationButton({
       </InvertedButton>
 
       <NewApplicationModal
-        isOpen={isModalOpen}
-        onClose={handleClose}
-        onSubmit={handleModalSubmit}
+        isOpen={isOpen}
+        onClose={() => !isPending && closeModal()}
+        onSubmit={handleSubmit}
         isSubmitting={isPending}
         errorMessage={errorMessage}
       />

@@ -1,190 +1,151 @@
-import { useState } from 'react'
-import { FileUp } from 'lucide-react'
+import { FileUp, Plus, X } from 'lucide-react'
 import { InputField } from '@ui/InputField'
-import { DatePicker } from '@ui/DatePicker'
-import type { JobApplicationInput } from '@/api/jobs'
-import { INPUT_TEXTAREA, LABEL_BASE } from '@/components/resumeForm/fieldStyles'
+import { MAX_ENTRIES, useNewApplicationStore } from './newApplication.store'
+import type { JdEntry } from './newApplication.store'
+import { INPUT_TEXTAREA } from '@/components/resumeForm/fieldStyles'
 import { useTextFileUpload } from '@/hooks/useTextFileUpload'
 
-const EXTRACTING_PLACEHOLDER = 'Extracting...'
+// Textarea with file upload support
+function JdTextarea({
+  id,
+  value,
+  onChange,
+}: {
+  id: string
+  value: string
+  onChange: (value: string) => void
+}) {
+  const fileUpload = useTextFileUpload({ onTextRead: onChange })
 
-function normalizeUrl(url: string): string | undefined {
-  const trimmed = url.trim()
-  if (!trimmed) return undefined
-  if (/^https?:\/\//i.test(trimmed)) return trimmed
-  return `https://${trimmed}`
+  return (
+    <div className="flex flex-col gap-1">
+      <div className="flex items-center gap-1">
+        <button
+          type="button"
+          onClick={fileUpload.triggerFileDialog}
+          className="rounded p-0.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:text-gray-500 dark:hover:bg-gray-700 dark:hover:text-gray-300"
+          title="Upload .md or .txt file"
+        >
+          <FileUp className="h-4 w-4" />
+        </button>
+        <input
+          ref={fileUpload.fileInputRef}
+          type="file"
+          accept={fileUpload.acceptedFileTypes}
+          onChange={fileUpload.handleInputChange}
+          className="sr-only"
+        />
+      </div>
+      <div
+        onDrop={fileUpload.handleDrop}
+        onDragOver={fileUpload.handleDragOver}
+        onDragLeave={fileUpload.handleDragLeave}
+        className={`rounded-lg transition-colors ${fileUpload.isDragActive ? 'ring-2 ring-gray-400 dark:ring-gray-500' : ''}`}
+      >
+        <textarea
+          id={id}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder="Paste the job description here..."
+          rows={6}
+          className={`${INPUT_TEXTAREA} overflow-y-auto`}
+        />
+      </div>
+    </div>
+  )
 }
 
-function getDefaultDueDate(): string {
-  const date = new Date()
-  date.setDate(date.getDate() + 14) // 14 days from now
-  return date.toISOString().split('T')[0] // YYYY-MM-DD format
-}
+// Entry card
+function JdEntryCard({
+  entry,
+  canRemove,
+}: {
+  entry: JdEntry
+  canRemove: boolean
+}) {
+  const updateEntry = useNewApplicationStore((s) => s.updateEntry)
+  const removeEntry = useNewApplicationStore((s) => s.removeEntry)
 
-export type JobApplicationFormData = Omit<
-  JobApplicationInput,
-  'rawResumeContent'
->
+  return (
+    <div className="relative rounded-lg border border-gray-200 p-3 dark:border-gray-700">
+      {canRemove && (
+        <button
+          type="button"
+          onClick={() => removeEntry(entry.id)}
+          className="absolute top-2 right-2 rounded p-1 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700 dark:hover:text-gray-300"
+          title="Remove"
+        >
+          <X className="h-4 w-4" />
+        </button>
+      )}
+      <div className="flex flex-col gap-2">
+        <JdTextarea
+          id={`jd-${entry.id}`}
+          value={entry.jobDescription}
+          onChange={(v) => updateEntry(entry.id, 'jobDescription', v)}
+        />
+        <InputField
+          id={`url-${entry.id}`}
+          label="Job URL"
+          type="text"
+          value={entry.jobUrl}
+          onChange={(v) => updateEntry(entry.id, 'jobUrl', v)}
+          placeholder="https://..."
+        />
+      </div>
+    </div>
+  )
+}
 
 export interface JobDetailsSectionProps {
-  onFormChange: (data: JobApplicationFormData, isValid: boolean) => void
   requireJobDescription?: boolean
 }
 
 export default function JobDetailsSection({
-  onFormChange,
   requireJobDescription = true,
 }: JobDetailsSectionProps) {
-  const [jobDescription, setJobDescription] = useState('')
-  const [companyName, setCompanyName] = useState('')
-  const [position, setPosition] = useState('')
-  const [dueDate, setDueDate] = useState('')
-  const [jobUrl, setJobUrl] = useState('')
-
-  const textFileUpload = useTextFileUpload({
-    onTextRead: (text) => {
-      setJobDescription(text)
-      handleFormChange({ jobDescription: text })
-    },
-  })
-
-  const handleFormChange = (updates?: {
-    jobDescription?: string
-    companyName?: string
-    position?: string
-    dueDate?: string
-    jobUrl?: string
-  }) => {
-    const currentJobDescription = updates?.jobDescription ?? jobDescription
-    const currentCompanyName = updates?.companyName ?? companyName
-    const currentPosition = updates?.position ?? position
-    const currentDueDate = updates?.dueDate ?? dueDate
-    const currentJobUrl = updates?.jobUrl ?? jobUrl
-
-    const hasJobDescription = currentJobDescription.trim().length > 0
-
-    // When JD is provided, use placeholders for empty fields (AI will extract)
-    const finalCompanyName = currentCompanyName.trim() || (hasJobDescription ? EXTRACTING_PLACEHOLDER : '')
-    const finalPosition = currentPosition.trim() || (hasJobDescription ? EXTRACTING_PLACEHOLDER : '')
-    const finalDueDate = currentDueDate || (hasJobDescription ? getDefaultDueDate() : '')
-
-    const formData: JobApplicationFormData = {
-      jobDescription: currentJobDescription.trim(),
-      companyName: finalCompanyName,
-      position: finalPosition,
-      dueDate: finalDueDate,
-      jobUrl: normalizeUrl(currentJobUrl),
-    }
-
-    // Form is valid if company/position/dueDate are filled (including placeholders)
-    const isValid = Boolean(
-      finalCompanyName &&
-      finalPosition &&
-      finalDueDate &&
-      (requireJobDescription ? currentJobDescription.trim() : true),
-    )
-    onFormChange(formData, isValid)
-  }
+  const entries = useNewApplicationStore((s) => s.entries)
+  const addEntry = useNewApplicationStore((s) => s.addEntry)
+  const canAddMore = entries.length < MAX_ENTRIES
 
   return (
     <section className="flex min-w-0 flex-col">
-      <div className="mt-2 flex flex-col space-y-2">
-        <div className="grid grid-cols-2 gap-4">
-          <InputField
-            id="companyName"
-            label="Company"
-            type="text"
-            value={companyName}
-            onChange={(value) => {
-              setCompanyName(value)
-              handleFormChange({ companyName: value })
-            }}
-            placeholder="Google, Apple, etc."
-          />
-          <InputField
-            id="position"
-            label="Position"
-            type="text"
-            value={position}
-            onChange={(value) => {
-              setPosition(value)
-              handleFormChange({ position: value })
-            }}
-            placeholder="Software Engineer"
-          />
-          <DatePicker
-            id="dueDate"
-            label="Application Due Date"
-            value={dueDate}
-            onChange={(value) => {
-              setDueDate(value)
-              handleFormChange({ dueDate: value })
-            }}
-            disablePastDates
-          />
-          <InputField
-            id="jobUrl"
-            label="Job URL"
-            type="url"
-            value={jobUrl}
-            onChange={(value) => {
-              setJobUrl(value)
-              handleFormChange({ jobUrl: value })
-            }}
-            placeholder="https://..."
-          />
-        </div>
-
-        <div className="flex flex-col">
-          <div className="flex items-center gap-1">
-            <label htmlFor="jobDescription" className={LABEL_BASE}>
-              Job Description
-              {!requireJobDescription && (
-                <span className="ml-1 text-gray-400 dark:text-gray-500">
-                  (optional)
-                </span>
-              )}
-            </label>
+      <div className="mt-2 flex flex-col space-y-3">
+        <div className="flex items-center justify-between">
+          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+            Job Descriptions{' '}
+            {!requireJobDescription && (
+              <span className="font-normal text-gray-400 dark:text-gray-500">
+                (optional)
+              </span>
+            )}
+          </span>
+          {canAddMore && (
             <button
               type="button"
-              onClick={textFileUpload.triggerFileDialog}
-              className="rounded p-0.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:text-gray-500 dark:hover:bg-gray-700 dark:hover:text-gray-300"
-              title="Upload .md or .txt file"
+              onClick={addEntry}
+              className="flex items-center gap-1 rounded px-2 py-1 text-sm text-gray-600 transition-colors hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700"
             >
-              <FileUp className="h-4 w-4" />
+              <Plus className="h-4 w-4" />
+              Add
             </button>
-            <input
-              ref={textFileUpload.fileInputRef}
-              type="file"
-              accept={textFileUpload.acceptedFileTypes}
-              onChange={textFileUpload.handleInputChange}
-              className="sr-only"
-            />
-          </div>
-          <div
-            onDrop={textFileUpload.handleDrop}
-            onDragOver={textFileUpload.handleDragOver}
-            onDragLeave={textFileUpload.handleDragLeave}
-            className={`rounded-lg transition-colors ${
-              textFileUpload.isDragActive
-                ? 'ring-2 ring-gray-400 dark:ring-gray-500'
-                : ''
-            }`}
-          >
-            <textarea
-              id="jobDescription"
-              name="jobDescription"
-              value={jobDescription}
-              onChange={(event) => {
-                setJobDescription(event.target.value)
-                handleFormChange({ jobDescription: event.target.value })
-              }}
-              placeholder="Paste the job description here..."
-              rows={8}
-              className={`${INPUT_TEXTAREA} overflow-y-auto`}
-            />
-          </div>
+          )}
         </div>
+
+        <div className="flex flex-col gap-3">
+          {entries.map((entry) => (
+            <JdEntryCard
+              key={entry.id}
+              entry={entry}
+              canRemove={entries.length > 1}
+            />
+          ))}
+        </div>
+
+        <p className="text-xs text-gray-500 dark:text-gray-400">
+          Company, position, and due date will be automatically extracted from
+          each job description.
+        </p>
       </div>
     </section>
   )
