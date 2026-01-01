@@ -1,5 +1,6 @@
 import type { Checklist } from '@type/checklist'
 import type { ExtractedJobInfo } from '../workers/prompts/jobinfo-extracting'
+import type { WorkflowContext } from '../workflow/workflow.types'
 
 export type ResumeParsingInput = {
   rawResumeContent: string
@@ -68,6 +69,22 @@ export abstract class Task<T extends TaskName> {
    * The task identifier (e.g., 'resume.parsing', 'checklist.matching')
    */
   abstract readonly name: T
+
+  /**
+   * Optional: which workflow context key to update with the result
+   */
+  readonly contextKey?: keyof WorkflowContext
+
+  /**
+   * Optional: tip event to trigger after success
+   */
+  readonly tipEvent?: string
+
+  /**
+   * Optional: get data to pass to tip.trigger()
+   * Override in subclass if tip needs additional data
+   */
+  getTipData?(result: TaskTypeMap[T]['output']): Record<string, unknown>
 
   /**
    * Execute the task with the given input.

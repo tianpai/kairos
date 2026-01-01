@@ -5,6 +5,8 @@ import type { TaskTypeMap } from './base.task'
 
 class ResumeTailoringTask extends Task<'resume.tailoring'> {
   readonly name = 'resume.tailoring' as const
+  readonly contextKey = 'resumeStructure' as const
+  readonly tipEvent = 'tailoring.complete'
 
   async execute(
     input: TaskTypeMap['resume.tailoring']['input'],

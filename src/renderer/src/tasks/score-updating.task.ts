@@ -1,7 +1,7 @@
 import log from 'electron-log/renderer'
 import { getJobApplication, saveMatchScore } from '@api/jobs'
-import type { Checklist, ChecklistRequirement } from '@type/checklist'
 import { Task } from './base.task'
+import type { Checklist, ChecklistRequirement } from '@type/checklist'
 import type { TaskTypeMap } from './base.task'
 
 const HARD_REQUIREMENT_WEIGHT = 3
@@ -57,6 +57,11 @@ export function calculateScore(checklist: Checklist): number {
 
 class ScoreUpdatingTask extends Task<'score.updating'> {
   readonly name = 'score.updating' as const
+  readonly tipEvent = 'score.updated'
+
+  getTipData(result: number): Record<string, unknown> {
+    return { score: result }
+  }
 
   async execute(
     input: TaskTypeMap['score.updating']['input'],

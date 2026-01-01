@@ -5,6 +5,7 @@ import type {TaskTypeMap} from './base.task';
 
 class ResumeParsingTask extends Task<'resume.parsing'> {
   readonly name = 'resume.parsing' as const
+  readonly contextKey = 'resumeStructure' as const
 
   async execute(
     input: TaskTypeMap['resume.parsing']['input'],

@@ -5,6 +5,8 @@ import type { TaskTypeMap } from './base.task'
 
 class ChecklistParsingTask extends Task<'checklist.parsing'> {
   readonly name = 'checklist.parsing' as const
+  readonly contextKey = 'checklist' as const
+  readonly tipEvent = 'checklist.parsed'
 
   async execute(
     input: TaskTypeMap['checklist.parsing']['input'],

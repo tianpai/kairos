@@ -1,27 +1,20 @@
+import log from 'electron-log/renderer'
 import { saveWorkflowState as saveWorkflowStateToDb } from '@api/jobs'
 import { tip } from '@tips/tips.service'
-
 import { resumeParsingTask } from '../tasks/resume-parsing.task'
 import { checklistParsingTask } from '../tasks/checklist-parsing.task'
 import { resumeTailoringTask } from '../tasks/resume-tailoring.task'
 import { checklistMatchingTask } from '../tasks/checklist-matching.task'
 import { scoreUpdatingTask } from '../tasks/score-updating.task'
 import { jobInfoExtractingTask } from '../tasks/jobinfo-extracting.task'
-import {
-  CHECKLIST_MATCHING,
-  CHECKLIST_PARSING,
-  JOBINFO_EXTRACTING,
-  RESUME_PARSING,
-  RESUME_TAILORING,
-  SCORE_UPDATING,
-} from './workflow.types'
+import { CHECKLIST_MATCHING, SCORE_UPDATING } from './workflow.types'
 import { WORKFLOWS } from './workflow.constants'
 import { useWorkflowStore } from './workflow.store'
-import type { JobInfoExtractingOutput } from '../tasks/base.task'
+import type { Task, TaskName, TaskTypeMap } from '../tasks/base.task'
 import type { Checklist } from '@type/checklist'
 import type {
-  Task,
   TaskStateMap,
+  Task as TaskType,
   Workflow,
   WorkflowName,
 } from './workflow.types'
@@ -39,10 +32,10 @@ export async function startCreateApplicationWorkflow(
     templateId: string
   },
 ): Promise<void> {
-  console.log('[Workflow] Starting create-application workflow for job:', jobId)
+  log.info('[Workflow] Starting create-application workflow for:', jobId)
   const workflowName: WorkflowName = 'create-application'
   const workflow = WORKFLOWS[workflowName]
-  const tasks = Object.keys(workflow) as Array<Task>
+  const tasks = Object.keys(workflow) as Array<TaskType>
 
   const store = useWorkflowStore.getState()
   store.startWorkflow(jobId, workflowName, tasks, {
@@ -54,18 +47,16 @@ export async function startCreateApplicationWorkflow(
   await saveWorkflowState(jobId)
 
   // Start entry tasks in parallel (don't await - fire and forget)
-  runTask(jobId, RESUME_PARSING, () =>
-    resumeParsingTask.execute({
-      rawResumeContent: data.rawResumeContent,
-      templateId: data.templateId,
-    }),
-  )
-  runTask(jobId, CHECKLIST_PARSING, () =>
-    checklistParsingTask.execute({ jobDescription: data.jobDescription }),
-  )
-  runTask(jobId, JOBINFO_EXTRACTING, () =>
-    jobInfoExtractingTask.execute({ jobDescription: data.jobDescription }),
-  )
+  runTask(jobId, resumeParsingTask, {
+    rawResumeContent: data.rawResumeContent,
+    templateId: data.templateId,
+  })
+  runTask(jobId, checklistParsingTask, {
+    jobDescription: data.jobDescription,
+  })
+  runTask(jobId, jobInfoExtractingTask, {
+    jobDescription: data.jobDescription,
+  })
 }
 
 /**
@@ -83,7 +74,7 @@ export async function startTailoringWorkflow(
 ): Promise<void> {
   const workflowName: WorkflowName = 'tailoring'
   const workflow = WORKFLOWS[workflowName]
-  const tasks = Object.keys(workflow) as Array<Task>
+  const tasks = Object.keys(workflow) as Array<TaskType>
 
   const store = useWorkflowStore.getState()
   store.startWorkflow(jobId, workflowName, tasks, {
@@ -95,13 +86,11 @@ export async function startTailoringWorkflow(
   await saveWorkflowState(jobId)
 
   // Start entry task
-  runTask(jobId, RESUME_TAILORING, () =>
-    resumeTailoringTask.execute({
-      checklist: data.checklist,
-      resumeStructure: data.resumeStructure,
-      templateId: data.templateId,
-    }),
-  )
+  runTask(jobId, resumeTailoringTask, {
+    checklist: data.checklist,
+    resumeStructure: data.resumeStructure,
+    templateId: data.templateId,
+  })
 }
 
 /**
@@ -120,7 +109,7 @@ export async function startChecklistOnlyWorkflow(
 ): Promise<void> {
   const workflowName: WorkflowName = 'checklist-only'
   const workflow = WORKFLOWS[workflowName]
-  const tasks = Object.keys(workflow) as Array<Task>
+  const tasks = Object.keys(workflow) as Array<TaskType>
 
   const store = useWorkflowStore.getState()
   store.startWorkflow(jobId, workflowName, tasks, {
@@ -132,121 +121,60 @@ export async function startChecklistOnlyWorkflow(
   await saveWorkflowState(jobId)
 
   // Start entry task
-  runTask(jobId, CHECKLIST_PARSING, () =>
-    checklistParsingTask.execute({ jobDescription: data.jobDescription }),
-  )
+  runTask(jobId, checklistParsingTask, {
+    jobDescription: data.jobDescription,
+  })
 
   // Start job info extraction if JD is provided (existing mode, not scratch)
   if (data.jobDescription) {
-    runTask(jobId, JOBINFO_EXTRACTING, () =>
-      jobInfoExtractingTask.execute({ jobDescription: data.jobDescription }),
-    )
+    runTask(jobId, jobInfoExtractingTask, {
+      jobDescription: data.jobDescription,
+    })
   }
 }
 
 /**
  * Run a task and handle completion
  */
-async function runTask(
+async function runTask<T extends TaskName>(
   jobId: string,
-  taskType: Task,
-  executor: () => Promise<unknown>,
+  task: Task<T>,
+  input: TaskTypeMap[T]['input'],
 ): Promise<void> {
   const store = useWorkflowStore.getState()
   const workflow = store.getWorkflow(jobId)
 
   // Verify workflow exists and is running
   if (!workflow || workflow.status !== 'running') {
-    console.warn(
-      `[Workflow] Task ${taskType} skipped - workflow not running for job ${jobId}`,
+    log.warn(
+      `[Workflow] Task ${task.name} skipped - workflow not running for job ${jobId}`,
     )
     return
   }
 
-  store.setTaskStatus(jobId, taskType, 'running')
+  store.setTaskStatus(jobId, task.name, 'running')
 
   try {
-    const result = await executor()
-    await handleTaskSuccess(jobId, taskType, result)
+    const result = await task.execute(input)
+    await task.onSuccess(jobId, result)
+
+    if (task.contextKey) {
+      store.updateContext(jobId, { [task.contextKey]: result })
+    }
+    if (task.tipEvent) {
+      tip.trigger(task.tipEvent, task.getTipData?.(result))
+    }
+
+    store.setTaskStatus(jobId, task.name, 'completed')
+    await saveWorkflowState(jobId)
+    await startReadyTasks(jobId)
   } catch (error) {
     await handleTaskFailure(
       jobId,
-      taskType,
+      task.name,
       error instanceof Error ? error.message : String(error),
     )
   }
-}
-
-/**
- * Handle successful task completion
- */
-async function handleTaskSuccess(
-  jobId: string,
-  taskType: Task,
-  result: unknown,
-): Promise<void> {
-  const store = useWorkflowStore.getState()
-  const workflow = store.getWorkflow(jobId)
-
-  // Always persist task results to database (prevents data loss on navigation)
-  switch (taskType) {
-    case RESUME_PARSING: {
-      const resumeStructure = result as Record<string, unknown>
-      await resumeParsingTask.onSuccess(jobId, resumeStructure)
-      if (workflow) store.updateContext(jobId, { resumeStructure })
-      break
-    }
-    case CHECKLIST_PARSING: {
-      const checklist = result as Checklist
-      await checklistParsingTask.onSuccess(jobId, checklist)
-      if (workflow) {
-        store.updateContext(jobId, { checklist })
-        tip.trigger('checklist.parsed')
-      }
-      break
-    }
-    case RESUME_TAILORING: {
-      const tailoredResume = result as Record<string, unknown>
-      await resumeTailoringTask.onSuccess(jobId, tailoredResume)
-      if (workflow) {
-        store.updateContext(jobId, { resumeStructure: tailoredResume })
-        tip.trigger('tailoring.complete')
-      }
-      break
-    }
-    case CHECKLIST_MATCHING: {
-      const matchedChecklist = result as Checklist
-      await checklistMatchingTask.onSuccess(jobId, matchedChecklist)
-      if (workflow) store.updateContext(jobId, { checklist: matchedChecklist })
-      break
-    }
-    case SCORE_UPDATING: {
-      const matchPercentage = result as number
-      await scoreUpdatingTask.onSuccess(jobId, matchPercentage)
-      if (workflow) tip.trigger('score.updated', { score: matchPercentage })
-      break
-    }
-    case JOBINFO_EXTRACTING: {
-      const extractedJobInfo = result as JobInfoExtractingOutput
-      await jobInfoExtractingTask.onSuccess(jobId, extractedJobInfo)
-      break
-    }
-  }
-
-  // Only update workflow state and trigger downstream tasks if workflow exists
-  if (!workflow) {
-    console.log(
-      `[Workflow] Task ${taskType} saved to DB, but workflow not in store - skipping state update`,
-    )
-    return
-  }
-
-  // Update task state to completed
-  store.setTaskStatus(jobId, taskType, 'completed')
-  await saveWorkflowState(jobId)
-
-  // Find and start ready tasks
-  await startReadyTasks(jobId)
 }
 
 /**
@@ -254,20 +182,20 @@ async function handleTaskSuccess(
  */
 async function handleTaskFailure(
   jobId: string,
-  taskType: Task,
+  taskType: TaskType,
   error: string,
 ): Promise<void> {
   const store = useWorkflowStore.getState()
   const workflow = store.getWorkflow(jobId)
 
   if (!workflow) {
-    console.warn(
+    log.warn(
       `[Workflow] Task ${taskType} failure ignored - workflow not in store for job ${jobId}`,
     )
     return
   }
 
-  console.error(`[Workflow] Task ${taskType} failed:`, error)
+  log.error(`[Workflow] Task ${taskType} failed:`, error)
 
   store.setTaskStatus(jobId, taskType, 'failed', error)
   store.failWorkflow(jobId, error)
@@ -309,18 +237,14 @@ async function startReadyTasks(jobId: string): Promise<void> {
     switch (taskType) {
       case CHECKLIST_MATCHING:
         if (context.checklist && context.resumeStructure) {
-          runTask(jobId, CHECKLIST_MATCHING, () =>
-            checklistMatchingTask.execute({
-              checklist: context.checklist!,
-              resumeStructure: context.resumeStructure!,
-            }),
-          )
+          runTask(jobId, checklistMatchingTask, {
+            checklist: context.checklist,
+            resumeStructure: context.resumeStructure,
+          })
         }
         break
       case SCORE_UPDATING:
-        runTask(jobId, SCORE_UPDATING, () =>
-          scoreUpdatingTask.execute({ jobId }),
-        )
+        runTask(jobId, scoreUpdatingTask, { jobId })
         break
     }
   }
@@ -332,11 +256,11 @@ async function startReadyTasks(jobId: string): Promise<void> {
 function findReadyTasks(
   taskStates: TaskStateMap,
   workflow: Workflow,
-): Array<Task> {
-  const ready: Array<Task> = []
+): Array<TaskType> {
+  const ready: Array<TaskType> = []
 
   for (const [taskType, taskDep] of Object.entries(workflow)) {
-    const status = taskStates[taskType as Task]
+    const status = taskStates[taskType as TaskType]
     if (status !== 'pending') continue
 
     const allPrereqsCompleted = taskDep.prerequisites.every(
@@ -344,7 +268,7 @@ function findReadyTasks(
     )
 
     if (allPrereqsCompleted) {
-      ready.push(taskType as Task)
+      ready.push(taskType as TaskType)
     }
   }
 
@@ -366,7 +290,9 @@ async function saveWorkflowState(jobId: string): Promise<void> {
 /**
  * Retry failed tasks for a job
  */
-export async function retryFailedTasks(jobId: string): Promise<Array<Task>> {
+export async function retryFailedTasks(
+  jobId: string,
+): Promise<Array<TaskType>> {
   const store = useWorkflowStore.getState()
   const workflow = store.getWorkflow(jobId)
 
@@ -381,7 +307,7 @@ export async function retryFailedTasks(jobId: string): Promise<Array<Task>> {
   // Find failed tasks
   const failedTasks = Object.entries(workflow.taskStates)
     .filter(([, status]) => status === 'failed')
-    .map(([task]) => task as Task)
+    .map(([task]) => task as TaskType)
 
   if (failedTasks.length === 0) return []
 
@@ -415,7 +341,7 @@ export async function retryFailedTasks(jobId: string): Promise<Array<Task>> {
  */
 export function waitForTaskCompletion(
   jobId: string,
-  taskType: Task,
+  taskType: TaskType,
 ): Promise<void> {
   return new Promise((resolve, reject) => {
     const store = useWorkflowStore.getState()
