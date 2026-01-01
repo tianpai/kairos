@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, nativeTheme } from 'electron'
+import { app, BrowserWindow, ipcMain, nativeTheme, shell } from 'electron'
 import { join } from 'path'
 import log from 'electron-log/main'
 import { SettingsService } from './config/settings.service'
@@ -46,20 +46,17 @@ ipcMain.handle('theme:getCurrent', () => {
   return nativeTheme.shouldUseDarkColors ? 'dark' : 'light'
 })
 
+// Shell IPC handler
+ipcMain.handle('shell:openExternal', (_, url: string) => {
+  return shell.openExternal(url)
+})
+
 async function initializeDatabase() {
-  // Set database path
-  const dbPath = app.isPackaged
-    ? join(app.getPath('userData'), 'kairos.db')
-    : join(app.getAppPath(), 'prisma/dev.db')
-
-  process.env.DATABASE_URL = `file:${dbPath}`
-
-  // Run migrations to ensure schema is up to date
-  log.info('Running database migrations...')
-  await runMigrations()
-
-  // Connect to database
+  // Connect to database (creates tables if needed)
   await connectDatabase()
+
+  // Run any pending migrations
+  await runMigrations()
 
   // Register IPC handlers
   registerAllHandlers()

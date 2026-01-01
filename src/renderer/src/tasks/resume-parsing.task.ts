@@ -1,5 +1,5 @@
-import { aiWorker } from '../workers/ai-worker-manager'
 import { saveParsedResume } from '@api/jobs'
+import { aiWorker } from '../workers/ai-worker-manager'
 
 export async function executeResumeParsing(
   rawResumeContent: string,

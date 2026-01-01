@@ -1,7 +1,9 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
+// Singleton queryClient for use outside React context (e.g., in task handlers)
+export const queryClient = new QueryClient()
+
 export function getContext() {
-  const queryClient = new QueryClient()
   return {
     queryClient,
   }

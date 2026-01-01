@@ -20,6 +20,7 @@ export interface JobApplicationInput {
   companyName: string
   position: string
   dueDate: string
+  jobUrl?: string
 }
 
 export interface CreateJobApplicationPayload extends JobApplicationInput {
@@ -32,6 +33,17 @@ export interface CreateFromScratchPayload {
   position: string
   dueDate: string
   jobDescription?: string
+  jobUrl?: string
+  templateId: string
+}
+
+export interface CreateFromExistingPayload {
+  sourceJobId: string
+  companyName: string
+  position: string
+  dueDate: string
+  jobDescription: string
+  jobUrl?: string
   templateId: string
 }
 
@@ -42,6 +54,7 @@ export interface JobApplication {
   dueDate: string
   matchPercentage: number
   applicationStatus: string | null
+  jobUrl: string | null
   originalResume: string | null
   createdAt: string
   updatedAt: string
@@ -75,6 +88,7 @@ export interface UpdateJobApplicationPayload {
   companyName: string
   position: string
   dueDate: string
+  jobUrl?: string | null
 }
 
 // CRUD operations
@@ -89,6 +103,12 @@ export function createFromScratch(
   payload: CreateFromScratchPayload,
 ): Promise<CreateJobApplicationResponse> {
   return window.electron.jobs.createFromScratch(payload)
+}
+
+export function createFromExisting(
+  payload: CreateFromExistingPayload,
+): Promise<CreateJobApplicationResponse> {
+  return window.electron.jobs.createFromExisting(payload)
 }
 
 export async function getAllJobApplications(): Promise<Array<JobApplication>> {
@@ -156,7 +176,7 @@ export async function saveMatchScore(
 
 export async function saveWorkflowState(
   jobId: string,
-  workflowSteps: Record<string, unknown>,
+  workflowSteps: WorkflowStepsData,
   workflowStatus: string,
 ): Promise<GeneralAPIResponse> {
   return window.electron.jobs.saveWorkflowState(jobId, {

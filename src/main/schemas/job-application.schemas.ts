@@ -6,6 +6,7 @@ export const CreateJobApplicationSchema = z.object({
   position: z.string().min(1),
   dueDate: z.string().date(),
   jobDescription: z.string().min(1),
+  jobUrl: z.string().url().optional(),
   templateId: z.string().min(1),
   jsonSchema: z.record(z.string(), z.unknown()),
   rawResumeContent: z.string().min(1),
@@ -17,6 +18,18 @@ export const CreateFromScratchSchema = z.object({
   position: z.string().min(1),
   dueDate: z.string().date(),
   jobDescription: z.string().optional(),
+  jobUrl: z.string().url().optional(),
+  templateId: z.string().min(1),
+})
+
+// Create job application from existing (copy resume from another application)
+export const CreateFromExistingSchema = z.object({
+  sourceJobId: z.string().uuid(),
+  companyName: z.string().min(1),
+  position: z.string().min(1),
+  dueDate: z.string().date(),
+  jobDescription: z.string().min(1),
+  jobUrl: z.string().url().optional(),
   templateId: z.string().min(1),
 })
 
@@ -25,6 +38,7 @@ export const UpdateJobApplicationSchema = z.object({
   companyName: z.string().min(1).optional(),
   position: z.string().min(1).optional(),
   dueDate: z.string().date().optional(),
+  jobUrl: z.string().url().nullable().optional(),
 })
 
 // Save resume
@@ -63,6 +77,7 @@ export const UpdateJobDescriptionSchema = z.object({
 // Inferred types
 export type CreateJobApplicationInput = z.infer<typeof CreateJobApplicationSchema>
 export type CreateFromScratchInput = z.infer<typeof CreateFromScratchSchema>
+export type CreateFromExistingInput = z.infer<typeof CreateFromExistingSchema>
 export type UpdateJobApplicationInput = z.infer<typeof UpdateJobApplicationSchema>
 export type UpdateJobDescriptionInput = z.infer<typeof UpdateJobDescriptionSchema>
 export type SaveResumeInput = z.infer<typeof SaveResumeSchema>

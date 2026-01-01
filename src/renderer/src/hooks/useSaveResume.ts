@@ -1,6 +1,6 @@
 import { useMutation } from '@tanstack/react-query'
 import { useResumeStore } from '@typst-compiler/resumeState'
-import { saveResume, saveParsedResume } from '@/api/jobs'
+import { saveParsedResume, saveResume } from '@/api/jobs'
 
 interface UseSaveResumeOptions {
   isBuiltFromScratch?: boolean

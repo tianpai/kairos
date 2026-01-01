@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { useNavigate, useSearch } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { Columns2, Columns3, PanelLeft } from 'lucide-react'
@@ -8,12 +9,9 @@ import { getAllJobApplications, getJobApplication } from '@api/jobs'
 import { useWorkflowSync } from '@hooks/useWorkflowSync'
 import { useSyncJobApplicationToStore } from '@hooks/useSyncJobApplicationToStore'
 import { useJobApplicationMutations } from '@hooks/useJobApplicationMutations'
-import { useWorkflowStore } from '@workflow/workflow.store'
-import { CHECKLIST_PARSING, RESUME_PARSING } from '@workflow/workflow.types'
 import ResumeRender from '@editor/ResumeRender'
 import ResumeForm from '@resumeForm/ResumeForm'
 import Checklist from '@checklist/Checklist'
-import ResumeParsingLoader from '@editor/ResumeParsingLoader'
 import DownloadResumeButton from '@editor/DownloadResumeButton'
 import SaveResumeButton from '@editor/SaveResumeButton'
 import { DocumentConfigButton } from '@resumeForm/DocumentConfigButton'
@@ -21,8 +19,10 @@ import { EmptyState } from '@layout/EmptyState'
 import { Sidebar } from '@sidebar/Sidebar'
 import { AppLayout } from '@layout/AppLayout'
 import { useLayoutStore } from '@layout/layout.store'
+import { useShortcutStore } from '@layout/shortcut.store'
 import { getScoreColor } from '@/utils/scoreThresholds'
 import NewApplicationButton from '@/components/upload/NewApplicationButton'
+import { BatchExportModal } from '@/components/export/BatchExportModal'
 
 export default function App() {
   const navigate = useNavigate()
@@ -31,6 +31,23 @@ export default function App() {
   // Layout state from store
   const { sidebarCollapsed, showChecklist, toggleSidebar, toggleChecklist } =
     useLayoutStore()
+
+  // Navigation shortcut state
+  const navigationRequested = useShortcutStore(
+    (state) => state.navigationRequested,
+  )
+  const clearNavigationRequest = useShortcutStore(
+    (state) => state.clearNavigationRequest,
+  )
+
+  // Batch export state
+  const [showBatchExport, setShowBatchExport] = useState(false)
+  const batchExportRequested = useShortcutStore(
+    (state) => state.batchExportRequested,
+  )
+  const clearBatchExportRequest = useShortcutStore(
+    (state) => state.clearBatchExportRequest,
+  )
 
   // Fetch all applications for sidebar
   const { data: applications = [] } = useQuery({
@@ -51,16 +68,54 @@ export default function App() {
   // Sync workflow state between DB and store
   useWorkflowSync(jobId, jobApplication)
 
-  // Get loading states from workflow store (requires jobId)
-  const isParsingResume = useWorkflowStore((state) =>
-    jobId ? state.isTaskRunning(jobId, RESUME_PARSING) : false,
-  )
-  const isParsingChecklist = useWorkflowStore((state) =>
-    jobId ? state.isTaskRunning(jobId, CHECKLIST_PARSING) : false,
-  )
-
   // Sync job application data to store (templateId + tailored resume)
   useSyncJobApplicationToStore(jobApplication)
+
+  // Handle batch export shortcut
+  useEffect(() => {
+    if (batchExportRequested) {
+      setShowBatchExport(true)
+      clearBatchExportRequest()
+    }
+  }, [batchExportRequested, clearBatchExportRequest])
+
+  // Handle navigation shortcuts
+  useEffect(() => {
+    if (!navigationRequested || applications.length === 0) {
+      if (navigationRequested) {
+        clearNavigationRequest()
+      }
+      return
+    }
+
+    const currentIndex = applications.findIndex((app) => app.id === jobId)
+    let targetId: string | undefined
+
+    switch (navigationRequested) {
+      case 'prev':
+        // Move UP in sidebar (toward newer items at top)
+        targetId = applications[Math.max(0, currentIndex - 1)]?.id
+        break
+      case 'next':
+        // Move DOWN in sidebar (toward older items at bottom)
+        targetId = applications[Math.min(applications.length - 1, currentIndex + 1)]?.id
+        break
+      case 'oldest':
+        // Jump to bottom of sidebar
+        targetId = applications[applications.length - 1]?.id
+        break
+      case 'latest':
+        // Jump to top of sidebar
+        targetId = applications[0]?.id
+        break
+    }
+
+    if (targetId && targetId !== jobId) {
+      navigate({ to: '/', search: { jobId: targetId } })
+    }
+
+    clearNavigationRequest()
+  }, [navigationRequested, applications, jobId, navigate, clearNavigationRequest])
 
   const handleSelectApplication = (id: string) => {
     navigate({ to: '/', search: { jobId: id } })
@@ -79,6 +134,7 @@ export default function App() {
   const hasSelection = !!jobId && !!jobApplication
 
   return (
+    <>
     <AppLayout
       header={
         <PageHeader
@@ -172,14 +228,17 @@ export default function App() {
               <Checklist jobId={jobId} />
             </div>
           )}
-          <ResumeParsingLoader
-            isParsingResume={isParsingResume}
-            isParsingChecklist={isParsingChecklist}
-          />
         </div>
       ) : (
         <EmptyState hasApplications={hasApplications} />
       )}
     </AppLayout>
+
+    <BatchExportModal
+      open={showBatchExport}
+      onClose={() => setShowBatchExport(false)}
+      applications={applications}
+    />
+  </>
   )
 }

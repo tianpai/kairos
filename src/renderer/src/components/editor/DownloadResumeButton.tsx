@@ -1,10 +1,11 @@
-import { memo, useState } from 'react'
+import { memo, useCallback, useEffect, useState } from 'react'
 import { useResumeStore } from '@typst-compiler/resumeState'
 import { compileToPDF } from '@typst-compiler/compile'
 import { FileDown } from 'lucide-react'
 import { InvertedButton } from '@ui/InvertedButton'
 import type { TemplateData } from '@templates/template.types'
 import { TemplateBuilder } from '@/templates/builder'
+import { useShortcutStore } from '@/components/layout/shortcut.store'
 
 interface DownloadResumeButtonProps {
   companyName?: string
@@ -45,7 +46,14 @@ const DownloadResumeButton = memo(function DownloadResumeButton({
   const templateId = useResumeStore((state) => state.templateId)
   const data = useResumeStore((state) => state.data)
 
-  const handleDownload = async () => {
+  const exportPdfRequested = useShortcutStore(
+    (state) => state.exportPdfRequested,
+  )
+  const clearExportPdfRequest = useShortcutStore(
+    (state) => state.clearExportPdfRequest,
+  )
+
+  const handleDownload = useCallback(async () => {
     try {
       setIsDownloading(true)
 
@@ -73,7 +81,15 @@ const DownloadResumeButton = memo(function DownloadResumeButton({
     } finally {
       setIsDownloading(false)
     }
-  }
+  }, [templateId, data, companyName, position])
+
+  // Listen for keyboard shortcut
+  useEffect(() => {
+    if (exportPdfRequested) {
+      handleDownload()
+      clearExportPdfRequest()
+    }
+  }, [exportPdfRequested, handleDownload, clearExportPdfRequest])
 
   return (
     <InvertedButton

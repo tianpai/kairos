@@ -1,5 +1,6 @@
 import { useResumeStore } from '@typst-compiler/resumeState'
 import { DiscreteSlider } from '@ui/DiscreteSlider'
+import { Select } from '@ui/Select'
 import { TemplateId } from '@templates/templateId'
 import { DocumentSetupSchema } from '@templates/shared/document-config'
 import { Modal } from '@ui/Modal'
@@ -76,17 +77,17 @@ export function DocumentConfigModal({
             {/* Font Selection */}
             <div className="space-y-1">
               <label className="block text-sm font-medium">Font</label>
-              <select
+              <Select
                 value={globalConfig.font}
                 onChange={(e) => handleChange('font', e.target.value)}
-                className="w-full rounded border border-gray-300 bg-white px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-800"
+                className="w-full"
               >
                 {FONT_OPTIONS.map((font) => (
                   <option key={font} value={font}>
                     {font}
                   </option>
                 ))}
-              </select>
+              </Select>
             </div>
 
             {/* Font Size Selection */}
@@ -117,17 +118,17 @@ export function DocumentConfigModal({
             {/* Paper Size Selection */}
             <div className="space-y-1">
               <label className="block text-sm font-medium">Paper Size</label>
-              <select
+              <Select
                 value={globalConfig.paperSize}
                 onChange={(e) => handleChange('paperSize', e.target.value)}
-                className="w-full rounded border border-gray-300 bg-white px-3 py-2 text-sm dark:border-gray-600 dark:bg-gray-800"
+                className="w-full"
               >
                 {PAPER_SIZE_OPTIONS.map((size) => (
                   <option key={size} value={size}>
                     {size}
                   </option>
                 ))}
-              </select>
+              </Select>
             </div>
           </div>
         </div>

@@ -46,17 +46,15 @@ export function Toggle({
         disabled={disabled}
         onClick={handleToggle}
         onKeyDown={handleKeyDown}
-        className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 dark:focus:ring-offset-gray-900 ${
+        className={`relative inline-flex h-4 w-8 shrink-0 cursor-pointer items-center rounded-full transition-colors duration-200 focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 focus:outline-none dark:focus:ring-offset-gray-900 ${
           disabled ? 'cursor-not-allowed opacity-50' : ''
         } ${
-          checked
-            ? 'bg-black dark:bg-white'
-            : 'bg-gray-300 dark:bg-gray-600'
+          checked ? 'bg-black dark:bg-white' : 'bg-gray-300 dark:bg-gray-600'
         }`}
       >
         <span
-          className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform duration-200 dark:bg-gray-900 ${
-            checked ? 'translate-x-6' : 'translate-x-1'
+          className={`inline-block h-3 w-3 transform rounded-full bg-white shadow transition-transform duration-200 dark:bg-gray-900 ${
+            checked ? 'translate-x-4' : 'translate-x-1'
           }`}
         />
       </button>

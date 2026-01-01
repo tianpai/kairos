@@ -12,8 +12,77 @@ contextBridge.exposeInMainWorld('electron', {
       ipcRenderer.on('shortcut:new-application', handler)
       return () => ipcRenderer.removeListener('shortcut:new-application', handler)
     },
+    onSave: (callback: () => void) => {
+      const handler = () => callback()
+      ipcRenderer.on('shortcut:save', handler)
+      return () => ipcRenderer.removeListener('shortcut:save', handler)
+    },
+    onExportPdf: (callback: () => void) => {
+      const handler = () => callback()
+      ipcRenderer.on('shortcut:export-pdf', handler)
+      return () => ipcRenderer.removeListener('shortcut:export-pdf', handler)
+    },
+    onDocumentSettings: (callback: () => void) => {
+      const handler = () => callback()
+      ipcRenderer.on('shortcut:document-settings', handler)
+      return () => ipcRenderer.removeListener('shortcut:document-settings', handler)
+    },
+    onPrevApp: (callback: () => void) => {
+      const handler = () => callback()
+      ipcRenderer.on('shortcut:prev-app', handler)
+      return () => ipcRenderer.removeListener('shortcut:prev-app', handler)
+    },
+    onNextApp: (callback: () => void) => {
+      const handler = () => callback()
+      ipcRenderer.on('shortcut:next-app', handler)
+      return () => ipcRenderer.removeListener('shortcut:next-app', handler)
+    },
+    onLatestApp: (callback: () => void) => {
+      const handler = () => callback()
+      ipcRenderer.on('shortcut:latest-app', handler)
+      return () => ipcRenderer.removeListener('shortcut:latest-app', handler)
+    },
+    onOldestApp: (callback: () => void) => {
+      const handler = () => callback()
+      ipcRenderer.on('shortcut:oldest-app', handler)
+      return () => ipcRenderer.removeListener('shortcut:oldest-app', handler)
+    },
+    onTailor: (callback: () => void) => {
+      const handler = () => callback()
+      ipcRenderer.on('shortcut:tailor', handler)
+      return () => ipcRenderer.removeListener('shortcut:tailor', handler)
+    },
+    onToggleSidebar: (callback: () => void) => {
+      const handler = () => callback()
+      ipcRenderer.on('shortcut:toggle-sidebar', handler)
+      return () => ipcRenderer.removeListener('shortcut:toggle-sidebar', handler)
+    },
+    onToggleColumns: (callback: () => void) => {
+      const handler = () => callback()
+      ipcRenderer.on('shortcut:toggle-columns', handler)
+      return () => ipcRenderer.removeListener('shortcut:toggle-columns', handler)
+    },
+    onBatchExport: (callback: () => void) => {
+      const handler = () => callback()
+      ipcRenderer.on('shortcut:batch-export', handler)
+      return () => ipcRenderer.removeListener('shortcut:batch-export', handler)
+    },
   },
   platform: process.platform,
+  shell: {
+    openExternal: (url: string): Promise<void> => ipcRenderer.invoke('shell:openExternal', url),
+  },
+  dialog: {
+    selectFolder: (): Promise<string | null> => ipcRenderer.invoke('dialog:selectFolder'),
+  },
+  fs: {
+    writeFile: (
+      folderPath: string,
+      filename: string,
+      data: ArrayBuffer,
+    ): Promise<{ success: boolean; path: string }> =>
+      ipcRenderer.invoke('fs:writeFile', folderPath, filename, data),
+  },
   settings: {
     getApiKey: (): Promise<string | null> => ipcRenderer.invoke('settings:getApiKey'),
     setApiKey: (key: string): Promise<void> => ipcRenderer.invoke('settings:setApiKey', key),
@@ -30,6 +99,8 @@ contextBridge.exposeInMainWorld('electron', {
     create: (data: unknown): Promise<{ id: string }> => ipcRenderer.invoke('jobs:create', data),
     createFromScratch: (data: unknown): Promise<{ id: string }> =>
       ipcRenderer.invoke('jobs:createFromScratch', data),
+    createFromExisting: (data: unknown): Promise<{ id: string }> =>
+      ipcRenderer.invoke('jobs:createFromExisting', data),
     getAll: (): Promise<unknown[]> => ipcRenderer.invoke('jobs:getAll'),
     get: (id: string): Promise<unknown> => ipcRenderer.invoke('jobs:get', id),
     update: (id: string, data: unknown): Promise<unknown> =>

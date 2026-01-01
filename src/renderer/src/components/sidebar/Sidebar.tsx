@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { Settings } from 'lucide-react'
-import EditJobModal from '@sidebar/EditJobModal'
+import JobInfoModal from '@sidebar/JobInfoModal'
 import { SidebarItem } from './SidebarItem'
 
 interface Application {
@@ -10,6 +10,7 @@ interface Application {
   position: string
   dueDate: string
   matchPercentage: number
+  jobUrl: string | null
   originalResume: string | null
 }
 
@@ -20,7 +21,12 @@ interface SidebarProps {
   collapsed: boolean
   onEdit: (
     id: string,
-    data: { companyName: string; position: string; dueDate: string },
+    data: {
+      companyName: string
+      position: string
+      dueDate: string
+      jobUrl: string | null
+    },
   ) => void
   onDelete: (id: string) => void
 }
@@ -40,6 +46,7 @@ export function Sidebar({
     companyName: string
     position: string
     dueDate: string
+    jobUrl: string | null
   }) => {
     if (editingApp) {
       onEdit(editingApp.id, data)
@@ -94,9 +101,9 @@ export function Sidebar({
         </div>
       </aside>
 
-      {/* Edit Modal */}
+      {/* Job Info Modal */}
       {editingApp && (
-        <EditJobModal
+        <JobInfoModal
           open={true}
           onClose={() => setEditingApp(null)}
           onSave={handleSaveEdit}
@@ -105,6 +112,7 @@ export function Sidebar({
             companyName: editingApp.companyName,
             position: editingApp.position,
             dueDate: editingApp.dueDate,
+            jobUrl: editingApp.jobUrl,
           }}
         />
       )}

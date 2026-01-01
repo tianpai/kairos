@@ -15,6 +15,7 @@ export interface CreateFromScratchInput {
   position: string
   dueDate: string
   jobDescription?: string
+  jobUrl?: string
 }
 
 export function useCreateFromScratch() {
