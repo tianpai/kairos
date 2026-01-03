@@ -1,17 +1,19 @@
 import { saveParsedResume } from '@api/jobs'
 import { aiWorker } from '../workers/ai-worker-manager'
-import { Task  } from './base.task'
-import type {TaskTypeMap} from './base.task';
+import { RESUME_PARSING } from '../workflow/workflow.types'
+import { BaseTask } from './base.task'
+import type { TaskTypeMap } from './base.task'
 
-class ResumeParsingTask extends Task<'resume.parsing'> {
-  readonly name = 'resume.parsing' as const
+class ResumeParsingTask extends BaseTask<typeof RESUME_PARSING> {
+  readonly name = RESUME_PARSING
+  readonly inputKeys = ['rawResumeContent', 'templateId'] as const
   readonly contextKey = 'resumeStructure' as const
 
   async execute(
-    input: TaskTypeMap['resume.parsing']['input'],
-  ): Promise<TaskTypeMap['resume.parsing']['output']> {
-    return aiWorker.execute<TaskTypeMap['resume.parsing']['output']>(
-      'resume.parsing',
+    input: TaskTypeMap[typeof RESUME_PARSING]['input'],
+  ): Promise<TaskTypeMap[typeof RESUME_PARSING]['output']> {
+    return aiWorker.execute<TaskTypeMap[typeof RESUME_PARSING]['output']>(
+      RESUME_PARSING,
       {
         rawResumeContent: input.rawResumeContent,
         templateId: input.templateId,
@@ -21,7 +23,7 @@ class ResumeParsingTask extends Task<'resume.parsing'> {
 
   async onSuccess(
     jobId: string,
-    resumeStructure: TaskTypeMap['resume.parsing']['output'],
+    resumeStructure: TaskTypeMap[typeof RESUME_PARSING]['output'],
   ): Promise<void> {
     await saveParsedResume(jobId, resumeStructure, resumeStructure)
   }

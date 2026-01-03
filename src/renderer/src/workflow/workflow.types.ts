@@ -65,3 +65,5 @@ export interface WorkflowContext {
   resumeStructure?: Record<string, unknown>
   checklist?: Checklist
 }
+
+export type WorkflowContextKey = keyof WorkflowContext

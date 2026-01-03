@@ -1,18 +1,20 @@
 import { saveTailoredResume } from '@api/jobs'
 import { aiWorker } from '../workers/ai-worker-manager'
-import { Task } from './base.task'
+import { RESUME_TAILORING } from '../workflow/workflow.types'
+import { BaseTask } from './base.task'
 import type { TaskTypeMap } from './base.task'
 
-class ResumeTailoringTask extends Task<'resume.tailoring'> {
-  readonly name = 'resume.tailoring' as const
+class ResumeTailoringTask extends BaseTask<typeof RESUME_TAILORING> {
+  readonly name = RESUME_TAILORING
+  readonly inputKeys = ['checklist', 'resumeStructure', 'templateId'] as const
   readonly contextKey = 'resumeStructure' as const
   readonly tipEvent = 'tailoring.complete'
 
   async execute(
-    input: TaskTypeMap['resume.tailoring']['input'],
-  ): Promise<TaskTypeMap['resume.tailoring']['output']> {
-    return aiWorker.execute<TaskTypeMap['resume.tailoring']['output']>(
-      'resume.tailoring',
+    input: TaskTypeMap[typeof RESUME_TAILORING]['input'],
+  ): Promise<TaskTypeMap[typeof RESUME_TAILORING]['output']> {
+    return aiWorker.execute<TaskTypeMap[typeof RESUME_TAILORING]['output']>(
+      RESUME_TAILORING,
       {
         checklist: input.checklist,
         resumeStructure: input.resumeStructure,
@@ -23,7 +25,7 @@ class ResumeTailoringTask extends Task<'resume.tailoring'> {
 
   async onSuccess(
     jobId: string,
-    tailoredResume: TaskTypeMap['resume.tailoring']['output'],
+    tailoredResume: TaskTypeMap[typeof RESUME_TAILORING]['output'],
   ): Promise<void> {
     await saveTailoredResume(jobId, tailoredResume)
   }

@@ -6,7 +6,7 @@ import {
   RESUME_TAILORING,
   SCORE_UPDATING,
 } from './workflow.types'
-import type { Workflow } from './workflow.types'
+import type { Workflow, WorkflowName } from './workflow.types'
 
 /**
  * CREATE_APPLICATION_WORKFLOW
@@ -94,10 +94,7 @@ export const CHECKLIST_ONLY_WORKFLOW: Workflow = {
   },
 }
 
-export const WORKFLOWS: Record<
-  'create-application' | 'tailoring' | 'checklist-only',
-  Workflow
-> = {
+export const WORKFLOWS: Record<WorkflowName, Workflow> = {
   'create-application': CREATE_APPLICATION_WORKFLOW,
   tailoring: TAILORING_WORKFLOW,
   'checklist-only': CHECKLIST_ONLY_WORKFLOW,

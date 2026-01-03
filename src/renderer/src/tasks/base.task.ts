@@ -1,6 +1,18 @@
 import type { Checklist } from '@type/checklist'
 import type { ExtractedJobInfo } from '../workers/prompts/jobinfo-extracting'
-import type { WorkflowContext } from '../workflow/workflow.types'
+import {
+  RESUME_PARSING,
+  RESUME_TAILORING,
+  CHECKLIST_PARSING,
+  CHECKLIST_MATCHING,
+  SCORE_UPDATING,
+  JOBINFO_EXTRACTING,
+} from '../workflow/workflow.types'
+import type {
+  Task,
+  WorkflowContext,
+  WorkflowContextKey,
+} from '../workflow/workflow.types'
 
 export type ResumeParsingInput = {
   rawResumeContent: string
@@ -37,43 +49,50 @@ export type JobInfoExtractingInput = {
 export type JobInfoExtractingOutput = ExtractedJobInfo
 
 export type TaskTypeMap = {
-  'resume.parsing': { input: ResumeParsingInput; output: ResumeParsingOutput }
-  'checklist.parsing': {
+  [RESUME_PARSING]: { input: ResumeParsingInput; output: ResumeParsingOutput }
+  [CHECKLIST_PARSING]: {
     input: ChecklistParsingInput
     output: ChecklistParsingOutput
   }
-  'checklist.matching': {
+  [CHECKLIST_MATCHING]: {
     input: ChecklistMatchingInput
     output: ChecklistMatchingOutput
   }
-  'resume.tailoring': {
+  [RESUME_TAILORING]: {
     input: ResumeTailoringInput
     output: ResumeTailoringOutput
   }
-  'score.updating': { input: ScoreUpdatingInput; output: ScoreUpdatingOutput }
-  'jobinfo.extracting': {
+  [SCORE_UPDATING]: { input: ScoreUpdatingInput; output: ScoreUpdatingOutput }
+  [JOBINFO_EXTRACTING]: {
     input: JobInfoExtractingInput
     output: JobInfoExtractingOutput
   }
 }
 
-export type TaskName = keyof TaskTypeMap
+// Re-export Task type for convenience (single source of truth is workflow.types.ts)
+export type { Task }
 
 /**
  * Abstract base class for all workflow tasks.
  *
  * @template T - The task name, used to infer input/output types from TaskTypeMap
  */
-export abstract class Task<T extends TaskName> {
+export abstract class BaseTask<T extends Task> {
   /**
    * The task identifier (e.g., 'resume.parsing', 'checklist.matching')
    */
   abstract readonly name: T
 
   /**
+   * Context keys required as input for this task.
+   * The workflow engine uses this to auto-resolve inputs from context.
+   */
+  abstract readonly inputKeys: ReadonlyArray<WorkflowContextKey>
+
+  /**
    * Optional: which workflow context key to update with the result
    */
-  readonly contextKey?: keyof WorkflowContext
+  readonly contextKey?: WorkflowContextKey
 
   /**
    * Optional: tip event to trigger after success

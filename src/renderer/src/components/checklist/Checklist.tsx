@@ -6,7 +6,7 @@ import { ChecklistSection } from '@checklist/ChecklistSection'
 import { InvertedButton } from '@ui/InvertedButton'
 import { useResumeStore } from '@typst-compiler/resumeState'
 import { useWorkflowStore } from '@workflow/workflow.store'
-import { startChecklistOnlyWorkflow } from '@workflow/workflow.service'
+import { startWorkflow } from '@workflow/workflow.service'
 import { CHECKLIST_PARSING } from '@workflow/workflow.types'
 
 interface ChecklistProps {
@@ -62,7 +62,7 @@ export default function Checklist({ jobId }: ChecklistProps) {
   const handleParseChecklist = () => {
     if (!jobId || !jobApplication?.jobDescription) return
 
-    startChecklistOnlyWorkflow(jobId, {
+    startWorkflow('checklist-only', jobId, {
       jobDescription: jobApplication.jobDescription,
       resumeStructure,
       templateId,

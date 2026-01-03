@@ -4,11 +4,7 @@ import {
   premadeTemplates,
 } from '@templates/premade-tmpl'
 import { TemplateId } from '@templates/templateId'
-import {
-  startChecklistOnlyWorkflow,
-  startCreateApplicationWorkflow,
-  waitForTaskCompletion,
-} from '@workflow/workflow.service'
+import { startWorkflow, waitForTaskCompletion } from '@workflow/workflow.service'
 import { RESUME_PARSING } from '@workflow/workflow.types'
 import {
   createFromExisting,
@@ -42,7 +38,7 @@ async function createBatchApp(
       templateId,
     })
 
-    startChecklistOnlyWorkflow(response.id, {
+    startWorkflow('checklist-only', response.id, {
       jobDescription: entry.jobDescription,
       resumeStructure: parsedResume,
       templateId,
@@ -100,7 +96,7 @@ export function useBatchCreation() {
         templateId: defaultTemplateId,
       })
 
-      startCreateApplicationWorkflow(firstResponse.id, {
+      startWorkflow('create-application', firstResponse.id, {
         rawResumeContent,
         jobDescription: firstEntry.jobDescription,
         templateId: defaultTemplateId,

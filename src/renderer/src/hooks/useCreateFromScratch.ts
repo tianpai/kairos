@@ -4,7 +4,7 @@ import {
   premadeTemplates,
 } from '@templates/premade-tmpl'
 import { TemplateId } from '@templates/templateId'
-import { startChecklistOnlyWorkflow } from '@workflow/workflow.service'
+import { startWorkflow } from '@workflow/workflow.service'
 import type { CreateFromScratchPayload } from '@/api/jobs'
 import { createFromScratch } from '@/api/jobs'
 
@@ -28,7 +28,7 @@ export function useCreateFromScratch() {
       queryClient.invalidateQueries({ queryKey: ['jobApplications'] })
       // Start checklist workflow if job description was provided
       if (payload.jobDescription) {
-        startChecklistOnlyWorkflow(response.id, {
+        startWorkflow('checklist-only', response.id, {
           jobDescription: payload.jobDescription,
           resumeStructure: {},
           templateId: payload.templateId,

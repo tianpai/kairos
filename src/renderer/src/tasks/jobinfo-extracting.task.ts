@@ -1,19 +1,21 @@
 import { getJobApplication, updateJobApplication } from '@api/jobs'
 import { aiWorker } from '../workers/ai-worker-manager'
 import { queryClient } from '../integrations/tanstack-query/root-provider'
-import { Task } from './base.task'
+import { JOBINFO_EXTRACTING } from '../workflow/workflow.types'
+import { BaseTask } from './base.task'
 import type { TaskTypeMap } from './base.task'
 
 const EXTRACTING_PLACEHOLDER = 'Extracting...'
 
-class JobInfoExtractingTask extends Task<'jobinfo.extracting'> {
-  readonly name = 'jobinfo.extracting' as const
+class JobInfoExtractingTask extends BaseTask<typeof JOBINFO_EXTRACTING> {
+  readonly name = JOBINFO_EXTRACTING
+  readonly inputKeys = ['jobDescription'] as const
 
   async execute(
-    input: TaskTypeMap['jobinfo.extracting']['input'],
-  ): Promise<TaskTypeMap['jobinfo.extracting']['output']> {
-    return aiWorker.execute<TaskTypeMap['jobinfo.extracting']['output']>(
-      'jobinfo.extracting',
+    input: TaskTypeMap[typeof JOBINFO_EXTRACTING]['input'],
+  ): Promise<TaskTypeMap[typeof JOBINFO_EXTRACTING]['output']> {
+    return aiWorker.execute<TaskTypeMap[typeof JOBINFO_EXTRACTING]['output']>(
+      JOBINFO_EXTRACTING,
       {
         jobDescription: input.jobDescription,
       },
@@ -22,7 +24,7 @@ class JobInfoExtractingTask extends Task<'jobinfo.extracting'> {
 
   async onSuccess(
     jobId: string,
-    extracted: TaskTypeMap['jobinfo.extracting']['output'],
+    extracted: TaskTypeMap[typeof JOBINFO_EXTRACTING]['output'],
   ): Promise<void> {
     // Fetch current application to check which fields are placeholders
     const current = await getJobApplication(jobId)

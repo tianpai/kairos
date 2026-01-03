@@ -4,13 +4,16 @@ import { parseChecklist } from './prompts/checklist-parsing'
 import { matchChecklist } from './prompts/checklist-matching'
 import { tailorResume } from './prompts/resume-tailoring'
 import { extractJobInfo } from './prompts/jobinfo-extracting'
+import {
+  RESUME_PARSING,
+  RESUME_TAILORING,
+  CHECKLIST_PARSING,
+  CHECKLIST_MATCHING,
+  JOBINFO_EXTRACTING,
+} from '../workflow/workflow.types'
+import type { Task } from '../workflow/workflow.types'
 
-export type AITaskType =
-  | 'resume.parsing'
-  | 'checklist.parsing'
-  | 'checklist.matching'
-  | 'resume.tailoring'
-  | 'jobinfo.extracting'
+export type AITaskType = Task
 
 export interface AIWorkerMessage {
   id: string
@@ -40,7 +43,7 @@ self.onmessage = async ({ data }: MessageEvent<AIWorkerMessage>) => {
 
     let result: unknown
     switch (taskType) {
-      case 'resume.parsing':
+      case RESUME_PARSING:
         result = await parseResume(
           provider,
           payload.rawResumeContent as string,
@@ -48,13 +51,13 @@ self.onmessage = async ({ data }: MessageEvent<AIWorkerMessage>) => {
           { streaming, onPartial },
         )
         break
-      case 'checklist.parsing':
+      case CHECKLIST_PARSING:
         result = await parseChecklist(provider, payload.jobDescription as string, {
           streaming,
           onPartial,
         })
         break
-      case 'checklist.matching':
+      case CHECKLIST_MATCHING:
         result = await matchChecklist(
           provider,
           payload.checklist as Parameters<typeof matchChecklist>[1],
@@ -62,7 +65,7 @@ self.onmessage = async ({ data }: MessageEvent<AIWorkerMessage>) => {
           { streaming, onPartial },
         )
         break
-      case 'resume.tailoring':
+      case RESUME_TAILORING:
         result = await tailorResume(
           provider,
           payload.checklist as Parameters<typeof tailorResume>[1],
@@ -71,7 +74,7 @@ self.onmessage = async ({ data }: MessageEvent<AIWorkerMessage>) => {
           { streaming, onPartial },
         )
         break
-      case 'jobinfo.extracting':
+      case JOBINFO_EXTRACTING:
         result = await extractJobInfo(provider, payload.jobDescription as string, {
           streaming,
           onPartial,

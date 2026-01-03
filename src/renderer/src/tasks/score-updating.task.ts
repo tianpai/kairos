@@ -1,6 +1,7 @@
 import log from 'electron-log/renderer'
 import { getJobApplication, saveMatchScore } from '@api/jobs'
-import { Task } from './base.task'
+import { SCORE_UPDATING } from '../workflow/workflow.types'
+import { BaseTask } from './base.task'
 import type { Checklist, ChecklistRequirement } from '@type/checklist'
 import type { TaskTypeMap } from './base.task'
 
@@ -55,8 +56,9 @@ export function calculateScore(checklist: Checklist): number {
   return Math.max(0, Math.min(100, score))
 }
 
-class ScoreUpdatingTask extends Task<'score.updating'> {
-  readonly name = 'score.updating' as const
+class ScoreUpdatingTask extends BaseTask<typeof SCORE_UPDATING> {
+  readonly name = SCORE_UPDATING
+  readonly inputKeys = ['jobId'] as const
   readonly tipEvent = 'score.updated'
 
   getTipData(result: number): Record<string, unknown> {
@@ -64,8 +66,8 @@ class ScoreUpdatingTask extends Task<'score.updating'> {
   }
 
   async execute(
-    input: TaskTypeMap['score.updating']['input'],
-  ): Promise<TaskTypeMap['score.updating']['output']> {
+    input: TaskTypeMap[typeof SCORE_UPDATING]['input'],
+  ): Promise<TaskTypeMap[typeof SCORE_UPDATING]['output']> {
     const job = await getJobApplication(input.jobId)
 
     const checklist = job.checklist
@@ -81,7 +83,7 @@ class ScoreUpdatingTask extends Task<'score.updating'> {
 
   async onSuccess(
     jobId: string,
-    matchPercentage: TaskTypeMap['score.updating']['output'],
+    matchPercentage: TaskTypeMap[typeof SCORE_UPDATING]['output'],
   ): Promise<void> {
     await saveMatchScore(jobId, matchPercentage)
     log.info(`Score saved: ${matchPercentage}% for job ${jobId}`)

@@ -1,17 +1,19 @@
 import { saveChecklist } from '@api/jobs'
 import { aiWorker } from '../workers/ai-worker-manager'
-import { Task } from './base.task'
+import { CHECKLIST_MATCHING } from '../workflow/workflow.types'
+import { BaseTask } from './base.task'
 import type { TaskTypeMap } from './base.task'
 
-class ChecklistMatchingTask extends Task<'checklist.matching'> {
-  readonly name = 'checklist.matching' as const
+class ChecklistMatchingTask extends BaseTask<typeof CHECKLIST_MATCHING> {
+  readonly name = CHECKLIST_MATCHING
+  readonly inputKeys = ['checklist', 'resumeStructure'] as const
   readonly contextKey = 'checklist' as const
 
   async execute(
-    input: TaskTypeMap['checklist.matching']['input'],
-  ): Promise<TaskTypeMap['checklist.matching']['output']> {
-    return aiWorker.execute<TaskTypeMap['checklist.matching']['output']>(
-      'checklist.matching',
+    input: TaskTypeMap[typeof CHECKLIST_MATCHING]['input'],
+  ): Promise<TaskTypeMap[typeof CHECKLIST_MATCHING]['output']> {
+    return aiWorker.execute<TaskTypeMap[typeof CHECKLIST_MATCHING]['output']>(
+      CHECKLIST_MATCHING,
       {
         checklist: input.checklist,
         resumeStructure: input.resumeStructure,
@@ -21,7 +23,7 @@ class ChecklistMatchingTask extends Task<'checklist.matching'> {
 
   async onSuccess(
     jobId: string,
-    checklist: TaskTypeMap['checklist.matching']['output'],
+    checklist: TaskTypeMap[typeof CHECKLIST_MATCHING]['output'],
   ): Promise<void> {
     await saveChecklist(jobId, checklist)
   }

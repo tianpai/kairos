@@ -1,9 +1,14 @@
 import { useEffect, useRef } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { useWorkflowStore } from '@workflow/workflow.store'
-import { recoverStaleWorkflow } from '@workflow/workflow.recovery'
+import { recoverStaleWorkflow } from '@workflow/workflow.service'
 import { useResumeStore } from '@typst-compiler/resumeState'
-import { saveWorkflowState } from '@api/jobs'
+import { saveWorkflow } from '@api/jobs'
+import {
+  RESUME_PARSING,
+  RESUME_TAILORING,
+  SCORE_UPDATING,
+} from '@workflow/workflow.types'
 import type { JobApplicationDetails } from '@api/jobs'
 import type { TemplateData } from '@templates/template.types'
 import type { TaskStateMap, WorkflowName } from '@workflow/workflow.types'
@@ -50,7 +55,7 @@ export function useWorkflowSync(
 
     // If recovery changed the state, persist it back to DB
     if (wasStale) {
-      saveWorkflowState(jobId, recovered, recovered.status).catch((error) => {
+      saveWorkflow(jobId, recovered, recovered.status).catch((error) => {
         console.error(
           '[WorkflowSync] Failed to save recovered workflow state:',
           error,
@@ -115,14 +120,14 @@ export function useWorkflowSync(
     queryClient.invalidateQueries({ queryKey: ['jobApplication', jobId] })
 
     // If score updated, also invalidate the applications list for sidebar
-    if (justCompleted.includes('score.updating')) {
+    if (justCompleted.includes(SCORE_UPDATING)) {
       queryClient.invalidateQueries({ queryKey: ['jobApplications'] })
     }
 
     // If resume parsing or tailoring completed, load into resume store
     if (
-      justCompleted.includes('resume.parsing') ||
-      justCompleted.includes('resume.tailoring')
+      justCompleted.includes(RESUME_PARSING) ||
+      justCompleted.includes(RESUME_TAILORING)
     ) {
       if (context?.resumeStructure) {
         loadParsedResume(context.resumeStructure as TemplateData)

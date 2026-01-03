@@ -1,7 +1,7 @@
 import { useEffect, useCallback } from 'react'
 import { WandSparkles } from 'lucide-react'
 import { useWorkflowStore } from '@workflow/workflow.store'
-import { startTailoringWorkflow } from '@workflow/workflow.service'
+import { startWorkflow } from '@workflow/workflow.service'
 import { CHECKLIST_MATCHING, RESUME_TAILORING } from '@workflow/workflow.types'
 import { InvertedButton } from '@ui/InvertedButton'
 import { useTailoringData } from '@hooks/useTailoringData'
@@ -44,7 +44,7 @@ export function TailoringButton() {
       return
     }
 
-    startTailoringWorkflow(jobId, {
+    startWorkflow('tailoring', jobId, {
       checklist,
       resumeStructure,
       templateId,
