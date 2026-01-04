@@ -1,8 +1,8 @@
 import log from 'electron-log/renderer'
-import { getJobApplication, saveMatchScore } from '@api/jobs'
+import { saveMatchScore } from '@api/jobs'
 import { SCORE_UPDATING } from '../workflow/workflow.types'
 import { BaseTask } from './base.task'
-import type { Checklist, ChecklistRequirement } from '@type/checklist'
+import type { ChecklistRequirement } from '@type/checklist'
 import type { TaskTypeMap } from './base.task'
 
 const HARD_REQUIREMENT_WEIGHT = 3
@@ -58,7 +58,7 @@ export function calculateScore(checklist: Checklist): number {
 
 class ScoreUpdatingTask extends BaseTask<typeof SCORE_UPDATING> {
   readonly name = SCORE_UPDATING
-  readonly inputKeys = ['jobId'] as const
+  readonly inputKeys = ['checklist'] as const
   readonly tipEvent = 'score.updated'
 
   getTipData(result: number): Record<string, unknown> {
@@ -68,10 +68,9 @@ class ScoreUpdatingTask extends BaseTask<typeof SCORE_UPDATING> {
   async execute(
     input: TaskTypeMap[typeof SCORE_UPDATING]['input'],
   ): Promise<TaskTypeMap[typeof SCORE_UPDATING]['output']> {
-    const job = await getJobApplication(input.jobId)
+    const checklist = input.checklist
 
-    const checklist = job.checklist
-    if (!checklist) {
+    if (!checklist?.hardRequirements) {
       log.warn('Score update: no checklist found')
       return 0
     }

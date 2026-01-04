@@ -95,7 +95,16 @@ function findReadyTasks(
     // Check all inputs available
     const task = TASK_REGISTRY[taskName as Task]
     const input = resolveTaskInput(task, context)
-    if (input === null) continue
+    if (input === null) {
+      // Log which inputs are missing for debugging
+      const missingKeys = task.inputKeys.filter(
+        (key) => context[key as keyof WorkflowContext] === undefined,
+      )
+      log.debug(
+        `[Workflow] Task ${taskName} blocked on missing inputs: ${missingKeys.join(', ')}`,
+      )
+      continue
+    }
 
     ready.push(taskName as Task)
   }
@@ -164,7 +173,9 @@ async function runTask(
   store.setTaskStatus(jobId, taskName, 'running')
 
   try {
-    const result = await task.execute(input as any)
+    // Safe cast: inputKeys is compile-time validated to match TaskTypeMap[T]['input']
+    // and resolveTaskInput verified all keys are present at runtime
+    const result = await task.execute(input as Parameters<typeof task.execute>[0])
     await task.onSuccess(jobId, result)
 
     if (task.contextKey) {
@@ -243,6 +254,9 @@ async function startReadyTasks(jobId: string): Promise<void> {
   }
 
   // Start ready tasks
+  log.info(
+    `[Workflow] Starting ${readyTasks.length} ready task(s): ${readyTasks.join(', ')}`,
+  )
   for (const taskName of readyTasks) {
     const task = TASK_REGISTRY[taskName]
     const input = resolveTaskInput(task, context)

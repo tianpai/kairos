@@ -39,7 +39,7 @@ export type ResumeTailoringInput = {
 export type ResumeTailoringOutput = Record<string, unknown>
 
 export type ScoreUpdatingInput = {
-  jobId: string
+  checklist: Checklist
 }
 export type ScoreUpdatingOutput = number
 
@@ -73,6 +73,15 @@ export type TaskTypeMap = {
 export type { Task }
 
 /**
+ * Valid input keys for a task must be:
+ * 1. Keys of the task's input type (from TaskTypeMap)
+ * 2. Also valid WorkflowContext keys (so they can be resolved from context)
+ */
+type ValidInputKeys<T extends Task> = ReadonlyArray<
+  keyof TaskTypeMap[T]['input'] & WorkflowContextKey
+>
+
+/**
  * Abstract base class for all workflow tasks.
  *
  * @template T - The task name, used to infer input/output types from TaskTypeMap
@@ -86,8 +95,9 @@ export abstract class BaseTask<T extends Task> {
   /**
    * Context keys required as input for this task.
    * The workflow engine uses this to auto-resolve inputs from context.
+   * Keys must exist in both TaskTypeMap[T]['input'] and WorkflowContext.
    */
-  abstract readonly inputKeys: ReadonlyArray<WorkflowContextKey>
+  abstract readonly inputKeys: ValidInputKeys<T>
 
   /**
    * Optional: which workflow context key to update with the result
