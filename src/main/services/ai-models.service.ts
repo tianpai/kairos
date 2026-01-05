@@ -22,9 +22,9 @@ const DEEPSEEK_FALLBACK_MODELS = [
 
 // Claude models are hardcoded (OAuth doesn't provide a model list endpoint)
 const CLAUDE_MODELS: ModelInfo[] = [
-  { id: "claude-sonnet-4-20250514", name: "Claude Sonnet 4" },
-  { id: "claude-opus-4-20250514", name: "Claude Opus 4" },
-  { id: "claude-3-5-haiku-20241022", name: "Claude 3.5 Haiku" },
+  { id: "claude-sonnet-4-5-20250929", name: "Claude Sonnet 4.5" },
+  { id: "claude-opus-4-5-20251101", name: "Claude Opus 4.5" },
+  { id: "claude-haiku-4-5-20251001", name: "Claude Haiku 4.5" },
 ]
 
 // Filter patterns for chat models (exclude embeddings, tts, whisper, dall-e, etc.)
@@ -133,7 +133,7 @@ export function getDefaultModel(provider: ProviderType): string {
     case "deepseek":
       return "deepseek-chat"
     case "claude":
-      return "claude-sonnet-4-20250514"
+      return "claude-sonnet-4-5-20250929"
     default:
       return "gpt-4o-mini"
   }

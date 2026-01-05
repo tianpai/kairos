@@ -92,7 +92,7 @@ export class ClaudeProvider implements AIProvider {
         'anthropic-beta': ANTHROPIC_BETA_FLAGS.join(','),
       },
     })
-    this.defaultModel = config.defaultModel ?? 'claude-sonnet-4-20250514'
+    this.defaultModel = config.defaultModel ?? 'claude-sonnet-4-5-20250929'
   }
 
   async generateStructuredOutput<T>(params: GenerateParams<T>): Promise<T> {
