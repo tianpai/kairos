@@ -15,7 +15,7 @@
     "build:all": "npm run build && electron-builder --mac --win --linux",
     "postinstall": "npx @electron/rebuild",
     "format": "prettier --write .",
-    "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
+    "lint": "eslint \"{src,apps,libs,test}/**/*.{ts,tsx}\" --fix",
     "test": "vitest run",
     "test:watch": "vitest watch",
     "release": "standard-version",
