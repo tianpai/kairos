@@ -6,15 +6,16 @@ import { registerAllHandlers } from './ipc'
 import { connectDatabase, disconnectDatabase, runMigrations } from './services/database.service'
 import { createAppMenu } from './menu'
 import {
-  fetchOpenAIModels,
+  
   fetchDeepSeekModels,
+  fetchOpenAIModels,
   getClaudeModels,
-  getFallbackModels,
   getDefaultModel,
-  type ProviderType,
+  getFallbackModels
 } from './services/ai-models.service'
 import { claudeSubscriptionService } from './services/claude-subscription.service'
 import { aiServerService } from './services/ai-server.service'
+import type {ProviderType} from './services/ai-models.service';
 
 // Initialize logger
 log.initialize()

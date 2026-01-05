@@ -5,11 +5,12 @@ import { PageHeader } from '@ui/PageHeader'
 import { InvertedButton } from '@ui/InvertedButton'
 import { AppLayout } from '@layout/AppLayout'
 import { useLayoutStore } from '@layout/layout.store'
-import { SettingsSidebar, type SettingsSection } from './SettingsSidebar'
+import {  SettingsSidebar } from './SettingsSidebar'
 import { ProvidersSection } from './ProvidersSection'
 import { AppearanceSection } from './AppearanceSection'
 import { TipsSection } from './TipsSection'
 import { AboutSection } from './AboutSection'
+import type {SettingsSection} from './SettingsSidebar';
 
 export default function SettingsPage() {
   const navigate = useNavigate()

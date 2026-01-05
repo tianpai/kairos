@@ -21,7 +21,7 @@ const DEEPSEEK_FALLBACK_MODELS = [
 ]
 
 // Claude models are hardcoded (OAuth doesn't provide a model list endpoint)
-const CLAUDE_MODELS: ModelInfo[] = [
+const CLAUDE_MODELS: Array<ModelInfo> = [
   { id: "claude-sonnet-4-5-20250929", name: "Claude Sonnet 4.5" },
   { id: "claude-opus-4-5-20251101", name: "Claude Opus 4.5" },
   { id: "claude-haiku-4-5-20251001", name: "Claude Haiku 4.5" },
@@ -43,7 +43,7 @@ function isOpenAIChatModel(modelId: string): boolean {
 export async function fetchOpenAIModels(
   apiKey: string,
   baseUrl = "https://api.openai.com/v1",
-): Promise<ModelInfo[]> {
+): Promise<Array<ModelInfo>> {
   try {
     const response = await fetch(`${baseUrl}/models`, {
       headers: {
@@ -79,7 +79,7 @@ export async function fetchOpenAIModels(
 export async function fetchDeepSeekModels(
   apiKey: string,
   baseUrl = "https://api.deepseek.com/v1",
-): Promise<ModelInfo[]> {
+): Promise<Array<ModelInfo>> {
   try {
     const response = await fetch(`${baseUrl}/models`, {
       headers: {
@@ -109,11 +109,11 @@ export async function fetchDeepSeekModels(
   }
 }
 
-export function getClaudeModels(): ModelInfo[] {
+export function getClaudeModels(): Array<ModelInfo> {
   return CLAUDE_MODELS
 }
 
-export function getFallbackModels(provider: ProviderType): ModelInfo[] {
+export function getFallbackModels(provider: ProviderType): Array<ModelInfo> {
   switch (provider) {
     case "openai":
       return OPENAI_FALLBACK_MODELS.map((id) => ({ id, name: id }))

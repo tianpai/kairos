@@ -1,24 +1,24 @@
-import { useState, useEffect } from 'react'
-import { Check, Eye, EyeOff, Copy } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { Check, Copy, Eye, EyeOff } from 'lucide-react'
 import { InvertedButton } from '@ui/InvertedButton'
 import { GenericSidebarItem } from '@sidebar/GenericSidebarItem'
 import {
+  useActiveProvider,
   useApiKey,
-  useDeleteApiKey,
-  useSetApiKey,
+  useClaudeCompleteAuth,
+  useClaudeIsAuthenticated,
+  useClaudeLogout,
+  useClaudeStartAuth,
   useDeepSeekApiKey,
+  useDefaultModel,
+  useDeleteApiKey,
   useDeleteDeepSeekApiKey,
-  useSetDeepSeekApiKey,
   useFetchModels,
   useSelectedModel,
-  useSetSelectedModel,
-  useDefaultModel,
-  useActiveProvider,
   useSetActiveProvider,
-  useClaudeIsAuthenticated,
-  useClaudeStartAuth,
-  useClaudeCompleteAuth,
-  useClaudeLogout,
+  useSetApiKey,
+  useSetDeepSeekApiKey,
+  useSetSelectedModel,
 } from '@hooks/useSettings'
 
 type ProviderType = 'openai' | 'deepseek' | 'claude'
@@ -30,7 +30,7 @@ interface ProviderInfo {
   placeholder: string
 }
 
-const PROVIDERS: ProviderInfo[] = [
+const PROVIDERS: Array<ProviderInfo> = [
   {
     id: 'openai',
     name: 'OpenAI',

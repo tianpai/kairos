@@ -1,7 +1,7 @@
 import { Cpu, Info, Lightbulb, Palette } from 'lucide-react'
-import type { LucideIcon } from 'lucide-react'
 import { CollapsibleSidebar } from '@sidebar/CollapsibleSidebar'
 import { GenericSidebarItem } from '@sidebar/GenericSidebarItem'
+import type { LucideIcon } from 'lucide-react'
 
 export type SettingsSection = 'providers' | 'appearance' | 'tips' | 'about'
 
@@ -11,7 +11,7 @@ interface NavItem {
   icon: LucideIcon
 }
 
-const NAV_ITEMS: NavItem[] = [
+const NAV_ITEMS: Array<NavItem> = [
   { id: 'providers', label: 'Providers', icon: Cpu },
   { id: 'appearance', label: 'Appearance', icon: Palette },
   { id: 'tips', label: 'Tips', icon: Lightbulb },

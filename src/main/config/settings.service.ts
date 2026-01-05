@@ -7,17 +7,17 @@ interface SettingsSchema {
     openai: {
       apiKey: string | null;
       selectedModel: string | null;
-      cachedModels: string[];
+      cachedModels: Array<string>;
     };
     deepseek: {
       apiKey: string | null;
       selectedModel: string | null;
-      cachedModels: string[];
+      cachedModels: Array<string>;
     };
     claude: {
       // No apiKey - Claude uses OAuth tokens stored separately
       selectedModel: string | null;
-      cachedModels: string[];
+      cachedModels: Array<string>;
     };
   };
   activeProvider: "openai" | "deepseek" | "claude";
@@ -84,11 +84,11 @@ export class SettingsService {
     this.store.set("aiProviders.openai.selectedModel", model);
   }
 
-  getOpenAICachedModels(): string[] {
+  getOpenAICachedModels(): Array<string> {
     return this.store.get("aiProviders.openai.cachedModels");
   }
 
-  setOpenAICachedModels(models: string[]): void {
+  setOpenAICachedModels(models: Array<string>): void {
     this.store.set("aiProviders.openai.cachedModels", models);
   }
 
@@ -117,11 +117,11 @@ export class SettingsService {
     this.store.set("aiProviders.deepseek.selectedModel", model);
   }
 
-  getDeepSeekCachedModels(): string[] {
+  getDeepSeekCachedModels(): Array<string> {
     return this.store.get("aiProviders.deepseek.cachedModels");
   }
 
-  setDeepSeekCachedModels(models: string[]): void {
+  setDeepSeekCachedModels(models: Array<string>): void {
     this.store.set("aiProviders.deepseek.cachedModels", models);
   }
 
@@ -134,11 +134,11 @@ export class SettingsService {
     this.store.set("aiProviders.claude.selectedModel", model);
   }
 
-  getClaudeCachedModels(): string[] {
+  getClaudeCachedModels(): Array<string> {
     return this.store.get("aiProviders.claude.cachedModels");
   }
 
-  setClaudeCachedModels(models: string[]): void {
+  setClaudeCachedModels(models: Array<string>): void {
     this.store.set("aiProviders.claude.cachedModels", models);
   }
 

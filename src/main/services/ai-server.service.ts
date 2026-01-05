@@ -1,14 +1,16 @@
-import express, { type Request, type Response, type NextFunction } from 'express'
-import { createServer, type Server } from 'http'
-import { WebSocketServer, WebSocket } from 'ws'
+import {  createServer } from 'node:http'
+import express from 'express'
+import { WebSocket, WebSocketServer } from 'ws'
 import log from 'electron-log/main'
 import { createAIProvider } from '../ai/provider.factory'
-import type { AIProviderConfig } from '../ai/provider.interface'
 import { parseResume } from '../ai/prompts/resume-parsing'
 import { parseChecklist } from '../ai/prompts/checklist-parsing'
 import { matchChecklist } from '../ai/prompts/checklist-matching'
 import { tailorResume } from '../ai/prompts/resume-tailoring'
 import { extractJobInfo } from '../ai/prompts/jobinfo-extracting'
+import type {Server} from 'node:http';
+import type {NextFunction, Request, Response} from 'express';
+import type { AIProviderConfig } from '../ai/provider.interface'
 import type { Checklist } from '@type/checklist'
 
 // Task type constants (mirroring renderer's task-names.ts)

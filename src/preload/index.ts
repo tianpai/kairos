@@ -99,7 +99,7 @@ contextBridge.exposeInMainWorld('electron', {
   models: {
     fetch: (provider: string): Promise<Array<{ id: string; name: string }>> =>
       ipcRenderer.invoke('models:fetch', provider),
-    getCached: (provider: string): Promise<string[]> =>
+    getCached: (provider: string): Promise<Array<string>> =>
       ipcRenderer.invoke('models:getCached', provider),
     getSelected: (provider: string): Promise<string | null> =>
       ipcRenderer.invoke('models:getSelected', provider),

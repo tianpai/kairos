@@ -1,7 +1,7 @@
-import { app, safeStorage, shell } from 'electron'
 import { createHash, randomBytes } from 'node:crypto'
 import { existsSync, promises as fs } from 'node:fs'
 import { dirname, join } from 'node:path'
+import { app, safeStorage, shell } from 'electron'
 import log from 'electron-log/main'
 
 // OAuth Configuration
