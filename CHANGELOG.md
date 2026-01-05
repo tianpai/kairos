@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## 0.0.4 (Unreleased)
+
+"You shall be the Fellowship of the Ring"
+
+### Features
+
+- Add DeepSeek provider support
+- Support Anthropic Claude and Claude Code subscription login
+
+### Bug Fixes
+
+- Update to latest Claude models
+- Remove duplicate provider name from settings panel
+
 ## 0.0.3 (2024-12-31)
 
 "I need you to hurry up now, 'Cause I can't wait much longer"
