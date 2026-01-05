@@ -4,13 +4,14 @@ import type { AIProvider, DeepPartial } from '../../ai/provider.interface'
 interface ParseOptions {
   streaming?: boolean
   onPartial?: (partial: DeepPartial<Record<string, unknown>>) => void
+  model: string
 }
 
 export async function parseResume(
   provider: AIProvider,
   rawResumeContent: string,
   templateId: string,
-  options?: ParseOptions,
+  options: ParseOptions,
 ): Promise<Record<string, unknown>> {
   const systemPrompt =
     'Extract structured data from resumes. Only include factual information from the source.'
@@ -23,10 +24,10 @@ export async function parseResume(
     systemPrompt,
     userPrompt,
     schema,
-    model: 'gpt-4o-mini',
+    model: options.model,
   }
 
-  if (options?.streaming && options.onPartial) {
+  if (options.streaming && options.onPartial) {
     return provider.streamStructuredOutput({
       ...params,
       onPartial: options.onPartial,

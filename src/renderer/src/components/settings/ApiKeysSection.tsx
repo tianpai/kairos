@@ -1,12 +1,33 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { InvertedButton } from '@ui/InvertedButton'
-import { useApiKey, useDeleteApiKey, useSetApiKey } from '@hooks/useSettings'
+import {
+  useApiKey,
+  useDeleteApiKey,
+  useSetApiKey,
+  useFetchModels,
+  useSelectedModel,
+  useSetSelectedModel,
+  useDefaultModel,
+} from '@hooks/useSettings'
 
 export function ApiKeysSection() {
   const { data: currentKey } = useApiKey()
   const setApiKey = useSetApiKey()
   const deleteApiKey = useDeleteApiKey()
   const [apiKey, setApiKeyInput] = useState('')
+
+  // Model selection
+  const { data: models, isLoading: isLoadingModels, refetch: refetchModels } = useFetchModels('openai')
+  const { data: selectedModel } = useSelectedModel('openai')
+  const { data: defaultModel } = useDefaultModel('openai')
+  const setSelectedModel = useSetSelectedModel()
+
+  // Refetch models when API key changes
+  useEffect(() => {
+    if (currentKey) {
+      refetchModels()
+    }
+  }, [currentKey, refetchModels])
 
   const handleSave = async () => {
     if (apiKey.trim()) {
@@ -18,6 +39,12 @@ export function ApiKeysSection() {
   const handleDelete = async () => {
     await deleteApiKey.mutateAsync()
   }
+
+  const handleModelChange = async (model: string) => {
+    await setSelectedModel.mutateAsync({ provider: 'openai', model })
+  }
+
+  const displayModel = selectedModel ?? defaultModel ?? 'gpt-4o-mini'
 
   return (
     <div className="space-y-6">
@@ -62,6 +89,33 @@ export function ApiKeysSection() {
             </InvertedButton>
           )}
         </div>
+
+        {currentKey && (
+          <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              Model
+            </label>
+            <select
+              value={displayModel}
+              onChange={(e) => handleModelChange(e.target.value)}
+              disabled={isLoadingModels}
+              className="mt-1 w-full max-w-md border-2 border-gray-300 bg-white px-3 py-2 focus:border-black focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus:border-white disabled:opacity-50"
+            >
+              {isLoadingModels ? (
+                <option>Loading models...</option>
+              ) : (
+                models?.map((model) => (
+                  <option key={model.id} value={model.id}>
+                    {model.name}
+                  </option>
+                ))
+              )}
+            </select>
+            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+              Select the model to use for all AI tasks.
+            </p>
+          </div>
+        )}
       </div>
     </div>
   )

@@ -5,13 +5,14 @@ import type { AIProvider, DeepPartial } from '../../ai/provider.interface'
 interface MatchOptions {
   streaming?: boolean
   onPartial?: (partial: DeepPartial<Checklist>) => void
+  model: string
 }
 
 export async function matchChecklist(
   provider: AIProvider,
   checklist: Checklist,
   resumeStructure: Record<string, unknown>,
-  options?: MatchOptions,
+  options: MatchOptions,
 ): Promise<Checklist> {
   const systemPrompt = `You are a resume-to-job matching expert. Your task is to accurately determine which job requirements are fulfilled by the candidate's resume.
 
@@ -49,10 +50,10 @@ Analyze the resume against each requirement and return the updated checklist wit
     systemPrompt,
     userPrompt,
     schema: ChecklistSchema,
-    model: 'gpt-4o',
+    model: options.model,
   }
 
-  if (options?.streaming && options.onPartial) {
+  if (options.streaming && options.onPartial) {
     return provider.streamStructuredOutput({
       ...params,
       onPartial: options.onPartial,

@@ -5,6 +5,7 @@ import type { AIProvider, DeepPartial } from '../../ai/provider.interface'
 interface TailorOptions {
   streaming?: boolean
   onPartial?: (partial: DeepPartial<Record<string, unknown>>) => void
+  model: string
 }
 
 export async function tailorResume(
@@ -12,7 +13,7 @@ export async function tailorResume(
   checklist: Checklist,
   resumeStructure: Record<string, unknown>,
   templateId: string,
-  options?: TailorOptions,
+  options: TailorOptions,
 ): Promise<Record<string, unknown>> {
   const systemPrompt = `You are an expert resume writer and career coach. Your task is to tailor a resume to incorporate specific keywords selected by the user.
 
@@ -75,10 +76,10 @@ Tailor this resume to maximize fit for the job requirements. Remember: maintain 
     systemPrompt,
     userPrompt,
     schema,
-    model: 'gpt-4o',
+    model: options.model,
   }
 
-  if (options?.streaming && options.onPartial) {
+  if (options.streaming && options.onPartial) {
     return provider.streamStructuredOutput({
       ...params,
       onPartial: options.onPartial,

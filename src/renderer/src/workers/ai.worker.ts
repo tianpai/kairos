@@ -20,6 +20,7 @@ export interface AIWorkerMessage {
   taskType: AITaskType
   payload: Record<string, unknown>
   apiKey: string
+  model: string
   streaming?: boolean
 }
 
@@ -29,7 +30,7 @@ export type AIWorkerResponse =
   | { id: string; type: 'failed'; error: string }
 
 self.onmessage = async ({ data }: MessageEvent<AIWorkerMessage>) => {
-  const { id, taskType, payload, apiKey, streaming = false } = data
+  const { id, taskType, payload, apiKey, model, streaming = false } = data
 
   try {
     const provider = createAIProvider({ type: 'openai', apiKey })
@@ -48,13 +49,14 @@ self.onmessage = async ({ data }: MessageEvent<AIWorkerMessage>) => {
           provider,
           payload.rawResumeContent as string,
           payload.templateId as string,
-          { streaming, onPartial },
+          { streaming, onPartial, model },
         )
         break
       case CHECKLIST_PARSING:
         result = await parseChecklist(provider, payload.jobDescription as string, {
           streaming,
           onPartial,
+          model,
         })
         break
       case CHECKLIST_MATCHING:
@@ -62,7 +64,7 @@ self.onmessage = async ({ data }: MessageEvent<AIWorkerMessage>) => {
           provider,
           payload.checklist as Parameters<typeof matchChecklist>[1],
           payload.resumeStructure as Record<string, unknown>,
-          { streaming, onPartial },
+          { streaming, onPartial, model },
         )
         break
       case RESUME_TAILORING:
@@ -71,13 +73,14 @@ self.onmessage = async ({ data }: MessageEvent<AIWorkerMessage>) => {
           payload.checklist as Parameters<typeof tailorResume>[1],
           payload.resumeStructure as Record<string, unknown>,
           payload.templateId as string,
-          { streaming, onPartial },
+          { streaming, onPartial, model },
         )
         break
       case JOBINFO_EXTRACTING:
         result = await extractJobInfo(provider, payload.jobDescription as string, {
           streaming,
           onPartial,
+          model,
         })
         break
       default:

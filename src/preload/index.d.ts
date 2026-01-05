@@ -1,5 +1,11 @@
 type ThemeSource = 'system' | 'light' | 'dark'
 type ThemeMode = 'light' | 'dark'
+type ProviderType = 'openai' | 'deepseek'
+
+interface ModelInfo {
+  id: string
+  name: string
+}
 
 interface IElectronAPI {
   shortcuts: {
@@ -36,6 +42,17 @@ interface IElectronAPI {
     setApiKey: (key: string) => Promise<void>
     hasApiKey: () => Promise<boolean>
     deleteApiKey: () => Promise<void>
+  }
+  models: {
+    fetch: (provider: ProviderType) => Promise<ModelInfo[]>
+    getCached: (provider: ProviderType) => Promise<string[]>
+    getSelected: (provider: ProviderType) => Promise<string | null>
+    setSelected: (provider: ProviderType, model: string) => Promise<void>
+    getDefault: (provider: ProviderType) => Promise<string>
+  }
+  provider: {
+    getActive: () => Promise<ProviderType>
+    setActive: (provider: ProviderType) => Promise<void>
   }
   theme: {
     get: () => Promise<ThemeSource>

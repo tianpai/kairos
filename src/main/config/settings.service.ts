@@ -6,14 +6,16 @@ interface SettingsSchema {
   aiProviders: {
     openai: {
       apiKey: string | null;
-      defaultModel: string;
+      selectedModel: string | null;
+      cachedModels: string[];
     };
-    ollama: {
-      baseUrl: string | null;
-      defaultModel: string;
+    deepseek: {
+      apiKey: string | null;
+      selectedModel: string | null;
+      cachedModels: string[];
     };
   };
-  activeProvider: "openai" | "ollama";
+  activeProvider: "openai" | "deepseek";
   theme: ThemeSource;
 }
 
@@ -26,11 +28,13 @@ export class SettingsService {
         aiProviders: {
           openai: {
             apiKey: null,
-            defaultModel: "gpt-4o-mini",
+            selectedModel: null,
+            cachedModels: [],
           },
-          ollama: {
-            baseUrl: null,
-            defaultModel: "llama2",
+          deepseek: {
+            apiKey: null,
+            selectedModel: null,
+            cachedModels: [],
           },
         },
         activeProvider: "openai",
@@ -62,6 +66,66 @@ export class SettingsService {
     return process.env.OPENAI_API_KEY || null;
   }
 
+  // OpenAI Model methods
+  getOpenAISelectedModel(): string | null {
+    return this.store.get("aiProviders.openai.selectedModel");
+  }
+
+  setOpenAISelectedModel(model: string): void {
+    this.store.set("aiProviders.openai.selectedModel", model);
+  }
+
+  getOpenAICachedModels(): string[] {
+    return this.store.get("aiProviders.openai.cachedModels");
+  }
+
+  setOpenAICachedModels(models: string[]): void {
+    this.store.set("aiProviders.openai.cachedModels", models);
+  }
+
+  // DeepSeek methods
+  getDeepSeekKey(): string | null {
+    return this.store.get("aiProviders.deepseek.apiKey");
+  }
+
+  setDeepSeekKey(key: string): void {
+    this.store.set("aiProviders.deepseek.apiKey", key);
+  }
+
+  hasDeepSeekKey(): boolean {
+    return !!this.store.get("aiProviders.deepseek.apiKey");
+  }
+
+  deleteDeepSeekKey(): void {
+    this.store.set("aiProviders.deepseek.apiKey", null);
+  }
+
+  getDeepSeekSelectedModel(): string | null {
+    return this.store.get("aiProviders.deepseek.selectedModel");
+  }
+
+  setDeepSeekSelectedModel(model: string): void {
+    this.store.set("aiProviders.deepseek.selectedModel", model);
+  }
+
+  getDeepSeekCachedModels(): string[] {
+    return this.store.get("aiProviders.deepseek.cachedModels");
+  }
+
+  setDeepSeekCachedModels(models: string[]): void {
+    this.store.set("aiProviders.deepseek.cachedModels", models);
+  }
+
+  // Active provider methods
+  getActiveProvider(): "openai" | "deepseek" {
+    return this.store.get("activeProvider");
+  }
+
+  setActiveProvider(provider: "openai" | "deepseek"): void {
+    this.store.set("activeProvider", provider);
+  }
+
+  // Theme methods
   getTheme(): ThemeSource {
     return this.store.get("theme");
   }

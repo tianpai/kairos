@@ -14,6 +14,12 @@ export interface ExecuteOptions {
   onPartial?: (partial: unknown) => void
 }
 
+async function getSelectedModelOrDefault(): Promise<string> {
+  const selected = await window.electron.models.getSelected('openai')
+  if (selected) return selected
+  return window.electron.models.getDefault('openai')
+}
+
 class AIWorkerManager {
   private worker: Worker | null = null
   private pendingTasks = new Map<string, PendingTask>()
@@ -41,6 +47,7 @@ class AIWorkerManager {
       throw new Error('API key not configured')
     }
 
+    const model = await getSelectedModelOrDefault()
     const worker = this.getWorker()
 
     return new Promise((resolve, reject) => {
@@ -53,13 +60,14 @@ class AIWorkerManager {
       })
 
       const streamingLabel = options?.streaming ? ' (streaming)' : ''
-      log.info(`AI task started: ${taskType}${streamingLabel}`)
+      log.info(`AI task started: ${taskType}${streamingLabel} with model: ${model}`)
 
       const message: AIWorkerMessage = {
         id,
         taskType,
         payload,
         apiKey,
+        model,
         streaming: options?.streaming,
       }
       worker.postMessage(message)

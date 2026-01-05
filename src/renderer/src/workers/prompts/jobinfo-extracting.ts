@@ -15,12 +15,13 @@ export type ExtractedJobInfo = z.infer<typeof ExtractedJobInfoSchema>
 interface ExtractOptions {
   streaming?: boolean
   onPartial?: (partial: DeepPartial<ExtractedJobInfo>) => void
+  model: string
 }
 
 export async function extractJobInfo(
   provider: AIProvider,
   jobDescription: string,
-  options?: ExtractOptions,
+  options: ExtractOptions,
 ): Promise<ExtractedJobInfo> {
   const systemPrompt = `You are a job posting analyzer. Extract key information from job descriptions.
 
@@ -39,10 +40,10 @@ Be conservative - only extract information that is clearly stated. Do not guess 
     systemPrompt,
     userPrompt,
     schema: ExtractedJobInfoSchema,
-    model: 'gpt-4o-mini',
+    model: options.model,
   }
 
-  if (options?.streaming && options.onPartial) {
+  if (options.streaming && options.onPartial) {
     return provider.streamStructuredOutput({
       ...params,
       onPartial: options.onPartial,

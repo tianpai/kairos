@@ -5,6 +5,13 @@ import { SettingsService } from './config/settings.service'
 import { registerAllHandlers } from './ipc'
 import { connectDatabase, disconnectDatabase, runMigrations } from './services/database.service'
 import { createAppMenu } from './menu'
+import {
+  fetchOpenAIModels,
+  fetchDeepSeekModels,
+  getFallbackModels,
+  getDefaultModel,
+  type ProviderType,
+} from './services/ai-models.service'
 
 // Initialize logger
 log.initialize()
@@ -30,6 +37,73 @@ ipcMain.handle('settings:hasApiKey', () => {
 
 ipcMain.handle('settings:deleteApiKey', () => {
   settingsService.deleteOpenAIKey()
+})
+
+// Model fetching IPC handlers
+ipcMain.handle('models:fetch', async (_, provider: ProviderType) => {
+  try {
+    let models
+    if (provider === 'openai') {
+      const apiKey = settingsService.getOpenAIKey()
+      if (!apiKey) {
+        return getFallbackModels(provider)
+      }
+      models = await fetchOpenAIModels(apiKey)
+      settingsService.setOpenAICachedModels(models.map((m) => m.id))
+    } else if (provider === 'deepseek') {
+      const apiKey = settingsService.getDeepSeekKey()
+      if (!apiKey) {
+        return getFallbackModels(provider)
+      }
+      models = await fetchDeepSeekModels(apiKey)
+      settingsService.setDeepSeekCachedModels(models.map((m) => m.id))
+    } else {
+      return getFallbackModels(provider)
+    }
+    return models
+  } catch (error) {
+    log.error('Failed to fetch models:', error)
+    return getFallbackModels(provider)
+  }
+})
+
+ipcMain.handle('models:getCached', (_, provider: ProviderType) => {
+  if (provider === 'openai') {
+    return settingsService.getOpenAICachedModels()
+  } else if (provider === 'deepseek') {
+    return settingsService.getDeepSeekCachedModels()
+  }
+  return []
+})
+
+ipcMain.handle('models:getSelected', (_, provider: ProviderType) => {
+  if (provider === 'openai') {
+    return settingsService.getOpenAISelectedModel()
+  } else if (provider === 'deepseek') {
+    return settingsService.getDeepSeekSelectedModel()
+  }
+  return null
+})
+
+ipcMain.handle('models:setSelected', (_, provider: ProviderType, model: string) => {
+  if (provider === 'openai') {
+    settingsService.setOpenAISelectedModel(model)
+  } else if (provider === 'deepseek') {
+    settingsService.setDeepSeekSelectedModel(model)
+  }
+})
+
+ipcMain.handle('models:getDefault', (_, provider: ProviderType) => {
+  return getDefaultModel(provider)
+})
+
+// Active provider IPC handlers
+ipcMain.handle('provider:getActive', () => {
+  return settingsService.getActiveProvider()
+})
+
+ipcMain.handle('provider:setActive', (_, provider: ProviderType) => {
+  settingsService.setActiveProvider(provider)
 })
 
 // Theme IPC handlers

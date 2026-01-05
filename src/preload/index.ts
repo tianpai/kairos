@@ -89,6 +89,22 @@ contextBridge.exposeInMainWorld('electron', {
     hasApiKey: (): Promise<boolean> => ipcRenderer.invoke('settings:hasApiKey'),
     deleteApiKey: (): Promise<void> => ipcRenderer.invoke('settings:deleteApiKey'),
   },
+  models: {
+    fetch: (provider: string): Promise<Array<{ id: string; name: string }>> =>
+      ipcRenderer.invoke('models:fetch', provider),
+    getCached: (provider: string): Promise<string[]> =>
+      ipcRenderer.invoke('models:getCached', provider),
+    getSelected: (provider: string): Promise<string | null> =>
+      ipcRenderer.invoke('models:getSelected', provider),
+    setSelected: (provider: string, model: string): Promise<void> =>
+      ipcRenderer.invoke('models:setSelected', provider, model),
+    getDefault: (provider: string): Promise<string> =>
+      ipcRenderer.invoke('models:getDefault', provider),
+  },
+  provider: {
+    getActive: (): Promise<string> => ipcRenderer.invoke('provider:getActive'),
+    setActive: (provider: string): Promise<void> => ipcRenderer.invoke('provider:setActive', provider),
+  },
   theme: {
     get: (): Promise<'system' | 'light' | 'dark'> => ipcRenderer.invoke('theme:get'),
     set: (theme: 'system' | 'light' | 'dark'): Promise<void> => ipcRenderer.invoke('theme:set', theme),
