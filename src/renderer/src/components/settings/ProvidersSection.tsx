@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
-import { Check } from 'lucide-react'
+import { Check, Eye, EyeOff, Copy } from 'lucide-react'
 import { InvertedButton } from '@ui/InvertedButton'
+import { GenericSidebarItem } from '@sidebar/GenericSidebarItem'
 import {
   useApiKey,
   useDeleteApiKey,
@@ -22,11 +23,36 @@ import {
 
 type ProviderType = 'openai' | 'deepseek' | 'claude'
 
-interface ProviderCardProps {
-  provider: ProviderType
+interface ProviderInfo {
+  id: ProviderType
   name: string
   description: string
   placeholder: string
+}
+
+const PROVIDERS: ProviderInfo[] = [
+  {
+    id: 'openai',
+    name: 'OpenAI',
+    description: 'GPT-4o, GPT-4o-mini, and other OpenAI models',
+    placeholder: 'sk-...',
+  },
+  {
+    id: 'deepseek',
+    name: 'DeepSeek',
+    description: 'DeepSeek Chat and DeepSeek Reasoner models',
+    placeholder: 'sk-...',
+  },
+  {
+    id: 'claude',
+    name: 'Anthropic subscription',
+    description: 'Claude Sonnet 4, Opus 4, and Haiku via your Claude subscription',
+    placeholder: '',
+  },
+]
+
+interface ProviderConfigProps {
+  provider: ProviderInfo
   currentKey: string | null | undefined
   isActive: boolean
   onSetActive: () => void
@@ -34,23 +60,31 @@ interface ProviderCardProps {
   onDelete: () => Promise<void>
 }
 
-function ProviderCard({
+function ProviderConfig({
   provider,
-  name,
-  description,
-  placeholder,
   currentKey,
   isActive,
   onSetActive,
   onSave,
   onDelete,
-}: ProviderCardProps) {
+}: ProviderConfigProps) {
   const [apiKey, setApiKeyInput] = useState('')
+  const [showKey, setShowKey] = useState(false)
+  const [copied, setCopied] = useState(false)
+
+  const handleCopy = async () => {
+    const keyToCopy = apiKey || currentKey
+    if (keyToCopy) {
+      await navigator.clipboard.writeText(keyToCopy)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 1500)
+    }
+  }
 
   // Model selection
-  const { data: models, isLoading: isLoadingModels, refetch: refetchModels } = useFetchModels(provider)
-  const { data: selectedModel } = useSelectedModel(provider)
-  const { data: defaultModel } = useDefaultModel(provider)
+  const { data: models, isLoading: isLoadingModels, refetch: refetchModels } = useFetchModels(provider.id)
+  const { data: selectedModel } = useSelectedModel(provider.id)
+  const { data: defaultModel } = useDefaultModel(provider.id)
   const setSelectedModel = useSetSelectedModel()
 
   // Refetch models when API key changes
@@ -68,24 +102,20 @@ function ProviderCard({
   }
 
   const handleModelChange = async (model: string) => {
-    await setSelectedModel.mutateAsync({ provider, model })
+    await setSelectedModel.mutateAsync({ provider: provider.id, model })
   }
 
   const displayModel = selectedModel ?? defaultModel ?? ''
   const canSetActive = !!currentKey
 
   return (
-    <div
-      className={`border-2 p-4 transition-colors ${
-        isActive
-          ? 'border-black dark:border-white'
-          : 'border-gray-200 dark:border-gray-700'
-      }`}
-    >
-      <div className="mb-4 flex items-start justify-between">
+    <div className="space-y-6">
+      <div className="flex items-start justify-between">
         <div>
-          <h3 className="text-base font-semibold">{name}</h3>
-          <p className="text-sm text-gray-500 dark:text-gray-400">{description}</p>
+          <h3 className="text-lg font-semibold">{provider.name}</h3>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            {provider.description}
+          </p>
         </div>
         <button
           onClick={onSetActive}
@@ -108,28 +138,55 @@ function ProviderCard({
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
             API Key
           </label>
-          <input
-            type="password"
-            value={apiKey}
-            onChange={(e) => setApiKeyInput(e.target.value)}
-            placeholder={currentKey ? '********' : placeholder}
-            className="mt-1 w-full border-2 border-gray-300 bg-white px-3 py-2 focus:border-black focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus:border-white"
-          />
+          <div className="relative mt-1">
+            <input
+              type={showKey ? 'text' : 'password'}
+              value={apiKey || (showKey ? currentKey ?? '' : '')}
+              onChange={(e) => setApiKeyInput(e.target.value)}
+              placeholder={currentKey ? '********' : provider.placeholder}
+              className="w-full rounded-md border-2 border-gray-300 bg-white py-2 pl-3 pr-16 focus:border-black focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus:border-white"
+              readOnly={!apiKey && showKey && !!currentKey}
+            />
+            <div className="absolute inset-y-0 right-0 flex items-center gap-1 pr-2">
+              {(apiKey || currentKey) && (
+                <button
+                  type="button"
+                  onClick={handleCopy}
+                  className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700 dark:hover:text-gray-300"
+                  title={copied ? 'Copied!' : 'Copy to clipboard'}
+                >
+                  <Copy size={14} />
+                </button>
+              )}
+              {(apiKey || currentKey) && (
+                <button
+                  type="button"
+                  onClick={() => setShowKey(!showKey)}
+                  className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700 dark:hover:text-gray-300"
+                  title={showKey ? 'Hide' : 'Show'}
+                >
+                  {showKey ? <EyeOff size={14} /> : <Eye size={14} />}
+                </button>
+              )}
+            </div>
+          </div>
           <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-            {currentKey ? 'Key is set. Enter new key to replace.' : `Enter your ${name} API key.`}
+            {currentKey ? 'Key is set. Enter new key to replace.' : `Enter your ${provider.name} API key.`}
           </p>
         </div>
 
         <div className="flex gap-2">
-          <InvertedButton onClick={handleSave} disabled={!apiKey.trim()}>
+          <InvertedButton
+            onClick={handleSave}
+            disabled={!apiKey.trim()}
+            className="bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+          >
             Save
           </InvertedButton>
           {currentKey && (
             <InvertedButton
               onClick={onDelete}
-              bgColor="bg-red-600"
-              hoverBgColor="hover:bg-red-100"
-              hoverTextColor="hover:text-red-600"
+              className="bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-950 dark:text-red-400 dark:hover:bg-red-900"
             >
               Delete
             </InvertedButton>
@@ -137,7 +194,7 @@ function ProviderCard({
         </div>
 
         {currentKey && (
-          <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+          <div className="border-t border-gray-200 pt-4 dark:border-gray-700">
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
               Model
             </label>
@@ -145,7 +202,7 @@ function ProviderCard({
               value={displayModel}
               onChange={(e) => handleModelChange(e.target.value)}
               disabled={isLoadingModels}
-              className="mt-1 w-full border-2 border-gray-300 bg-white px-3 py-2 focus:border-black focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus:border-white disabled:opacity-50"
+              className="mt-1 w-full rounded-md border-2 border-gray-300 bg-white px-3 py-2 focus:border-black focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus:border-white disabled:opacity-50"
             >
               {isLoadingModels ? (
                 <option>Loading models...</option>
@@ -167,19 +224,19 @@ function ProviderCard({
   )
 }
 
-interface ClaudeProviderCardProps {
+interface ClaudeConfigProps {
   isAuthenticated: boolean
   isActive: boolean
   onSetActive: () => void
   onDisconnect: () => void
 }
 
-function ClaudeProviderCard({
+function ClaudeConfig({
   isAuthenticated,
   isActive,
   onSetActive,
   onDisconnect,
-}: ClaudeProviderCardProps) {
+}: ClaudeConfigProps) {
   const [authCode, setAuthCode] = useState('')
   const [isAwaitingCode, setIsAwaitingCode] = useState(false)
   const [codeVerifier, setCodeVerifier] = useState<string | null>(null)
@@ -227,20 +284,15 @@ function ClaudeProviderCard({
 
   const displayModel = selectedModel ?? defaultModel ?? ''
   const canSetActive = isAuthenticated
+  const provider = PROVIDERS.find((p) => p.id === 'claude')!
 
   return (
-    <div
-      className={`border-2 p-4 transition-colors ${
-        isActive
-          ? 'border-black dark:border-white'
-          : 'border-gray-200 dark:border-gray-700'
-      }`}
-    >
-      <div className="mb-4 flex items-start justify-between">
+    <div className="space-y-6">
+      <div className="flex items-start justify-between">
         <div>
-          <h3 className="text-base font-semibold">Claude</h3>
+          <h3 className="text-lg font-semibold">{provider.name}</h3>
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            Claude Sonnet 4, Opus 4, and Haiku models via Claude subscription
+            {provider.description}
           </p>
         </div>
         <button
@@ -272,9 +324,7 @@ function ClaudeProviderCard({
               </span>
               <InvertedButton
                 onClick={onDisconnect}
-                bgColor="bg-red-600"
-                hoverBgColor="hover:bg-red-100"
-                hoverTextColor="hover:text-red-600"
+                className="bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-950 dark:text-red-400 dark:hover:bg-red-900"
               >
                 Disconnect
               </InvertedButton>
@@ -289,7 +339,7 @@ function ClaudeProviderCard({
                 value={authCode}
                 onChange={(e) => setAuthCode(e.target.value)}
                 placeholder="Paste authorization code here..."
-                className="w-full border-2 border-gray-300 bg-white px-3 py-2 focus:border-black focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus:border-white"
+                className="w-full rounded-md border-2 border-gray-300 bg-white px-3 py-2 focus:border-black focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus:border-white"
               />
               <p className="text-xs text-gray-500 dark:text-gray-400">
                 Look for the code in the URL after &quot;?code=&quot; (before any # symbol)
@@ -298,14 +348,13 @@ function ClaudeProviderCard({
                 <InvertedButton
                   onClick={handleSubmitCode}
                   disabled={!authCode.trim() || completeAuth.isPending}
+                  className="bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
                 >
                   {completeAuth.isPending ? 'Connecting...' : 'Submit Code'}
                 </InvertedButton>
                 <InvertedButton
                   onClick={handleCancel}
-                  bgColor="bg-gray-600"
-                  hoverBgColor="hover:bg-gray-100"
-                  hoverTextColor="hover:text-gray-600"
+                  className="bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
                 >
                   Cancel
                 </InvertedButton>
@@ -318,7 +367,11 @@ function ClaudeProviderCard({
             </div>
           ) : (
             <div className="mt-2">
-              <InvertedButton onClick={handleConnect} disabled={startAuth.isPending}>
+              <InvertedButton
+                onClick={handleConnect}
+                disabled={startAuth.isPending}
+                className="bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+              >
                 {startAuth.isPending ? 'Opening browser...' : 'Connect with Claude'}
               </InvertedButton>
               <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
@@ -329,7 +382,7 @@ function ClaudeProviderCard({
         </div>
 
         {isAuthenticated && (
-          <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+          <div className="border-t border-gray-200 pt-4 dark:border-gray-700">
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
               Model
             </label>
@@ -337,7 +390,7 @@ function ClaudeProviderCard({
               value={displayModel}
               onChange={(e) => handleModelChange(e.target.value)}
               disabled={isLoadingModels}
-              className="mt-1 w-full border-2 border-gray-300 bg-white px-3 py-2 focus:border-black focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus:border-white disabled:opacity-50"
+              className="mt-1 w-full rounded-md border-2 border-gray-300 bg-white px-3 py-2 focus:border-black focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus:border-white disabled:opacity-50"
             >
               {isLoadingModels ? (
                 <option>Loading models...</option>
@@ -359,7 +412,31 @@ function ClaudeProviderCard({
   )
 }
 
+function ProviderStatusBadge({
+  isConfigured,
+  isActive,
+}: {
+  isConfigured: boolean
+  isActive: boolean
+}) {
+  if (isActive) {
+    return (
+      <span className="text-xs font-medium text-gray-900 dark:text-white">
+        Selected
+      </span>
+    )
+  }
+  if (isConfigured) {
+    return (
+      <span className="h-2 w-2 rounded-full bg-green-500" title="Configured" />
+    )
+  }
+  return null
+}
+
 export function ProvidersSection() {
+  const [selectedProvider, setSelectedProvider] = useState<ProviderType>('openai')
+
   // OpenAI hooks
   const { data: openaiKey } = useApiKey()
   const setOpenaiKey = useSetApiKey()
@@ -382,47 +459,81 @@ export function ProvidersSection() {
     await claudeLogout.mutateAsync()
   }
 
+  const getProviderStatus = (providerId: ProviderType) => {
+    switch (providerId) {
+      case 'openai':
+        return { isConfigured: !!openaiKey, isActive: activeProvider === 'openai' }
+      case 'deepseek':
+        return { isConfigured: !!deepseekKey, isActive: activeProvider === 'deepseek' }
+      case 'claude':
+        return { isConfigured: !!isClaudeAuthenticated, isActive: activeProvider === 'claude' }
+    }
+  }
+
+  const getProviderSublabel = (providerId: ProviderType) => {
+    const status = getProviderStatus(providerId)
+    if (status.isActive) return 'Active'
+    if (status.isConfigured) return 'Configured'
+    return 'Not configured'
+  }
+
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-lg font-semibold">AI Providers</h2>
-        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-          Configure your AI provider API keys and select models. Click the circle to set the active
-          provider.
-        </p>
+    <div className="flex h-full gap-6">
+      {/* Provider List */}
+      <div className="w-48 shrink-0 border-r border-gray-200 pr-4 dark:border-gray-700">
+        <h2 className="mb-3 text-sm font-semibold text-gray-500 dark:text-gray-400">
+          Providers
+        </h2>
+        <div className="space-y-1">
+          {PROVIDERS.map((provider) => {
+            const status = getProviderStatus(provider.id)
+            return (
+              <GenericSidebarItem
+                key={provider.id}
+                label={provider.name}
+                sublabel={getProviderSublabel(provider.id)}
+                isSelected={selectedProvider === provider.id}
+                onClick={() => setSelectedProvider(provider.id)}
+                rightContent={
+                  <ProviderStatusBadge
+                    isConfigured={status.isConfigured}
+                    isActive={status.isActive}
+                  />
+                }
+              />
+            )
+          })}
+        </div>
       </div>
 
-      <div className="grid gap-4">
-        <ProviderCard
-          provider="openai"
-          name="OpenAI"
-          description="GPT-4o, GPT-4o-mini, and other OpenAI models"
-          placeholder="sk-..."
-          currentKey={openaiKey}
-          isActive={activeProvider === 'openai'}
-          onSetActive={() => setActiveProvider.mutateAsync('openai')}
-          onSave={(key) => setOpenaiKey.mutateAsync(key)}
-          onDelete={() => deleteOpenaiKey.mutateAsync()}
-        />
-
-        <ProviderCard
-          provider="deepseek"
-          name="DeepSeek"
-          description="DeepSeek Chat and DeepSeek Reasoner models"
-          placeholder="sk-..."
-          currentKey={deepseekKey}
-          isActive={activeProvider === 'deepseek'}
-          onSetActive={() => setActiveProvider.mutateAsync('deepseek')}
-          onSave={(key) => setDeepseekKey.mutateAsync(key)}
-          onDelete={() => deleteDeepseekKey.mutateAsync()}
-        />
-
-        <ClaudeProviderCard
-          isAuthenticated={isClaudeAuthenticated ?? false}
-          isActive={activeProvider === 'claude'}
-          onSetActive={() => setActiveProvider.mutateAsync('claude')}
-          onDisconnect={handleClaudeDisconnect}
-        />
+      {/* Provider Configuration */}
+      <div className="flex-1">
+        {selectedProvider === 'claude' ? (
+          <ClaudeConfig
+            isAuthenticated={isClaudeAuthenticated ?? false}
+            isActive={activeProvider === 'claude'}
+            onSetActive={() => setActiveProvider.mutateAsync('claude')}
+            onDisconnect={handleClaudeDisconnect}
+          />
+        ) : selectedProvider === 'openai' ? (
+          <ProviderConfig
+            provider={PROVIDERS.find((p) => p.id === 'openai')!}
+            currentKey={openaiKey}
+            isActive={activeProvider === 'openai'}
+            onSetActive={() => setActiveProvider.mutateAsync('openai')}
+            onSave={(key) => setOpenaiKey.mutateAsync(key)}
+            onDelete={() => deleteOpenaiKey.mutateAsync()}
+          />
+        ) : (
+          <ProviderConfig
+            provider={PROVIDERS.find((p) => p.id === 'deepseek')!}
+            currentKey={deepseekKey}
+            isActive={activeProvider === 'deepseek'}
+            onSetActive={() => setActiveProvider.mutateAsync('deepseek')}
+            onSave={(key) => setDeepseekKey.mutateAsync(key)}
+            onDelete={() => deleteDeepseekKey.mutateAsync()}
+          />
+        )}
       </div>
     </div>
   )
