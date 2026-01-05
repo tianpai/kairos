@@ -38,10 +38,16 @@ interface IElectronAPI {
     ) => Promise<{ success: boolean; path: string }>
   }
   settings: {
+    // OpenAI
     getApiKey: () => Promise<string | null>
     setApiKey: (key: string) => Promise<void>
     hasApiKey: () => Promise<boolean>
     deleteApiKey: () => Promise<void>
+    // DeepSeek
+    getDeepSeekApiKey: () => Promise<string | null>
+    setDeepSeekApiKey: (key: string) => Promise<void>
+    hasDeepSeekApiKey: () => Promise<boolean>
+    deleteDeepSeekApiKey: () => Promise<void>
   }
   models: {
     fetch: (provider: ProviderType) => Promise<ModelInfo[]>

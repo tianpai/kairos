@@ -14,10 +14,28 @@ export interface ExecuteOptions {
   onPartial?: (partial: unknown) => void
 }
 
-async function getSelectedModelOrDefault(): Promise<string> {
-  const selected = await window.electron.models.getSelected('openai')
-  if (selected) return selected
-  return window.electron.models.getDefault('openai')
+type ProviderType = 'openai' | 'deepseek'
+
+async function getActiveProviderConfig(): Promise<{ provider: ProviderType; model: string; apiKey: string }> {
+  const provider = await window.electron.provider.getActive() as ProviderType
+
+  // Get API key based on provider
+  let apiKey: string | null
+  if (provider === 'deepseek') {
+    apiKey = await window.electron.settings.getDeepSeekApiKey()
+  } else {
+    apiKey = await window.electron.settings.getApiKey()
+  }
+
+  if (!apiKey) {
+    throw new Error(`API key not configured for ${provider}`)
+  }
+
+  // Get selected model or default
+  const selected = await window.electron.models.getSelected(provider)
+  const model = selected ?? await window.electron.models.getDefault(provider)
+
+  return { provider, model, apiKey }
 }
 
 class AIWorkerManager {
@@ -41,13 +59,7 @@ class AIWorkerManager {
     options?: ExecuteOptions,
   ): Promise<T> {
     const id = crypto.randomUUID()
-    const apiKey = await window.electron.settings.getApiKey()
-
-    if (!apiKey) {
-      throw new Error('API key not configured')
-    }
-
-    const model = await getSelectedModelOrDefault()
+    const { provider, model, apiKey } = await getActiveProviderConfig()
     const worker = this.getWorker()
 
     return new Promise((resolve, reject) => {
@@ -60,7 +72,7 @@ class AIWorkerManager {
       })
 
       const streamingLabel = options?.streaming ? ' (streaming)' : ''
-      log.info(`AI task started: ${taskType}${streamingLabel} with model: ${model}`)
+      log.info(`AI task started: ${taskType}${streamingLabel} with ${provider}/${model}`)
 
       const message: AIWorkerMessage = {
         id,
@@ -68,6 +80,7 @@ class AIWorkerManager {
         payload,
         apiKey,
         model,
+        provider,
         streaming: options?.streaming,
       }
       worker.postMessage(message)

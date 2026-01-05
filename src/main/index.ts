@@ -39,6 +39,23 @@ ipcMain.handle('settings:deleteApiKey', () => {
   settingsService.deleteOpenAIKey()
 })
 
+// DeepSeek API key handlers
+ipcMain.handle('settings:getDeepSeekApiKey', () => {
+  return settingsService.getDeepSeekKey()
+})
+
+ipcMain.handle('settings:setDeepSeekApiKey', (_, key: string) => {
+  settingsService.setDeepSeekKey(key)
+})
+
+ipcMain.handle('settings:hasDeepSeekApiKey', () => {
+  return settingsService.hasDeepSeekKey()
+})
+
+ipcMain.handle('settings:deleteDeepSeekApiKey', () => {
+  settingsService.deleteDeepSeekKey()
+})
+
 // Model fetching IPC handlers
 ipcMain.handle('models:fetch', async (_, provider: ProviderType) => {
   try {
@@ -87,9 +104,13 @@ ipcMain.handle('models:getSelected', (_, provider: ProviderType) => {
 
 ipcMain.handle('models:setSelected', (_, provider: ProviderType, model: string) => {
   if (provider === 'openai') {
+    const previous = settingsService.getOpenAISelectedModel()
     settingsService.setOpenAISelectedModel(model)
+    log.info(`OpenAI model changed: ${previous ?? 'default'} -> ${model}`)
   } else if (provider === 'deepseek') {
+    const previous = settingsService.getDeepSeekSelectedModel()
     settingsService.setDeepSeekSelectedModel(model)
+    log.info(`DeepSeek model changed: ${previous ?? 'default'} -> ${model}`)
   }
 })
 
@@ -103,7 +124,9 @@ ipcMain.handle('provider:getActive', () => {
 })
 
 ipcMain.handle('provider:setActive', (_, provider: ProviderType) => {
+  const previous = settingsService.getActiveProvider()
   settingsService.setActiveProvider(provider)
+  log.info(`AI provider switched: ${previous} -> ${provider}`)
 })
 
 // Theme IPC handlers

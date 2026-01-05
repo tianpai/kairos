@@ -21,6 +21,7 @@ export interface AIWorkerMessage {
   payload: Record<string, unknown>
   apiKey: string
   model: string
+  provider: 'openai' | 'deepseek'
   streaming?: boolean
 }
 
@@ -30,10 +31,10 @@ export type AIWorkerResponse =
   | { id: string; type: 'failed'; error: string }
 
 self.onmessage = async ({ data }: MessageEvent<AIWorkerMessage>) => {
-  const { id, taskType, payload, apiKey, model, streaming = false } = data
+  const { id, taskType, payload, apiKey, model, provider: providerType, streaming = false } = data
 
   try {
-    const provider = createAIProvider({ type: 'openai', apiKey })
+    const provider = createAIProvider({ type: providerType, apiKey })
 
     // Create partial handler for streaming
     const onPartial = streaming

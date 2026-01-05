@@ -84,10 +84,17 @@ contextBridge.exposeInMainWorld('electron', {
       ipcRenderer.invoke('fs:writeFile', folderPath, filename, data),
   },
   settings: {
+    // OpenAI
     getApiKey: (): Promise<string | null> => ipcRenderer.invoke('settings:getApiKey'),
     setApiKey: (key: string): Promise<void> => ipcRenderer.invoke('settings:setApiKey', key),
     hasApiKey: (): Promise<boolean> => ipcRenderer.invoke('settings:hasApiKey'),
     deleteApiKey: (): Promise<void> => ipcRenderer.invoke('settings:deleteApiKey'),
+    // DeepSeek
+    getDeepSeekApiKey: (): Promise<string | null> => ipcRenderer.invoke('settings:getDeepSeekApiKey'),
+    setDeepSeekApiKey: (key: string): Promise<void> =>
+      ipcRenderer.invoke('settings:setDeepSeekApiKey', key),
+    hasDeepSeekApiKey: (): Promise<boolean> => ipcRenderer.invoke('settings:hasDeepSeekApiKey'),
+    deleteDeepSeekApiKey: (): Promise<void> => ipcRenderer.invoke('settings:deleteDeepSeekApiKey'),
   },
   models: {
     fetch: (provider: string): Promise<Array<{ id: string; name: string }>> =>

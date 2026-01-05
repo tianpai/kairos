@@ -1,21 +1,21 @@
 import { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
-import { ArrowLeft, Info, Key, Lightbulb, Palette } from 'lucide-react'
+import { ArrowLeft, Cpu, Info, Lightbulb, Palette } from 'lucide-react'
 import { PageHeader } from '@ui/PageHeader'
 import { InvertedButton } from '@ui/InvertedButton'
-import { ApiKeysSection } from './ApiKeysSection'
+import { ProvidersSection } from './ProvidersSection'
 import { AppearanceSection } from './AppearanceSection'
 import { TipsSection } from './TipsSection'
 import { AboutSection } from './AboutSection'
 
-type SettingsSection = 'api-keys' | 'appearance' | 'tips' | 'about'
+type SettingsSection = 'providers' | 'appearance' | 'tips' | 'about'
 
 const NAV_ITEMS: Array<{
   id: SettingsSection
   label: string
-  icon: typeof Key
+  icon: typeof Cpu
 }> = [
-  { id: 'api-keys', label: 'API Keys', icon: Key },
+  { id: 'providers', label: 'Providers', icon: Cpu },
   { id: 'appearance', label: 'Appearance', icon: Palette },
   { id: 'tips', label: 'Tips', icon: Lightbulb },
   { id: 'about', label: 'About', icon: Info },
@@ -24,7 +24,7 @@ const NAV_ITEMS: Array<{
 export default function SettingsPage() {
   const navigate = useNavigate()
   const [activeSection, setActiveSection] =
-    useState<SettingsSection>('api-keys')
+    useState<SettingsSection>('providers')
 
   return (
     <div className="flex h-screen flex-col bg-[#fafafa] dark:bg-[#1a1a1a]">
@@ -67,7 +67,7 @@ export default function SettingsPage() {
         </nav>
 
         <main className="flex-1 overflow-auto p-8">
-          {activeSection === 'api-keys' && <ApiKeysSection />}
+          {activeSection === 'providers' && <ProvidersSection />}
           {activeSection === 'appearance' && <AppearanceSection />}
           {activeSection === 'tips' && <TipsSection />}
           {activeSection === 'about' && <AboutSection />}

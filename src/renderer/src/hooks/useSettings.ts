@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 type ProviderType = 'openai' | 'deepseek'
 
-// API Key hooks
+// OpenAI API Key hooks
 export function useHasApiKey() {
   return useQuery({
     queryKey: ['settings', 'hasApiKey'],
@@ -31,6 +31,41 @@ export function useDeleteApiKey() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: () => window.electron.settings.deleteApiKey(),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['settings'] })
+    },
+  })
+}
+
+// DeepSeek API Key hooks
+export function useHasDeepSeekApiKey() {
+  return useQuery({
+    queryKey: ['settings', 'hasDeepSeekApiKey'],
+    queryFn: () => window.electron.settings.hasDeepSeekApiKey(),
+  })
+}
+
+export function useDeepSeekApiKey() {
+  return useQuery({
+    queryKey: ['settings', 'deepSeekApiKey'],
+    queryFn: () => window.electron.settings.getDeepSeekApiKey(),
+  })
+}
+
+export function useSetDeepSeekApiKey() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (key: string) => window.electron.settings.setDeepSeekApiKey(key),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['settings'] })
+    },
+  })
+}
+
+export function useDeleteDeepSeekApiKey() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: () => window.electron.settings.deleteDeepSeekApiKey(),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['settings'] })
     },
