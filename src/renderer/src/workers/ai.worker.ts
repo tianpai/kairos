@@ -1,19 +1,19 @@
 import { createAIProvider } from '../ai/provider.factory'
+import {
+  CHECKLIST_MATCHING,
+  CHECKLIST_PARSING,
+  JOBINFO_EXTRACTING,
+  RESUME_PARSING,
+  RESUME_TAILORING,
+} from '../workflow/task-names'
 import { parseResume } from './prompts/resume-parsing'
 import { parseChecklist } from './prompts/checklist-parsing'
 import { matchChecklist } from './prompts/checklist-matching'
 import { tailorResume } from './prompts/resume-tailoring'
 import { extractJobInfo } from './prompts/jobinfo-extracting'
-import {
-  RESUME_PARSING,
-  RESUME_TAILORING,
-  CHECKLIST_PARSING,
-  CHECKLIST_MATCHING,
-  JOBINFO_EXTRACTING,
-} from '../workflow/workflow.types'
-import type { Task } from '../workflow/workflow.types'
+import type { TaskName } from '../workflow/task-contracts'
 
-export type AITaskType = Task
+export type AITaskType = TaskName
 
 export interface AIWorkerMessage {
   id: string
