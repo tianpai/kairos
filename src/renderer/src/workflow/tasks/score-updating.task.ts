@@ -1,9 +1,18 @@
+/**
+ * Score Updating Task
+ *
+ * Calculates match score from fulfilled checklist requirements.
+ * This is a local computation (no AI worker needed).
+ */
+
 import log from 'electron-log/renderer'
 import { saveMatchScore } from '@api/jobs'
-import { SCORE_UPDATING } from '../workflow/workflow.types'
-import { BaseTask } from './base.task'
-import type { ChecklistRequirement } from '@type/checklist'
-import type { TaskTypeMap } from './base.task'
+import { defineTask } from '../define-task'
+import type { Checklist, ChecklistRequirement } from '@type/checklist'
+
+// =============================================================================
+// Score Calculation Logic
+// =============================================================================
 
 const HARD_REQUIREMENT_WEIGHT = 3
 const SOFT_REQUIREMENT_WEIGHT = 1
@@ -56,20 +65,17 @@ export function calculateScore(checklist: Checklist): number {
   return Math.max(0, Math.min(100, score))
 }
 
-class ScoreUpdatingTask extends BaseTask<typeof SCORE_UPDATING> {
-  readonly name = SCORE_UPDATING
-  readonly inputKeys = ['checklist'] as const
-  readonly tipEvent = 'score.updated'
+// =============================================================================
+// Task Definition
+// =============================================================================
 
-  getTipData(result: number): Record<string, unknown> {
-    return { score: result }
-  }
+export const scoreUpdatingTask = defineTask({
+  name: 'score.updating',
+  inputKeys: ['checklist'],
+  // No 'provides' - score is saved directly to DB, not added to context
+  tipEvent: 'score.updated',
 
-  async execute(
-    input: TaskTypeMap[typeof SCORE_UPDATING]['input'],
-  ): Promise<TaskTypeMap[typeof SCORE_UPDATING]['output']> {
-    const checklist = input.checklist
-
+  async execute({ checklist }) {
     if (!checklist?.hardRequirements) {
       log.warn('Score update: no checklist found')
       return 0
@@ -78,15 +84,14 @@ class ScoreUpdatingTask extends BaseTask<typeof SCORE_UPDATING> {
     const score = calculateScore(checklist)
     log.info(`Score calculated: ${score}%`)
     return score
-  }
+  },
 
-  async onSuccess(
-    jobId: string,
-    matchPercentage: TaskTypeMap[typeof SCORE_UPDATING]['output'],
-  ): Promise<void> {
+  async onSuccess(jobId, matchPercentage) {
     await saveMatchScore(jobId, matchPercentage)
     log.info(`Score saved: ${matchPercentage}% for job ${jobId}`)
-  }
-}
+  },
 
-export const scoreUpdatingTask = new ScoreUpdatingTask()
+  getTipData(score) {
+    return { score }
+  },
+})

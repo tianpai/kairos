@@ -1,5 +1,5 @@
-import { app, BrowserWindow, ipcMain, nativeTheme, shell } from 'electron'
-import { join } from 'path'
+import { join } from 'node:path'
+import { BrowserWindow, app, ipcMain, nativeTheme, shell } from 'electron'
 import log from 'electron-log/main'
 import { SettingsService } from './config/settings.service'
 import { registerAllHandlers } from './ipc'

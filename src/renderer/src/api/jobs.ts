@@ -1,8 +1,8 @@
 import type { Checklist } from '@type/checklist'
-import type { Task } from '@workflow/workflow.types'
+import type { TaskName } from '../workflow'
 
 // Failed tasks map: task name -> ISO timestamp when it failed
-export type FailedTasksMap = Partial<Record<Task, string>>
+export type FailedTasksMap = Partial<Record<TaskName, string>>
 
 export interface CreateJobApplicationResponse {
   id: string

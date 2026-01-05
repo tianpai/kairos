@@ -1,13 +1,15 @@
 import { useEffect, useState } from 'react'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { ListTodo, SquarePen } from 'lucide-react'
 import { getJobApplication, updateJobDescription } from '@api/jobs'
 import { ChecklistSection } from '@checklist/ChecklistSection'
 import { InvertedButton } from '@ui/InvertedButton'
 import { useResumeStore } from '@typst-compiler/resumeState'
-import { useWorkflowStore } from '@workflow/workflow.store'
-import { startWorkflow } from '@workflow/workflow.service'
-import { CHECKLIST_PARSING } from '@workflow/workflow.types'
+import {
+  CHECKLIST_PARSING,
+  startWorkflow,
+  useWorkflowStore,
+} from '../../workflow'
 
 interface ChecklistProps {
   jobId: string | undefined

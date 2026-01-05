@@ -40,7 +40,7 @@ export class SettingsService {
   }
 
   getOpenAIKey(): string | null {
-    return this.store.get("aiProviders.openai.apiKey") as string | null;
+    return this.store.get("aiProviders.openai.apiKey");
   }
 
   setOpenAIKey(key: string): void {
@@ -63,7 +63,7 @@ export class SettingsService {
   }
 
   getTheme(): ThemeSource {
-    return this.store.get("theme") as ThemeSource;
+    return this.store.get("theme");
   }
 
   setTheme(theme: ThemeSource): void {

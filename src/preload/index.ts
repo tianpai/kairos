@@ -101,7 +101,7 @@ contextBridge.exposeInMainWorld('electron', {
       ipcRenderer.invoke('jobs:createFromScratch', data),
     createFromExisting: (data: unknown): Promise<{ id: string }> =>
       ipcRenderer.invoke('jobs:createFromExisting', data),
-    getAll: (): Promise<unknown[]> => ipcRenderer.invoke('jobs:getAll'),
+    getAll: (): Promise<Array<unknown>> => ipcRenderer.invoke('jobs:getAll'),
     get: (id: string): Promise<unknown> => ipcRenderer.invoke('jobs:get', id),
     update: (id: string, data: unknown): Promise<unknown> =>
       ipcRenderer.invoke('jobs:update', id, data),

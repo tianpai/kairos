@@ -1,6 +1,6 @@
 import type { Tip } from './tips.types'
 
-export const tips: Tip[] = [
+export const tips: Array<Tip> = [
   {
     id: 'first-tailoring',
     category: 'knockout',
@@ -37,7 +37,7 @@ export function getTipById(id: string): Tip | undefined {
   return tips.find((tip) => tip.id === id)
 }
 
-export function getTipsByEvent(event: string): Tip[] {
+export function getTipsByEvent(event: string): Array<Tip> {
   return tips.filter((tip) =>
     tip.conditions.some((c) => c.type === 'event' && c.event === event),
   )

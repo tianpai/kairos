@@ -4,7 +4,7 @@ import {
   premadeTemplates,
 } from '@templates/premade-tmpl'
 import { TemplateId } from '@templates/templateId'
-import { startWorkflow } from '@workflow/workflow.service'
+import { startWorkflow } from '../workflow'
 import type { CreateFromScratchPayload } from '@/api/jobs'
 import { createFromScratch } from '@/api/jobs'
 

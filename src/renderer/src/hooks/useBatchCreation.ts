@@ -4,8 +4,11 @@ import {
   premadeTemplates,
 } from '@templates/premade-tmpl'
 import { TemplateId } from '@templates/templateId'
-import { startWorkflow, waitForTaskCompletion } from '@workflow/workflow.service'
-import { RESUME_PARSING } from '@workflow/workflow.types'
+import {
+  RESUME_PARSING,
+  startWorkflow,
+  waitForTask,
+} from '../workflow'
 import {
   createFromExisting,
   createJobApplication,
@@ -106,7 +109,7 @@ export function useBatchCreation() {
       onProgress()
 
       // Wait for resume parsing, then create remaining apps
-      await waitForTaskCompletion(firstResponse.id, RESUME_PARSING)
+      await waitForTask(firstResponse.id, RESUME_PARSING)
 
       const firstJob = await getJobApplication(firstResponse.id)
       if (!firstJob.parsedResume) {

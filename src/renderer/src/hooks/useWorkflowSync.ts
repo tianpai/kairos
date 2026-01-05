@@ -1,17 +1,17 @@
 import { useEffect, useRef } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
-import { useWorkflowStore } from '@workflow/workflow.store'
-import { recoverStaleWorkflow } from '@workflow/workflow.service'
 import { useResumeStore } from '@typst-compiler/resumeState'
 import { saveWorkflow } from '@api/jobs'
 import {
   RESUME_PARSING,
   RESUME_TAILORING,
   SCORE_UPDATING,
-} from '@workflow/workflow.types'
+  recoverStaleWorkflow,
+  useWorkflowStore,
+} from '../workflow'
 import type { JobApplicationDetails } from '@api/jobs'
 import type { TemplateData } from '@templates/template.types'
-import type { TaskStateMap, WorkflowName } from '@workflow/workflow.types'
+import type { TaskStateMap } from '../workflow'
 
 /**
  * Syncs workflow state between DB, Zustand store, and React Query cache
@@ -68,9 +68,9 @@ export function useWorkflowSync(
       jobId,
       {
         jobId,
-        workflowName: recovered.workflowName as WorkflowName,
+        workflowName: recovered.workflowName,
         taskStates: recovered.taskStates as TaskStateMap,
-        status: recovered.status,
+        status: recovered.status as 'idle' | 'running' | 'completed' | 'failed',
         error: recovered.error,
       },
       {
