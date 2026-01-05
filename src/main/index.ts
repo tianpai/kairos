@@ -8,10 +8,13 @@ import { createAppMenu } from './menu'
 import {
   fetchOpenAIModels,
   fetchDeepSeekModels,
+  getClaudeModels,
   getFallbackModels,
   getDefaultModel,
   type ProviderType,
 } from './services/ai-models.service'
+import { claudeSubscriptionService } from './services/claude-subscription.service'
+import { aiServerService } from './services/ai-server.service'
 
 // Initialize logger
 log.initialize()
@@ -56,6 +59,31 @@ ipcMain.handle('settings:deleteDeepSeekApiKey', () => {
   settingsService.deleteDeepSeekKey()
 })
 
+// Claude OAuth subscription handlers
+ipcMain.handle('claude:startAuth', async () => {
+  return claudeSubscriptionService.startAuthorization()
+})
+
+ipcMain.handle('claude:completeAuth', async (_, code: string, codeVerifier?: string) => {
+  return claudeSubscriptionService.completeAuthorization(code, codeVerifier)
+})
+
+ipcMain.handle('claude:getAccessToken', async () => {
+  return claudeSubscriptionService.getAccessToken()
+})
+
+ipcMain.handle('claude:isAuthenticated', async () => {
+  return claudeSubscriptionService.isAuthenticated()
+})
+
+ipcMain.handle('claude:logout', async () => {
+  return claudeSubscriptionService.logout()
+})
+
+ipcMain.handle('claude:cancelAuth', () => {
+  claudeSubscriptionService.cancelAuthorization()
+})
+
 // Model fetching IPC handlers
 ipcMain.handle('models:fetch', async (_, provider: ProviderType) => {
   try {
@@ -74,6 +102,10 @@ ipcMain.handle('models:fetch', async (_, provider: ProviderType) => {
       }
       models = await fetchDeepSeekModels(apiKey)
       settingsService.setDeepSeekCachedModels(models.map((m) => m.id))
+    } else if (provider === 'claude') {
+      // Claude uses hardcoded models (OAuth doesn't have model list endpoint)
+      models = getClaudeModels()
+      settingsService.setClaudeCachedModels(models.map((m) => m.id))
     } else {
       return getFallbackModels(provider)
     }
@@ -89,6 +121,8 @@ ipcMain.handle('models:getCached', (_, provider: ProviderType) => {
     return settingsService.getOpenAICachedModels()
   } else if (provider === 'deepseek') {
     return settingsService.getDeepSeekCachedModels()
+  } else if (provider === 'claude') {
+    return settingsService.getClaudeCachedModels()
   }
   return []
 })
@@ -98,6 +132,8 @@ ipcMain.handle('models:getSelected', (_, provider: ProviderType) => {
     return settingsService.getOpenAISelectedModel()
   } else if (provider === 'deepseek') {
     return settingsService.getDeepSeekSelectedModel()
+  } else if (provider === 'claude') {
+    return settingsService.getClaudeSelectedModel()
   }
   return null
 })
@@ -111,6 +147,10 @@ ipcMain.handle('models:setSelected', (_, provider: ProviderType, model: string) 
     const previous = settingsService.getDeepSeekSelectedModel()
     settingsService.setDeepSeekSelectedModel(model)
     log.info(`DeepSeek model changed: ${previous ?? 'default'} -> ${model}`)
+  } else if (provider === 'claude') {
+    const previous = settingsService.getClaudeSelectedModel()
+    settingsService.setClaudeSelectedModel(model)
+    log.info(`Claude model changed: ${previous ?? 'default'} -> ${model}`)
   }
 })
 
@@ -207,6 +247,8 @@ app.whenReady().then(async () => {
     })
     // Apply saved theme preference
     nativeTheme.themeSource = settingsService.getTheme()
+    // Start AI server (handles all AI API calls from renderer)
+    await aiServerService.start()
     await initializeDatabase()
     await createWindow()
     log.info('App ready')
@@ -229,5 +271,6 @@ app.on('window-all-closed', () => {
 })
 
 app.on('before-quit', async () => {
+  await aiServerService.stop()
   await disconnectDatabase()
 })

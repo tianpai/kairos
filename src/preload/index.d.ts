@@ -1,6 +1,6 @@
 type ThemeSource = 'system' | 'light' | 'dark'
 type ThemeMode = 'light' | 'dark'
-type ProviderType = 'openai' | 'deepseek'
+type ProviderType = 'openai' | 'deepseek' | 'claude'
 
 interface ModelInfo {
   id: string
@@ -60,10 +60,21 @@ interface IElectronAPI {
     getActive: () => Promise<ProviderType>
     setActive: (provider: ProviderType) => Promise<void>
   }
+  claudeSubscription: {
+    startAuthorization: () => Promise<{ codeVerifier: string }>
+    completeAuthorization: (code: string, codeVerifier?: string) => Promise<unknown>
+    getAccessToken: () => Promise<string>
+    isAuthenticated: () => Promise<boolean>
+    logout: () => Promise<void>
+    cancelAuthorization: () => void
+  }
   theme: {
     get: () => Promise<ThemeSource>
     set: (theme: ThemeSource) => Promise<void>
     getCurrent: () => Promise<ThemeMode>
+  }
+  aiServer: {
+    getInfo: () => Promise<{ port: number; baseURL: string; wsURL: string }>
   }
   jobs: {
     // CRUD

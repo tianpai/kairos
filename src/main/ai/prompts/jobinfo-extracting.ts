@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import type { AIProvider, DeepPartial } from '../../ai/provider.interface'
+import type { AIProvider, DeepPartial } from '../provider.interface'
 
 export const ExtractedJobInfoSchema = z.object({
   company: z.string().describe('Company name extracted from the job description'),

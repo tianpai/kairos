@@ -14,8 +14,13 @@ interface SettingsSchema {
       selectedModel: string | null;
       cachedModels: string[];
     };
+    claude: {
+      // No apiKey - Claude uses OAuth tokens stored separately
+      selectedModel: string | null;
+      cachedModels: string[];
+    };
   };
-  activeProvider: "openai" | "deepseek";
+  activeProvider: "openai" | "deepseek" | "claude";
   theme: ThemeSource;
 }
 
@@ -33,6 +38,10 @@ export class SettingsService {
           },
           deepseek: {
             apiKey: null,
+            selectedModel: null,
+            cachedModels: [],
+          },
+          claude: {
             selectedModel: null,
             cachedModels: [],
           },
@@ -116,12 +125,29 @@ export class SettingsService {
     this.store.set("aiProviders.deepseek.cachedModels", models);
   }
 
+  // Claude methods (no API key - uses OAuth tokens stored separately)
+  getClaudeSelectedModel(): string | null {
+    return this.store.get("aiProviders.claude.selectedModel");
+  }
+
+  setClaudeSelectedModel(model: string): void {
+    this.store.set("aiProviders.claude.selectedModel", model);
+  }
+
+  getClaudeCachedModels(): string[] {
+    return this.store.get("aiProviders.claude.cachedModels");
+  }
+
+  setClaudeCachedModels(models: string[]): void {
+    this.store.set("aiProviders.claude.cachedModels", models);
+  }
+
   // Active provider methods
-  getActiveProvider(): "openai" | "deepseek" {
+  getActiveProvider(): "openai" | "deepseek" | "claude" {
     return this.store.get("activeProvider");
   }
 
-  setActiveProvider(provider: "openai" | "deepseek"): void {
+  setActiveProvider(provider: "openai" | "deepseek" | "claude"): void {
     this.store.set("activeProvider", provider);
   }
 

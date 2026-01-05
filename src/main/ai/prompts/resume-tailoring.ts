@@ -1,6 +1,6 @@
 import { buildTailoringZodSchema } from '@templates/schema-builder'
 import type { Checklist } from '@type/checklist'
-import type { AIProvider, DeepPartial } from '../../ai/provider.interface'
+import type { AIProvider, DeepPartial } from '../provider.interface'
 
 interface TailorOptions {
   streaming?: boolean

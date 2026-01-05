@@ -21,7 +21,7 @@ export interface AIProvider {
 }
 
 export interface AIProviderConfig {
-  type: 'openai' | 'deepseek'
+  type: 'openai' | 'deepseek' | 'claude'
   apiKey?: string
   baseUrl?: string
   defaultModel?: string

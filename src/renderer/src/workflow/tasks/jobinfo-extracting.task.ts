@@ -6,10 +6,10 @@
  */
 
 import { getJobApplication, updateJobApplication } from '@api/jobs'
-import { aiWorker } from '../../workers/ai-worker-manager'
+import { aiClient } from '../../ai/ai-client'
 import { queryClient } from '../../integrations/tanstack-query/root-provider'
 import { defineTask } from '../define-task'
-import type { ExtractedJobInfo } from '../../workers/prompts/jobinfo-extracting'
+import type { ExtractedJobInfo } from '../task-contracts'
 
 const EXTRACTING_PLACEHOLDER = 'Extracting...'
 
@@ -19,7 +19,7 @@ export const jobInfoExtractingTask = defineTask({
   // No 'provides' - updates DB directly, doesn't write to context
 
   async execute({ jobDescription }) {
-    return aiWorker.execute<ExtractedJobInfo>('jobinfo.extracting', {
+    return aiClient.execute<ExtractedJobInfo>('jobinfo.extracting', {
       jobDescription,
     })
   },

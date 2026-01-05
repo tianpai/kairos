@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
-type ProviderType = 'openai' | 'deepseek'
+type ProviderType = 'openai' | 'deepseek' | 'claude'
 
 // OpenAI API Key hooks
 export function useHasApiKey() {
@@ -120,6 +120,43 @@ export function useSetActiveProvider() {
     mutationFn: (provider: ProviderType) => window.electron.provider.setActive(provider),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['provider'] })
+    },
+  })
+}
+
+// Claude OAuth hooks
+export function useClaudeIsAuthenticated() {
+  return useQuery({
+    queryKey: ['claude', 'isAuthenticated'],
+    queryFn: () => window.electron.claudeSubscription.isAuthenticated(),
+  })
+}
+
+export function useClaudeStartAuth() {
+  return useMutation({
+    mutationFn: () => window.electron.claudeSubscription.startAuthorization(),
+  })
+}
+
+export function useClaudeCompleteAuth() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ code, codeVerifier }: { code: string; codeVerifier?: string }) =>
+      window.electron.claudeSubscription.completeAuthorization(code, codeVerifier),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['claude'] })
+      queryClient.invalidateQueries({ queryKey: ['settings'] })
+    },
+  })
+}
+
+export function useClaudeLogout() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: () => window.electron.claudeSubscription.logout(),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['claude'] })
+      queryClient.invalidateQueries({ queryKey: ['settings'] })
     },
   })
 }

@@ -112,10 +112,26 @@ contextBridge.exposeInMainWorld('electron', {
     getActive: (): Promise<string> => ipcRenderer.invoke('provider:getActive'),
     setActive: (provider: string): Promise<void> => ipcRenderer.invoke('provider:setActive', provider),
   },
+  claudeSubscription: {
+    startAuthorization: (): Promise<{ codeVerifier: string }> =>
+      ipcRenderer.invoke('claude:startAuth'),
+    completeAuthorization: (code: string, codeVerifier?: string): Promise<unknown> =>
+      ipcRenderer.invoke('claude:completeAuth', code, codeVerifier),
+    getAccessToken: (): Promise<string> => ipcRenderer.invoke('claude:getAccessToken'),
+    isAuthenticated: (): Promise<boolean> => ipcRenderer.invoke('claude:isAuthenticated'),
+    logout: (): Promise<void> => ipcRenderer.invoke('claude:logout'),
+    cancelAuthorization: (): void => {
+      ipcRenderer.invoke('claude:cancelAuth')
+    },
+  },
   theme: {
     get: (): Promise<'system' | 'light' | 'dark'> => ipcRenderer.invoke('theme:get'),
     set: (theme: 'system' | 'light' | 'dark'): Promise<void> => ipcRenderer.invoke('theme:set', theme),
     getCurrent: (): Promise<'light' | 'dark'> => ipcRenderer.invoke('theme:getCurrent'),
+  },
+  aiServer: {
+    getInfo: (): Promise<{ port: number; baseURL: string; wsURL: string }> =>
+      ipcRenderer.invoke('aiServer:getInfo'),
   },
   jobs: {
     // CRUD

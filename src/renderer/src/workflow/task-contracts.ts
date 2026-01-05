@@ -11,10 +11,15 @@
  */
 
 import type { Checklist } from '@type/checklist'
-import type { ExtractedJobInfo } from '../workers/prompts/jobinfo-extracting'
 
 // Domain types
 export type ResumeStructure = Record<string, unknown>
+
+export interface ExtractedJobInfo {
+  company: string
+  position: string
+  dueDate: string | null
+}
 
 /**
  * Task Contracts Registry

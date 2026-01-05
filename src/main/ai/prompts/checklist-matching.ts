@@ -1,6 +1,6 @@
 import { ChecklistSchema } from '@type/checklist'
 import type { Checklist } from '@type/checklist'
-import type { AIProvider, DeepPartial } from '../../ai/provider.interface'
+import type { AIProvider, DeepPartial } from '../provider.interface'
 
 interface MatchOptions {
   streaming?: boolean

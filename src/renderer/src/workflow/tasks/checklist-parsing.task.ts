@@ -5,7 +5,7 @@
  */
 
 import { saveChecklist } from '@api/jobs'
-import { aiWorker } from '../../workers/ai-worker-manager'
+import { aiClient } from '../../ai/ai-client'
 import { defineTask } from '../define-task'
 import type { Checklist } from '@type/checklist'
 
@@ -16,7 +16,7 @@ export const checklistParsingTask = defineTask({
   tipEvent: 'checklist.parsed',
 
   async execute({ jobDescription }) {
-    return aiWorker.execute<Checklist>('checklist.parsing', {
+    return aiClient.execute<Checklist>('checklist.parsing', {
       jobDescription,
     })
   },

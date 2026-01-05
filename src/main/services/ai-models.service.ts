@@ -1,4 +1,4 @@
-export type ProviderType = "openai" | "deepseek"
+export type ProviderType = "openai" | "deepseek" | "claude"
 
 export interface ModelInfo {
   id: string
@@ -18,6 +18,13 @@ const OPENAI_FALLBACK_MODELS = [
 const DEEPSEEK_FALLBACK_MODELS = [
   "deepseek-chat",
   "deepseek-reasoner",
+]
+
+// Claude models are hardcoded (OAuth doesn't provide a model list endpoint)
+const CLAUDE_MODELS: ModelInfo[] = [
+  { id: "claude-sonnet-4-20250514", name: "Claude Sonnet 4" },
+  { id: "claude-opus-4-20250514", name: "Claude Opus 4" },
+  { id: "claude-3-5-haiku-20241022", name: "Claude 3.5 Haiku" },
 ]
 
 // Filter patterns for chat models (exclude embeddings, tts, whisper, dall-e, etc.)
@@ -102,12 +109,18 @@ export async function fetchDeepSeekModels(
   }
 }
 
+export function getClaudeModels(): ModelInfo[] {
+  return CLAUDE_MODELS
+}
+
 export function getFallbackModels(provider: ProviderType): ModelInfo[] {
   switch (provider) {
     case "openai":
       return OPENAI_FALLBACK_MODELS.map((id) => ({ id, name: id }))
     case "deepseek":
       return DEEPSEEK_FALLBACK_MODELS.map((id) => ({ id, name: id }))
+    case "claude":
+      return CLAUDE_MODELS
     default:
       return []
   }
@@ -119,6 +132,8 @@ export function getDefaultModel(provider: ProviderType): string {
       return "gpt-4o-mini"
     case "deepseek":
       return "deepseek-chat"
+    case "claude":
+      return "claude-sonnet-4-20250514"
     default:
       return "gpt-4o-mini"
   }

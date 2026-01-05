@@ -5,7 +5,7 @@
  */
 
 import { saveTailoredResume } from '@api/jobs'
-import { aiWorker } from '../../workers/ai-worker-manager'
+import { aiClient } from '../../ai/ai-client'
 import { defineTask } from '../define-task'
 import type { ResumeStructure } from '../task-contracts'
 
@@ -16,7 +16,7 @@ export const resumeTailoringTask = defineTask({
   tipEvent: 'tailoring.complete',
 
   async execute({ checklist, resumeStructure, templateId }) {
-    return aiWorker.execute<ResumeStructure>('resume.tailoring', {
+    return aiClient.execute<ResumeStructure>('resume.tailoring', {
       checklist,
       resumeStructure,
       templateId,

@@ -5,7 +5,7 @@
  */
 
 import { saveParsedResume } from '@api/jobs'
-import { aiWorker } from '../../workers/ai-worker-manager'
+import { aiClient } from '../../ai/ai-client'
 import { defineTask } from '../define-task'
 import type { ResumeStructure } from '../task-contracts'
 
@@ -15,7 +15,7 @@ export const resumeParsingTask = defineTask({
   provides: 'resumeStructure',
 
   async execute({ rawResumeContent, templateId }) {
-    return aiWorker.execute<ResumeStructure>('resume.parsing', {
+    return aiClient.execute<ResumeStructure>('resume.parsing', {
       rawResumeContent,
       templateId,
     })

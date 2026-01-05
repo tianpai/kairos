@@ -1,5 +1,5 @@
 import { buildResumeZodSchema } from '@templates/schema-builder'
-import type { AIProvider, DeepPartial } from '../../ai/provider.interface'
+import type { AIProvider, DeepPartial } from '../provider.interface'
 
 interface ParseOptions {
   streaming?: boolean

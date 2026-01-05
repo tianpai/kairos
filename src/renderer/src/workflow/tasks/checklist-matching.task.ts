@@ -6,7 +6,7 @@
  */
 
 import { saveChecklist } from '@api/jobs'
-import { aiWorker } from '../../workers/ai-worker-manager'
+import { aiClient } from '../../ai/ai-client'
 import { defineTask } from '../define-task'
 import type { Checklist } from '@type/checklist'
 
@@ -16,7 +16,7 @@ export const checklistMatchingTask = defineTask({
   provides: 'checklist', // Overwrites checklist with fulfilled status
 
   async execute({ checklist, resumeStructure }) {
-    return aiWorker.execute<Checklist>('checklist.matching', {
+    return aiClient.execute<Checklist>('checklist.matching', {
       checklist,
       resumeStructure,
     })

@@ -39,6 +39,8 @@ export default defineConfig({
     resolve: {
       alias: {
         "@nest": resolve(__dirname, "src/main/nest"),
+        "@templates/": `${rendererRoot}/src/templates/`,
+        "@type/": `${rendererRoot}/src/type/`,
       },
     },
   },
