@@ -95,6 +95,11 @@ contextBridge.exposeInMainWorld('electron', {
       ipcRenderer.invoke('settings:setDeepSeekApiKey', key),
     hasDeepSeekApiKey: (): Promise<boolean> => ipcRenderer.invoke('settings:hasDeepSeekApiKey'),
     deleteDeepSeekApiKey: (): Promise<void> => ipcRenderer.invoke('settings:deleteDeepSeekApiKey'),
+    // xAI
+    getXAIApiKey: (): Promise<string | null> => ipcRenderer.invoke('settings:getXAIApiKey'),
+    setXAIApiKey: (key: string): Promise<void> => ipcRenderer.invoke('settings:setXAIApiKey', key),
+    hasXAIApiKey: (): Promise<boolean> => ipcRenderer.invoke('settings:hasXAIApiKey'),
+    deleteXAIApiKey: (): Promise<void> => ipcRenderer.invoke('settings:deleteXAIApiKey'),
   },
   models: {
     fetch: (provider: string): Promise<Array<{ id: string; name: string }>> =>

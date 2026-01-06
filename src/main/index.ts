@@ -8,6 +8,7 @@ import { createAppMenu } from './menu'
 import {
   fetchDeepSeekModels,
   fetchOpenAIModels,
+  fetchXAIModels,
   getClaudeModels,
   getDefaultModel,
   getFallbackModels,
@@ -75,6 +76,23 @@ ipcMain.handle('settings:hasDeepSeekApiKey', () => {
 
 ipcMain.handle('settings:deleteDeepSeekApiKey', () => {
   settingsService.deleteDeepSeekKey()
+})
+
+// xAI API key handlers
+ipcMain.handle('settings:getXAIApiKey', () => {
+  return settingsService.getXAIKey()
+})
+
+ipcMain.handle('settings:setXAIApiKey', (_, key: string) => {
+  settingsService.setXAIKey(key)
+})
+
+ipcMain.handle('settings:hasXAIApiKey', () => {
+  return settingsService.hasXAIKey()
+})
+
+ipcMain.handle('settings:deleteXAIApiKey', () => {
+  settingsService.deleteXAIKey()
 })
 
 // Claude OAuth subscription handlers
@@ -197,6 +215,13 @@ ipcMain.handle('models:fetch', async (_, provider: ProviderType) => {
       }
       models = await fetchDeepSeekModels(apiKey)
       settingsService.setDeepSeekCachedModels(models.map((m) => m.id))
+    } else if (provider === 'xai') {
+      const apiKey = settingsService.getXAIKey()
+      if (!apiKey) {
+        return getFallbackModels(provider)
+      }
+      models = await fetchXAIModels(apiKey)
+      settingsService.setXAICachedModels(models.map((m) => m.id))
     } else if (provider === 'claude') {
       // Claude uses hardcoded models (OAuth doesn't have model list endpoint)
       models = getClaudeModels()
@@ -220,6 +245,8 @@ ipcMain.handle('models:getCached', (_, provider: ProviderType) => {
     return settingsService.getOpenAICachedModels()
   } else if (provider === 'deepseek') {
     return settingsService.getDeepSeekCachedModels()
+  } else if (provider === 'xai') {
+    return settingsService.getXAICachedModels()
   } else if (provider === 'claude') {
     return settingsService.getClaudeCachedModels()
   } else if (provider === 'ollama') {
@@ -233,6 +260,8 @@ ipcMain.handle('models:getSelected', (_, provider: ProviderType) => {
     return settingsService.getOpenAISelectedModel()
   } else if (provider === 'deepseek') {
     return settingsService.getDeepSeekSelectedModel()
+  } else if (provider === 'xai') {
+    return settingsService.getXAISelectedModel()
   } else if (provider === 'claude') {
     return settingsService.getClaudeSelectedModel()
   } else if (provider === 'ollama') {
@@ -250,6 +279,10 @@ ipcMain.handle('models:setSelected', (_, provider: ProviderType, model: string) 
     const previous = settingsService.getDeepSeekSelectedModel()
     settingsService.setDeepSeekSelectedModel(model)
     log.info(`DeepSeek model changed: ${previous ?? 'default'} -> ${model}`)
+  } else if (provider === 'xai') {
+    const previous = settingsService.getXAISelectedModel()
+    settingsService.setXAISelectedModel(model)
+    log.info(`xAI model changed: ${previous ?? 'default'} -> ${model}`)
   } else if (provider === 'claude') {
     const previous = settingsService.getClaudeSelectedModel()
     settingsService.setClaudeSelectedModel(model)

@@ -14,7 +14,7 @@ export interface ExecuteOptions {
   onPartial?: (partial: unknown) => void
 }
 
-type ProviderType = 'openai' | 'deepseek' | 'claude' | 'ollama'
+type ProviderType = 'openai' | 'deepseek' | 'claude' | 'ollama' | 'xai'
 
 interface ServerInfo {
   port: number
@@ -47,6 +47,8 @@ async function getActiveProviderConfig(): Promise<{
     apiKey = await window.electron.claudeSubscription.getAccessToken()
   } else if (provider === 'deepseek') {
     apiKey = await window.electron.settings.getDeepSeekApiKey()
+  } else if (provider === 'xai') {
+    apiKey = await window.electron.settings.getXAIApiKey()
   } else {
     apiKey = await window.electron.settings.getApiKey()
   }

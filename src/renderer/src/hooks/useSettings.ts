@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
-type ProviderType = 'openai' | 'deepseek' | 'claude' | 'ollama'
+type ProviderType = 'openai' | 'deepseek' | 'claude' | 'ollama' | 'xai'
 
 // OpenAI API Key hooks
 export function useHasApiKey() {
@@ -66,6 +66,41 @@ export function useDeleteDeepSeekApiKey() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: () => window.electron.settings.deleteDeepSeekApiKey(),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['settings'] })
+    },
+  })
+}
+
+// xAI API Key hooks
+export function useHasXAIApiKey() {
+  return useQuery({
+    queryKey: ['settings', 'hasXAIApiKey'],
+    queryFn: () => window.electron.settings.hasXAIApiKey(),
+  })
+}
+
+export function useXAIApiKey() {
+  return useQuery({
+    queryKey: ['settings', 'xaiApiKey'],
+    queryFn: () => window.electron.settings.getXAIApiKey(),
+  })
+}
+
+export function useSetXAIApiKey() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (key: string) => window.electron.settings.setXAIApiKey(key),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['settings'] })
+    },
+  })
+}
+
+export function useDeleteXAIApiKey() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: () => window.electron.settings.deleteXAIApiKey(),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['settings'] })
     },

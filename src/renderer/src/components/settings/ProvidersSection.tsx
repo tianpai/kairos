@@ -16,6 +16,7 @@ import {
   useDefaultModel,
   useDeleteApiKey,
   useDeleteDeepSeekApiKey,
+  useDeleteXAIApiKey,
   useFetchModels,
   useOllamaCancelPull,
   useOllamaCuratedModels,
@@ -29,9 +30,11 @@ import {
   useSetClaudeCliPath,
   useSetDeepSeekApiKey,
   useSetSelectedModel,
+  useSetXAIApiKey,
+  useXAIApiKey,
 } from '@hooks/useSettings'
 
-type ProviderType = 'openai' | 'deepseek' | 'claude' | 'ollama'
+type ProviderType = 'openai' | 'deepseek' | 'claude' | 'ollama' | 'xai'
 
 interface ProviderInfo {
   id: ProviderType
@@ -65,6 +68,12 @@ const PROVIDERS: Array<ProviderInfo> = [
     name: 'Ollama',
     description: 'Run local AI models on your machine',
     placeholder: '',
+  },
+  {
+    id: 'xai',
+    name: 'xAI (Grok)',
+    description: 'Grok-4, Grok-3 and other xAI models',
+    placeholder: 'xai-...',
   },
 ]
 
@@ -937,6 +946,11 @@ export function ProvidersSection() {
   const { data: ollamaStatus } = useOllamaStatus()
   const { data: ollamaInstalledModels } = useOllamaInstalledModels()
 
+  // xAI hooks
+  const { data: xaiKey } = useXAIApiKey()
+  const setXaiKey = useSetXAIApiKey()
+  const deleteXaiKey = useDeleteXAIApiKey()
+
   // Active provider
   const { data: activeProvider } = useActiveProvider()
   const setActiveProvider = useSetActiveProvider()
@@ -966,6 +980,11 @@ export function ProvidersSection() {
         return {
           isConfigured: ollamaStatus?.running && (ollamaInstalledModels?.length ?? 0) > 0,
           isActive: activeProvider === 'ollama',
+        }
+      case 'xai':
+        return {
+          isConfigured: !!xaiKey,
+          isActive: activeProvider === 'xai',
         }
     }
   }
@@ -1029,7 +1048,7 @@ export function ProvidersSection() {
             onSave={(key) => setOpenaiKey.mutateAsync(key)}
             onDelete={() => deleteOpenaiKey.mutateAsync()}
           />
-        ) : (
+        ) : selectedProvider === 'deepseek' ? (
           <ProviderConfig
             provider={PROVIDERS.find((p) => p.id === 'deepseek')!}
             currentKey={deepseekKey}
@@ -1037,6 +1056,15 @@ export function ProvidersSection() {
             onSetActive={() => setActiveProvider.mutateAsync('deepseek')}
             onSave={(key) => setDeepseekKey.mutateAsync(key)}
             onDelete={() => deleteDeepseekKey.mutateAsync()}
+          />
+        ) : (
+          <ProviderConfig
+            provider={PROVIDERS.find((p) => p.id === 'xai')!}
+            currentKey={xaiKey}
+            isActive={activeProvider === 'xai'}
+            onSetActive={() => setActiveProvider.mutateAsync('xai')}
+            onSave={(key) => setXaiKey.mutateAsync(key)}
+            onDelete={() => deleteXaiKey.mutateAsync()}
           />
         )}
       </div>

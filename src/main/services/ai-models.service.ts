@@ -1,4 +1,4 @@
-export type ProviderType = "openai" | "deepseek" | "claude" | "ollama"
+export type ProviderType = "openai" | "deepseek" | "claude" | "ollama" | "xai"
 
 export interface ModelInfo {
   id: string
@@ -18,6 +18,14 @@ const OPENAI_FALLBACK_MODELS = [
 const DEEPSEEK_FALLBACK_MODELS = [
   "deepseek-chat",
   "deepseek-reasoner",
+]
+
+const XAI_FALLBACK_MODELS = [
+  "grok-3-fast",
+  "grok-3",
+  "grok-3-mini-fast",
+  "grok-3-mini",
+  "grok-2-1212",
 ]
 
 // Claude models are hardcoded (OAuth doesn't provide a model list endpoint)
@@ -118,6 +126,39 @@ export async function fetchDeepSeekModels(
   }
 }
 
+export async function fetchXAIModels(
+  apiKey: string,
+  baseUrl = "https://api.x.ai/v1",
+): Promise<Array<ModelInfo>> {
+  try {
+    const response = await fetch(`${baseUrl}/models`, {
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+    })
+
+    if (!response.ok) {
+      console.error(`xAI models fetch failed: ${response.status}`)
+      return XAI_FALLBACK_MODELS.map((id) => ({ id, name: id }))
+    }
+
+    const data = (await response.json()) as { data: Array<{ id: string; owned_by?: string }> }
+    const models = data.data.map((m) => ({
+      id: m.id,
+      name: m.id,
+      owned_by: m.owned_by,
+    }))
+
+    return models.length > 0
+      ? models
+      : XAI_FALLBACK_MODELS.map((id) => ({ id, name: id }))
+  } catch (error) {
+    console.error("Failed to fetch xAI models:", error)
+    return XAI_FALLBACK_MODELS.map((id) => ({ id, name: id }))
+  }
+}
+
 export function getClaudeModels(): Array<ModelInfo> {
   return CLAUDE_MODELS
 }
@@ -132,6 +173,8 @@ export function getFallbackModels(provider: ProviderType): Array<ModelInfo> {
       return OPENAI_FALLBACK_MODELS.map((id) => ({ id, name: id }))
     case "deepseek":
       return DEEPSEEK_FALLBACK_MODELS.map((id) => ({ id, name: id }))
+    case "xai":
+      return XAI_FALLBACK_MODELS.map((id) => ({ id, name: id }))
     case "claude":
       return CLAUDE_MODELS
     case "ollama":
@@ -147,6 +190,8 @@ export function getDefaultModel(provider: ProviderType): string {
       return "gpt-4o-mini"
     case "deepseek":
       return "deepseek-chat"
+    case "xai":
+      return "grok-3-fast"
     case "claude":
       return "claude-sonnet-4-5-20250929"
     case "ollama":

@@ -1,6 +1,6 @@
 type ThemeSource = 'system' | 'light' | 'dark'
 type ThemeMode = 'light' | 'dark'
-type ProviderType = 'openai' | 'deepseek' | 'claude' | 'ollama'
+type ProviderType = 'openai' | 'deepseek' | 'claude' | 'ollama' | 'xai'
 
 interface ModelInfo {
   id: string
@@ -55,6 +55,11 @@ interface IElectronAPI {
     setDeepSeekApiKey: (key: string) => Promise<void>
     hasDeepSeekApiKey: () => Promise<boolean>
     deleteDeepSeekApiKey: () => Promise<void>
+    // xAI
+    getXAIApiKey: () => Promise<string | null>
+    setXAIApiKey: (key: string) => Promise<void>
+    hasXAIApiKey: () => Promise<boolean>
+    deleteXAIApiKey: () => Promise<void>
   }
   models: {
     fetch: (provider: ProviderType) => Promise<ModelInfo[]>

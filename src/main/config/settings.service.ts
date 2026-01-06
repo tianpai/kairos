@@ -27,8 +27,13 @@ interface SettingsSchema {
       selectedModel: string | null;
       cachedModels: Array<string>;
     };
+    xai: {
+      apiKey: string | null;
+      selectedModel: string | null;
+      cachedModels: Array<string>;
+    };
   };
-  activeProvider: "openai" | "deepseek" | "claude" | "ollama";
+  activeProvider: "openai" | "deepseek" | "claude" | "ollama" | "xai";
   theme: ThemeSource;
 }
 
@@ -57,6 +62,11 @@ export class SettingsService {
           },
           ollama: {
             baseUrl: "http://localhost:11434",
+            selectedModel: null,
+            cachedModels: [],
+          },
+          xai: {
+            apiKey: null,
             selectedModel: null,
             cachedModels: [],
           },
@@ -206,12 +216,45 @@ export class SettingsService {
     this.store.set("aiProviders.ollama.cachedModels", models);
   }
 
+  // xAI methods
+  getXAIKey(): string | null {
+    return this.store.get("aiProviders.xai.apiKey");
+  }
+
+  setXAIKey(key: string): void {
+    this.store.set("aiProviders.xai.apiKey", key);
+  }
+
+  hasXAIKey(): boolean {
+    return !!this.store.get("aiProviders.xai.apiKey");
+  }
+
+  deleteXAIKey(): void {
+    this.store.set("aiProviders.xai.apiKey", null);
+  }
+
+  getXAISelectedModel(): string | null {
+    return this.store.get("aiProviders.xai.selectedModel");
+  }
+
+  setXAISelectedModel(model: string): void {
+    this.store.set("aiProviders.xai.selectedModel", model);
+  }
+
+  getXAICachedModels(): Array<string> {
+    return this.store.get("aiProviders.xai.cachedModels");
+  }
+
+  setXAICachedModels(models: Array<string>): void {
+    this.store.set("aiProviders.xai.cachedModels", models);
+  }
+
   // Active provider methods
-  getActiveProvider(): "openai" | "deepseek" | "claude" | "ollama" {
+  getActiveProvider(): "openai" | "deepseek" | "claude" | "ollama" | "xai" {
     return this.store.get("activeProvider");
   }
 
-  setActiveProvider(provider: "openai" | "deepseek" | "claude" | "ollama"): void {
+  setActiveProvider(provider: "openai" | "deepseek" | "claude" | "ollama" | "xai"): void {
     this.store.set("activeProvider", provider);
   }
 
