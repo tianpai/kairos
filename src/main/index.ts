@@ -15,6 +15,14 @@ import {
 } from './services/ai-models.service'
 import { claudeSubscriptionService } from './services/claude-subscription.service'
 import { aiServerService } from './services/ai-server.service'
+import {
+  clearClaudePathCache,
+  findClaudePath,
+  getClaudeCliVersion,
+  isClaudeCliAuthenticated,
+  isClaudeCliInstalled,
+  setUserConfiguredPath,
+} from './services/claude-code-cli-validation.service'
 import type {ProviderType} from './services/ai-models.service';
 
 // Initialize logger
@@ -83,6 +91,41 @@ ipcMain.handle('claude:logout', async () => {
 
 ipcMain.handle('claude:cancelAuth', () => {
   claudeSubscriptionService.cancelAuthorization()
+})
+
+// Claude auth mode handlers
+ipcMain.handle('claude:getAuthMode', () => {
+  return settingsService.getClaudeAuthMode()
+})
+
+ipcMain.handle('claude:setAuthMode', (_, mode: 'oauth' | 'cli') => {
+  settingsService.setClaudeAuthMode(mode)
+})
+
+// Claude CLI validation handlers
+ipcMain.handle('claude:cli:isInstalled', () => {
+  return isClaudeCliInstalled()
+})
+
+ipcMain.handle('claude:cli:isAuthenticated', async () => {
+  return isClaudeCliAuthenticated()
+})
+
+ipcMain.handle('claude:cli:getVersion', async () => {
+  return getClaudeCliVersion()
+})
+
+ipcMain.handle('claude:cli:getPath', () => {
+  return findClaudePath()
+})
+
+ipcMain.handle('claude:cli:setPath', (_, path: string | null) => {
+  settingsService.setClaudeCliPath(path)
+  setUserConfiguredPath(path)
+})
+
+ipcMain.handle('claude:cli:getConfiguredPath', () => {
+  return settingsService.getClaudeCliPath()
 })
 
 // Model fetching IPC handlers
@@ -248,6 +291,8 @@ app.whenReady().then(async () => {
     })
     // Apply saved theme preference
     nativeTheme.themeSource = settingsService.getTheme()
+    // Initialize Claude CLI path from saved settings
+    setUserConfiguredPath(settingsService.getClaudeCliPath())
     // Start AI server (handles all AI API calls from renderer)
     await aiServerService.start()
     await initializeDatabase()

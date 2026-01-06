@@ -61,12 +61,23 @@ interface IElectronAPI {
     setActive: (provider: ProviderType) => Promise<void>
   }
   claudeSubscription: {
+    // OAuth methods
     startAuthorization: () => Promise<{ codeVerifier: string }>
     completeAuthorization: (code: string, codeVerifier?: string) => Promise<unknown>
     getAccessToken: () => Promise<string>
     isAuthenticated: () => Promise<boolean>
     logout: () => Promise<void>
     cancelAuthorization: () => void
+    // Auth mode methods
+    getAuthMode: () => Promise<'oauth' | 'cli'>
+    setAuthMode: (mode: 'oauth' | 'cli') => Promise<void>
+    // CLI validation methods
+    isCliInstalled: () => Promise<boolean>
+    isCliAuthenticated: () => Promise<boolean>
+    getCliVersion: () => Promise<string | null>
+    getCliPath: () => Promise<string | null>
+    setCliPath: (path: string | null) => Promise<void>
+    getConfiguredCliPath: () => Promise<string | null>
   }
   theme: {
     get: () => Promise<ThemeSource>

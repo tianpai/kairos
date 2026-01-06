@@ -1,6 +1,8 @@
+import { settingsService } from '../index'
 import { OpenAIProvider } from './providers/openai.provider'
 import { DeepSeekProvider } from './providers/deepseek.provider'
 import { ClaudeProvider } from './providers/claude.provider'
+import { ClaudeCodeCLIProvider } from './providers/claude-code-cli.provider'
 import type { AIProvider, AIProviderConfig } from './provider.interface'
 
 export function createAIProvider(config: AIProviderConfig): AIProvider {
@@ -9,8 +11,14 @@ export function createAIProvider(config: AIProviderConfig): AIProvider {
       return new OpenAIProvider(config)
     case 'deepseek':
       return new DeepSeekProvider(config)
-    case 'claude':
-      return new ClaudeProvider(config)
+    case 'claude': {
+      const authMode = settingsService.getClaudeAuthMode()
+      if (authMode === 'cli') {
+        return new ClaudeCodeCLIProvider(config)
+      } else {
+        return new ClaudeProvider(config)
+      }
+    }
     default:
       throw new Error(`Unknown provider type: ${config.type}`)
   }

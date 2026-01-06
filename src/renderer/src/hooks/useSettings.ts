@@ -160,3 +160,65 @@ export function useClaudeLogout() {
     },
   })
 }
+
+// Claude auth mode hooks
+export function useClaudeAuthMode() {
+  return useQuery({
+    queryKey: ['claude', 'authMode'],
+    queryFn: () => window.electron.claudeSubscription.getAuthMode(),
+  })
+}
+
+export function useSetClaudeAuthMode() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (mode: 'oauth' | 'cli') => window.electron.claudeSubscription.setAuthMode(mode),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['claude'] })
+    },
+  })
+}
+
+// Claude CLI status hooks
+export function useClaudeCliStatus() {
+  return useQuery({
+    queryKey: ['claude', 'cli', 'status'],
+    queryFn: async () => {
+      const [installed, authenticated, version, path] = await Promise.all([
+        window.electron.claudeSubscription.isCliInstalled(),
+        window.electron.claudeSubscription.isCliAuthenticated(),
+        window.electron.claudeSubscription.getCliVersion(),
+        window.electron.claudeSubscription.getCliPath(),
+      ])
+      return { installed, authenticated, version, path }
+    },
+  })
+}
+
+// Claude CLI path hooks
+export function useClaudeCliPath() {
+  return useQuery({
+    queryKey: ['claude', 'cli', 'path'],
+    queryFn: () => window.electron.claudeSubscription.getCliPath(),
+  })
+}
+
+export function useClaudeConfiguredCliPath() {
+  return useQuery({
+    queryKey: ['claude', 'cli', 'configuredPath'],
+    queryFn: async () => {
+      const path = await window.electron.claudeSubscription.getConfiguredCliPath()
+      return path ?? null // Ensure we return null, not undefined
+    },
+  })
+}
+
+export function useSetClaudeCliPath() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (path: string | null) => window.electron.claudeSubscription.setCliPath(path),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['claude', 'cli'] })
+    },
+  })
+}

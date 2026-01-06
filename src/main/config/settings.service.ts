@@ -15,7 +15,9 @@ interface SettingsSchema {
       cachedModels: Array<string>;
     };
     claude: {
-      // No apiKey - Claude uses OAuth tokens stored separately
+      // No apiKey - Claude uses OAuth tokens or CLI
+      authMode: "oauth" | "cli";
+      cliPath: string | null; // User-configured path to claude binary
       selectedModel: string | null;
       cachedModels: Array<string>;
     };
@@ -42,6 +44,8 @@ export class SettingsService {
             cachedModels: [],
           },
           claude: {
+            authMode: "cli",
+            cliPath: null,
             selectedModel: null,
             cachedModels: [],
           },
@@ -50,6 +54,14 @@ export class SettingsService {
         theme: "system",
       },
     });
+
+    // Migrate existing Claude users to OAuth mode (backward compatibility)
+    // New users without existing Claude config will default to CLI
+    if (!this.store.has("aiProviders.claude.authMode")) {
+      const hasClaudeModels = this.store.has("aiProviders.claude.selectedModel");
+      const defaultMode = hasClaudeModels ? "oauth" : "cli";
+      this.store.set("aiProviders.claude.authMode", defaultMode);
+    }
   }
 
   getOpenAIKey(): string | null {
@@ -125,7 +137,23 @@ export class SettingsService {
     this.store.set("aiProviders.deepseek.cachedModels", models);
   }
 
-  // Claude methods (no API key - uses OAuth tokens stored separately)
+  // Claude methods (no API key - uses OAuth tokens or CLI)
+  getClaudeAuthMode(): "oauth" | "cli" {
+    return this.store.get("aiProviders.claude.authMode");
+  }
+
+  setClaudeAuthMode(mode: "oauth" | "cli"): void {
+    this.store.set("aiProviders.claude.authMode", mode);
+  }
+
+  getClaudeCliPath(): string | null {
+    return this.store.get("aiProviders.claude.cliPath");
+  }
+
+  setClaudeCliPath(path: string | null): void {
+    this.store.set("aiProviders.claude.cliPath", path);
+  }
+
   getClaudeSelectedModel(): string | null {
     return this.store.get("aiProviders.claude.selectedModel");
   }
