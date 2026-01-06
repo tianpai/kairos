@@ -14,7 +14,13 @@ export interface ExecuteOptions {
   onPartial?: (partial: unknown) => void
 }
 
-type ProviderType = 'openai' | 'deepseek' | 'claude' | 'ollama' | 'xai'
+type ProviderType =
+  | 'openai'
+  | 'deepseek'
+  | 'claude'
+  | 'ollama'
+  | 'xai'
+  | 'gemini'
 
 interface ServerInfo {
   port: number
@@ -49,6 +55,8 @@ async function getActiveProviderConfig(): Promise<{
     apiKey = await window.electron.settings.getDeepSeekApiKey()
   } else if (provider === 'xai') {
     apiKey = await window.electron.settings.getXAIApiKey()
+  } else if (provider === 'gemini') {
+    apiKey = await window.electron.settings.getGeminiApiKey()
   } else {
     apiKey = await window.electron.settings.getApiKey()
   }
@@ -155,17 +163,27 @@ class AIClient {
   async execute<T>(
     taskType: TaskName,
     payload: Record<string, unknown>,
-    options?: ExecuteOptions
+    options?: ExecuteOptions,
   ): Promise<T> {
     const id = crypto.randomUUID()
     const { provider, model, apiKey } = await getActiveProviderConfig()
 
     const streamingLabel = options?.streaming ? ' (streaming)' : ''
-    log.info(`AI task started: ${taskType}${streamingLabel} with ${provider}/${model}`)
+    log.info(
+      `AI task started: ${taskType}${streamingLabel} with ${provider}/${model}`,
+    )
 
     // Use WebSocket for streaming, HTTP for non-streaming
     if (options?.streaming) {
-      return this.executeViaWebSocket(id, taskType, payload, provider, model, apiKey, options)
+      return this.executeViaWebSocket(
+        id,
+        taskType,
+        payload,
+        provider,
+        model,
+        apiKey,
+        options,
+      )
     } else {
       return this.executeViaHttp(id, taskType, payload, provider, model, apiKey)
     }
@@ -178,7 +196,7 @@ class AIClient {
     provider: ProviderType,
     model: string,
     apiKey: string,
-    options: ExecuteOptions
+    options: ExecuteOptions,
   ): Promise<T> {
     await this.ensureConnection()
 
@@ -210,7 +228,7 @@ class AIClient {
     payload: Record<string, unknown>,
     provider: ProviderType,
     model: string,
-    apiKey: string
+    apiKey: string,
   ): Promise<T> {
     const info = await this.getServerInfo()
     const startTime = Date.now()

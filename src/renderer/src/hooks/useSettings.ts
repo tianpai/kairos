@@ -1,6 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
-type ProviderType = 'openai' | 'deepseek' | 'claude' | 'ollama' | 'xai'
+type ProviderType =
+  | 'openai'
+  | 'deepseek'
+  | 'claude'
+  | 'ollama'
+  | 'xai'
+  | 'gemini'
 
 // OpenAI API Key hooks
 export function useHasApiKey() {
@@ -55,7 +61,8 @@ export function useDeepSeekApiKey() {
 export function useSetDeepSeekApiKey() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (key: string) => window.electron.settings.setDeepSeekApiKey(key),
+    mutationFn: (key: string) =>
+      window.electron.settings.setDeepSeekApiKey(key),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['settings'] })
     },
@@ -107,6 +114,41 @@ export function useDeleteXAIApiKey() {
   })
 }
 
+// Gemini API Key hooks
+export function useHasGeminiApiKey() {
+  return useQuery({
+    queryKey: ['settings', 'hasGeminiApiKey'],
+    queryFn: () => window.electron.settings.hasGeminiApiKey(),
+  })
+}
+
+export function useGeminiApiKey() {
+  return useQuery({
+    queryKey: ['settings', 'geminiApiKey'],
+    queryFn: () => window.electron.settings.getGeminiApiKey(),
+  })
+}
+
+export function useSetGeminiApiKey() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (key: string) => window.electron.settings.setGeminiApiKey(key),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['settings'] })
+    },
+  })
+}
+
+export function useDeleteGeminiApiKey() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: () => window.electron.settings.deleteGeminiApiKey(),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['settings'] })
+    },
+  })
+}
+
 // Model hooks
 export function useFetchModels(provider: ProviderType) {
   return useQuery({
@@ -126,10 +168,17 @@ export function useSelectedModel(provider: ProviderType) {
 export function useSetSelectedModel() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: ({ provider, model }: { provider: ProviderType; model: string }) =>
-      window.electron.models.setSelected(provider, model),
+    mutationFn: ({
+      provider,
+      model,
+    }: {
+      provider: ProviderType
+      model: string
+    }) => window.electron.models.setSelected(provider, model),
     onSuccess: (_, { provider }) => {
-      queryClient.invalidateQueries({ queryKey: ['models', 'selected', provider] })
+      queryClient.invalidateQueries({
+        queryKey: ['models', 'selected', provider],
+      })
     },
   })
 }
@@ -152,7 +201,8 @@ export function useActiveProvider() {
 export function useSetActiveProvider() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (provider: ProviderType) => window.electron.provider.setActive(provider),
+    mutationFn: (provider: ProviderType) =>
+      window.electron.provider.setActive(provider),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['provider'] })
     },
@@ -176,8 +226,17 @@ export function useClaudeStartAuth() {
 export function useClaudeCompleteAuth() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: ({ code, codeVerifier }: { code: string; codeVerifier?: string }) =>
-      window.electron.claudeSubscription.completeAuthorization(code, codeVerifier),
+    mutationFn: ({
+      code,
+      codeVerifier,
+    }: {
+      code: string
+      codeVerifier?: string
+    }) =>
+      window.electron.claudeSubscription.completeAuthorization(
+        code,
+        codeVerifier,
+      ),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['claude'] })
       queryClient.invalidateQueries({ queryKey: ['settings'] })
@@ -207,7 +266,8 @@ export function useClaudeAuthMode() {
 export function useSetClaudeAuthMode() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (mode: 'oauth' | 'cli') => window.electron.claudeSubscription.setAuthMode(mode),
+    mutationFn: (mode: 'oauth' | 'cli') =>
+      window.electron.claudeSubscription.setAuthMode(mode),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['claude'] })
     },
@@ -242,7 +302,8 @@ export function useClaudeConfiguredCliPath() {
   return useQuery({
     queryKey: ['claude', 'cli', 'configuredPath'],
     queryFn: async () => {
-      const path = await window.electron.claudeSubscription.getConfiguredCliPath()
+      const path =
+        await window.electron.claudeSubscription.getConfiguredCliPath()
       return path ?? null // Ensure we return null, not undefined
     },
   })
@@ -251,7 +312,8 @@ export function useClaudeConfiguredCliPath() {
 export function useSetClaudeCliPath() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (path: string | null) => window.electron.claudeSubscription.setCliPath(path),
+    mutationFn: (path: string | null) =>
+      window.electron.claudeSubscription.setCliPath(path),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['claude', 'cli'] })
     },
@@ -290,7 +352,8 @@ export function useOllamaCuratedModels() {
 export function useOllamaPullModel() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (modelName: string) => window.electron.ollama.pullModel(modelName),
+    mutationFn: (modelName: string) =>
+      window.electron.ollama.pullModel(modelName),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['ollama', 'installedModels'] })
       queryClient.invalidateQueries({ queryKey: ['models', 'ollama'] })

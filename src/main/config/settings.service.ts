@@ -32,8 +32,13 @@ interface SettingsSchema {
       selectedModel: string | null;
       cachedModels: Array<string>;
     };
+    gemini: {
+      apiKey: string | null;
+      selectedModel: string | null;
+      cachedModels: Array<string>;
+    };
   };
-  activeProvider: "openai" | "deepseek" | "claude" | "ollama" | "xai";
+  activeProvider: "openai" | "deepseek" | "claude" | "ollama" | "xai" | "gemini";
   theme: ThemeSource;
 }
 
@@ -66,6 +71,11 @@ export class SettingsService {
             cachedModels: [],
           },
           xai: {
+            apiKey: null,
+            selectedModel: null,
+            cachedModels: [],
+          },
+          gemini: {
             apiKey: null,
             selectedModel: null,
             cachedModels: [],
@@ -249,12 +259,45 @@ export class SettingsService {
     this.store.set("aiProviders.xai.cachedModels", models);
   }
 
+  // Gemini methods
+  getGeminiKey(): string | null {
+    return this.store.get("aiProviders.gemini.apiKey");
+  }
+
+  setGeminiKey(key: string): void {
+    this.store.set("aiProviders.gemini.apiKey", key);
+  }
+
+  hasGeminiKey(): boolean {
+    return !!this.store.get("aiProviders.gemini.apiKey");
+  }
+
+  deleteGeminiKey(): void {
+    this.store.set("aiProviders.gemini.apiKey", null);
+  }
+
+  getGeminiSelectedModel(): string | null {
+    return this.store.get("aiProviders.gemini.selectedModel");
+  }
+
+  setGeminiSelectedModel(model: string): void {
+    this.store.set("aiProviders.gemini.selectedModel", model);
+  }
+
+  getGeminiCachedModels(): Array<string> {
+    return this.store.get("aiProviders.gemini.cachedModels");
+  }
+
+  setGeminiCachedModels(models: Array<string>): void {
+    this.store.set("aiProviders.gemini.cachedModels", models);
+  }
+
   // Active provider methods
-  getActiveProvider(): "openai" | "deepseek" | "claude" | "ollama" | "xai" {
+  getActiveProvider(): "openai" | "deepseek" | "claude" | "ollama" | "xai" | "gemini" {
     return this.store.get("activeProvider");
   }
 
-  setActiveProvider(provider: "openai" | "deepseek" | "claude" | "ollama" | "xai"): void {
+  setActiveProvider(provider: "openai" | "deepseek" | "claude" | "ollama" | "xai" | "gemini"): void {
     this.store.set("activeProvider", provider);
   }
 

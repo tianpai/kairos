@@ -16,8 +16,10 @@ import {
   useDefaultModel,
   useDeleteApiKey,
   useDeleteDeepSeekApiKey,
+  useDeleteGeminiApiKey,
   useDeleteXAIApiKey,
   useFetchModels,
+  useGeminiApiKey,
   useOllamaCancelPull,
   useOllamaCuratedModels,
   useOllamaInstalledModels,
@@ -29,12 +31,19 @@ import {
   useSetClaudeAuthMode,
   useSetClaudeCliPath,
   useSetDeepSeekApiKey,
+  useSetGeminiApiKey,
   useSetSelectedModel,
   useSetXAIApiKey,
   useXAIApiKey,
 } from '@hooks/useSettings'
 
-type ProviderType = 'openai' | 'deepseek' | 'claude' | 'ollama' | 'xai'
+type ProviderType =
+  | 'openai'
+  | 'deepseek'
+  | 'claude'
+  | 'ollama'
+  | 'xai'
+  | 'gemini'
 
 interface ProviderInfo {
   id: ProviderType
@@ -74,6 +83,12 @@ const PROVIDERS: Array<ProviderInfo> = [
     name: 'xAI (Grok)',
     description: 'Grok-4, Grok-3 and other xAI models',
     placeholder: 'xai-...',
+  },
+  {
+    id: 'gemini',
+    name: 'Google Gemini',
+    description: 'Gemini 2.5 Flash, Gemini 2.5 Pro and other Google models',
+    placeholder: 'AIza...',
   },
 ]
 
@@ -260,7 +275,11 @@ function ClaudeConfig({
   // Auth mode hooks
   const { data: authMode } = useClaudeAuthMode()
   const setAuthMode = useSetClaudeAuthMode()
-  const { data: cliStatus, refetch: refetchCliStatus, isLoading: isCheckingCli } = useClaudeCliStatus()
+  const {
+    data: cliStatus,
+    refetch: refetchCliStatus,
+    isLoading: isCheckingCli,
+  } = useClaudeCliStatus()
   const { data: configuredPath } = useClaudeConfiguredCliPath()
   const setCliPath = useSetClaudeCliPath()
 
@@ -381,7 +400,8 @@ function ClaudeConfig({
         {authMode === 'cli' && (
           <div className="mt-2 space-y-1">
             <p className="text-xs text-gray-500 dark:text-gray-400">
-              Requires Claude Code CLI installed and authenticated on your system.
+              Requires Claude Code CLI installed and authenticated on your
+              system.
             </p>
             <p className="inline-flex items-center gap-1 rounded bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800 dark:bg-amber-900 dark:text-amber-200">
               Experimental feature
@@ -494,7 +514,9 @@ function ClaudeConfig({
                   }}
                   className="text-gray-900 focus:ring-gray-900 dark:text-white dark:focus:ring-white"
                 />
-                <span className="text-sm text-gray-700 dark:text-gray-300">Auto-detect</span>
+                <span className="text-sm text-gray-700 dark:text-gray-300">
+                  Auto-detect
+                </span>
               </label>
               <label className="flex items-center gap-2">
                 <input
@@ -503,7 +525,9 @@ function ClaudeConfig({
                   onChange={() => setUseCustomPath(true)}
                   className="text-gray-900 focus:ring-gray-900 dark:text-white dark:focus:ring-white"
                 />
-                <span className="text-sm text-gray-700 dark:text-gray-300">Custom path</span>
+                <span className="text-sm text-gray-700 dark:text-gray-300">
+                  Custom path
+                </span>
               </label>
             </div>
             {useCustomPath && (
@@ -538,7 +562,8 @@ function ClaudeConfig({
             ) : !cliStatus?.installed ? (
               <div className="mt-2 space-y-3">
                 <p className="text-sm text-gray-700 dark:text-gray-300">
-                  Claude Code CLI not found{useCustomPath ? ' at specified path' : ''}.
+                  Claude Code CLI not found
+                  {useCustomPath ? ' at specified path' : ''}.
                 </p>
                 <div className="rounded-md bg-blue-50 p-4 dark:bg-blue-950">
                   <p className="text-sm font-medium text-blue-800 dark:text-blue-200">
@@ -653,7 +678,8 @@ interface OllamaConfigProps {
 function OllamaConfig({ isActive, onSetActive }: OllamaConfigProps) {
   const { data: status, refetch: refetchStatus } = useOllamaStatus()
   const { data: curatedModels } = useOllamaCuratedModels()
-  const { data: installedModels, refetch: refetchInstalled } = useOllamaInstalledModels()
+  const { data: installedModels, refetch: refetchInstalled } =
+    useOllamaInstalledModels()
   const pullModel = useOllamaPullModel()
   const cancelPull = useOllamaCancelPull()
 
@@ -719,13 +745,16 @@ function OllamaConfig({ isActive, onSetActive }: OllamaConfigProps) {
   // Calculate progress percentage
   const progressPercent =
     pullProgress?.progress.total && pullProgress.progress.completed
-      ? Math.round((pullProgress.progress.completed / pullProgress.progress.total) * 100)
+      ? Math.round(
+          (pullProgress.progress.completed / pullProgress.progress.total) * 100,
+        )
       : 0
 
   const formatBytes = (bytes: number) => {
     if (bytes < 1024) return `${bytes} B`
     if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
-    if (bytes < 1024 * 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+    if (bytes < 1024 * 1024 * 1024)
+      return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
     return `${(bytes / (1024 * 1024 * 1024)).toFixed(2)} GB`
   }
 
@@ -802,8 +831,8 @@ function OllamaConfig({ isActive, onSetActive }: OllamaConfigProps) {
           {/* Performance Note */}
           <div className="rounded-md bg-amber-50 p-3 dark:bg-amber-950">
             <p className="text-xs text-amber-800 dark:text-amber-200">
-              Local models are significantly slower than cloud APIs. Performance depends on your
-              hardware.
+              Local models are significantly slower than cloud APIs. Performance
+              depends on your hardware.
             </p>
           </div>
 
@@ -853,11 +882,13 @@ function OllamaConfig({ isActive, onSetActive }: OllamaConfigProps) {
                             />
                           </div>
                           <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                            {pullProgress?.progress.status === 'pulling manifest'
+                            {pullProgress?.progress.status ===
+                            'pulling manifest'
                               ? 'Starting...'
                               : pullProgress?.progress.total
                                 ? `${formatBytes(pullProgress.progress.completed ?? 0)} / ${formatBytes(pullProgress.progress.total)}`
-                                : pullProgress?.progress.status ?? 'Downloading...'}
+                                : (pullProgress?.progress.status ??
+                                  'Downloading...')}
                           </p>
                         </div>
                         <button
@@ -951,6 +982,11 @@ export function ProvidersSection() {
   const setXaiKey = useSetXAIApiKey()
   const deleteXaiKey = useDeleteXAIApiKey()
 
+  // Gemini hooks
+  const { data: geminiKey } = useGeminiApiKey()
+  const setGeminiKey = useSetGeminiApiKey()
+  const deleteGeminiKey = useDeleteGeminiApiKey()
+
   // Active provider
   const { data: activeProvider } = useActiveProvider()
   const setActiveProvider = useSetActiveProvider()
@@ -978,13 +1014,19 @@ export function ProvidersSection() {
         }
       case 'ollama':
         return {
-          isConfigured: ollamaStatus?.running && (ollamaInstalledModels?.length ?? 0) > 0,
+          isConfigured:
+            ollamaStatus?.running && (ollamaInstalledModels?.length ?? 0) > 0,
           isActive: activeProvider === 'ollama',
         }
       case 'xai':
         return {
           isConfigured: !!xaiKey,
           isActive: activeProvider === 'xai',
+        }
+      case 'gemini':
+        return {
+          isConfigured: !!geminiKey,
+          isActive: activeProvider === 'gemini',
         }
     }
   }
@@ -1057,7 +1099,7 @@ export function ProvidersSection() {
             onSave={(key) => setDeepseekKey.mutateAsync(key)}
             onDelete={() => deleteDeepseekKey.mutateAsync()}
           />
-        ) : (
+        ) : selectedProvider === 'xai' ? (
           <ProviderConfig
             provider={PROVIDERS.find((p) => p.id === 'xai')!}
             currentKey={xaiKey}
@@ -1065,6 +1107,15 @@ export function ProvidersSection() {
             onSetActive={() => setActiveProvider.mutateAsync('xai')}
             onSave={(key) => setXaiKey.mutateAsync(key)}
             onDelete={() => deleteXaiKey.mutateAsync()}
+          />
+        ) : (
+          <ProviderConfig
+            provider={PROVIDERS.find((p) => p.id === 'gemini')!}
+            currentKey={geminiKey}
+            isActive={activeProvider === 'gemini'}
+            onSetActive={() => setActiveProvider.mutateAsync('gemini')}
+            onSave={(key) => setGeminiKey.mutateAsync(key)}
+            onDelete={() => deleteGeminiKey.mutateAsync()}
           />
         )}
       </div>

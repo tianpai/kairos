@@ -7,6 +7,7 @@ import { connectDatabase, disconnectDatabase, runMigrations } from './services/d
 import { createAppMenu } from './menu'
 import {
   fetchDeepSeekModels,
+  fetchGeminiModels,
   fetchOpenAIModels,
   fetchXAIModels,
   getClaudeModels,
@@ -93,6 +94,23 @@ ipcMain.handle('settings:hasXAIApiKey', () => {
 
 ipcMain.handle('settings:deleteXAIApiKey', () => {
   settingsService.deleteXAIKey()
+})
+
+// Gemini API key handlers
+ipcMain.handle('settings:getGeminiApiKey', () => {
+  return settingsService.getGeminiKey()
+})
+
+ipcMain.handle('settings:setGeminiApiKey', (_, key: string) => {
+  settingsService.setGeminiKey(key)
+})
+
+ipcMain.handle('settings:hasGeminiApiKey', () => {
+  return settingsService.hasGeminiKey()
+})
+
+ipcMain.handle('settings:deleteGeminiApiKey', () => {
+  settingsService.deleteGeminiKey()
 })
 
 // Claude OAuth subscription handlers
@@ -222,6 +240,13 @@ ipcMain.handle('models:fetch', async (_, provider: ProviderType) => {
       }
       models = await fetchXAIModels(apiKey)
       settingsService.setXAICachedModels(models.map((m) => m.id))
+    } else if (provider === 'gemini') {
+      const apiKey = settingsService.getGeminiKey()
+      if (!apiKey) {
+        return getFallbackModels(provider)
+      }
+      models = await fetchGeminiModels(apiKey)
+      settingsService.setGeminiCachedModels(models.map((m) => m.id))
     } else if (provider === 'claude') {
       // Claude uses hardcoded models (OAuth doesn't have model list endpoint)
       models = getClaudeModels()
@@ -247,6 +272,8 @@ ipcMain.handle('models:getCached', (_, provider: ProviderType) => {
     return settingsService.getDeepSeekCachedModels()
   } else if (provider === 'xai') {
     return settingsService.getXAICachedModels()
+  } else if (provider === 'gemini') {
+    return settingsService.getGeminiCachedModels()
   } else if (provider === 'claude') {
     return settingsService.getClaudeCachedModels()
   } else if (provider === 'ollama') {
@@ -262,6 +289,8 @@ ipcMain.handle('models:getSelected', (_, provider: ProviderType) => {
     return settingsService.getDeepSeekSelectedModel()
   } else if (provider === 'xai') {
     return settingsService.getXAISelectedModel()
+  } else if (provider === 'gemini') {
+    return settingsService.getGeminiSelectedModel()
   } else if (provider === 'claude') {
     return settingsService.getClaudeSelectedModel()
   } else if (provider === 'ollama') {
@@ -283,6 +312,10 @@ ipcMain.handle('models:setSelected', (_, provider: ProviderType, model: string) 
     const previous = settingsService.getXAISelectedModel()
     settingsService.setXAISelectedModel(model)
     log.info(`xAI model changed: ${previous ?? 'default'} -> ${model}`)
+  } else if (provider === 'gemini') {
+    const previous = settingsService.getGeminiSelectedModel()
+    settingsService.setGeminiSelectedModel(model)
+    log.info(`Gemini model changed: ${previous ?? 'default'} -> ${model}`)
   } else if (provider === 'claude') {
     const previous = settingsService.getClaudeSelectedModel()
     settingsService.setClaudeSelectedModel(model)

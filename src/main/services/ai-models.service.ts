@@ -1,4 +1,4 @@
-export type ProviderType = "openai" | "deepseek" | "claude" | "ollama" | "xai"
+export type ProviderType = "openai" | "deepseek" | "claude" | "ollama" | "xai" | "gemini"
 
 export interface ModelInfo {
   id: string
@@ -26,6 +26,14 @@ const XAI_FALLBACK_MODELS = [
   "grok-3-mini-fast",
   "grok-3-mini",
   "grok-2-1212",
+]
+
+const GEMINI_FALLBACK_MODELS = [
+  "gemini-2.5-flash",
+  "gemini-2.5-pro",
+  "gemini-2.0-flash",
+  "gemini-1.5-flash",
+  "gemini-1.5-pro",
 ]
 
 // Claude models are hardcoded (OAuth doesn't provide a model list endpoint)
@@ -159,6 +167,41 @@ export async function fetchXAIModels(
   }
 }
 
+export async function fetchGeminiModels(
+  apiKey: string,
+  baseUrl = "https://generativelanguage.googleapis.com/v1beta",
+): Promise<Array<ModelInfo>> {
+  try {
+    const response = await fetch(`${baseUrl}/models?key=${apiKey}`, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+
+    if (!response.ok) {
+      console.error(`Gemini models fetch failed: ${response.status}`)
+      return GEMINI_FALLBACK_MODELS.map((id) => ({ id, name: id }))
+    }
+
+    const data = (await response.json()) as { models: Array<{ name: string; displayName: string }> }
+    // Filter for generative models only (exclude embedding models, etc.)
+    const generativeModels = data.models
+      .filter((m) => m.name.includes("gemini"))
+      .map((m) => ({
+        id: m.name.replace("models/", ""),
+        name: m.displayName || m.name.replace("models/", ""),
+      }))
+      .sort((a, b) => a.id.localeCompare(b.id))
+
+    return generativeModels.length > 0
+      ? generativeModels
+      : GEMINI_FALLBACK_MODELS.map((id) => ({ id, name: id }))
+  } catch (error) {
+    console.error("Failed to fetch Gemini models:", error)
+    return GEMINI_FALLBACK_MODELS.map((id) => ({ id, name: id }))
+  }
+}
+
 export function getClaudeModels(): Array<ModelInfo> {
   return CLAUDE_MODELS
 }
@@ -175,6 +218,8 @@ export function getFallbackModels(provider: ProviderType): Array<ModelInfo> {
       return DEEPSEEK_FALLBACK_MODELS.map((id) => ({ id, name: id }))
     case "xai":
       return XAI_FALLBACK_MODELS.map((id) => ({ id, name: id }))
+    case "gemini":
+      return GEMINI_FALLBACK_MODELS.map((id) => ({ id, name: id }))
     case "claude":
       return CLAUDE_MODELS
     case "ollama":
@@ -192,6 +237,8 @@ export function getDefaultModel(provider: ProviderType): string {
       return "deepseek-chat"
     case "xai":
       return "grok-3-fast"
+    case "gemini":
+      return "gemini-2.5-flash"
     case "claude":
       return "claude-sonnet-4-5-20250929"
     case "ollama":
