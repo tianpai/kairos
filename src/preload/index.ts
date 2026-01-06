@@ -136,6 +136,35 @@ contextBridge.exposeInMainWorld('electron', {
     setCliPath: (path: string | null): Promise<void> => ipcRenderer.invoke('claude:cli:setPath', path),
     getConfiguredCliPath: (): Promise<string | null> => ipcRenderer.invoke('claude:cli:getConfiguredPath'),
   },
+  ollama: {
+    isRunning: (): Promise<boolean> => ipcRenderer.invoke('ollama:isRunning'),
+    getVersion: (): Promise<string | null> => ipcRenderer.invoke('ollama:getVersion'),
+    getInstalledModels: (): Promise<Array<{ id: string; name: string }>> =>
+      ipcRenderer.invoke('ollama:getInstalledModels'),
+    getCuratedModels: (): Promise<Array<{ id: string; name: string }>> =>
+      ipcRenderer.invoke('ollama:getCuratedModels'),
+    pullModel: (modelName: string): Promise<{ success: boolean; error?: string }> =>
+      ipcRenderer.invoke('ollama:pullModel', modelName),
+    cancelPull: (): Promise<void> => ipcRenderer.invoke('ollama:cancelPull'),
+    getBaseUrl: (): Promise<string> => ipcRenderer.invoke('ollama:getBaseUrl'),
+    setBaseUrl: (url: string): Promise<void> => ipcRenderer.invoke('ollama:setBaseUrl', url),
+    onPullProgress: (
+      callback: (data: {
+        modelName: string
+        progress: { status: string; digest?: string; total?: number; completed?: number }
+      }) => void,
+    ) => {
+      const handler = (
+        _: unknown,
+        data: {
+          modelName: string
+          progress: { status: string; digest?: string; total?: number; completed?: number }
+        },
+      ) => callback(data)
+      ipcRenderer.on('ollama:pullProgress', handler)
+      return () => ipcRenderer.removeListener('ollama:pullProgress', handler)
+    },
+  },
   theme: {
     get: (): Promise<'system' | 'light' | 'dark'> => ipcRenderer.invoke('theme:get'),
     set: (theme: 'system' | 'light' | 'dark'): Promise<void> => ipcRenderer.invoke('theme:set', theme),

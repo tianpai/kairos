@@ -3,6 +3,7 @@ import { OpenAIProvider } from './providers/openai.provider'
 import { DeepSeekProvider } from './providers/deepseek.provider'
 import { ClaudeProvider } from './providers/claude.provider'
 import { ClaudeCodeCLIProvider } from './providers/claude-code-cli.provider'
+import { OllamaProvider } from './providers/ollama.provider'
 import type { AIProvider, AIProviderConfig } from './provider.interface'
 
 export function createAIProvider(config: AIProviderConfig): AIProvider {
@@ -19,6 +20,8 @@ export function createAIProvider(config: AIProviderConfig): AIProvider {
         return new ClaudeProvider(config)
       }
     }
+    case 'ollama':
+      return new OllamaProvider(config)
     default:
       throw new Error(`Unknown provider type: ${config.type}`)
   }

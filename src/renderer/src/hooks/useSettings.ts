@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
-type ProviderType = 'openai' | 'deepseek' | 'claude'
+type ProviderType = 'openai' | 'deepseek' | 'claude' | 'ollama'
 
 // OpenAI API Key hooks
 export function useHasApiKey() {
@@ -219,6 +219,69 @@ export function useSetClaudeCliPath() {
     mutationFn: (path: string | null) => window.electron.claudeSubscription.setCliPath(path),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['claude', 'cli'] })
+    },
+  })
+}
+
+// Ollama status hooks
+export function useOllamaStatus() {
+  return useQuery({
+    queryKey: ['ollama', 'status'],
+    queryFn: async () => {
+      const [running, version] = await Promise.all([
+        window.electron.ollama.isRunning(),
+        window.electron.ollama.getVersion(),
+      ])
+      return { running, version }
+    },
+    refetchInterval: 10000, // Re-check every 10s
+  })
+}
+
+export function useOllamaInstalledModels() {
+  return useQuery({
+    queryKey: ['ollama', 'installedModels'],
+    queryFn: () => window.electron.ollama.getInstalledModels(),
+  })
+}
+
+export function useOllamaCuratedModels() {
+  return useQuery({
+    queryKey: ['ollama', 'curatedModels'],
+    queryFn: () => window.electron.ollama.getCuratedModels(),
+  })
+}
+
+export function useOllamaPullModel() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (modelName: string) => window.electron.ollama.pullModel(modelName),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['ollama', 'installedModels'] })
+      queryClient.invalidateQueries({ queryKey: ['models', 'ollama'] })
+    },
+  })
+}
+
+export function useOllamaCancelPull() {
+  return useMutation({
+    mutationFn: () => window.electron.ollama.cancelPull(),
+  })
+}
+
+export function useOllamaBaseUrl() {
+  return useQuery({
+    queryKey: ['ollama', 'baseUrl'],
+    queryFn: () => window.electron.ollama.getBaseUrl(),
+  })
+}
+
+export function useSetOllamaBaseUrl() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (url: string) => window.electron.ollama.setBaseUrl(url),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['ollama'] })
     },
   })
 }

@@ -14,7 +14,7 @@ export interface ExecuteOptions {
   onPartial?: (partial: unknown) => void
 }
 
-type ProviderType = 'openai' | 'deepseek' | 'claude'
+type ProviderType = 'openai' | 'deepseek' | 'claude' | 'ollama'
 
 interface ServerInfo {
   port: number
@@ -39,7 +39,10 @@ async function getActiveProviderConfig(): Promise<{
 
   // Get API key or OAuth token based on provider
   let apiKey: string | null
-  if (provider === 'claude') {
+  if (provider === 'ollama') {
+    // Ollama doesn't need an API key, but we pass a dummy for consistency
+    apiKey = 'ollama'
+  } else if (provider === 'claude') {
     // Get OAuth access token for Claude
     apiKey = await window.electron.claudeSubscription.getAccessToken()
   } else if (provider === 'deepseek') {

@@ -21,8 +21,14 @@ interface SettingsSchema {
       selectedModel: string | null;
       cachedModels: Array<string>;
     };
+    ollama: {
+      // No apiKey - Ollama runs locally
+      baseUrl: string;
+      selectedModel: string | null;
+      cachedModels: Array<string>;
+    };
   };
-  activeProvider: "openai" | "deepseek" | "claude";
+  activeProvider: "openai" | "deepseek" | "claude" | "ollama";
   theme: ThemeSource;
 }
 
@@ -46,6 +52,11 @@ export class SettingsService {
           claude: {
             authMode: "cli",
             cliPath: null,
+            selectedModel: null,
+            cachedModels: [],
+          },
+          ollama: {
+            baseUrl: "http://localhost:11434",
             selectedModel: null,
             cachedModels: [],
           },
@@ -170,12 +181,37 @@ export class SettingsService {
     this.store.set("aiProviders.claude.cachedModels", models);
   }
 
+  // Ollama methods (no API key - runs locally)
+  getOllamaBaseUrl(): string {
+    return this.store.get("aiProviders.ollama.baseUrl");
+  }
+
+  setOllamaBaseUrl(url: string): void {
+    this.store.set("aiProviders.ollama.baseUrl", url);
+  }
+
+  getOllamaSelectedModel(): string | null {
+    return this.store.get("aiProviders.ollama.selectedModel");
+  }
+
+  setOllamaSelectedModel(model: string): void {
+    this.store.set("aiProviders.ollama.selectedModel", model);
+  }
+
+  getOllamaCachedModels(): Array<string> {
+    return this.store.get("aiProviders.ollama.cachedModels");
+  }
+
+  setOllamaCachedModels(models: Array<string>): void {
+    this.store.set("aiProviders.ollama.cachedModels", models);
+  }
+
   // Active provider methods
-  getActiveProvider(): "openai" | "deepseek" | "claude" {
+  getActiveProvider(): "openai" | "deepseek" | "claude" | "ollama" {
     return this.store.get("activeProvider");
   }
 
-  setActiveProvider(provider: "openai" | "deepseek" | "claude"): void {
+  setActiveProvider(provider: "openai" | "deepseek" | "claude" | "ollama"): void {
     this.store.set("activeProvider", provider);
   }
 

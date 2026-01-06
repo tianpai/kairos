@@ -6,13 +6,22 @@ import { registerAllHandlers } from './ipc'
 import { connectDatabase, disconnectDatabase, runMigrations } from './services/database.service'
 import { createAppMenu } from './menu'
 import {
-  
   fetchDeepSeekModels,
   fetchOpenAIModels,
   getClaudeModels,
   getDefaultModel,
-  getFallbackModels
+  getFallbackModels,
+  getOllamaCuratedModels,
 } from './services/ai-models.service'
+import {
+  isOllamaRunning,
+  getOllamaVersion,
+  getInstalledCuratedModels,
+  getOllamaCuratedModels as getOllamaCuratedModelsList,
+  pullOllamaModel,
+  cancelPullModel,
+  setOllamaBaseUrl,
+} from './services/ollama.service'
 import { claudeSubscriptionService } from './services/claude-subscription.service'
 import { aiServerService } from './services/ai-server.service'
 import {
@@ -128,6 +137,48 @@ ipcMain.handle('claude:cli:getConfiguredPath', () => {
   return settingsService.getClaudeCliPath()
 })
 
+// Ollama IPC handlers
+ipcMain.handle('ollama:isRunning', async () => {
+  return isOllamaRunning()
+})
+
+ipcMain.handle('ollama:getVersion', async () => {
+  return getOllamaVersion()
+})
+
+ipcMain.handle('ollama:getInstalledModels', async () => {
+  return getInstalledCuratedModels()
+})
+
+ipcMain.handle('ollama:getCuratedModels', () => {
+  return getOllamaCuratedModelsList()
+})
+
+ipcMain.handle('ollama:pullModel', async (event, modelName: string) => {
+  try {
+    await pullOllamaModel(modelName, (progress) => {
+      event.sender.send('ollama:pullProgress', { modelName, progress })
+    })
+    return { success: true }
+  } catch (error) {
+    log.error(`Failed to pull Ollama model ${modelName}:`, error)
+    return { success: false, error: String(error) }
+  }
+})
+
+ipcMain.handle('ollama:cancelPull', () => {
+  cancelPullModel()
+})
+
+ipcMain.handle('ollama:getBaseUrl', () => {
+  return settingsService.getOllamaBaseUrl()
+})
+
+ipcMain.handle('ollama:setBaseUrl', (_, url: string) => {
+  settingsService.setOllamaBaseUrl(url)
+  setOllamaBaseUrl(url)
+})
+
 // Model fetching IPC handlers
 ipcMain.handle('models:fetch', async (_, provider: ProviderType) => {
   try {
@@ -150,6 +201,10 @@ ipcMain.handle('models:fetch', async (_, provider: ProviderType) => {
       // Claude uses hardcoded models (OAuth doesn't have model list endpoint)
       models = getClaudeModels()
       settingsService.setClaudeCachedModels(models.map((m) => m.id))
+    } else if (provider === 'ollama') {
+      // Ollama returns intersection of installed and curated models
+      models = await getInstalledCuratedModels()
+      settingsService.setOllamaCachedModels(models.map((m) => m.id))
     } else {
       return getFallbackModels(provider)
     }
@@ -167,6 +222,8 @@ ipcMain.handle('models:getCached', (_, provider: ProviderType) => {
     return settingsService.getDeepSeekCachedModels()
   } else if (provider === 'claude') {
     return settingsService.getClaudeCachedModels()
+  } else if (provider === 'ollama') {
+    return settingsService.getOllamaCachedModels()
   }
   return []
 })
@@ -178,6 +235,8 @@ ipcMain.handle('models:getSelected', (_, provider: ProviderType) => {
     return settingsService.getDeepSeekSelectedModel()
   } else if (provider === 'claude') {
     return settingsService.getClaudeSelectedModel()
+  } else if (provider === 'ollama') {
+    return settingsService.getOllamaSelectedModel()
   }
   return null
 })
@@ -195,10 +254,21 @@ ipcMain.handle('models:setSelected', (_, provider: ProviderType, model: string) 
     const previous = settingsService.getClaudeSelectedModel()
     settingsService.setClaudeSelectedModel(model)
     log.info(`Claude model changed: ${previous ?? 'default'} -> ${model}`)
+  } else if (provider === 'ollama') {
+    const previous = settingsService.getOllamaSelectedModel()
+    settingsService.setOllamaSelectedModel(model)
+    log.info(`Ollama model changed: ${previous ?? 'default'} -> ${model}`)
   }
 })
 
-ipcMain.handle('models:getDefault', (_, provider: ProviderType) => {
+ipcMain.handle('models:getDefault', async (_, provider: ProviderType) => {
+  // For Ollama, return first installed model instead of hardcoded default
+  if (provider === 'ollama') {
+    const installed = await getInstalledCuratedModels()
+    if (installed.length > 0) {
+      return installed[0].id
+    }
+  }
   return getDefaultModel(provider)
 })
 

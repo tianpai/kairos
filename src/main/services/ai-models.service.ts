@@ -1,4 +1,4 @@
-export type ProviderType = "openai" | "deepseek" | "claude"
+export type ProviderType = "openai" | "deepseek" | "claude" | "ollama"
 
 export interface ModelInfo {
   id: string
@@ -25,6 +25,15 @@ const CLAUDE_MODELS: Array<ModelInfo> = [
   { id: "claude-sonnet-4-5-20250929", name: "Claude Sonnet 4.5" },
   { id: "claude-opus-4-5-20251101", name: "Claude Opus 4.5" },
   { id: "claude-haiku-4-5-20251001", name: "Claude Haiku 4.5" },
+]
+
+// Ollama curated models (known good for structured output)
+const OLLAMA_CURATED_MODELS: Array<ModelInfo> = [
+  { id: "llama3.2:3b", name: "Llama 3.2 3B (Recommended)" },
+  { id: "llama3.1:8b", name: "Llama 3.1 8B" },
+  { id: "qwen2.5:7b", name: "Qwen 2.5 7B" },
+  { id: "mistral:7b", name: "Mistral 7B" },
+  { id: "gemma2:9b", name: "Gemma 2 9B" },
 ]
 
 // Filter patterns for chat models (exclude embeddings, tts, whisper, dall-e, etc.)
@@ -113,6 +122,10 @@ export function getClaudeModels(): Array<ModelInfo> {
   return CLAUDE_MODELS
 }
 
+export function getOllamaCuratedModels(): Array<ModelInfo> {
+  return OLLAMA_CURATED_MODELS
+}
+
 export function getFallbackModels(provider: ProviderType): Array<ModelInfo> {
   switch (provider) {
     case "openai":
@@ -121,6 +134,8 @@ export function getFallbackModels(provider: ProviderType): Array<ModelInfo> {
       return DEEPSEEK_FALLBACK_MODELS.map((id) => ({ id, name: id }))
     case "claude":
       return CLAUDE_MODELS
+    case "ollama":
+      return OLLAMA_CURATED_MODELS
     default:
       return []
   }
@@ -134,6 +149,8 @@ export function getDefaultModel(provider: ProviderType): string {
       return "deepseek-chat"
     case "claude":
       return "claude-sonnet-4-5-20250929"
+    case "ollama":
+      return "llama3.2:3b"
     default:
       return "gpt-4o-mini"
   }

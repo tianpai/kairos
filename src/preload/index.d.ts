@@ -1,10 +1,17 @@
 type ThemeSource = 'system' | 'light' | 'dark'
 type ThemeMode = 'light' | 'dark'
-type ProviderType = 'openai' | 'deepseek' | 'claude'
+type ProviderType = 'openai' | 'deepseek' | 'claude' | 'ollama'
 
 interface ModelInfo {
   id: string
   name: string
+}
+
+interface OllamaPullProgress {
+  status: string
+  digest?: string
+  total?: number
+  completed?: number
 }
 
 interface IElectronAPI {
@@ -78,6 +85,19 @@ interface IElectronAPI {
     getCliPath: () => Promise<string | null>
     setCliPath: (path: string | null) => Promise<void>
     getConfiguredCliPath: () => Promise<string | null>
+  }
+  ollama: {
+    isRunning: () => Promise<boolean>
+    getVersion: () => Promise<string | null>
+    getInstalledModels: () => Promise<ModelInfo[]>
+    getCuratedModels: () => Promise<ModelInfo[]>
+    pullModel: (modelName: string) => Promise<{ success: boolean; error?: string }>
+    cancelPull: () => Promise<void>
+    getBaseUrl: () => Promise<string>
+    setBaseUrl: (url: string) => Promise<void>
+    onPullProgress: (
+      callback: (data: { modelName: string; progress: OllamaPullProgress }) => void,
+    ) => () => void
   }
   theme: {
     get: () => Promise<ThemeSource>
