@@ -1,5 +1,24 @@
+import { useEffect, useState } from 'react'
 import changelogRaw from '@root/CHANGELOG.md?raw'
 import pkg from '@root/package.json'
+
+type UpdateStatus =
+  | 'idle'
+  | 'checking'
+  | 'available'
+  | 'not-available'
+  | 'downloading'
+  | 'downloaded'
+  | 'error'
+
+interface UpdateState {
+  status: UpdateStatus
+  version?: string
+  error?: string
+  progress?: {
+    percent: number
+  }
+}
 
 function GitHubIcon({ size = 24 }: { size?: number }) {
   return (
@@ -72,6 +91,47 @@ const currentVersionEntry = changelogEntries.find(
 )
 
 export function AboutSection() {
+  const [updateState, setUpdateState] = useState<UpdateState>({ status: 'idle' })
+  const [isPackaged, setIsPackaged] = useState<boolean | null>(null)
+
+  useEffect(() => {
+    window.electron.updater.isPackaged().then(setIsPackaged)
+  }, [])
+
+  const checkForUpdates = async () => {
+    setUpdateState({ status: 'checking' })
+    try {
+      const state = (await window.electron.updater.check()) as UpdateState
+      setUpdateState(state)
+    } catch {
+      setUpdateState({ status: 'error', error: 'Failed to check for updates' })
+    }
+  }
+
+  const handleDownload = async () => {
+    try {
+      await window.electron.updater.download()
+      // Poll for state updates during download
+      const pollInterval = setInterval(async () => {
+        const state = (await window.electron.updater.getState()) as UpdateState
+        setUpdateState(state)
+        if (state.status === 'downloaded' || state.status === 'error') {
+          clearInterval(pollInterval)
+        }
+      }, 500)
+    } catch {
+      setUpdateState({ status: 'error', error: 'Failed to download update' })
+    }
+  }
+
+  const handleInstall = () => {
+    window.electron.updater.quitAndInstall()
+  }
+
+  const openReleasesPage = () => {
+    window.electron.updater.openReleasesPage()
+  }
+
   return (
     <div className="space-y-6">
       <div>
@@ -90,6 +150,100 @@ export function AboutSection() {
             <p className="mt-1 text-sm text-gray-500 italic dark:text-gray-400">
               "{currentVersionEntry.quote}"
             </p>
+          )}
+        </div>
+
+        {/* Update Section */}
+        <div className="space-y-2">
+          {isPackaged === false && (
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              Development mode — update check disabled
+            </p>
+          )}
+
+          {isPackaged === true && updateState.status === 'idle' && (
+            <button
+              onClick={checkForUpdates}
+              className="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+            >
+              Check for Updates
+            </button>
+          )}
+
+          {updateState.status === 'checking' && (
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              Checking for updates...
+            </p>
+          )}
+
+          {updateState.status === 'not-available' && (
+            <p className="text-sm text-green-600 dark:text-green-400">
+              You're running the latest version
+            </p>
+          )}
+
+          {updateState.status === 'available' && (
+            <div className="space-y-2">
+              <p className="text-sm text-amber-600 dark:text-amber-400">
+                Version {updateState.version} is available
+              </p>
+              <div className="flex gap-2">
+                <button
+                  onClick={handleDownload}
+                  className="rounded bg-blue-600 px-3 py-1 text-sm text-white hover:bg-blue-700"
+                >
+                  Download Update
+                </button>
+                <button
+                  onClick={openReleasesPage}
+                  className="text-sm text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
+                >
+                  View on GitHub
+                </button>
+              </div>
+            </div>
+          )}
+
+          {updateState.status === 'downloading' && (
+            <div className="space-y-1">
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Downloading... {updateState.progress?.percent.toFixed(0)}%
+              </p>
+              <div className="h-1.5 w-48 overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
+                <div
+                  className="h-full bg-blue-600 transition-all"
+                  style={{ width: `${updateState.progress?.percent ?? 0}%` }}
+                />
+              </div>
+            </div>
+          )}
+
+          {updateState.status === 'downloaded' && (
+            <div className="space-y-2">
+              <p className="text-sm text-green-600 dark:text-green-400">
+                Update ready to install
+              </p>
+              <button
+                onClick={handleInstall}
+                className="rounded bg-green-600 px-3 py-1 text-sm text-white hover:bg-green-700"
+              >
+                Restart to Install
+              </button>
+            </div>
+          )}
+
+          {updateState.status === 'error' && (
+            <div className="space-y-2">
+              <p className="text-sm text-red-600 dark:text-red-400">
+                {updateState.error || 'Update check failed'}
+              </p>
+              <button
+                onClick={checkForUpdates}
+                className="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+              >
+                Try Again
+              </button>
+            </div>
           )}
         </div>
 
