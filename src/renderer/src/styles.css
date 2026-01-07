@@ -1,24 +1,57 @@
 @import 'tailwindcss';
-@plugin 'daisyui';
 
 :root {
-  --app-bg: #ffffff;
-  --app-header: #fafafa;
-  --app-surface: #f5f5f5;
+  /* Backgrounds */
+  --k-base: #F5F5F5;
+  --k-surface: #f3f4f6;
+  --k-hover: #e5e7eb;
+  --k-active: #d1d5db;
+
+  /* Borders */
+  --k-default: #d1d5db;
+
+  /* Text */
+  --k-primary: #111827;
+  --k-secondary: #4b5563;
+  --k-hint: #9ca3af;
+  --k-disabled: #d1d5db;
+
+  /* Semantic */
+  --k-error: #ef4444;
+  --k-success: #16a34a;
+  --k-warning: #ca8a04;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --app-bg: #1a1a1a;
-    --app-header: #2a2a2a;
-    --app-surface: #252525;
+    --k-base: #1a1a1a;
+    --k-surface: #2a2a2a;
+    --k-hover: #374151;
+    --k-active: #4b5563;
+    --k-default: #4b5563;
+    --k-primary: #f3f4f6;
+    --k-secondary: #9ca3af;
+    --k-hint: #6b7280;
+    --k-disabled: #4b5563;
+    --k-error: #f87171;
+    --k-success: #4ade80;
+    --k-warning: #facc15;
   }
 }
 
 @theme {
-  --color-app-bg: var(--app-bg);
-  --color-app-header: var(--app-header);
-  --color-app-surface: var(--app-surface);
+  --color-base: var(--k-base);
+  --color-surface: var(--k-surface);
+  --color-hover: var(--k-hover);
+  --color-active: var(--k-active);
+  --color-default: var(--k-default);
+  --color-primary: var(--k-primary);
+  --color-secondary: var(--k-secondary);
+  --color-hint: var(--k-hint);
+  --color-disabled: var(--k-disabled);
+  --color-error: var(--k-error);
+  --color-success: var(--k-success);
+  --color-warning: var(--k-warning);
 }
 
 @keyframes flash {
@@ -36,8 +69,8 @@
 }
 
 body {
-  background-color: var(--app-bg);
-  color: #111827;
+  background-color: var(--k-base);
+  color: var(--k-primary);
   margin: 0;
   padding: 0;
   min-height: 100vh;
@@ -49,10 +82,6 @@ button {
 }
 
 @media (prefers-color-scheme: dark) {
-  body {
-    color: #e5e5e5;
-  }
-
   .resume-page svg [fill="#000000"],
   .resume-page svg [fill="#000"],
   .resume-page svg [fill="black"],

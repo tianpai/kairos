@@ -24,13 +24,13 @@ export function Button({
   ariaLabel,
 }: ButtonProps) {
   const baseClasses =
-    'inline-flex items-center justify-center transition cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-400'
+    'inline-flex items-center justify-center transition cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-default'
 
   const variantClasses = {
     primary:
-      'rounded-full bg-slate-200 text-sm font-medium hover:bg-slate-300 disabled:cursor-not-allowed disabled:opacity-50',
+      'rounded-full bg-hover text-sm font-medium hover:bg-active disabled:cursor-not-allowed disabled:opacity-50',
     secondary:
-      'rounded-full border border-transparent text-sm font-medium hover:bg-slate-100',
+      'rounded-full border border-transparent text-sm font-medium hover:bg-hover',
     text: 'text-xs font-medium underline underline-offset-4 hover:underline-offset-4',
   }
 
@@ -40,9 +40,7 @@ export function Button({
     lg: variant === 'text' ? '' : 'px-8 py-4',
   }
 
-  const textVariantColorClasses = className.includes('text-slate-500')
-    ? 'text-slate-500 hover:text-slate-900'
-    : 'text-slate-600 hover:text-slate-900'
+  const textVariantColorClasses = 'text-secondary hover:text-primary'
 
   const finalClasses =
     `${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${

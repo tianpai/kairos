@@ -25,9 +25,9 @@ export function InvertedButton({
   ariaLabel,
   title,
   bgColor = '',
-  textColor = 'text-gray-600 dark:text-gray-400',
+  textColor = 'text-secondary',
   hoverBgColor = '',
-  hoverTextColor = 'hover:text-black dark:hover:text-white',
+  hoverTextColor = 'hover:text-primary',
 }: InvertedButtonProps) {
   return (
     <button
@@ -40,7 +40,7 @@ export function InvertedButton({
     >
       {loading ? (
         <span
-          className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-gray-400 border-t-transparent"
+          className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-default border-t-transparent"
           aria-hidden="true"
         />
       ) : (

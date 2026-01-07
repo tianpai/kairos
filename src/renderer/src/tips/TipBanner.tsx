@@ -21,14 +21,14 @@ export function TipBanner() {
         <div className="flex items-center gap-3">
           <button
             onClick={neverShow}
-            className="text-xs text-gray-400 transition-colors hover:text-gray-200"
+            className="text-xs text-gray-400 transition-colors hover:text-white"
           >
             Don't show again
           </button>
 
           <button
             onClick={dismiss}
-            className="rounded p-0.5 text-gray-400 transition-colors hover:text-gray-100"
+            className="rounded p-0.5 text-gray-400 transition-colors hover:text-white"
             aria-label="Dismiss tip"
           >
             <X size={14} />

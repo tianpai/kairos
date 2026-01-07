@@ -41,7 +41,7 @@ function SelectedFile({
       >
         <CircleX
           size={14}
-          className="text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
+          className="text-hint hover:text-secondary"
         />
       </button>
     </div>
@@ -66,12 +66,12 @@ function FileDropzone({
       onDragLeave={onDragLeave}
       className={`mt-2 flex cursor-pointer items-center gap-2 rounded-md border border-dashed px-3 py-2 text-sm transition ${
         isDragActive
-          ? 'border-gray-400 bg-gray-200 dark:border-gray-500 dark:bg-gray-700'
-          : 'border-gray-300 hover:border-gray-400 dark:border-gray-600 dark:hover:border-gray-500'
+          ? 'border-hint bg-hover'
+          : 'border-default hover:border-hint'
       }`}
     >
-      <UploadCloud className="h-4 w-4 text-gray-400 dark:text-gray-500" />
-      <span className="text-gray-500 dark:text-gray-400">
+      <UploadCloud className="h-4 w-4 text-hint" />
+      <span className="text-hint">
         Drop or click to upload ({acceptedFileTypes})
       </span>
     </div>

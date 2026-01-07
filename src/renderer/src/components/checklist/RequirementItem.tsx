@@ -27,17 +27,17 @@ export function RequirementItem({
       ? CircleDotDashed
       : Circle
   const iconColor = isFulfilled
-    ? 'text-green-500'
+    ? 'text-success'
     : isPartiallyFulfilled
-      ? 'text-yellow-600'
-      : 'text-gray-300'
+      ? 'text-warning'
+      : 'text-disabled'
 
   return (
     <div className="mb-2">
-      <div className="flex items-start gap-2 rounded-lg bg-gray-50 p-3 dark:bg-gray-800/50">
+      <div className="flex items-start gap-2 rounded-lg bg-hover p-3">
         <StatusIcon className={`mt-0.5 h-4 w-4 shrink-0 ${iconColor}`} />
         <div className="flex-1">
-          <p className="text-sm text-gray-800 dark:text-gray-300">
+          <p className="text-sm text-secondary">
             <HighlightedRequirement
               text={requirement.requirement}
               keywords={requirement.keywords}
@@ -46,7 +46,7 @@ export function RequirementItem({
             />
           </p>
           {hasWarning && (
-            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">{requirement.reason}</p>
+            <p className="mt-1 text-xs text-hint">{requirement.reason}</p>
           )}
         </div>
       </div>

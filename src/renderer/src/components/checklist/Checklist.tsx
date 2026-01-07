@@ -108,10 +108,10 @@ export default function Checklist({ jobId }: ChecklistProps) {
   if (!hasJobDescription) {
     return (
       <div className="flex h-full flex-col p-4">
-        <h3 className="text-sm font-medium text-gray-900 dark:text-white">
+        <h3 className="text-sm font-medium text-primary">
           Add Job Description
         </h3>
-        <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+        <p className="mt-1 text-xs text-hint">
           Paste the job description to enable AI-powered tailoring and generate
           a requirements checklist.
         </p>
@@ -119,7 +119,7 @@ export default function Checklist({ jobId }: ChecklistProps) {
           value={jdInput}
           onChange={(e) => setJdInput(e.target.value)}
           placeholder="Paste the job description here..."
-          className="mt-3 flex-1 resize-none rounded-lg border border-gray-300 bg-transparent p-3 text-sm leading-relaxed text-slate-800 outline-none focus:border-gray-500 dark:border-gray-600 dark:text-gray-200 dark:placeholder-gray-500 dark:focus:border-gray-400"
+          className="mt-3 flex-1 resize-none rounded-lg border border-default bg-transparent p-3 text-sm leading-relaxed text-primary outline-none focus:border-primary placeholder:text-hint"
         />
         <div className="mt-3">
           <InvertedButton
@@ -139,7 +139,7 @@ export default function Checklist({ jobId }: ChecklistProps) {
       {checklist ? (
         <>
           {/* Vertical Tab Navigation */}
-          <div className="bg-app-header m-2 flex flex-col rounded-lg p-2">
+          <div className="bg-surface m-2 flex flex-col rounded-lg p-2">
             {tabs.map((tab) => (
               <button
                 key={tab.key}
@@ -147,8 +147,8 @@ export default function Checklist({ jobId }: ChecklistProps) {
                 onClick={() => setActiveTab(tab.key)}
                 className={`w-full cursor-pointer rounded-lg px-3 py-1.5 text-left text-sm transition-colors ${
                   activeTab === tab.key
-                    ? 'bg-gray-200 font-medium text-gray-900 dark:bg-gray-700 dark:text-gray-100'
-                    : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-900'
+                    ? 'bg-active font-medium text-primary'
+                    : 'text-secondary hover:bg-hover'
                 }`}
               >
                 {tab.label}
@@ -183,19 +183,19 @@ export default function Checklist({ jobId }: ChecklistProps) {
         </>
       ) : (
         <div className="flex h-full flex-col p-4">
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+          <p className="text-sm text-hint">
             Checklist will appear here once job description is processed.
           </p>
           <div className="mt-4 flex flex-1 flex-col overflow-hidden">
             <div className="flex items-center justify-between">
-              <h4 className="text-xs font-medium text-gray-500 dark:text-gray-400">
+              <h4 className="text-xs font-medium text-hint">
                 Job Description
               </h4>
               {!isEditingJd && (
                 <div className="flex items-center gap-1">
                   <button
                     onClick={handleEditJd}
-                    className="rounded p-1 text-gray-400 hover:bg-gray-200 hover:text-gray-600 dark:hover:bg-gray-700 dark:hover:text-gray-300"
+                    className="rounded p-1 text-hint hover:bg-hover hover:text-secondary"
                     title="Edit job description"
                   >
                     <SquarePen size={14} />
@@ -203,7 +203,7 @@ export default function Checklist({ jobId }: ChecklistProps) {
                   <button
                     onClick={handleParseChecklist}
                     disabled={isParsingChecklist}
-                    className="rounded p-1 text-gray-400 hover:bg-gray-200 hover:text-gray-600 disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-gray-700 dark:hover:text-gray-300"
+                    className="rounded p-1 text-hint hover:bg-hover hover:text-secondary disabled:cursor-not-allowed disabled:opacity-50"
                     title="Parse into checklist"
                   >
                     <ListTodo size={14} />
@@ -216,7 +216,7 @@ export default function Checklist({ jobId }: ChecklistProps) {
                 <textarea
                   value={jdInput}
                   onChange={(e) => setJdInput(e.target.value)}
-                  className="flex-1 resize-none rounded-lg border border-gray-300 bg-transparent p-3 text-sm leading-relaxed text-slate-800 outline-none focus:border-gray-500 dark:border-gray-600 dark:text-gray-200 dark:placeholder-gray-500 dark:focus:border-gray-400"
+                  className="flex-1 resize-none rounded-lg border border-default bg-transparent p-3 text-sm leading-relaxed text-primary outline-none focus:border-primary placeholder:text-hint"
                 />
                 <div className="mt-3 flex gap-2">
                   <InvertedButton
@@ -235,7 +235,7 @@ export default function Checklist({ jobId }: ChecklistProps) {
                 </div>
               </div>
             ) : (
-              <div className="mt-2 flex-1 overflow-y-auto rounded-lg bg-gray-100 p-3 text-sm whitespace-pre-wrap text-gray-700 dark:bg-gray-800 dark:text-gray-300">
+              <div className="mt-2 flex-1 overflow-y-auto rounded-lg bg-hover p-3 text-sm whitespace-pre-wrap text-secondary">
                 {jobApplication?.jobDescription}
               </div>
             )}

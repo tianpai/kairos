@@ -82,7 +82,7 @@ function DatePickerInput({
         {value ? (
           <span>{formatDate(value, displayFormat)}</span>
         ) : (
-          <span className="text-gray-400 dark:text-gray-500">Select a date</span>
+          <span className="text-hint">Select a date</span>
         )}
       </button>
     </>
@@ -154,7 +154,7 @@ function Calendar({
   today.setHours(0, 0, 0, 0)
 
   return (
-    <div className="absolute z-50 mt-1 w-60 border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
+    <div className="absolute z-50 mt-1 w-60 border border-default bg-surface p-4">
       <div className="mb-1 flex items-center justify-between">
         <InvertedCircleButton
           onClick={() => navigateMonth('prev')}
@@ -163,7 +163,7 @@ function Calendar({
         >
           <ChevronLeft className="h-3 w-3" />
         </InvertedCircleButton>
-        <span className="dark:text-gray-200">
+        <span>
           {displayMonth.toLocaleDateString('en-US', {
             month: 'long',
             year: 'numeric',
@@ -180,7 +180,7 @@ function Calendar({
 
       <div className="grid grid-cols-7 gap-1">
         {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map((day) => (
-          <div key={day} className="text-center text-xs text-gray-600 dark:text-gray-400">
+          <div key={day} className="text-center text-xs text-secondary">
             {day}
           </div>
         ))}
@@ -204,10 +204,10 @@ function Calendar({
               disabled={isPast}
               className={`py-0 text-center text-sm ${
                 isPast
-                  ? 'cursor-not-allowed text-gray-300 dark:text-gray-600'
+                  ? 'cursor-not-allowed text-disabled'
                   : isSelected
-                    ? 'bg-black text-white hover:bg-black dark:bg-white dark:text-black'
-                    : 'text-slate-800 hover:bg-gray-300 dark:text-gray-200 dark:hover:bg-gray-700'
+                    ? 'bg-primary text-base'
+                    : 'text-primary hover:bg-active'
               }`}
             >
               {day}

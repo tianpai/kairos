@@ -43,7 +43,7 @@ export function ExistingApplicationSelect({
         ))}
       </Select>
       {applicationsWithResume.length === 0 && !isLoading && (
-        <p className="text-xs text-gray-500 dark:text-gray-400">
+        <p className="text-xs text-hint">
           No applications with resumes found. Upload a resume first.
         </p>
       )}

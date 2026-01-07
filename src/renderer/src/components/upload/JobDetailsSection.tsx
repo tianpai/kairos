@@ -23,7 +23,7 @@ function JdTextarea({
         <button
           type="button"
           onClick={fileUpload.triggerFileDialog}
-          className="rounded p-0.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:text-gray-500 dark:hover:bg-gray-700 dark:hover:text-gray-300"
+          className="rounded p-0.5 text-hint transition-colors hover:bg-hover hover:text-secondary"
           title="Upload .md or .txt file"
         >
           <FileUp className="h-4 w-4" />
@@ -40,7 +40,7 @@ function JdTextarea({
         onDrop={fileUpload.handleDrop}
         onDragOver={fileUpload.handleDragOver}
         onDragLeave={fileUpload.handleDragLeave}
-        className={`rounded-lg transition-colors ${fileUpload.isDragActive ? 'ring-2 ring-gray-400 dark:ring-gray-500' : ''}`}
+        className={`rounded-lg transition-colors ${fileUpload.isDragActive ? 'ring-2 ring-hint' : ''}`}
       >
         <textarea
           id={id}
@@ -67,12 +67,12 @@ function JdEntryCard({
   const removeEntry = useNewApplicationStore((s) => s.removeEntry)
 
   return (
-    <div className="relative rounded-lg border border-gray-200 p-3 dark:border-gray-700">
+    <div className="relative rounded-lg border border-default p-3">
       {canRemove && (
         <button
           type="button"
           onClick={() => removeEntry(entry.id)}
-          className="absolute top-2 right-2 rounded p-1 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700 dark:hover:text-gray-300"
+          className="absolute top-2 right-2 rounded p-1 text-hint transition-colors hover:bg-hover hover:text-secondary"
           title="Remove"
         >
           <X className="h-4 w-4" />
@@ -112,10 +112,10 @@ export default function JobDetailsSection({
     <section className="flex min-w-0 flex-col">
       <div className="mt-2 flex flex-col space-y-3">
         <div className="flex items-center justify-between">
-          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+          <span className="text-sm font-medium text-secondary">
             Job Descriptions{' '}
             {!requireJobDescription && (
-              <span className="font-normal text-gray-400 dark:text-gray-500">
+              <span className="font-normal text-hint">
                 (optional)
               </span>
             )}
@@ -124,7 +124,7 @@ export default function JobDetailsSection({
             <button
               type="button"
               onClick={addEntry}
-              className="flex items-center gap-1 rounded px-2 py-1 text-sm text-gray-600 transition-colors hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700"
+              className="flex items-center gap-1 rounded px-2 py-1 text-sm text-secondary transition-colors hover:bg-hover"
             >
               <Plus className="h-4 w-4" />
               Add
@@ -142,7 +142,7 @@ export default function JobDetailsSection({
           ))}
         </div>
 
-        <p className="text-xs text-gray-500 dark:text-gray-400">
+        <p className="text-xs text-hint">
           Company, position, and due date will be automatically extracted from
           each job description.
         </p>

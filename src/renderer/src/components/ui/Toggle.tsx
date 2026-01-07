@@ -31,9 +31,7 @@ export function Toggle({
       {labelOff && (
         <span
           className={`text-sm ${
-            !checked
-              ? 'font-medium text-gray-900 dark:text-gray-100'
-              : 'text-gray-500 dark:text-gray-400'
+            !checked ? 'font-medium text-primary' : 'text-hint'
           }`}
         >
           {labelOff}
@@ -46,14 +44,12 @@ export function Toggle({
         disabled={disabled}
         onClick={handleToggle}
         onKeyDown={handleKeyDown}
-        className={`relative inline-flex h-4 w-8 shrink-0 cursor-pointer items-center rounded-full transition-colors duration-200 focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 focus:outline-none dark:focus:ring-offset-gray-900 ${
+        className={`relative inline-flex h-4 w-8 shrink-0 cursor-pointer items-center rounded-full transition-colors duration-200 focus:ring-2 focus:ring-default focus:ring-offset-2 focus:outline-none ${
           disabled ? 'cursor-not-allowed opacity-50' : ''
-        } ${
-          checked ? 'bg-black dark:bg-white' : 'bg-gray-300 dark:bg-gray-600'
-        }`}
+        } ${checked ? 'bg-primary' : 'bg-active'}`}
       >
         <span
-          className={`inline-block h-3 w-3 transform rounded-full bg-white shadow transition-transform duration-200 dark:bg-gray-900 ${
+          className={`inline-block h-3 w-3 transform rounded-full bg-base shadow transition-transform duration-200 ${
             checked ? 'translate-x-4' : 'translate-x-1'
           }`}
         />
@@ -61,9 +57,7 @@ export function Toggle({
       {labelOn && (
         <span
           className={`text-sm ${
-            checked
-              ? 'font-medium text-gray-900 dark:text-gray-100'
-              : 'text-gray-500 dark:text-gray-400'
+            checked ? 'font-medium text-primary' : 'text-hint'
           }`}
         >
           {labelOn}

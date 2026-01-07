@@ -65,7 +65,7 @@ export function Sidebar({
   const settingsFooter = (
     <button
       onClick={() => navigate({ to: '/settings' })}
-      className="flex w-full cursor-pointer items-center gap-2 px-3 py-3 text-sm text-gray-600 transition-colors hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
+      className="flex w-full cursor-pointer items-center gap-2 px-3 py-3 text-sm text-secondary transition-colors hover:bg-hover"
     >
       <Settings size={16} />
       <span>Settings</span>

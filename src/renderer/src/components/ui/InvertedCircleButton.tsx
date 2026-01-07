@@ -19,8 +19,8 @@ export function InvertedCircleButton({
 }: InvertedCircleButtonProps) {
   const variantClasses =
     variant === 'dark'
-      ? 'text-gray-400 border-gray-600 hover:text-white dark:text-gray-500 dark:border-gray-500 dark:hover:text-white'
-      : 'text-gray-600 border-gray-300 hover:text-black dark:text-gray-400 dark:border-gray-600 dark:hover:text-white'
+      ? 'text-hint border-default hover:text-primary'
+      : 'text-secondary border-default hover:text-primary'
 
   const borderClass = bordered ? 'border' : ''
 

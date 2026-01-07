@@ -79,10 +79,10 @@ function FailedExportsList({
 
   return (
     <div className={className}>
-      <div className="text-sm font-medium text-red-600 dark:text-red-400">
+      <div className="text-sm font-medium text-error">
         {title}
       </div>
-      <ul className="mt-1 list-inside list-disc text-sm text-gray-600 dark:text-gray-400">
+      <ul className="mt-1 list-inside list-disc text-sm text-secondary">
         {failed.map((item, i) => (
           <li key={i}>{item}</li>
         ))}
@@ -94,11 +94,11 @@ function FailedExportsList({
 function ExportProgressView({ progress }: ExportProgressViewProps) {
   return (
     <div className="flex flex-col gap-2">
-      <div className="text-sm text-gray-600 dark:text-gray-400">
+      <div className="text-sm text-secondary">
         Exporting {progress.current} of {progress.total}...
       </div>
       {progress.currentApp && (
-        <div className="text-sm text-gray-500 dark:text-gray-500">
+        <div className="text-sm text-hint">
           {progress.currentApp}
         </div>
       )}
@@ -111,20 +111,20 @@ function SelectAllToggle({ allSelected, onToggle }: SelectAllToggleProps) {
   return (
     <button
       onClick={onToggle}
-      className="flex cursor-pointer items-center gap-2 text-sm text-gray-600 dark:text-gray-400"
+      className="flex cursor-pointer items-center gap-2 text-sm text-secondary"
     >
       <span
         className={
           allSelected
-            ? 'text-gray-400 dark:text-gray-500'
-            : 'font-medium text-gray-900 dark:text-gray-100'
+            ? 'text-hint'
+            : 'font-medium text-primary'
         }
       >
         Select All
       </span>
-      <div className="relative h-5 w-9 rounded-full bg-gray-300 transition-colors dark:bg-gray-600">
+      <div className="relative h-5 w-9 rounded-full bg-active transition-colors">
         <div
-          className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition-all dark:bg-gray-200 ${
+          className={`absolute top-0.5 h-4 w-4 rounded-full bg-base shadow transition-all ${
             allSelected ? 'left-4.5' : 'left-0.5'
           }`}
         />
@@ -132,8 +132,8 @@ function SelectAllToggle({ allSelected, onToggle }: SelectAllToggleProps) {
       <span
         className={
           allSelected
-            ? 'font-medium text-gray-900 dark:text-gray-100'
-            : 'text-gray-400 dark:text-gray-500'
+            ? 'font-medium text-primary'
+            : 'text-hint'
         }
       >
         Select None
@@ -148,24 +148,24 @@ function ApplicationListItem({
   onToggle,
 }: ApplicationListItemProps) {
   return (
-    <label className="flex cursor-pointer items-center gap-3 border-b border-gray-100 px-4 py-3 transition-colors last:border-b-0 hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-gray-800/50">
+    <label className="flex cursor-pointer items-center gap-3 border-b border-hover px-4 py-3 transition-colors last:border-b-0 hover:bg-hover">
       <input
         type="checkbox"
         checked={checked}
         onChange={() => onToggle(app.id)}
-        className="h-4 w-4 rounded border-gray-300 accent-black focus:ring-0 focus:ring-offset-0 dark:border-gray-600 dark:accent-white"
+        className="h-4 w-4 rounded border-default accent-black focus:ring-0 focus:ring-offset-0 dark:accent-white"
       />
       <div className="flex flex-1 items-center justify-between">
         <div>
-          <span className="font-medium text-gray-900 dark:text-gray-100">
+          <span className="font-medium text-primary">
             {app.companyName}
           </span>
-          <span className="mx-2 text-gray-400">-</span>
-          <span className="text-gray-600 dark:text-gray-400">
+          <span className="mx-2 text-hint">-</span>
+          <span className="text-secondary">
             {app.position}
           </span>
         </div>
-        <span className="text-sm text-gray-500 dark:text-gray-500">
+        <span className="text-sm text-hint">
           {app.dueDate ? `Due ${formatDate(app.dueDate)}` : 'No due date'}
         </span>
       </div>
@@ -179,9 +179,9 @@ function ApplicationList({
   onToggle,
 }: ApplicationListProps) {
   return (
-    <div className="max-h-96 overflow-y-auto rounded border border-gray-200 dark:border-gray-700">
+    <div className="max-h-96 overflow-y-auto rounded border border-default">
       {applications.length === 0 ? (
-        <div className="p-4 text-center text-gray-500 dark:text-gray-400">
+        <div className="p-4 text-center text-hint">
           No applications match the current filter
         </div>
       ) : (
@@ -342,14 +342,14 @@ export function BatchExportModal({
           <button
             onClick={handleClose}
             disabled={exporting}
-            className="cursor-pointer rounded px-4 py-2 text-gray-600 transition-colors hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50 dark:text-gray-400 dark:hover:bg-gray-800"
+            className="cursor-pointer rounded px-4 py-2 text-secondary transition-colors hover:bg-hover disabled:cursor-not-allowed disabled:opacity-50"
           >
             {progress?.failed.length ? 'Close' : 'Cancel'}
           </button>
           <button
             onClick={handleExport}
             disabled={selectedIds.size === 0 || exporting}
-            className="cursor-pointer rounded bg-black px-4 py-2 text-white transition-colors hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-white dark:text-black dark:hover:bg-gray-200"
+            className="cursor-pointer rounded bg-black px-4 py-2 text-white transition-colors hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-white dark:text-black dark:hover:bg-hover"
           >
             {exporting
               ? 'Exporting...'
@@ -359,7 +359,7 @@ export function BatchExportModal({
       }
     >
       <div className="flex flex-col gap-4">
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+        <h2 className="text-xl font-semibold text-primary">
           Export PDFs
         </h2>
 

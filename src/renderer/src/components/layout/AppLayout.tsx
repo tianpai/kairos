@@ -6,7 +6,7 @@ interface AppLayoutProps {
 
 export function AppLayout({ header, sidebar, children }: AppLayoutProps) {
   return (
-    <div className="bg-app-bg flex h-screen flex-col">
+    <div className="bg-base flex h-screen flex-col">
       {header}
       <div className="flex flex-1 overflow-hidden">
         {sidebar}

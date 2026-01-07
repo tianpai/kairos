@@ -28,7 +28,7 @@ export function InputField({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className={`${INPUT_BASE} ${type === 'date' && !value ? 'text-gray-400' : ''}`}
+        className={`${INPUT_BASE} ${type === 'date' && !value ? 'text-hint' : ''}`}
         style={type === 'date' && !value ? { colorScheme: 'light' } : undefined}
       />
     </div>
