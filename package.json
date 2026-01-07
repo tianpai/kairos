@@ -1,6 +1,6 @@
 {
   "name": "kairos",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "AI-powered resume optimization desktop application",
   "main": "./out/main/index.js",
   "author": "",

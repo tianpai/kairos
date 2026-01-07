@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.5](https://github.com/tianpai/kairos/compare/v0.0.4...v0.0.5) (2026-01-07)
+
+
+### Features
+
+* add auto-update with GitHub Releases ([31d6087](https://github.com/tianpai/kairos/commit/31d60875af192d738ddc2e99c24be681012fce48))
+
 ### 0.0.4 (2026-01-07)
 
 
@@ -48,6 +55,16 @@ All notable changes to this project will be documented in this file. See [standa
 * sidebar score not updating in realtime ([b6b7577](https://github.com/tianpai/kairos/commit/b6b75778a14cd15226f7c779661572523bc29c58))
 * update to latest models for claude ([b06a146](https://github.com/tianpai/kairos/commit/b06a1461945e3f52954bf43e4454f3b19782b889))
 * worker crash due to window not defined ([f3e0ce4](https://github.com/tianpai/kairos/commit/f3e0ce46c9f0ab2a32535e58859022e38565976e))
+
+## 0.0.5
+
+"A Quick Update"
+
+### Features
+
+- Auto-update support with GitHub Releases
+- Check for updates in Settings > About
+- Public README with screenshots and installation guide
 
 ## 0.0.4 (Unreleased)
 
