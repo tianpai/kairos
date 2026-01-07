@@ -6,6 +6,7 @@ import { registerAllHandlers } from './ipc'
 import { connectDatabase, disconnectDatabase, runMigrations } from './services/database.service'
 import { createAppMenu } from './menu'
 import {
+  fetchAnthropicModels,
   fetchDeepSeekModels,
   fetchGeminiModels,
   fetchOpenAIModels,
@@ -111,6 +112,23 @@ ipcMain.handle('settings:hasGeminiApiKey', () => {
 
 ipcMain.handle('settings:deleteGeminiApiKey', () => {
   settingsService.deleteGeminiKey()
+})
+
+// Anthropic API key handlers
+ipcMain.handle('settings:getAnthropicApiKey', () => {
+  return settingsService.getAnthropicKey()
+})
+
+ipcMain.handle('settings:setAnthropicApiKey', (_, key: string) => {
+  settingsService.setAnthropicKey(key)
+})
+
+ipcMain.handle('settings:hasAnthropicApiKey', () => {
+  return settingsService.hasAnthropicKey()
+})
+
+ipcMain.handle('settings:deleteAnthropicApiKey', () => {
+  settingsService.deleteAnthropicKey()
 })
 
 // Claude OAuth subscription handlers
@@ -255,6 +273,13 @@ ipcMain.handle('models:fetch', async (_, provider: ProviderType) => {
       // Ollama returns intersection of installed and curated models
       models = await getInstalledCuratedModels()
       settingsService.setOllamaCachedModels(models.map((m) => m.id))
+    } else if (provider === 'anthropic') {
+      const apiKey = settingsService.getAnthropicKey()
+      if (!apiKey) {
+        return getFallbackModels(provider)
+      }
+      models = await fetchAnthropicModels(apiKey)
+      settingsService.setAnthropicCachedModels(models.map((m) => m.id))
     } else {
       return getFallbackModels(provider)
     }
@@ -278,6 +303,8 @@ ipcMain.handle('models:getCached', (_, provider: ProviderType) => {
     return settingsService.getClaudeCachedModels()
   } else if (provider === 'ollama') {
     return settingsService.getOllamaCachedModels()
+  } else if (provider === 'anthropic') {
+    return settingsService.getAnthropicCachedModels()
   }
   return []
 })
@@ -295,6 +322,8 @@ ipcMain.handle('models:getSelected', (_, provider: ProviderType) => {
     return settingsService.getClaudeSelectedModel()
   } else if (provider === 'ollama') {
     return settingsService.getOllamaSelectedModel()
+  } else if (provider === 'anthropic') {
+    return settingsService.getAnthropicSelectedModel()
   }
   return null
 })
@@ -324,6 +353,10 @@ ipcMain.handle('models:setSelected', (_, provider: ProviderType, model: string) 
     const previous = settingsService.getOllamaSelectedModel()
     settingsService.setOllamaSelectedModel(model)
     log.info(`Ollama model changed: ${previous ?? 'default'} -> ${model}`)
+  } else if (provider === 'anthropic') {
+    const previous = settingsService.getAnthropicSelectedModel()
+    settingsService.setAnthropicSelectedModel(model)
+    log.info(`Anthropic model changed: ${previous ?? 'default'} -> ${model}`)
   }
 })
 

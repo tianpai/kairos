@@ -1,4 +1,4 @@
-export type ProviderType = "openai" | "deepseek" | "claude" | "ollama" | "xai" | "gemini"
+export type ProviderType = "openai" | "deepseek" | "claude" | "ollama" | "xai" | "gemini" | "anthropic"
 
 export interface ModelInfo {
   id: string
@@ -34,6 +34,12 @@ const GEMINI_FALLBACK_MODELS = [
   "gemini-2.0-flash",
   "gemini-1.5-flash",
   "gemini-1.5-pro",
+]
+
+const ANTHROPIC_FALLBACK_MODELS: Array<ModelInfo> = [
+  { id: "claude-haiku-4-5-20251001", name: "Claude Haiku 4.5" },
+  { id: "claude-sonnet-4-5-20250929", name: "Claude Sonnet 4.5" },
+  { id: "claude-opus-4-5-20251101", name: "Claude Opus 4.5" },
 ]
 
 // Claude models are hardcoded (OAuth doesn't provide a model list endpoint)
@@ -202,6 +208,39 @@ export async function fetchGeminiModels(
   }
 }
 
+export async function fetchAnthropicModels(
+  apiKey: string,
+  baseUrl = "https://api.anthropic.com/v1",
+): Promise<Array<ModelInfo>> {
+  try {
+    const response = await fetch(`${baseUrl}/models`, {
+      headers: {
+        "x-api-key": apiKey,
+        "anthropic-version": "2023-06-01",
+      },
+    })
+
+    if (!response.ok) {
+      console.error(`Anthropic models fetch failed: ${response.status}`)
+      return ANTHROPIC_FALLBACK_MODELS
+    }
+
+    const data = (await response.json()) as {
+      data: Array<{ id: string; display_name: string; type: string; created_at: string }>
+      has_more: boolean
+    }
+    const models = data.data.map((m) => ({
+      id: m.id,
+      name: m.display_name,
+    }))
+
+    return models.length > 0 ? models : ANTHROPIC_FALLBACK_MODELS
+  } catch (error) {
+    console.error("Failed to fetch Anthropic models:", error)
+    return ANTHROPIC_FALLBACK_MODELS
+  }
+}
+
 export function getClaudeModels(): Array<ModelInfo> {
   return CLAUDE_MODELS
 }
@@ -224,6 +263,8 @@ export function getFallbackModels(provider: ProviderType): Array<ModelInfo> {
       return CLAUDE_MODELS
     case "ollama":
       return OLLAMA_CURATED_MODELS
+    case "anthropic":
+      return ANTHROPIC_FALLBACK_MODELS
     default:
       return []
   }
@@ -243,6 +284,8 @@ export function getDefaultModel(provider: ProviderType): string {
       return "claude-sonnet-4-5-20250929"
     case "ollama":
       return "llama3.2:3b"
+    case "anthropic":
+      return "claude-haiku-4-5-20251001"
     default:
       return "gpt-4o-mini"
   }

@@ -7,6 +7,7 @@ type ProviderType =
   | 'ollama'
   | 'xai'
   | 'gemini'
+  | 'anthropic'
 
 // OpenAI API Key hooks
 export function useHasApiKey() {
@@ -143,6 +144,42 @@ export function useDeleteGeminiApiKey() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: () => window.electron.settings.deleteGeminiApiKey(),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['settings'] })
+    },
+  })
+}
+
+// Anthropic API Key hooks
+export function useHasAnthropicApiKey() {
+  return useQuery({
+    queryKey: ['settings', 'hasAnthropicApiKey'],
+    queryFn: () => window.electron.settings.hasAnthropicApiKey(),
+  })
+}
+
+export function useAnthropicApiKey() {
+  return useQuery({
+    queryKey: ['settings', 'anthropicApiKey'],
+    queryFn: () => window.electron.settings.getAnthropicApiKey(),
+  })
+}
+
+export function useSetAnthropicApiKey() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (key: string) =>
+      window.electron.settings.setAnthropicApiKey(key),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['settings'] })
+    },
+  })
+}
+
+export function useDeleteAnthropicApiKey() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: () => window.electron.settings.deleteAnthropicApiKey(),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['settings'] })
     },

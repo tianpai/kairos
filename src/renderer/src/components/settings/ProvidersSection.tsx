@@ -4,6 +4,7 @@ import { InvertedButton } from '@ui/InvertedButton'
 import { GenericSidebarItem } from '@sidebar/GenericSidebarItem'
 import {
   useActiveProvider,
+  useAnthropicApiKey,
   useApiKey,
   useClaudeAuthMode,
   useClaudeCliStatus,
@@ -14,6 +15,7 @@ import {
   useClaudeStartAuth,
   useDeepSeekApiKey,
   useDefaultModel,
+  useDeleteAnthropicApiKey,
   useDeleteApiKey,
   useDeleteDeepSeekApiKey,
   useDeleteGeminiApiKey,
@@ -27,6 +29,7 @@ import {
   useOllamaStatus,
   useSelectedModel,
   useSetActiveProvider,
+  useSetAnthropicApiKey,
   useSetApiKey,
   useSetClaudeAuthMode,
   useSetClaudeCliPath,
@@ -44,6 +47,7 @@ type ProviderType =
   | 'ollama'
   | 'xai'
   | 'gemini'
+  | 'anthropic'
 
 interface ProviderInfo {
   id: ProviderType
@@ -89,6 +93,12 @@ const PROVIDERS: Array<ProviderInfo> = [
     name: 'Google Gemini',
     description: 'Gemini 2.5 Flash, Gemini 2.5 Pro and other Google models',
     placeholder: 'AIza...',
+  },
+  {
+    id: 'anthropic',
+    name: 'Anthropic',
+    description: 'Claude Haiku 4.5, Claude Sonnet 4.5, Claude Opus 4.5 via API',
+    placeholder: 'sk-ant-...',
   },
 ]
 
@@ -987,6 +997,11 @@ export function ProvidersSection() {
   const setGeminiKey = useSetGeminiApiKey()
   const deleteGeminiKey = useDeleteGeminiApiKey()
 
+  // Anthropic hooks
+  const { data: anthropicKey } = useAnthropicApiKey()
+  const setAnthropicKey = useSetAnthropicApiKey()
+  const deleteAnthropicKey = useDeleteAnthropicApiKey()
+
   // Active provider
   const { data: activeProvider } = useActiveProvider()
   const setActiveProvider = useSetActiveProvider()
@@ -1027,6 +1042,11 @@ export function ProvidersSection() {
         return {
           isConfigured: !!geminiKey,
           isActive: activeProvider === 'gemini',
+        }
+      case 'anthropic':
+        return {
+          isConfigured: !!anthropicKey,
+          isActive: activeProvider === 'anthropic',
         }
     }
   }
@@ -1108,7 +1128,7 @@ export function ProvidersSection() {
             onSave={(key) => setXaiKey.mutateAsync(key)}
             onDelete={() => deleteXaiKey.mutateAsync()}
           />
-        ) : (
+        ) : selectedProvider === 'gemini' ? (
           <ProviderConfig
             provider={PROVIDERS.find((p) => p.id === 'gemini')!}
             currentKey={geminiKey}
@@ -1116,6 +1136,15 @@ export function ProvidersSection() {
             onSetActive={() => setActiveProvider.mutateAsync('gemini')}
             onSave={(key) => setGeminiKey.mutateAsync(key)}
             onDelete={() => deleteGeminiKey.mutateAsync()}
+          />
+        ) : (
+          <ProviderConfig
+            provider={PROVIDERS.find((p) => p.id === 'anthropic')!}
+            currentKey={anthropicKey}
+            isActive={activeProvider === 'anthropic'}
+            onSetActive={() => setActiveProvider.mutateAsync('anthropic')}
+            onSave={(key) => setAnthropicKey.mutateAsync(key)}
+            onDelete={() => deleteAnthropicKey.mutateAsync()}
           />
         )}
       </div>

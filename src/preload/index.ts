@@ -125,6 +125,15 @@ contextBridge.exposeInMainWorld("electron", {
       ipcRenderer.invoke("settings:hasGeminiApiKey"),
     deleteGeminiApiKey: (): Promise<void> =>
       ipcRenderer.invoke("settings:deleteGeminiApiKey"),
+    // Anthropic
+    getAnthropicApiKey: (): Promise<string | null> =>
+      ipcRenderer.invoke("settings:getAnthropicApiKey"),
+    setAnthropicApiKey: (key: string): Promise<void> =>
+      ipcRenderer.invoke("settings:setAnthropicApiKey", key),
+    hasAnthropicApiKey: (): Promise<boolean> =>
+      ipcRenderer.invoke("settings:hasAnthropicApiKey"),
+    deleteAnthropicApiKey: (): Promise<void> =>
+      ipcRenderer.invoke("settings:deleteAnthropicApiKey"),
   },
   models: {
     fetch: (provider: string): Promise<Array<{ id: string; name: string }>> =>

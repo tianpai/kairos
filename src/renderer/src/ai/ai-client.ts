@@ -21,6 +21,7 @@ type ProviderType =
   | 'ollama'
   | 'xai'
   | 'gemini'
+  | 'anthropic'
 
 interface ServerInfo {
   port: number
@@ -57,6 +58,8 @@ async function getActiveProviderConfig(): Promise<{
     apiKey = await window.electron.settings.getXAIApiKey()
   } else if (provider === 'gemini') {
     apiKey = await window.electron.settings.getGeminiApiKey()
+  } else if (provider === 'anthropic') {
+    apiKey = await window.electron.settings.getAnthropicApiKey()
   } else {
     apiKey = await window.electron.settings.getApiKey()
   }

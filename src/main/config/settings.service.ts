@@ -37,8 +37,13 @@ interface SettingsSchema {
       selectedModel: string | null;
       cachedModels: Array<string>;
     };
+    anthropic: {
+      apiKey: string | null;
+      selectedModel: string | null;
+      cachedModels: Array<string>;
+    };
   };
-  activeProvider: "openai" | "deepseek" | "claude" | "ollama" | "xai" | "gemini";
+  activeProvider: "openai" | "deepseek" | "claude" | "ollama" | "xai" | "gemini" | "anthropic";
   theme: ThemeSource;
 }
 
@@ -76,6 +81,11 @@ export class SettingsService {
             cachedModels: [],
           },
           gemini: {
+            apiKey: null,
+            selectedModel: null,
+            cachedModels: [],
+          },
+          anthropic: {
             apiKey: null,
             selectedModel: null,
             cachedModels: [],
@@ -292,12 +302,45 @@ export class SettingsService {
     this.store.set("aiProviders.gemini.cachedModels", models);
   }
 
+  // Anthropic methods
+  getAnthropicKey(): string | null {
+    return this.store.get("aiProviders.anthropic.apiKey");
+  }
+
+  setAnthropicKey(key: string): void {
+    this.store.set("aiProviders.anthropic.apiKey", key);
+  }
+
+  hasAnthropicKey(): boolean {
+    return !!this.store.get("aiProviders.anthropic.apiKey");
+  }
+
+  deleteAnthropicKey(): void {
+    this.store.set("aiProviders.anthropic.apiKey", null);
+  }
+
+  getAnthropicSelectedModel(): string | null {
+    return this.store.get("aiProviders.anthropic.selectedModel");
+  }
+
+  setAnthropicSelectedModel(model: string): void {
+    this.store.set("aiProviders.anthropic.selectedModel", model);
+  }
+
+  getAnthropicCachedModels(): Array<string> {
+    return this.store.get("aiProviders.anthropic.cachedModels");
+  }
+
+  setAnthropicCachedModels(models: Array<string>): void {
+    this.store.set("aiProviders.anthropic.cachedModels", models);
+  }
+
   // Active provider methods
-  getActiveProvider(): "openai" | "deepseek" | "claude" | "ollama" | "xai" | "gemini" {
+  getActiveProvider(): "openai" | "deepseek" | "claude" | "ollama" | "xai" | "gemini" | "anthropic" {
     return this.store.get("activeProvider");
   }
 
-  setActiveProvider(provider: "openai" | "deepseek" | "claude" | "ollama" | "xai" | "gemini"): void {
+  setActiveProvider(provider: "openai" | "deepseek" | "claude" | "ollama" | "xai" | "gemini" | "anthropic"): void {
     this.store.set("activeProvider", provider);
   }
 
