@@ -8,8 +8,12 @@ All notable changes to this project will be documented in this file. See [standa
 
 ### Features
 
+- Add Anthropic API provider support
+- Add Google Gemini provider support
+- Add xAI Grok provider support
 - Add DeepSeek provider support
-- Support Anthropic Claude and Claude Code subscription login
+- Add Ollama local model support
+- Support Claude Code subscription login with auto-detection
 
 ### Bug Fixes
 
