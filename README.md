@@ -1,100 +1,70 @@
 # Kairos
 
-AI-powered resume optimization desktop application.
+AI-powered resume tailoring for job seekers. Build, customize, and optimize
+your resume for each application.
 
-## Project Structure
+> [!WARNING]
+> This app is in early development and may have bugs or unexpected behavior. AI
+> can make mistakes when tailoring and parsing your resume - always review the
+> output before submitting applications.
 
-```
-kairos/
-├── src/
-│   ├── main/          # Electron main process (IPC handlers, Prisma, services)
-│   ├── preload/       # Electron preload scripts (IPC bridge)
-│   └── renderer/      # Frontend - React + Vite
-├── prisma/            # Database schema and migrations
-├── build/             # App icons for packaging
-└── electron.vite.config.ts
-```
+> [!NOTE]
+> Kairos does not collect any user data. No telemetry, no analytics, no
+> tracking.
 
-## Prerequisites
+> [!IMPORTANT]
+> By using AI features, your resume content is sent to the LLM provider you
+> configure (OpenAI, Anthropic, etc.). You are responsible for reviewing and
+> agreeing to their terms of service and privacy policies.
 
-- Node.js (v18+)
-- npm
+![Kairos Editor](assets/screenshots/editor.png)
 
-## Setup
+[More screenshots](assets/screenshots/)
 
-Install dependencies:
-```bash
-npm install
-```
+## Features
+
+- **Real-time editing** - Live preview as you type
+- **AI-powered tailoring** - Automatically optimize your resume for job descriptions
+- **Batch applications** - One resume + multiple JDs = multiple tailored applications
+- **Build from scratch** - Start fresh or use an existing application as a base
+- **Keyword scoring** - Weighted scoring system to track requirement coverage
+- **Flexible export** - Single PDF or batch export all applications
+- **Full customization** - Sections, subsections, fields are all drag-and-drop reorderable
+- **Document styling** - Font, margins, heading color, paper size
+- **Dark/light theme** - System-aware appearance
+- **Keyboard-first** - Shortcuts for speed and efficiency
+
+### AI Providers
+
+Bring your own API key or use Claude Code subscription:
+
+- OpenAI
+- Anthropic Claude
+- Google Gemini
+- DeepSeek
+- xAI Grok
+- Ollama (local models)
+
+More providers will be supported once the app is stable in v1.0.0.
+
+See [CHANGELOG.md](CHANGELOG.md) for version history and detailed feature notes.
+
+## Installation
+
+### macOS
+
+1. Download the latest `.dmg` from [Releases](https://github.com/tianpai/kairos/releases)
+2. Open the `.dmg` and drag Kairos to Applications
+3. On first launch, macOS will warn about an unidentified developer:
+   - Right-click the app → **Open** → **Open** again
+   - Or run: `xattr -cr /Applications/Kairos.app`
+
+Windows and Linux builds are available but less tested.
 
 ## Development
 
-Start the Electron app in development mode:
-```bash
-npm run dev
-```
+See [CONTRIBUTING.md](CONTRIBUTING.md) for setup instructions and technical documentation.
 
-This single command:
-- Builds the main and preload processes
-- Starts the Vite dev server for the renderer (hot reload)
-- Launches the Electron window with DevTools
+## License
 
-## Production Build
-
-Build and package the application for distribution:
-
-```bash
-# Build for macOS only
-npm run build:mac
-
-# Build for Windows only
-npm run build:win
-
-# Build for Linux only
-npm run build:linux
-
-# Build for all platforms
-npm run build:all
-```
-
-Output will be in the `dist/` directory.
-
-## Clean Build
-
-Remove build artifacts and user data for a fresh start:
-
-```bash
-rm -rf dist/ out/ ~/Library/Application\ Support/kairos/
-```
-
-- `dist/` - packaged app output
-- `out/` - compiled source
-- `~/Library/Application Support/kairos/` - user data (database, settings)
-
-## Database
-
-The application uses **SQLite** for local storage via Prisma ORM:
-- Development: `prisma/dev.db`
-- Production: `<user-data>/kairos.db` (automatically created on first run)
-
-## Key Architectural Principles
-
-- **Desktop-First**: Single-user Electron application with local SQLite database
-- **IPC Communication**: Main process handles database and system operations, renderer handles UI
-- **Real-Time Preview**: Live preview compiles [Typst](https://typst.app/) code using WASM in the renderer process
-- **Resume Templates**: Templates are generated programmatically using Typst
-- **AI Workflows**: Web Worker-based AI services using OpenAI SDK
-
-## Tech Stack
-
-**Frontend (Renderer):**
-- React 19 + TypeScript
-- TanStack Router + Query
-- Tailwind CSS
-- Typst WASM compiler
-
-**Main Process:**
-- Electron
-- Prisma ORM + SQLite
-- electron-vite for build tooling
-- electron-store for settings
+[AGPL-3.0](LICENSE)

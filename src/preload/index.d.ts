@@ -20,6 +20,30 @@ interface OllamaPullProgress {
   completed?: number;
 }
 
+type UpdateStatus =
+  | "idle"
+  | "checking"
+  | "available"
+  | "not-available"
+  | "downloading"
+  | "downloaded"
+  | "error";
+
+interface UpdateProgress {
+  percent: number;
+  bytesPerSecond: number;
+  transferred: number;
+  total: number;
+}
+
+interface UpdateState {
+  status: UpdateStatus;
+  version?: string;
+  releaseNotes?: string;
+  error?: string;
+  progress?: UpdateProgress;
+}
+
 interface IElectronAPI {
   shortcuts: {
     onSettings: (callback: () => void) => () => void;
@@ -162,6 +186,15 @@ interface IElectronAPI {
       id: string,
       data: unknown,
     ) => Promise<{ success: boolean }>;
+  };
+  updater: {
+    check: () => Promise<UpdateState>;
+    getState: () => Promise<UpdateState>;
+    getVersion: () => Promise<string>;
+    isPackaged: () => Promise<boolean>;
+    openReleasesPage: () => Promise<void>;
+    download: () => Promise<void>;
+    quitAndInstall: () => Promise<void>;
   };
 }
 

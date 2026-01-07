@@ -4,6 +4,7 @@ import { registerJobsHandlers } from './jobs.handlers'
 import { registerDialogHandlers } from './dialog.handlers'
 import { registerFsHandlers } from './fs.handlers'
 import { registerAIServerHandlers } from './ai-server.handlers'
+import { registerUpdaterHandlers } from './updater.handlers'
 
 export function registerAllHandlers(): void {
   const database = getDatabase()
@@ -12,4 +13,5 @@ export function registerAllHandlers(): void {
   registerDialogHandlers()
   registerFsHandlers()
   registerAIServerHandlers()
+  registerUpdaterHandlers()
 }
