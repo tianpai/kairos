@@ -1,6 +1,3 @@
-import type { z } from 'zod'
-import type { Section, TemplateData } from '@templates/template.types'
-import type { TemplateConfig } from '@templates/templateId'
 import { TemplateId } from '@templates/templateId'
 import { SECTION_IDS } from '@templates/template.types'
 import { GlobalHelpersSection } from '@templates/shared/document-config'
@@ -15,6 +12,9 @@ import {
   SummarySection,
   WorkExperienceSection,
 } from '@templates/sections'
+import type { TemplateConfig } from '@templates/templateId'
+import type { Section, TemplateData } from '@templates/template.types'
+import type { z } from 'zod'
 
 /**
  * Section registry: maps section IDs to their class constructors
@@ -91,7 +91,7 @@ export class TemplateBuilder {
 
     // Assemble final document
     const typstString = `${globalStyle}\n${sectionStyles}\n${content}`
-    console.log(typstString)
+    // console.log(typstString)
     return typstString
   }
 
@@ -107,7 +107,7 @@ export class TemplateBuilder {
 
       // Get data for this section
       const rawData = data[sectionConfig.id]
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+       
       if (rawData === undefined) continue
 
       // Normalize to array (sections always expect arrays)

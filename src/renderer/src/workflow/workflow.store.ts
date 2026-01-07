@@ -1,24 +1,45 @@
+/**
+ * Workflow Store (Zustand)
+ *
+ * Manages workflow state for multiple concurrent jobs.
+ * Each job has its own WorkflowInstance and WorkflowContext.
+ */
+
 import { create } from 'zustand'
-import type {
-  Task,
-  TaskStatus,
-  TaskStateMap,
-  WorkflowInstance,
-  WorkflowName,
-  WorkflowContext,
-} from './workflow.types'
+import type { TaskName, WorkflowContext } from './task-contracts'
+
+// =============================================================================
+// Types
+// =============================================================================
+
+export type TaskStatus = 'pending' | 'running' | 'completed' | 'failed'
+export type WorkflowStatus = 'idle' | 'running' | 'completed' | 'failed'
+
+export type TaskStateMap = Partial<Record<TaskName, TaskStatus>>
+
+export interface WorkflowInstance {
+  jobId: string
+  workflowName: string
+  taskStates: TaskStateMap
+  status: WorkflowStatus
+  error?: string
+}
+
+// =============================================================================
+// Store Interface
+// =============================================================================
 
 interface WorkflowState {
-  // Map of jobId -> WorkflowInstance (supports multiple concurrent workflows)
+  // State: Map of jobId -> WorkflowInstance (supports multiple concurrent workflows)
   workflows: Record<string, WorkflowInstance>
-  // Map of jobId -> WorkflowContext
+  // State: Map of jobId -> WorkflowContext
   contexts: Record<string, WorkflowContext>
 
-  // Actions (all require jobId)
-  startWorkflow: (
+  // Actions
+  initWorkflow: (
     jobId: string,
-    workflowName: WorkflowName,
-    tasks: Task[],
+    workflowName: string,
+    tasks: Array<TaskName>,
     initialContext: Partial<WorkflowContext>,
   ) => void
   loadWorkflow: (
@@ -26,26 +47,35 @@ interface WorkflowState {
     workflow: WorkflowInstance,
     context?: WorkflowContext,
   ) => void
-  setTaskStatus: (jobId: string, task: Task, status: TaskStatus, error?: string) => void
+  setTaskStatus: (
+    jobId: string,
+    task: TaskName,
+    status: TaskStatus,
+    error?: string,
+  ) => void
   updateContext: (jobId: string, updates: Partial<WorkflowContext>) => void
   completeWorkflow: (jobId: string) => void
   failWorkflow: (jobId: string, error: string) => void
   clearWorkflow: (jobId: string) => void
 
-  // Selectors (all require jobId)
+  // Selectors
   getWorkflow: (jobId: string) => WorkflowInstance | undefined
   getContext: (jobId: string) => WorkflowContext | undefined
-  getTaskStatus: (jobId: string, task: Task) => TaskStatus | undefined
-  isTaskRunning: (jobId: string, task: Task) => boolean
+  getTaskStatus: (jobId: string, task: TaskName) => TaskStatus | undefined
+  isTaskRunning: (jobId: string, task: TaskName) => boolean
   isWorkflowRunning: (jobId: string) => boolean
   hasFailedTask: (jobId: string) => boolean
 }
+
+// =============================================================================
+// Store Implementation
+// =============================================================================
 
 export const useWorkflowStore = create<WorkflowState>()((set, get) => ({
   workflows: {},
   contexts: {},
 
-  startWorkflow: (jobId, workflowName, tasks, initialContext) => {
+  initWorkflow: (jobId, workflowName, tasks, initialContext) => {
     const taskStates: TaskStateMap = {}
     tasks.forEach((task) => {
       taskStates[task] = 'pending'
@@ -66,7 +96,7 @@ export const useWorkflowStore = create<WorkflowState>()((set, get) => ({
         [jobId]: {
           jobId,
           ...initialContext,
-        },
+        } as WorkflowContext,
       },
     }))
   },
@@ -87,6 +117,7 @@ export const useWorkflowStore = create<WorkflowState>()((set, get) => ({
     set((state) => {
       const workflow = state.workflows[jobId]
       if (!workflow) return state
+
       return {
         workflows: {
           ...state.workflows,
@@ -107,6 +138,7 @@ export const useWorkflowStore = create<WorkflowState>()((set, get) => ({
     set((state) => {
       const context = state.contexts[jobId]
       if (!context) return state
+
       return {
         contexts: {
           ...state.contexts,
@@ -123,6 +155,7 @@ export const useWorkflowStore = create<WorkflowState>()((set, get) => ({
     set((state) => {
       const workflow = state.workflows[jobId]
       if (!workflow) return state
+
       return {
         workflows: {
           ...state.workflows,
@@ -139,6 +172,7 @@ export const useWorkflowStore = create<WorkflowState>()((set, get) => ({
     set((state) => {
       const workflow = state.workflows[jobId]
       if (!workflow) return state
+
       return {
         workflows: {
           ...state.workflows,
@@ -187,7 +221,8 @@ export const useWorkflowStore = create<WorkflowState>()((set, get) => ({
 
   hasFailedTask: (jobId) => {
     const workflow = get().workflows[jobId]
-    if (!workflow) return false
-    return Object.values(workflow.taskStates).some((s) => s === 'failed')
+    return workflow
+      ? Object.values(workflow.taskStates).some((s) => s === 'failed')
+      : false
   },
 }))

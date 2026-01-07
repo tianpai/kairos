@@ -4,12 +4,12 @@
  */
 
 import { z } from 'zod'
-import type { Section, SectionUISchema } from '@templates/template.types'
 import { SECTION_IDS } from '@templates/template.types'
 import {
   escapeTypstString,
   formatBulletList,
 } from '@templates/shared/codegen-helper'
+import type { Section, SectionUISchema } from '@templates/template.types'
 
 // Data schema for AI parsing/tailoring - all required (no defaults)
 export const ProjectDataSchema = z.object({

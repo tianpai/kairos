@@ -2,6 +2,43 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## 0.0.4 (Unreleased)
+
+"You shall be the Fellowship of the Ring"
+
+### Features
+
+- Add Anthropic API provider support
+- Add Google Gemini provider support
+- Add xAI Grok provider support
+- Add DeepSeek provider support
+- Add Ollama local model support
+- Support Claude Code subscription login with auto-detection
+
+### Bug Fixes
+
+- Update to latest Claude models
+- Remove duplicate provider name from settings panel
+
+## 0.0.3 (2024-12-31)
+
+"I need you to hurry up now, 'Cause I can't wait much longer"
+
+### Features
+
+- Start a new application from an existing resume instead of uploading again
+- Create multiple applications at once by selecting multiple job descriptions
+- Export all your resumes as PDFs in one click with batch download
+- Company, position, and due date auto-fill from job description
+- Use markdown or text files as job descriptions
+- Keyboard shortcuts for all header buttons
+- Save job posting URL and open it directly in your browser
+
+### Bug Fixes
+
+- PDF exports now include proper defaults for missing fields
+- Drag-and-drop lists no longer flicker during reordering
+
 ## 0.0.2 (2024-12-22)
 
 "Damn! It even uses like a desktop app"

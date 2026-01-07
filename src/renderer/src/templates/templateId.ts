@@ -4,8 +4,8 @@
  */
 
 import { z } from 'zod'
-import type { SectionId } from '@templates/template.types'
 import { DocumentSetupSchema } from '@templates/shared/document-config'
+import type { SectionId } from '@templates/template.types'
 
 export const SectionConfigSchema = z.object({
   id: z.string(),

@@ -1,12 +1,17 @@
 import { useEffect, useRef } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
-import { useWorkflowStore } from '@workflow/workflow.store'
-import { recoverStaleWorkflow } from '@workflow/workflow.recovery'
 import { useResumeStore } from '@typst-compiler/resumeState'
-import { saveWorkflowState } from '@api/jobs'
+import { saveWorkflow } from '@api/jobs'
+import {
+  RESUME_PARSING,
+  RESUME_TAILORING,
+  SCORE_UPDATING,
+  recoverStaleWorkflow,
+  useWorkflowStore,
+} from '../workflow'
 import type { JobApplicationDetails } from '@api/jobs'
 import type { TemplateData } from '@templates/template.types'
-import type { WorkflowName, TaskStateMap } from '@workflow/workflow.types'
+import type { TaskStateMap } from '../workflow'
 
 /**
  * Syncs workflow state between DB, Zustand store, and React Query cache
@@ -28,7 +33,9 @@ export function useWorkflowSync(
   const loadWorkflow = useWorkflowStore((state) => state.loadWorkflow)
 
   // Track previous task states to detect completions (per jobId)
-  const prevTaskStatesRef = useRef<Record<string, Record<string, string>>>({})
+  const prevTaskStatesRef = useRef<
+    Record<string, Record<string, string> | undefined>
+  >({})
 
   // Effect 1: Load workflow from DB when navigating to a job
   useEffect(() => {
@@ -48,8 +55,11 @@ export function useWorkflowSync(
 
     // If recovery changed the state, persist it back to DB
     if (wasStale) {
-      saveWorkflowState(jobId, recovered, recovered.status).catch((error) => {
-        console.error('[WorkflowSync] Failed to save recovered workflow state:', error)
+      saveWorkflow(jobId, recovered, recovered.status).catch((error) => {
+        console.error(
+          '[WorkflowSync] Failed to save recovered workflow state:',
+          error,
+        )
       })
     }
 
@@ -58,14 +68,17 @@ export function useWorkflowSync(
       jobId,
       {
         jobId,
-        workflowName: recovered.workflowName as WorkflowName,
+        workflowName: recovered.workflowName,
         taskStates: recovered.taskStates as TaskStateMap,
-        status: recovered.status,
+        status: recovered.status as 'idle' | 'running' | 'completed' | 'failed',
         error: recovered.error,
       },
       {
         jobId,
-        resumeStructure: jobApplication.tailoredResume ?? jobApplication.parsedResume ?? undefined,
+        resumeStructure:
+          jobApplication.tailoredResume ??
+          jobApplication.parsedResume ??
+          undefined,
         checklist: jobApplication.checklist ?? undefined,
       },
     )
@@ -91,7 +104,7 @@ export function useWorkflowSync(
     const prevTaskStates = prevTaskStatesRef.current[jobId] || {}
 
     // Find tasks that just completed
-    const justCompleted: string[] = []
+    const justCompleted: Array<string> = []
     for (const [task, status] of Object.entries(currentTaskStates)) {
       if (status === 'completed' && prevTaskStates[task] !== 'completed') {
         justCompleted.push(task)
@@ -107,14 +120,14 @@ export function useWorkflowSync(
     queryClient.invalidateQueries({ queryKey: ['jobApplication', jobId] })
 
     // If score updated, also invalidate the applications list for sidebar
-    if (justCompleted.includes('score.updating')) {
+    if (justCompleted.includes(SCORE_UPDATING)) {
       queryClient.invalidateQueries({ queryKey: ['jobApplications'] })
     }
 
     // If resume parsing or tailoring completed, load into resume store
     if (
-      justCompleted.includes('resume.parsing') ||
-      justCompleted.includes('resume.tailoring')
+      justCompleted.includes(RESUME_PARSING) ||
+      justCompleted.includes(RESUME_TAILORING)
     ) {
       if (context?.resumeStructure) {
         loadParsedResume(context.resumeStructure as TemplateData)
@@ -123,8 +136,8 @@ export function useWorkflowSync(
   }, [
     jobId,
     // Subscribe to workflow changes for the current job
-    useWorkflowStore((state) => jobId ? state.workflows[jobId] : undefined),
-    useWorkflowStore((state) => jobId ? state.contexts[jobId] : undefined),
+    useWorkflowStore((state) => (jobId ? state.workflows[jobId] : undefined)),
+    useWorkflowStore((state) => (jobId ? state.contexts[jobId] : undefined)),
     queryClient,
     loadParsedResume,
   ])

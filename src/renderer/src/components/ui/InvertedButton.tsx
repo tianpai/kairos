@@ -36,7 +36,7 @@ export function InvertedButton({
       disabled={disabled || loading}
       aria-label={ariaLabel}
       title={title || ariaLabel}
-      className={`cursor-pointer ${bgColor} px-3 py-2 ${textColor} transition-colors duration-200 ${hoverBgColor} ${hoverTextColor} focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 ${className}`}
+      className={`cursor-pointer rounded-md ${bgColor} px-3 py-2 ${textColor} transition-colors duration-200 ${hoverBgColor} ${hoverTextColor} focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 ${className}`}
     >
       {loading ? (
         <span

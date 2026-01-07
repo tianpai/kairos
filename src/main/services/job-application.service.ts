@@ -1,16 +1,22 @@
 import { randomUUID } from 'node:crypto'
-import type { Prisma, PrismaClient } from '@prisma/client'
+import { desc, eq } from 'drizzle-orm'
+import { companies, jobApplications } from '../db/schema'
+import type * as schema from '../db/schema'
+import type { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3'
 import type {
-  CreateJobApplicationInput,
+  CreateFromExistingInput,
   CreateFromScratchInput,
+  CreateJobApplicationInput,
+  SaveChecklistInput,
+  SaveParsedResumeInput,
+  SaveResumeInput,
+  SaveTailoredResumeInput,
+  SaveWorkflowStateInput,
   UpdateJobApplicationInput,
   UpdateJobDescriptionInput,
-  SaveResumeInput,
-  SaveParsedResumeInput,
-  SaveTailoredResumeInput,
-  SaveChecklistInput,
-  SaveWorkflowStateInput,
 } from '../schemas/job-application.schemas'
+
+type Database = BetterSQLite3Database<typeof schema>
 
 export class JobNotFoundError extends Error {
   constructor(id: string) {
@@ -19,102 +25,115 @@ export class JobNotFoundError extends Error {
   }
 }
 
-async function requireJobApplication<
-  Select extends Prisma.JobApplicationSelect | undefined = undefined,
-  Include extends Prisma.JobApplicationInclude | undefined = undefined,
->(
-  database: PrismaClient,
-  id: string,
-  args?: {
-    select?: Select
-    include?: Include
-  },
-): Promise<
-  Prisma.JobApplicationGetPayload<{
-    select: Select
-    include: Include
-  }>
-> {
-  const jobApplication = await database.jobApplication.findUnique({
-    where: { id },
-    ...(args ?? {}),
-  } as Prisma.JobApplicationFindUniqueArgs)
-
-  if (!jobApplication) {
-    throw new JobNotFoundError(id)
-  }
-
-  return jobApplication as Prisma.JobApplicationGetPayload<{
-    select: Select
-    include: Include
-  }>
+function nowISO(): string {
+  return new Date().toISOString()
 }
 
 export class JobApplicationService {
-  constructor(private readonly database: PrismaClient) {}
+  constructor(private readonly db: Database) {}
 
-  async createJobApplication(dto: CreateJobApplicationInput): Promise<{
-    id: string
-  }> {
-    const jobId = randomUUID()
+  private getOrCreateCompany(name: string): { id: number; name: string } {
+    const existing = this.db.select().from(companies).where(eq(companies.name, name)).get()
 
-    let company = await this.database.company.findUnique({
-      where: { name: dto.companyName },
-    })
-    if (!company) {
-      company = await this.database.company.create({
-        data: { name: dto.companyName },
-      })
-    }
+    if (existing) return existing
 
-    const jobApplication = await this.database.jobApplication.create({
-      data: {
-        id: jobId,
-        companyId: company.id,
-        position: dto.position,
-        dueDate: new Date(dto.dueDate),
-        matchPercentage: 0,
-        templateId: dto.templateId,
-        jobDescription: dto.jobDescription,
-        originalResume: dto.rawResumeContent,
-      },
-    })
+    const result = this.db.insert(companies).values({ name }).returning().get()
+
+    return result
+  }
+
+  private requireJobApplication(id: string) {
+    const result = this.db
+      .select()
+      .from(jobApplications)
+      .innerJoin(companies, eq(jobApplications.companyId, companies.id))
+      .where(eq(jobApplications.id, id))
+      .get()
+
+    if (!result) throw new JobNotFoundError(id)
 
     return {
-      id: jobApplication.id,
+      ...result.job_applications,
+      company: result.companies,
     }
   }
 
-  async createFromScratch(dto: CreateFromScratchInput): Promise<{
-    id: string
-  }> {
+  async createJobApplication(dto: CreateJobApplicationInput): Promise<{ id: string }> {
     const jobId = randomUUID()
+    const company = this.getOrCreateCompany(dto.companyName)
+    const now = nowISO()
 
-    let company = await this.database.company.findUnique({
-      where: { name: dto.companyName },
-    })
-    if (!company) {
-      company = await this.database.company.create({
-        data: { name: dto.companyName },
-      })
-    }
-
-    const jobApplication = await this.database.jobApplication.create({
-      data: {
+    this.db
+      .insert(jobApplications)
+      .values({
         id: jobId,
         companyId: company.id,
         position: dto.position,
-        dueDate: new Date(dto.dueDate),
+        dueDate: dto.dueDate,
+        matchPercentage: 0,
+        templateId: dto.templateId,
+        jobDescription: dto.jobDescription,
+        jobUrl: dto.jobUrl ?? null,
+        originalResume: dto.rawResumeContent,
+        createdAt: now,
+        updatedAt: now,
+      })
+      .run()
+
+    return { id: jobId }
+  }
+
+  async createFromScratch(dto: CreateFromScratchInput): Promise<{ id: string }> {
+    const jobId = randomUUID()
+    const company = this.getOrCreateCompany(dto.companyName)
+    const now = nowISO()
+
+    this.db
+      .insert(jobApplications)
+      .values({
+        id: jobId,
+        companyId: company.id,
+        position: dto.position,
+        dueDate: dto.dueDate,
         matchPercentage: 0,
         templateId: dto.templateId,
         jobDescription: dto.jobDescription ?? null,
+        jobUrl: dto.jobUrl ?? null,
         originalResume: null,
-      },
-    })
+        createdAt: now,
+        updatedAt: now,
+      })
+      .run()
 
-    return {
-      id: jobApplication.id,
-    }
+    return { id: jobId }
+  }
+
+  async createFromExisting(dto: CreateFromExistingInput): Promise<{ id: string }> {
+    const sourceJob = this.requireJobApplication(dto.sourceJobId)
+    const jobId = randomUUID()
+    const company = this.getOrCreateCompany(dto.companyName)
+    const now = nowISO()
+
+    this.db
+      .insert(jobApplications)
+      .values({
+        id: jobId,
+        companyId: company.id,
+        position: dto.position,
+        dueDate: dto.dueDate,
+        matchPercentage: 0,
+        templateId: dto.templateId,
+        jobDescription: dto.jobDescription,
+        jobUrl: dto.jobUrl ?? null,
+        originalResume: sourceJob.originalResume,
+        parsedResume: sourceJob.parsedResume,
+        tailoredResume: sourceJob.parsedResume,
+        createdAt: now,
+        updatedAt: now,
+      })
+      .run()
+
+    return { id: jobId }
   }
 
   async getAllJobApplications(): Promise<
@@ -125,30 +144,30 @@ export class JobApplicationService {
       dueDate: string
       matchPercentage: number
       applicationStatus: string | null
+      jobUrl: string | null
       originalResume: string | null
       createdAt: string
       updatedAt: string
     }>
   > {
-    const jobApplications = await this.database.jobApplication.findMany({
-      include: {
-        company: true,
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
-    })
+    const results = this.db
+      .select()
+      .from(jobApplications)
+      .innerJoin(companies, eq(jobApplications.companyId, companies.id))
+      .orderBy(desc(jobApplications.createdAt))
+      .all()
 
-    return jobApplications.map((app) => ({
-      id: app.id,
-      companyName: app.company.name,
-      position: app.position,
-      dueDate: app.dueDate.toISOString().split('T')[0],
-      matchPercentage: app.matchPercentage,
-      applicationStatus: app.applicationStatus,
-      originalResume: app.originalResume,
-      createdAt: app.createdAt.toISOString(),
-      updatedAt: app.updatedAt.toISOString(),
+    return results.map((row) => ({
+      id: row.job_applications.id,
+      companyName: row.companies.name,
+      position: row.job_applications.position,
+      dueDate: row.job_applications.dueDate.split('T')[0],
+      matchPercentage: row.job_applications.matchPercentage,
+      applicationStatus: row.job_applications.applicationStatus,
+      jobUrl: row.job_applications.jobUrl,
+      originalResume: row.job_applications.originalResume,
+      createdAt: row.job_applications.createdAt,
+      updatedAt: row.job_applications.updatedAt,
     }))
   }
 
@@ -159,6 +178,7 @@ export class JobApplicationService {
     dueDate: string
     matchPercentage: number
     applicationStatus: string | null
+    jobUrl: string | null
     createdAt: string
     updatedAt: string
     templateId: string
@@ -171,14 +191,9 @@ export class JobApplicationService {
     workflowSteps: Record<string, unknown> | null
     failedTasks: Record<string, unknown>
   }> {
-    const jobApplication = await requireJobApplication(this.database, id, {
-      include: {
-        company: true,
-      },
-    })
+    const job = this.requireJobApplication(id)
 
-    // Compute failedTasks from workflowSteps for backwards compatibility
-    const workflowSteps = jobApplication.workflowSteps as Record<string, unknown>
+    const workflowSteps = job.workflowSteps
     const failedTasks: Record<string, unknown> = {}
 
     if (workflowSteps && typeof workflowSteps === 'object' && 'taskStates' in workflowSteps) {
@@ -191,32 +206,30 @@ export class JobApplicationService {
     }
 
     return {
-      id: jobApplication.id,
-      companyName: jobApplication.company.name,
-      position: jobApplication.position,
-      dueDate: jobApplication.dueDate.toISOString().split('T')[0],
-      matchPercentage: jobApplication.matchPercentage,
-      applicationStatus: jobApplication.applicationStatus,
-      createdAt: jobApplication.createdAt.toISOString(),
-      updatedAt: jobApplication.updatedAt.toISOString(),
-      templateId: jobApplication.templateId,
-      jobDescription: jobApplication.jobDescription,
-      parsedResume: jobApplication.parsedResume as Record<string, unknown> | null,
-      tailoredResume: jobApplication.tailoredResume as Record<string, unknown> | null,
-      originalResume: jobApplication.originalResume,
-      checklist: jobApplication.checklist as Record<string, unknown> | null,
-      workflowStatus: jobApplication.workflowStatus,
-      workflowSteps: workflowSteps ?? null,
+      id: job.id,
+      companyName: job.company.name,
+      position: job.position,
+      dueDate: job.dueDate.split('T')[0],
+      matchPercentage: job.matchPercentage,
+      applicationStatus: job.applicationStatus,
+      jobUrl: job.jobUrl,
+      createdAt: job.createdAt,
+      updatedAt: job.updatedAt,
+      templateId: job.templateId,
+      jobDescription: job.jobDescription,
+      parsedResume: job.parsedResume,
+      tailoredResume: job.tailoredResume,
+      originalResume: job.originalResume,
+      checklist: job.checklist,
+      workflowStatus: job.workflowStatus,
+      workflowSteps: workflowSteps,
       failedTasks,
     }
   }
 
   async deleteJobApplication(id: string): Promise<{ success: boolean }> {
-    await requireJobApplication(this.database, id)
-    await this.database.jobApplication.delete({
-      where: { id },
-    })
-
+    this.requireJobApplication(id)
+    this.db.delete(jobApplications).where(eq(jobApplications.id, id)).run()
     return { success: true }
   }
 
@@ -230,141 +243,143 @@ export class JobApplicationService {
     dueDate: string
     matchPercentage: number
   }> {
-    const jobApplication = await requireJobApplication(this.database, id, {
-      include: { company: true },
-    })
+    const job = this.requireJobApplication(id)
+    let companyId = job.companyId
+    let companyName = job.company.name
 
-    let companyId = jobApplication.companyId
-    let companyName = jobApplication.company.name
-
-    if (dto.companyName && dto.companyName !== jobApplication.company.name) {
-      let company = await this.database.company.findUnique({
-        where: { name: dto.companyName },
-      })
-
-      if (!company) {
-        company = await this.database.company.create({
-          data: { name: dto.companyName },
-        })
-      }
-
+    if (dto.companyName && dto.companyName !== job.company.name) {
+      const company = this.getOrCreateCompany(dto.companyName)
       companyId = company.id
       companyName = company.name
     }
 
-    const updateData: Prisma.JobApplicationUpdateInput = {}
+    const updateData: Partial<{
+      companyId: number
+      position: string
+      dueDate: string
+      jobUrl: string | null
+      updatedAt: string
+    }> = {
+      updatedAt: nowISO(),
+    }
 
     if (dto.companyName) {
-      updateData.company = { connect: { id: companyId } }
+      updateData.companyId = companyId
     }
     if (dto.position) {
       updateData.position = dto.position
     }
     if (dto.dueDate) {
-      updateData.dueDate = new Date(dto.dueDate)
+      updateData.dueDate = dto.dueDate
+    }
+    if (dto.jobUrl !== undefined) {
+      updateData.jobUrl = dto.jobUrl
     }
 
-    const updated = await this.database.jobApplication.update({
-      where: { id },
-      data: updateData,
-    })
+    this.db.update(jobApplications).set(updateData).where(eq(jobApplications.id, id)).run()
+
+    const updated = this.db.select().from(jobApplications).where(eq(jobApplications.id, id)).get()!
 
     return {
       id: updated.id,
       companyName,
       position: updated.position,
-      dueDate: updated.dueDate.toISOString().split('T')[0],
+      dueDate: updated.dueDate.split('T')[0],
       matchPercentage: updated.matchPercentage,
     }
   }
 
   async saveResume(jobId: string, dto: SaveResumeInput): Promise<{ success: boolean }> {
-    await this.database.jobApplication.update({
-      where: { id: jobId },
-      data: {
-        tailoredResume: dto.resumeStructure as Prisma.InputJsonValue,
+    this.db
+      .update(jobApplications)
+      .set({
+        tailoredResume: dto.resumeStructure,
         templateId: dto.templateId,
-      },
-    })
+        updatedAt: nowISO(),
+      })
+      .where(eq(jobApplications.id, jobId))
+      .run()
     return { success: true }
   }
-
-  // Workflow data methods
 
   async saveParsedResume(jobId: string, dto: SaveParsedResumeInput): Promise<{ success: boolean }> {
-    await this.database.jobApplication.update({
-      where: { id: jobId },
-      data: {
-        parsedResume: dto.parsedResume as Prisma.InputJsonValue,
-        tailoredResume: dto.tailoredResume as Prisma.InputJsonValue,
-      },
-    })
+    this.db
+      .update(jobApplications)
+      .set({
+        parsedResume: dto.parsedResume,
+        tailoredResume: dto.tailoredResume,
+        updatedAt: nowISO(),
+      })
+      .where(eq(jobApplications.id, jobId))
+      .run()
     return { success: true }
   }
 
-  async saveTailoredResume(
-    jobId: string,
-    dto: SaveTailoredResumeInput,
-  ): Promise<{ success: boolean }> {
-    await this.database.jobApplication.update({
-      where: { id: jobId },
-      data: {
-        tailoredResume: dto.tailoredResume as Prisma.InputJsonValue,
-      },
-    })
+  async saveTailoredResume(jobId: string, dto: SaveTailoredResumeInput): Promise<{ success: boolean }> {
+    this.db
+      .update(jobApplications)
+      .set({
+        tailoredResume: dto.tailoredResume,
+        updatedAt: nowISO(),
+      })
+      .where(eq(jobApplications.id, jobId))
+      .run()
     return { success: true }
   }
 
   async saveChecklist(jobId: string, dto: SaveChecklistInput): Promise<{ success: boolean }> {
-    await this.database.jobApplication.update({
-      where: { id: jobId },
-      data: {
-        checklist: dto.checklist as Prisma.InputJsonValue,
-      },
-    })
+    this.db
+      .update(jobApplications)
+      .set({
+        checklist: dto.checklist,
+        updatedAt: nowISO(),
+      })
+      .where(eq(jobApplications.id, jobId))
+      .run()
     return { success: true }
   }
 
   async saveMatchScore(jobId: string, matchPercentage: number): Promise<{ success: boolean }> {
-    await this.database.jobApplication.update({
-      where: { id: jobId },
-      data: {
+    this.db
+      .update(jobApplications)
+      .set({
         matchPercentage,
-      },
-    })
+        updatedAt: nowISO(),
+      })
+      .where(eq(jobApplications.id, jobId))
+      .run()
     return { success: true }
   }
 
-  async saveWorkflowState(
-    jobId: string,
-    dto: SaveWorkflowStateInput,
-  ): Promise<{ success: boolean }> {
-    const updateData: Prisma.JobApplicationUpdateInput = {}
+  async saveWorkflowState(jobId: string, dto: SaveWorkflowStateInput): Promise<{ success: boolean }> {
+    const updateData: Partial<{
+      workflowSteps: Record<string, unknown> | null
+      workflowStatus: string | null
+      updatedAt: string
+    }> = {
+      updatedAt: nowISO(),
+    }
 
     if (dto.workflowSteps !== undefined) {
-      updateData.workflowSteps = dto.workflowSteps as Prisma.InputJsonValue
+      updateData.workflowSteps = dto.workflowSteps
     }
     if (dto.workflowStatus !== undefined) {
       updateData.workflowStatus = dto.workflowStatus
     }
 
-    await this.database.jobApplication.update({
-      where: { id: jobId },
-      data: updateData,
-    })
+    this.db.update(jobApplications).set(updateData).where(eq(jobApplications.id, jobId)).run()
     return { success: true }
   }
 
-  async updateJobDescription(
-    jobId: string,
-    dto: UpdateJobDescriptionInput,
-  ): Promise<{ success: boolean }> {
-    await this.database.jobApplication.update({
-      where: { id: jobId },
-      data: {
+  async updateJobDescription(jobId: string, dto: UpdateJobDescriptionInput): Promise<{ success: boolean }> {
+    this.db
+      .update(jobApplications)
+      .set({
         jobDescription: dto.jobDescription,
-      },
-    })
+        updatedAt: nowISO(),
+      })
+      .where(eq(jobApplications.id, jobId))
+      .run()
     return { success: true }
   }
 }

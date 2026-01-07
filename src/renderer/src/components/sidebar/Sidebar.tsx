@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { Settings } from 'lucide-react'
-import EditJobModal from '@sidebar/EditJobModal'
+import JobInfoModal from '@sidebar/JobInfoModal'
+import { CollapsibleSidebar } from './CollapsibleSidebar'
 import { SidebarItem } from './SidebarItem'
 
 interface Application {
@@ -10,6 +11,7 @@ interface Application {
   position: string
   dueDate: string
   matchPercentage: number
+  jobUrl: string | null
   originalResume: string | null
 }
 
@@ -20,7 +22,12 @@ interface SidebarProps {
   collapsed: boolean
   onEdit: (
     id: string,
-    data: { companyName: string; position: string; dueDate: string },
+    data: {
+      companyName: string
+      position: string
+      dueDate: string
+      jobUrl: string | null
+    },
   ) => void
   onDelete: (id: string) => void
 }
@@ -40,6 +47,7 @@ export function Sidebar({
     companyName: string
     position: string
     dueDate: string
+    jobUrl: string | null
   }) => {
     if (editingApp) {
       onEdit(editingApp.id, data)
@@ -54,49 +62,40 @@ export function Sidebar({
     }
   }
 
+  const settingsFooter = (
+    <button
+      onClick={() => navigate({ to: '/settings' })}
+      className="flex w-full cursor-pointer items-center gap-2 px-3 py-3 text-sm text-gray-600 transition-colors hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
+    >
+      <Settings size={16} />
+      <span>Settings</span>
+    </button>
+  )
+
   return (
     <>
-      <aside
-        className={`flex h-full flex-col border-r border-gray-200 bg-[#fafafa] transition-all duration-200 ease-in-out dark:border-gray-700 dark:bg-[#2a2a2a] ${
-          collapsed ? 'w-0 overflow-hidden border-r-0' : 'w-60'
-        }`}
-      >
-        {/* Inner container to prevent content reflow during animation */}
-        <div className="flex h-full w-60 flex-col">
-          {/* Applications List */}
-          <div className="flex-1 overflow-y-auto pt-3">
-            {applications.map((app) => (
-              <SidebarItem
-                key={app.id}
-                id={app.id}
-                companyName={app.companyName}
-                position={app.position}
-                dueDate={app.dueDate}
-                matchPercentage={app.matchPercentage}
-                isBuiltFromScratch={!app.originalResume}
-                isSelected={app.id === selectedId}
-                onClick={() => onSelect(app.id)}
-                onEdit={() => setEditingApp(app)}
-              />
-            ))}
-          </div>
-
-          {/* Settings at bottom */}
-          <div className="border-t border-gray-200 dark:border-gray-700">
-            <button
-              onClick={() => navigate({ to: '/settings' })}
-              className="flex w-full cursor-pointer items-center gap-2 px-3 py-3 text-sm text-gray-600 transition-colors hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
-            >
-              <Settings size={16} />
-              <span>Settings</span>
-            </button>
-          </div>
+      <CollapsibleSidebar collapsed={collapsed} footer={settingsFooter}>
+        <div className="pt-3">
+          {applications.map((app) => (
+            <SidebarItem
+              key={app.id}
+              id={app.id}
+              companyName={app.companyName}
+              position={app.position}
+              dueDate={app.dueDate}
+              matchPercentage={app.matchPercentage}
+              isBuiltFromScratch={!app.originalResume}
+              isSelected={app.id === selectedId}
+              onClick={() => onSelect(app.id)}
+              onEdit={() => setEditingApp(app)}
+            />
+          ))}
         </div>
-      </aside>
+      </CollapsibleSidebar>
 
-      {/* Edit Modal */}
+      {/* Job Info Modal */}
       {editingApp && (
-        <EditJobModal
+        <JobInfoModal
           open={true}
           onClose={() => setEditingApp(null)}
           onSave={handleSaveEdit}
@@ -105,6 +104,7 @@ export function Sidebar({
             companyName: editingApp.companyName,
             position: editingApp.position,
             dueDate: editingApp.dueDate,
+            jobUrl: editingApp.jobUrl,
           }}
         />
       )}

@@ -1,15 +1,15 @@
-import { useEffect, useMemo, useState } from 'react'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useEffect, useState } from 'react'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { ListTodo, SquarePen } from 'lucide-react'
-import { z } from 'zod'
 import { getJobApplication, updateJobDescription } from '@api/jobs'
 import { ChecklistSection } from '@checklist/ChecklistSection'
 import { InvertedButton } from '@ui/InvertedButton'
 import { useResumeStore } from '@typst-compiler/resumeState'
-import { TemplateBuilder } from '@templates/builder'
-import { useWorkflowStore } from '@workflow/workflow.store'
-import { startChecklistOnlyWorkflow } from '@workflow/workflow.service'
-import { CHECKLIST_PARSING } from '@workflow/workflow.types'
+import {
+  CHECKLIST_PARSING,
+  startWorkflow,
+  useWorkflowStore,
+} from '../../workflow'
 
 interface ChecklistProps {
   jobId: string | undefined
@@ -29,26 +29,6 @@ export default function Checklist({ jobId }: ChecklistProps) {
   // Get resume data from store for workflow
   const resumeStructure = useResumeStore((state) => state.data)
   const templateId = useResumeStore((state) => state.templateId)
-
-  // Compute JSON schema from template
-  const jsonSchema = useMemo(() => {
-    const builder = new TemplateBuilder(templateId)
-    const sectionSchemas = builder.getDataSchemas()
-    const uiSchemas = builder.getUISchemas()
-
-    const schemaShape: Record<string, z.ZodTypeAny> = {}
-    Object.entries(sectionSchemas).forEach(([sectionId, sectionSchema]) => {
-      const uiSchema = uiSchemas.find((s) => s.id === sectionId)
-      if (uiSchema?.multiple) {
-        schemaShape[sectionId] = z.array(sectionSchema)
-      } else {
-        schemaShape[sectionId] = sectionSchema
-      }
-    })
-
-    const zodSchema = z.object(schemaShape)
-    return z.toJSONSchema(zodSchema) as Record<string, unknown>
-  }, [templateId])
 
   // Check if checklist parsing is running
   const isParsingChecklist = useWorkflowStore((state) =>
@@ -84,10 +64,10 @@ export default function Checklist({ jobId }: ChecklistProps) {
   const handleParseChecklist = () => {
     if (!jobId || !jobApplication?.jobDescription) return
 
-    startChecklistOnlyWorkflow(jobId, {
+    startWorkflow('checklist-only', jobId, {
       jobDescription: jobApplication.jobDescription,
       resumeStructure,
-      jsonSchema,
+      templateId,
     })
   }
 

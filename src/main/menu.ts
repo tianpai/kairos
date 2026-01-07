@@ -1,9 +1,10 @@
-import { app, Menu, BrowserWindow } from 'electron'
+import { Menu, app } from 'electron'
+import type { BrowserWindow } from 'electron';
 
 export function createAppMenu(mainWindow: BrowserWindow | null) {
   const isMac = process.platform === 'darwin'
 
-  const template: Electron.MenuItemConstructorOptions[] = [
+  const template: Array<Electron.MenuItemConstructorOptions> = [
     // App menu (macOS only)
     ...(isMac
       ? [
@@ -42,8 +43,89 @@ export function createAppMenu(mainWindow: BrowserWindow | null) {
             mainWindow?.webContents.send('shortcut:new-application')
           },
         },
+        {
+          label: 'Save',
+          accelerator: 'CommandOrControl+S',
+          click: () => {
+            mainWindow?.webContents.send('shortcut:save')
+          },
+        },
+        {
+          label: 'Export PDF...',
+          accelerator: 'CommandOrControl+Shift+E',
+          click: () => {
+            mainWindow?.webContents.send('shortcut:export-pdf')
+          },
+        },
+        {
+          label: 'Export PDFs...',
+          accelerator: 'CommandOrControl+Shift+B',
+          click: () => {
+            mainWindow?.webContents.send('shortcut:batch-export')
+          },
+        },
+        { type: 'separator' },
+        {
+          label: 'Document Settings...',
+          accelerator: 'CommandOrControl+D',
+          click: () => {
+            mainWindow?.webContents.send('shortcut:document-settings')
+          },
+        },
+        { type: 'separator' },
+        {
+          label: 'Previous Application',
+          accelerator: 'CommandOrControl+[',
+          click: () => {
+            mainWindow?.webContents.send('shortcut:prev-app')
+          },
+        },
+        {
+          label: 'Next Application',
+          accelerator: 'CommandOrControl+]',
+          click: () => {
+            mainWindow?.webContents.send('shortcut:next-app')
+          },
+        },
+        {
+          label: 'Jump to First',
+          accelerator: 'CommandOrControl+Shift+[',
+          click: () => {
+            mainWindow?.webContents.send('shortcut:latest-app')
+          },
+        },
+        {
+          label: 'Jump to Last',
+          accelerator: 'CommandOrControl+Shift+]',
+          click: () => {
+            mainWindow?.webContents.send('shortcut:oldest-app')
+          },
+        },
         { type: 'separator' },
         isMac ? { role: 'close' } : { role: 'quit' },
+      ],
+    },
+    // AI menu
+    {
+      label: 'AI',
+      submenu: [
+        {
+          label: 'Tailor Resume',
+          accelerator: 'CommandOrControl+T',
+          click: () => {
+            mainWindow?.webContents.send('shortcut:tailor')
+          },
+        },
+      ],
+    },
+    // Workflow menu (placeholder)
+    {
+      label: 'Workflow',
+      submenu: [
+        {
+          label: 'No workflows available',
+          enabled: false,
+        },
       ],
     },
     // Edit menu
@@ -73,6 +155,21 @@ export function createAppMenu(mainWindow: BrowserWindow | null) {
     {
       label: 'View',
       submenu: [
+        {
+          label: 'Toggle Sidebar',
+          accelerator: 'CommandOrControl+B',
+          click: () => {
+            mainWindow?.webContents.send('shortcut:toggle-sidebar')
+          },
+        },
+        {
+          label: 'Toggle Checklist',
+          accelerator: 'CommandOrControl+\\',
+          click: () => {
+            mainWindow?.webContents.send('shortcut:toggle-columns')
+          },
+        },
+        { type: 'separator' },
         { role: 'reload' },
         { role: 'forceReload' },
         { role: 'toggleDevTools' },

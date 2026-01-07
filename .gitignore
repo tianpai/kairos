@@ -104,6 +104,5 @@ count.txt
 .tanstack/
 /services/ai/__pycache__
 
-/generated/prisma
-prisma/migrations/
 misc/icons
+docs

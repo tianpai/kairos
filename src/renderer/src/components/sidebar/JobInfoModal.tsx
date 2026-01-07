@@ -1,0 +1,140 @@
+import { useEffect, useState } from 'react'
+import { ExternalLink } from 'lucide-react'
+import { InvertedButton } from '@ui/InvertedButton'
+import { Modal } from '@ui/Modal'
+import { InputField } from '@ui/InputField'
+import { HoldButton } from '@ui/HoldButton'
+
+function normalizeUrl(url: string): string | null {
+  const trimmed = url.trim()
+  if (!trimmed) return null
+  if (/^https?:\/\//i.test(trimmed)) return trimmed
+  return `https://${trimmed}`
+}
+
+interface JobInfoModalProps {
+  open: boolean
+  onClose: () => void
+  onSave: (data: {
+    companyName: string
+    position: string
+    dueDate: string
+    jobUrl: string | null
+  }) => void
+  onDelete: () => void
+  initialData: {
+    companyName: string
+    position: string
+    dueDate: string
+    jobUrl: string | null
+  }
+}
+
+export default function JobInfoModal({
+  open,
+  onClose,
+  onSave,
+  onDelete,
+  initialData,
+}: JobInfoModalProps) {
+  const [companyName, setCompanyName] = useState(initialData.companyName)
+  const [position, setPosition] = useState(initialData.position)
+  const [dueDate, setDueDate] = useState(initialData.dueDate)
+  const [jobUrl, setJobUrl] = useState(initialData.jobUrl ?? '')
+
+  useEffect(() => {
+    if (open) {
+      setCompanyName(initialData.companyName)
+      setPosition(initialData.position)
+      setDueDate(initialData.dueDate)
+      setJobUrl(initialData.jobUrl ?? '')
+    }
+  }, [open, initialData])
+
+  return (
+    <Modal
+      open={open}
+      onClose={onClose}
+      variant="popup"
+      maxWidth="md"
+      leftActions={
+        <HoldButton
+          onComplete={() => {
+            onClose()
+            onDelete()
+          }}
+          className="text-red-400 hover:bg-slate-100 dark:hover:bg-slate-700"
+        >
+          Hold to Delete
+        </HoldButton>
+      }
+      actions={
+        <>
+          <InvertedButton onClick={onClose}>Cancel</InvertedButton>
+          <InvertedButton
+            onClick={() =>
+              onSave({
+                companyName,
+                position,
+                dueDate,
+                jobUrl: normalizeUrl(jobUrl),
+              })
+            }
+          >
+            Save
+          </InvertedButton>
+        </>
+      }
+    >
+      <h3 className="mb-4 text-lg">Job Info</h3>
+      <div className="mb-6 space-y-6">
+        <InputField
+          id="companyName"
+          label="Company Name"
+          type="text"
+          value={companyName}
+          onChange={setCompanyName}
+        />
+        <InputField
+          id="position"
+          label="Position"
+          type="text"
+          value={position}
+          onChange={setPosition}
+        />
+        <InputField
+          id="dueDate"
+          label="Due Date"
+          type="date"
+          value={dueDate}
+          onChange={setDueDate}
+        />
+        <div className="flex items-end gap-2">
+          <div className="flex-1">
+            <InputField
+              id="jobUrl"
+              label="Job URL"
+              type="url"
+              value={jobUrl}
+              onChange={setJobUrl}
+              placeholder="https://..."
+            />
+          </div>
+          {jobUrl.trim() && (
+            <button
+              type="button"
+              onClick={() => {
+                const url = normalizeUrl(jobUrl)
+                if (url) window.electron.shell.openExternal(url)
+              }}
+              className="mb-0.5 rounded p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-200"
+              title="Open in browser"
+            >
+              <ExternalLink size={18} />
+            </button>
+          )}
+        </div>
+      </div>
+    </Modal>
+  )
+}
