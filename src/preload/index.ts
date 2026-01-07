@@ -288,4 +288,15 @@ contextBridge.exposeInMainWorld("electron", {
     ): Promise<{ success: boolean }> =>
       ipcRenderer.invoke("jobs:saveWorkflowState", id, data),
   },
+  updater: {
+    check: (): Promise<unknown> => ipcRenderer.invoke("updater:check"),
+    getState: (): Promise<unknown> => ipcRenderer.invoke("updater:getState"),
+    getVersion: (): Promise<string> => ipcRenderer.invoke("updater:getVersion"),
+    isPackaged: (): Promise<boolean> => ipcRenderer.invoke("updater:isPackaged"),
+    openReleasesPage: (): Promise<void> =>
+      ipcRenderer.invoke("updater:openReleasesPage"),
+    download: (): Promise<void> => ipcRenderer.invoke("updater:download"),
+    quitAndInstall: (): Promise<void> =>
+      ipcRenderer.invoke("updater:quitAndInstall"),
+  },
 });

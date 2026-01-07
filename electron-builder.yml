@@ -37,7 +37,7 @@ mac:
   gatekeeperAssess: false
 
 dmg:
-  writeUpdateInfo: false
+  writeUpdateInfo: true
 
 win:
   target:
@@ -57,4 +57,7 @@ nsis:
   allowToChangeInstallationDirectory: true
   deleteAppDataOnUninstall: false
 
-publish: null
+publish:
+  provider: github
+  owner: tianpai
+  repo: kairos
