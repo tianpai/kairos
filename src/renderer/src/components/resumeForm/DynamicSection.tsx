@@ -15,8 +15,8 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import type { DragEndEvent } from '@dnd-kit/core'
 import { DynamicField } from './DynamicField'
+import type { DragEndEvent } from '@dnd-kit/core'
 import type {
   FieldSchema,
   FieldValue,

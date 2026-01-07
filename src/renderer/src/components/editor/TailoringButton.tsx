@@ -1,10 +1,13 @@
-import { useEffect, useCallback } from 'react'
+import { useCallback, useEffect } from 'react'
 import { WandSparkles } from 'lucide-react'
-import { useWorkflowStore } from '@workflow/workflow.store'
-import { startTailoringWorkflow } from '@workflow/workflow.service'
-import { CHECKLIST_MATCHING, RESUME_TAILORING } from '@workflow/workflow.types'
 import { InvertedButton } from '@ui/InvertedButton'
 import { useTailoringData } from '@hooks/useTailoringData'
+import {
+  CHECKLIST_MATCHING,
+  RESUME_TAILORING,
+  startWorkflow,
+  useWorkflowStore,
+} from '../../workflow'
 import { useShortcutStore } from '@/components/layout/shortcut.store'
 
 export function TailoringButton() {
@@ -12,7 +15,7 @@ export function TailoringButton() {
     jobId,
     checklist,
     resumeStructure,
-    jsonSchema,
+    templateId,
     hasJobDescription,
     hasResumeContent,
   } = useTailoringData()
@@ -44,12 +47,12 @@ export function TailoringButton() {
       return
     }
 
-    startTailoringWorkflow(jobId, {
+    startWorkflow('tailoring', jobId, {
       checklist,
       resumeStructure,
-      jsonSchema,
+      templateId,
     })
-  }, [jobId, checklist, resumeStructure, jsonSchema])
+  }, [jobId, checklist, resumeStructure, templateId])
 
   // Determine disabled state and tooltip
   const isProcessing = isTailoringResume || isMatchingTailoredResume

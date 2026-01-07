@@ -107,7 +107,7 @@ export class TemplateBuilder {
 
       // Get data for this section
       const rawData = data[sectionConfig.id]
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+       
       if (rawData === undefined) continue
 
       // Normalize to array (sections always expect arrays)

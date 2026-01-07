@@ -1,4 +1,4 @@
-import { ipcMain, dialog } from 'electron'
+import { dialog, ipcMain } from 'electron'
 import log from 'electron-log/main'
 
 export function registerDialogHandlers(): void {

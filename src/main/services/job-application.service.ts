@@ -1,19 +1,19 @@
 import { randomUUID } from 'node:crypto'
-import { eq, desc } from 'drizzle-orm'
-import type { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3'
-import * as schema from '../db/schema'
+import { desc, eq } from 'drizzle-orm'
 import { companies, jobApplications } from '../db/schema'
+import type * as schema from '../db/schema'
+import type { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3'
 import type {
-  CreateJobApplicationInput,
-  CreateFromScratchInput,
   CreateFromExistingInput,
+  CreateFromScratchInput,
+  CreateJobApplicationInput,
+  SaveChecklistInput,
+  SaveParsedResumeInput,
+  SaveResumeInput,
+  SaveTailoredResumeInput,
+  SaveWorkflowStateInput,
   UpdateJobApplicationInput,
   UpdateJobDescriptionInput,
-  SaveResumeInput,
-  SaveParsedResumeInput,
-  SaveTailoredResumeInput,
-  SaveChecklistInput,
-  SaveWorkflowStateInput,
 } from '../schemas/job-application.schemas'
 
 type Database = BetterSQLite3Database<typeof schema>
@@ -193,7 +193,7 @@ export class JobApplicationService {
   }> {
     const job = this.requireJobApplication(id)
 
-    const workflowSteps = job.workflowSteps as Record<string, unknown> | null
+    const workflowSteps = job.workflowSteps
     const failedTasks: Record<string, unknown> = {}
 
     if (workflowSteps && typeof workflowSteps === 'object' && 'taskStates' in workflowSteps) {
@@ -217,10 +217,10 @@ export class JobApplicationService {
       updatedAt: job.updatedAt,
       templateId: job.templateId,
       jobDescription: job.jobDescription,
-      parsedResume: job.parsedResume as Record<string, unknown> | null,
-      tailoredResume: job.tailoredResume as Record<string, unknown> | null,
+      parsedResume: job.parsedResume,
+      tailoredResume: job.tailoredResume,
       originalResume: job.originalResume,
-      checklist: job.checklist as Record<string, unknown> | null,
+      checklist: job.checklist,
       workflowStatus: job.workflowStatus,
       workflowSteps: workflowSteps,
       failedTasks,
@@ -293,7 +293,7 @@ export class JobApplicationService {
     this.db
       .update(jobApplications)
       .set({
-        tailoredResume: dto.resumeStructure as Record<string, unknown>,
+        tailoredResume: dto.resumeStructure,
         templateId: dto.templateId,
         updatedAt: nowISO(),
       })
@@ -306,8 +306,8 @@ export class JobApplicationService {
     this.db
       .update(jobApplications)
       .set({
-        parsedResume: dto.parsedResume as Record<string, unknown>,
-        tailoredResume: dto.tailoredResume as Record<string, unknown>,
+        parsedResume: dto.parsedResume,
+        tailoredResume: dto.tailoredResume,
         updatedAt: nowISO(),
       })
       .where(eq(jobApplications.id, jobId))
@@ -319,7 +319,7 @@ export class JobApplicationService {
     this.db
       .update(jobApplications)
       .set({
-        tailoredResume: dto.tailoredResume as Record<string, unknown>,
+        tailoredResume: dto.tailoredResume,
         updatedAt: nowISO(),
       })
       .where(eq(jobApplications.id, jobId))
@@ -331,7 +331,7 @@ export class JobApplicationService {
     this.db
       .update(jobApplications)
       .set({
-        checklist: dto.checklist as Record<string, unknown>,
+        checklist: dto.checklist,
         updatedAt: nowISO(),
       })
       .where(eq(jobApplications.id, jobId))
@@ -361,7 +361,7 @@ export class JobApplicationService {
     }
 
     if (dto.workflowSteps !== undefined) {
-      updateData.workflowSteps = dto.workflowSteps as Record<string, unknown>
+      updateData.workflowSteps = dto.workflowSteps
     }
     if (dto.workflowStatus !== undefined) {
       updateData.workflowStatus = dto.workflowStatus

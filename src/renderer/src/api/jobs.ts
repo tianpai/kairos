@@ -1,14 +1,8 @@
 import type { Checklist } from '@type/checklist'
+import type { TaskName } from '../workflow'
 
-// Task message types that can fail
-export type TaskMessageType =
-  | 'resume.parsing'
-  | 'resume.tailoring'
-  | 'checklist.parsing'
-  | 'checklist.matching'
-
-// Failed tasks map: task message type -> ISO timestamp when it failed
-export type FailedTasksMap = Partial<Record<TaskMessageType, string>>
+// Failed tasks map: task name -> ISO timestamp when it failed
+export type FailedTasksMap = Partial<Record<TaskName, string>>
 
 export interface CreateJobApplicationResponse {
   id: string
@@ -25,7 +19,6 @@ export interface JobApplicationInput {
 
 export interface CreateJobApplicationPayload extends JobApplicationInput {
   templateId: string
-  jsonSchema: Record<string, unknown>
 }
 
 export interface CreateFromScratchPayload {
@@ -174,7 +167,7 @@ export async function saveMatchScore(
   return window.electron.jobs.saveMatchScore(jobId, { matchPercentage })
 }
 
-export async function saveWorkflowState(
+export async function saveWorkflow(
   jobId: string,
   workflowSteps: WorkflowStepsData,
   workflowStatus: string,

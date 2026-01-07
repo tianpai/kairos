@@ -69,7 +69,7 @@ export const tip = {
     const matchingTips = getTipsByEvent(event)
 
     // Build list of first-time actions from the tips we're checking
-    const firstTimeActions: string[] = []
+    const firstTimeActions: Array<string> = []
     for (const t of matchingTips) {
       for (const condition of t.conditions) {
         if (condition.type === 'firstTime' && store.isFirstTime(condition.action)) {

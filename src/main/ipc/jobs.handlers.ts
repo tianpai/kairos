@@ -1,19 +1,20 @@
 import { ipcMain } from 'electron'
 import log from 'electron-log/main'
-import { JobApplicationService, JobNotFoundError } from '../services/job-application.service'
+import { JobNotFoundError } from '../services/job-application.service'
 import {
-  CreateJobApplicationSchema,
-  CreateFromScratchSchema,
   CreateFromExistingSchema,
-  UpdateJobApplicationSchema,
-  UpdateJobDescriptionSchema,
-  SaveResumeSchema,
-  SaveParsedResumeSchema,
-  SaveTailoredResumeSchema,
+  CreateFromScratchSchema,
+  CreateJobApplicationSchema,
   SaveChecklistSchema,
   SaveMatchScoreSchema,
+  SaveParsedResumeSchema,
+  SaveResumeSchema,
+  SaveTailoredResumeSchema,
   SaveWorkflowStateSchema,
+  UpdateJobApplicationSchema,
+  UpdateJobDescriptionSchema,
 } from '../schemas/job-application.schemas'
+import type { JobApplicationService} from '../services/job-application.service';
 
 export function registerJobsHandlers(service: JobApplicationService): void {
   // CRUD handlers
@@ -50,7 +51,7 @@ export function registerJobsHandlers(service: JobApplicationService): void {
       return result
     } catch (error) {
       if (error instanceof JobNotFoundError) {
-        log.warn(`Source job not found: ${(error as JobNotFoundError).message}`)
+        log.warn(`Source job not found: ${(error).message}`)
         throw new Error(error.message)
       }
       log.error('jobs:createFromExisting failed', error)
