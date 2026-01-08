@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useState } from 'react'
 import { Modal } from '@ui/Modal'
+import { Toggle } from '@ui/Toggle'
 import { getJobApplication } from '@api/jobs'
 import { compileToPDF } from '@typst-compiler/compile'
 import type { JobApplication } from '@api/jobs'
@@ -27,11 +28,6 @@ interface FailedExportsListProps {
 
 interface ExportProgressViewProps {
   progress: ExportProgress
-}
-
-interface SelectAllToggleProps {
-  allSelected: boolean
-  onToggle: () => void
 }
 
 interface ApplicationListItemProps {
@@ -107,41 +103,6 @@ function ExportProgressView({ progress }: ExportProgressViewProps) {
   )
 }
 
-function SelectAllToggle({ allSelected, onToggle }: SelectAllToggleProps) {
-  return (
-    <button
-      onClick={onToggle}
-      className="flex cursor-pointer items-center gap-2 text-sm text-secondary"
-    >
-      <span
-        className={
-          allSelected
-            ? 'text-hint'
-            : 'font-medium text-primary'
-        }
-      >
-        Select All
-      </span>
-      <div className="relative h-5 w-9 rounded-full bg-active transition-colors">
-        <div
-          className={`absolute top-0.5 h-4 w-4 rounded-full bg-base shadow transition-all ${
-            allSelected ? 'left-4.5' : 'left-0.5'
-          }`}
-        />
-      </div>
-      <span
-        className={
-          allSelected
-            ? 'font-medium text-primary'
-            : 'text-hint'
-        }
-      >
-        Select None
-      </span>
-    </button>
-  )
-}
-
 function ApplicationListItem({
   app,
   checked,
@@ -155,8 +116,8 @@ function ApplicationListItem({
         onChange={() => onToggle(app.id)}
         className="h-4 w-4 rounded border-default accent-black focus:ring-0 focus:ring-offset-0 dark:accent-white"
       />
-      <div className="flex flex-1 items-center justify-between">
-        <div>
+      <div className="flex min-w-0 flex-1 items-center justify-between gap-3">
+        <div className="min-w-0 truncate">
           <span className="font-medium text-primary">
             {app.companyName}
           </span>
@@ -165,7 +126,7 @@ function ApplicationListItem({
             {app.position}
           </span>
         </div>
-        <span className="text-sm text-hint">
+        <span className="shrink-0 text-sm text-hint">
           {app.dueDate ? `Due ${formatDate(app.dueDate)}` : 'No due date'}
         </span>
       </div>
@@ -367,9 +328,11 @@ export function BatchExportModal({
           <ExportProgressView progress={progress} />
         ) : (
           <>
-            <SelectAllToggle
-              allSelected={allSelected}
-              onToggle={handleToggleSelectAll}
+            <Toggle
+              checked={!allSelected}
+              onChange={handleToggleSelectAll}
+              labelOff="Select All"
+              labelOn="Select None"
             />
             <ApplicationList
               applications={applications}
