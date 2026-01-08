@@ -1,4 +1,4 @@
-import { InvertedButton } from '@ui/InvertedButton'
+import { Button } from '@ui/Button'
 import { Modal } from '@ui/Modal'
 import { useNewApplicationStore } from './newApplication.store'
 import type { SubmitPayload } from './newApplication.store'
@@ -53,14 +53,14 @@ export default function NewApplicationModal({
       maxWidth="xl"
       actions={
         <>
-          <InvertedButton onClick={onClose}>Cancel</InvertedButton>
-          <InvertedButton
+          <Button onClick={onClose}>Cancel</Button>
+          <Button
             onClick={handleSubmit}
             disabled={!canSubmit()}
             loading={isSubmitting}
           >
             {buttonText}
-          </InvertedButton>
+          </Button>
         </>
       }
     >

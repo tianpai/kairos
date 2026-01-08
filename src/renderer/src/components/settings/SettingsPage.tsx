@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { ArrowLeft, PanelLeft } from 'lucide-react'
 import { PageHeader } from '@ui/PageHeader'
-import { InvertedButton } from '@ui/InvertedButton'
+import { Button } from '@ui/Button'
 import { AppLayout } from '@layout/AppLayout'
 import { useLayoutStore } from '@layout/layout.store'
 import {  SettingsSidebar } from './SettingsSidebar'
@@ -25,7 +25,7 @@ export default function SettingsPage() {
         <PageHeader
           left={
             <>
-              <InvertedButton
+              <Button
                 onClick={toggleSettingsSidebar}
                 ariaLabel={
                   settingsSidebarCollapsed ? 'Show sidebar' : 'Hide sidebar'
@@ -33,14 +33,14 @@ export default function SettingsPage() {
                 title={settingsSidebarCollapsed ? 'Show sidebar' : 'Hide sidebar'}
               >
                 <PanelLeft size={16} />
-              </InvertedButton>
-              <InvertedButton
+              </Button>
+              <Button
                 onClick={() => navigate({ to: '/', search: { jobId: undefined } })}
                 ariaLabel="Back to dashboard"
                 title="Back"
               >
                 <ArrowLeft size={16} />
-              </InvertedButton>
+              </Button>
             </>
           }
           center={<div className="text-sm font-medium">Settings</div>}

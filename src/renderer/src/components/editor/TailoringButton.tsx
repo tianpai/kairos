@@ -1,6 +1,6 @@
 import { useCallback, useEffect } from 'react'
 import { WandSparkles } from 'lucide-react'
-import { InvertedButton } from '@ui/InvertedButton'
+import { Button } from '@ui/Button'
 import { useTailoringData } from '@hooks/useTailoringData'
 import {
   CHECKLIST_MATCHING,
@@ -87,7 +87,7 @@ export function TailoringButton() {
   }
 
   return (
-    <InvertedButton
+    <Button
       onClick={handleClick}
       disabled={isDisabled}
       loading={isProcessing}
@@ -95,6 +95,6 @@ export function TailoringButton() {
       ariaLabel={tooltipMessage}
     >
       <WandSparkles size={16} />
-    </InvertedButton>
+    </Button>
   )
 }

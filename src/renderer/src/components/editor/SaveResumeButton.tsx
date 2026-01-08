@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { Save } from 'lucide-react'
-import { InvertedButton } from '@ui/InvertedButton'
+import { Button } from '@ui/Button'
 import { useSaveResume } from '@/hooks/useSaveResume'
 import { useShortcutStore } from '@/components/layout/shortcut.store'
 
@@ -34,7 +34,7 @@ export default function SaveResumeButton({
   }, [saveRequested, jobId, saveResume, clearSaveRequest])
 
   return (
-    <InvertedButton
+    <Button
       onClick={handleSave}
       disabled={!jobId}
       ariaLabel="Save resume"
@@ -42,6 +42,6 @@ export default function SaveResumeButton({
       className="-mr-[2px]"
     >
       <Save size={16} />
-    </InvertedButton>
+    </Button>
   )
 }

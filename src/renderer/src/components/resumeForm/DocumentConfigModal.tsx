@@ -4,7 +4,7 @@ import { Select } from '@ui/Select'
 import { TemplateId } from '@templates/templateId'
 import { DocumentSetupSchema } from '@templates/shared/document-config'
 import { Modal } from '@ui/Modal'
-import { InvertedButton } from '@ui/InvertedButton'
+import { Button } from '@ui/Button'
 import { ColorPickerField } from './ColorPickerField'
 import { SectionManagerContent } from './SectionManager'
 import type { DocumentSetup } from '@templates/shared/document-config'
@@ -57,7 +57,7 @@ export function DocumentConfigModal({
       open={isOpen}
       onClose={onClose}
       maxWidth="xl"
-      actions={<InvertedButton onClick={onClose}>Done</InvertedButton>}
+      actions={<Button onClick={onClose}>Done</Button>}
     >
       <div className="mb-6">
         <h2 className="text-xl text-primary">Document Settings</h2>

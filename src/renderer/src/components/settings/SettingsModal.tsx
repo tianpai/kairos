@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Modal } from '@ui/Modal'
-import { InvertedButton } from '@ui/InvertedButton'
+import { Button } from '@ui/Button'
 import { useApiKey, useDeleteApiKey, useSetApiKey } from '@hooks/useSettings'
 
 interface SettingsModalProps {
@@ -32,20 +32,20 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
       onClose={onClose}
       maxWidth="sm"
       actions={
-        <InvertedButton onClick={handleSave} disabled={!apiKey.trim()}>
+        <Button onClick={handleSave} disabled={!apiKey.trim()}>
           Save
-        </InvertedButton>
+        </Button>
       }
       leftActions={
         currentKey ? (
-          <InvertedButton
+          <Button
             onClick={handleDelete}
             bgColor="bg-red-600"
             hoverBgColor="hover:bg-red-100"
             hoverTextColor="hover:text-red-600"
           >
             Delete Key
-          </InvertedButton>
+          </Button>
         ) : null
       }
     >

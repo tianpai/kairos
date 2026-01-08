@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { InvertedCircleButton } from '@ui/InvertedCircleButton'
-import { InvertedButton } from '@ui/InvertedButton'
+import { Button } from '@ui/Button'
 import { INPUT_BASE } from './fieldStyles'
 
 // DateInput supports flexible date formats commonly used in resumes
@@ -179,19 +179,19 @@ export function DateInput({ id, value, onChange }: DateInputProps) {
         <div className="absolute z-50 mt-1 w-64 border border-default bg-surface p-3">
           {/* Granularity Buttons */}
           <div className="mb-3 flex gap-0">
-            <InvertedButton
+            <Button
               onClick={() => setGranularity('year')}
               {...getGranularityButtonProps('year')}
             >
               YYYY
-            </InvertedButton>
-            <InvertedButton
+            </Button>
+            <Button
               onClick={() => setGranularity('month-year')}
               {...getGranularityButtonProps('month-year')}
             >
               MM, YYYY
-            </InvertedButton>
-            <InvertedButton
+            </Button>
+            <Button
               onClick={() => {
                 onChange('Present')
                 setIsOpen(false)
@@ -199,7 +199,7 @@ export function DateInput({ id, value, onChange }: DateInputProps) {
               {...getGranularityButtonProps('present')}
             >
               Present
-            </InvertedButton>
+            </Button>
           </div>
 
           {granularity === 'year' && (

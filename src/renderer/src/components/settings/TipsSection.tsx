@@ -1,4 +1,4 @@
-import { InvertedButton } from '@ui/InvertedButton'
+import { Button } from '@ui/Button'
 import { tips } from '@tips/tips.data'
 import { useTipsStore } from '@tips/tips.store'
 
@@ -44,7 +44,7 @@ export function TipsSection() {
         })}
       </div>
 
-      <InvertedButton onClick={reset}>Reset All Tips</InvertedButton>
+      <Button onClick={reset}>Reset All Tips</Button>
     </div>
   )
 }

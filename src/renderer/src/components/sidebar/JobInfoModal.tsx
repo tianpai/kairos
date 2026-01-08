@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { ExternalLink } from 'lucide-react'
-import { InvertedButton } from '@ui/InvertedButton'
+import { Button } from '@ui/Button'
 import { Modal } from '@ui/Modal'
 import { InputField } from '@ui/InputField'
 import { HoldButton } from '@ui/HoldButton'
@@ -70,8 +70,8 @@ export default function JobInfoModal({
       }
       actions={
         <>
-          <InvertedButton onClick={onClose}>Cancel</InvertedButton>
-          <InvertedButton
+          <Button onClick={onClose}>Cancel</Button>
+          <Button
             onClick={() =>
               onSave({
                 companyName,
@@ -82,7 +82,7 @@ export default function JobInfoModal({
             }
           >
             Save
-          </InvertedButton>
+          </Button>
         </>
       }
     >

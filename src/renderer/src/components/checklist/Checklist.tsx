@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { ListTodo, SquarePen } from 'lucide-react'
 import { getJobApplication, updateJobDescription } from '@api/jobs'
 import { ChecklistSection } from '@checklist/ChecklistSection'
-import { InvertedButton } from '@ui/InvertedButton'
+import { Button } from '@ui/Button'
 import { useResumeStore } from '@typst-compiler/resumeState'
 import {
   CHECKLIST_PARSING,
@@ -122,13 +122,13 @@ export default function Checklist({ jobId }: ChecklistProps) {
           className="mt-3 flex-1 resize-none rounded-lg border border-default bg-transparent p-3 text-sm leading-relaxed text-primary outline-none focus:border-primary placeholder:text-hint"
         />
         <div className="mt-3">
-          <InvertedButton
+          <Button
             onClick={() => updateJdMutation.mutate(jdInput.trim())}
             disabled={!jdInput.trim() || updateJdMutation.isPending}
             loading={updateJdMutation.isPending}
           >
             Save Job Description
-          </InvertedButton>
+          </Button>
         </div>
       </div>
     )
@@ -219,19 +219,19 @@ export default function Checklist({ jobId }: ChecklistProps) {
                   className="flex-1 resize-none rounded-lg border border-default bg-transparent p-3 text-sm leading-relaxed text-primary outline-none focus:border-primary placeholder:text-hint"
                 />
                 <div className="mt-3 flex gap-2">
-                  <InvertedButton
+                  <Button
                     onClick={handleCancelEdit}
                     disabled={updateJdMutation.isPending}
                   >
                     Cancel
-                  </InvertedButton>
-                  <InvertedButton
+                  </Button>
+                  <Button
                     onClick={() => updateJdMutation.mutate(jdInput.trim())}
                     disabled={!jdInput.trim() || updateJdMutation.isPending}
                     loading={updateJdMutation.isPending}
                   >
                     Save
-                  </InvertedButton>
+                  </Button>
                 </div>
               </div>
             ) : (

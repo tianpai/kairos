@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Columns2, Columns3, PanelLeft } from 'lucide-react'
 import { TailoringButton } from '@editor/TailoringButton'
 import { PageHeader } from '@ui/PageHeader'
-import { InvertedButton } from '@ui/InvertedButton'
+import { Button } from '@ui/Button'
 import { getAllJobApplications, getJobApplication } from '@api/jobs'
 import { useWorkflowSync } from '@hooks/useWorkflowSync'
 import { useSyncJobApplicationToStore } from '@hooks/useSyncJobApplicationToStore'
@@ -140,13 +140,13 @@ export default function App() {
         <PageHeader
           left={
             <>
-              <InvertedButton
+              <Button
                 onClick={toggleSidebar}
                 ariaLabel={sidebarCollapsed ? 'Show sidebar' : 'Hide sidebar'}
                 title={sidebarCollapsed ? 'Show sidebar' : 'Hide sidebar'}
               >
                 <PanelLeft size={16} />
-              </InvertedButton>
+              </Button>
               <NewApplicationButton onSuccess={handleUploadSuccess} />
             </>
           }
@@ -172,7 +172,7 @@ export default function App() {
                 </span>
                 <TailoringButton />
                 <DocumentConfigButton />
-                <InvertedButton
+                <Button
                   onClick={toggleChecklist}
                   ariaLabel={
                     showChecklist
@@ -186,7 +186,7 @@ export default function App() {
                   ) : (
                     <Columns3 size={16} />
                   )}
-                </InvertedButton>
+                </Button>
                 <SaveResumeButton
                   jobId={jobId}
                   isBuiltFromScratch={isBuiltFromScratch}

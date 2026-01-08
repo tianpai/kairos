@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Check, Copy, Eye, EyeOff } from 'lucide-react'
-import { InvertedButton } from '@ui/InvertedButton'
+import { Button } from '@ui/Button'
 import { GenericSidebarItem } from '@sidebar/GenericSidebarItem'
 import {
   useActiveProvider,
@@ -208,28 +208,28 @@ function ProviderConfig({
       </div>
 
       <div className="flex gap-2">
-        <InvertedButton
+        <Button
           onClick={handleSave}
           disabled={!apiKey.trim()}
           className="bg-surface text-secondary hover:bg-hover"
         >
           Save
-        </InvertedButton>
+        </Button>
         {currentKey && (
-          <InvertedButton
+          <Button
             onClick={onDelete}
             className="bg-red-50 text-error hover:bg-red-100 dark:bg-red-950 dark:hover:bg-red-900"
           >
             Delete
-          </InvertedButton>
+          </Button>
         )}
         {currentKey && !isActive && (
-          <InvertedButton
+          <Button
             onClick={onSetActive}
             className="bg-surface text-secondary hover:bg-hover"
           >
             Set as active
-          </InvertedButton>
+          </Button>
         )}
       </div>
 
@@ -435,19 +435,19 @@ function ClaudeConfig({
                 <Check size={14} />
                 Connected
               </span>
-              <InvertedButton
+              <Button
                 onClick={onDisconnect}
                 className="bg-red-50 text-error hover:bg-red-100 dark:bg-red-950 dark:hover:bg-red-900"
               >
                 Disconnect
-              </InvertedButton>
+              </Button>
               {!isActive && (
-                <InvertedButton
+                <Button
                   onClick={onSetActive}
                   className="bg-surface text-secondary hover:bg-hover"
                 >
                   Set as active
-                </InvertedButton>
+                </Button>
               )}
             </div>
           ) : isAwaitingCode ? (
@@ -468,19 +468,19 @@ function ClaudeConfig({
                 any # symbol)
               </p>
               <div className="flex gap-2">
-                <InvertedButton
+                <Button
                   onClick={handleSubmitCode}
                   disabled={!authCode.trim() || completeAuth.isPending}
                   className="bg-surface text-secondary hover:bg-hover"
                 >
                   {completeAuth.isPending ? 'Connecting...' : 'Submit Code'}
-                </InvertedButton>
-                <InvertedButton
+                </Button>
+                <Button
                   onClick={handleCancel}
                   className="bg-surface text-secondary hover:bg-hover"
                 >
                   Cancel
-                </InvertedButton>
+                </Button>
               </div>
               {completeAuth.isError && (
                 <p className="text-sm text-error">
@@ -490,7 +490,7 @@ function ClaudeConfig({
             </div>
           ) : (
             <div className="mt-2">
-              <InvertedButton
+              <Button
                 onClick={handleConnect}
                 disabled={startAuth.isPending}
                 className="bg-surface text-secondary hover:bg-hover"
@@ -498,7 +498,7 @@ function ClaudeConfig({
                 {startAuth.isPending
                   ? 'Opening browser...'
                   : 'Connect with Claude'}
-              </InvertedButton>
+              </Button>
               <p className="mt-2 text-xs text-hint">
                 Sign in with your Claude subscription to use Claude models.
               </p>
@@ -549,13 +549,13 @@ function ClaudeConfig({
                   placeholder="/path/to/claude"
                   className="flex-1 rounded-md border-2 border-default bg-base px-3 py-2 text-sm text-primary focus:border-black focus:outline-none dark:focus:border-white"
                 />
-                <InvertedButton
+                <Button
                   onClick={handleSaveCustomPath}
                   disabled={!customPathInput.trim()}
                   className="bg-surface text-secondary hover:bg-hover"
                 >
                   Save
-                </InvertedButton>
+                </Button>
               </div>
             )}
           </div>
@@ -606,12 +606,12 @@ function ClaudeConfig({
                     </li>
                   </ol>
                 </div>
-                <InvertedButton
+                <Button
                   onClick={() => refetchCliStatus()}
                   className="bg-surface text-secondary hover:bg-hover"
                 >
                   Retry Detection
-                </InvertedButton>
+                </Button>
               </div>
             ) : (
               <div className="mt-2 space-y-2">
@@ -621,12 +621,12 @@ function ClaudeConfig({
                     Ready (v{cliStatus.version})
                   </span>
                   {!isActive && (
-                    <InvertedButton
+                    <Button
                       onClick={onSetActive}
                       className="bg-surface text-secondary hover:bg-hover"
                     >
                       Set as active
-                    </InvertedButton>
+                    </Button>
                   )}
                 </div>
                 <p className="text-xs text-hint">
@@ -782,12 +782,12 @@ function OllamaConfig({ isActive, onSetActive }: OllamaConfigProps) {
               Running {status.version && `(v${status.version})`}
             </span>
             {!isActive && installedModels && installedModels.length > 0 && (
-              <InvertedButton
+              <Button
                 onClick={onSetActive}
                 className="bg-surface text-secondary hover:bg-hover"
               >
                 Set as active
-              </InvertedButton>
+              </Button>
             )}
           </div>
         ) : (
@@ -825,12 +825,12 @@ function OllamaConfig({ isActive, onSetActive }: OllamaConfigProps) {
                 </li>
               </ol>
             </div>
-            <InvertedButton
+            <Button
               onClick={() => refetchStatus()}
               className="bg-surface text-secondary hover:bg-hover"
             >
               Retry Detection
-            </InvertedButton>
+            </Button>
           </div>
         )}
       </div>
@@ -874,13 +874,13 @@ function OllamaConfig({ isActive, onSetActive }: OllamaConfigProps) {
                       )}
                     </div>
                     {!installed && !isPulling && (
-                      <InvertedButton
+                      <Button
                         onClick={() => handlePullModel(model.id)}
                         disabled={!!pullingModel}
                         className="bg-surface text-secondary hover:bg-hover"
                       >
                         Download
-                      </InvertedButton>
+                      </Button>
                     )}
                     {isPulling && (
                       <div className="flex items-center gap-2">

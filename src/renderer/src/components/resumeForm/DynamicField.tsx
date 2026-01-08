@@ -15,7 +15,7 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { InvertedButton } from '@ui/InvertedButton'
+import { Button } from '@ui/Button'
 import { Select } from '@ui/Select'
 import { DateInput } from './DateInput'
 import { asString, asStringArray } from './fieldUtils'
@@ -194,9 +194,9 @@ function TextArrayField({ schema, value, onChange }: FieldProps) {
           </SortableContext>
         </DndContext>
         <div className="text-right">
-          <InvertedButton type="button" onClick={addItem}>
+          <Button type="button" onClick={addItem}>
             <p className="text-xs"> Add {label} </p>
-          </InvertedButton>
+          </Button>
         </div>
       </div>
     </FieldWrapper>
