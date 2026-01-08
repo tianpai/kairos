@@ -2,8 +2,9 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
-### [0.1.1](https://github.com/tianpai/kairos/compare/v0.0.6...v0.1.1) (2026-01-08)
+## 0.1.1
 
+"You guys are getting interviews?"
 
 ### Features
 

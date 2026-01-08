@@ -275,8 +275,8 @@ export function AboutSection() {
                   </span>
                 )}
               </div>
-              {entry.sections.map((section) => (
-                <div key={section.title} className="pl-2">
+              {entry.sections.map((section, idx) => (
+                <div key={`${entry.version}-${idx}`} className="pl-2">
                   <p className="text-xs font-medium text-secondary">
                     {section.title}
                   </p>
