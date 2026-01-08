@@ -344,6 +344,30 @@ export class SettingsService {
     this.store.set("activeProvider", provider);
   }
 
+  hasActiveProviderConfigured(): boolean {
+    const active = this.getActiveProvider();
+    switch (active) {
+      case "openai":
+        return this.hasOpenAIKey();
+      case "deepseek":
+        return this.hasDeepSeekKey();
+      case "xai":
+        return this.hasXAIKey();
+      case "gemini":
+        return this.hasGeminiKey();
+      case "anthropic":
+        return this.hasAnthropicKey();
+      case "claude":
+        // Claude uses OAuth or CLI - renderer checks actual auth status
+        // Return true here, let renderer handle detailed check
+        return true;
+      case "ollama":
+        // Ollama runs locally - renderer checks if server is running
+        // Return true here, let renderer handle detailed check
+        return true;
+    }
+  }
+
   // Theme methods
   getTheme(): ThemeSource {
     return this.store.get("theme");
