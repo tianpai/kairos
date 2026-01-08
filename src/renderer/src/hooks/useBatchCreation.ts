@@ -73,13 +73,13 @@ export function useBatchCreation() {
     resumeFile: File,
     entries: Array<BatchEntry>,
   ) {
+    closeModal()
     setBatchProgress({
       status: 'processing',
       current: 0,
       total: entries.length,
       errorMessage: null,
     })
-    closeModal()
 
     try {
       const rawResumeContent = await extractResumeText(resumeFile)
@@ -147,13 +147,13 @@ export function useBatchCreation() {
     sourceJobId: string,
     entries: Array<BatchEntry>,
   ) {
+    closeModal()
     setBatchProgress({
       status: 'processing',
       current: 0,
       total: entries.length,
       errorMessage: null,
     })
-    closeModal()
 
     try {
       const sourceJob = await getJobApplication(sourceJobId)
