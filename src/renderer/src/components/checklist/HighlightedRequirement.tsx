@@ -41,11 +41,11 @@ export function HighlightedRequirement({
 
           let style: string
           if (isFulfilled) {
-            style = 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300'
+            style = 'bg-success-subtle text-success'
           } else if (isSelected) {
-            style = 'bg-sky-200 text-sky-800 dark:bg-sky-800/60 dark:text-sky-200 cursor-pointer hover:bg-sky-300 dark:hover:bg-sky-700/60'
+            style = 'bg-selected-subtle text-selected cursor-pointer hover:bg-selected-subtle/80'
           } else {
-            style = 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300 cursor-pointer hover:bg-amber-200 dark:hover:bg-amber-800/40'
+            style = 'bg-warning-subtle text-warning cursor-pointer hover:bg-warning-subtle/80'
           }
 
           return (

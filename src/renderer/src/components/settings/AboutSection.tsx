@@ -164,7 +164,7 @@ export function AboutSection() {
           {isPackaged === true && updateState.status === 'idle' && (
             <button
               onClick={checkForUpdates}
-              className="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+              className="text-sm text-link hover:text-link-hover"
             >
               Check for Updates
             </button>
@@ -190,7 +190,7 @@ export function AboutSection() {
               <div className="flex gap-2">
                 <button
                   onClick={handleDownload}
-                  className="rounded bg-blue-600 px-3 py-1 text-sm text-white hover:bg-blue-700"
+                  className="rounded bg-info px-3 py-1 text-sm text-white hover:bg-info/90"
                 >
                   Download Update
                 </button>
@@ -211,7 +211,7 @@ export function AboutSection() {
               </p>
               <div className="h-1.5 w-48 overflow-hidden rounded-full bg-hover">
                 <div
-                  className="h-full bg-blue-600 transition-all"
+                  className="h-full bg-info transition-all"
                   style={{ width: `${updateState.progress?.percent ?? 0}%` }}
                 />
               </div>
@@ -225,7 +225,7 @@ export function AboutSection() {
               </p>
               <button
                 onClick={handleInstall}
-                className="rounded bg-green-600 px-3 py-1 text-sm text-white hover:bg-green-700"
+                className="rounded bg-success px-3 py-1 text-sm text-white hover:bg-success/90"
               >
                 Restart to Install
               </button>
@@ -239,7 +239,7 @@ export function AboutSection() {
               </p>
               <button
                 onClick={checkForUpdates}
-                className="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                className="text-sm text-link hover:text-link-hover"
               >
                 Try Again
               </button>

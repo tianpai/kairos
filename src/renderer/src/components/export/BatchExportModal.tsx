@@ -310,7 +310,7 @@ export function BatchExportModal({
           <button
             onClick={handleExport}
             disabled={selectedIds.size === 0 || exporting}
-            className="cursor-pointer rounded bg-black px-4 py-2 text-white transition-colors hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-white dark:text-black dark:hover:bg-hover"
+            className="cursor-pointer rounded bg-primary px-4 py-2 text-base transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {exporting
               ? 'Exporting...'

@@ -4,7 +4,7 @@ const variantStyles = {
   default: 'text-secondary hover:text-primary px-3 py-2',
   ghost: 'text-hint hover:bg-hover hover:text-secondary p-1',
   outline: 'border-2 border-default bg-base text-secondary hover:border-hint px-3 py-2',
-  danger: 'border-2 border-default bg-red-50 text-error hover:bg-red-100 dark:bg-red-950 dark:hover:bg-red-900 px-3 py-2',
+  danger: 'border-2 border-default bg-error-subtle text-error hover:bg-error-subtle/80 px-3 py-2',
 } as const
 
 type ButtonVariant = keyof typeof variantStyles

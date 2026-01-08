@@ -45,7 +45,7 @@ export function AppearanceSection() {
                   onClick={() => handleThemeChange(option.value)}
                   className={`flex items-center gap-2 rounded-md border-2 px-4 py-2 text-sm transition-colors ${
                     isSelected
-                      ? 'border-black bg-black text-white dark:border-white dark:bg-white dark:text-black'
+                      ? 'border-primary bg-primary text-base'
                       : 'border-default bg-base text-secondary hover:border-hint'
                   }`}
                 >

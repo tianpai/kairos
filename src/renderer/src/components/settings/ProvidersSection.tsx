@@ -382,7 +382,7 @@ function ClaudeConfig({
             onClick={() => handleToggleAuthMode(false)}
             className={`rounded-md px-3 py-1.5 text-sm transition-colors ${
               authMode === 'oauth'
-                ? 'bg-black text-white dark:bg-white dark:text-black'
+                ? 'bg-primary text-base'
                 : 'bg-surface text-secondary hover:bg-hover'
             }`}
           >
@@ -392,7 +392,7 @@ function ClaudeConfig({
             onClick={() => handleToggleAuthMode(true)}
             className={`rounded-md px-3 py-1.5 text-sm transition-colors ${
               authMode === 'cli'
-                ? 'bg-black text-white dark:bg-white dark:text-black'
+                ? 'bg-primary text-base'
                 : 'bg-surface text-secondary hover:bg-hover'
             }`}
           >
@@ -413,7 +413,7 @@ function ClaudeConfig({
               Requires Claude Code CLI installed and authenticated on your
               system.
             </p>
-            <p className="inline-flex items-center gap-1 rounded bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800 dark:bg-amber-900 dark:text-amber-200">
+            <p className="inline-flex items-center gap-1 rounded bg-warning-subtle px-2 py-0.5 text-xs font-medium text-warning">
               Experimental feature
             </p>
           </div>
@@ -575,14 +575,14 @@ function ClaudeConfig({
                   Claude Code CLI not found
                   {useCustomPath ? ' at specified path' : ''}.
                 </p>
-                <div className="rounded-md bg-blue-50 p-4 dark:bg-blue-950">
-                  <p className="text-sm font-medium text-blue-800 dark:text-blue-200">
+                <div className="rounded-md bg-info-subtle p-4">
+                  <p className="text-sm font-medium text-info">
                     Installation:
                   </p>
-                  <ol className="mt-2 list-decimal space-y-1 pl-5 text-sm text-blue-700 dark:text-blue-300">
+                  <ol className="mt-2 list-decimal space-y-1 pl-5 text-sm text-info">
                     <li>
                       Install via{' '}
-                      <code className="rounded bg-blue-100 px-1 font-mono dark:bg-blue-900">
+                      <code className="rounded bg-info-subtle/80 px-1 font-mono">
                         npm install -g @anthropic-ai/claude-code
                       </code>
                     </li>
@@ -599,7 +599,7 @@ function ClaudeConfig({
                     </li>
                     <li>
                       Run{' '}
-                      <code className="rounded bg-blue-100 px-1 font-mono dark:bg-blue-900">
+                      <code className="rounded bg-info-subtle/80 px-1 font-mono">
                         claude
                       </code>{' '}
                       to authenticate
@@ -795,11 +795,11 @@ function OllamaConfig({ isActive, onSetActive }: OllamaConfigProps) {
             <p className="text-sm text-secondary">
               Ollama is not running.
             </p>
-            <div className="rounded-md bg-blue-50 p-4 dark:bg-blue-950">
-              <p className="text-sm font-medium text-blue-800 dark:text-blue-200">
+            <div className="rounded-md bg-info-subtle p-4">
+              <p className="text-sm font-medium text-info">
                 Installation:
               </p>
-              <ol className="mt-2 list-decimal space-y-1 pl-5 text-sm text-blue-700 dark:text-blue-300">
+              <ol className="mt-2 list-decimal space-y-1 pl-5 text-sm text-info">
                 <li>
                   Download from{' '}
                   <a
@@ -813,13 +813,13 @@ function OllamaConfig({ isActive, onSetActive }: OllamaConfigProps) {
                 </li>
                 <li>
                   Or install via{' '}
-                  <code className="rounded bg-blue-100 px-1 font-mono dark:bg-blue-900">
+                  <code className="rounded bg-info-subtle/80 px-1 font-mono">
                     brew install ollama
                   </code>
                 </li>
                 <li>
                   Start with{' '}
-                  <code className="rounded bg-blue-100 px-1 font-mono dark:bg-blue-900">
+                  <code className="rounded bg-info-subtle/80 px-1 font-mono">
                     ollama serve
                   </code>
                 </li>
@@ -839,8 +839,8 @@ function OllamaConfig({ isActive, onSetActive }: OllamaConfigProps) {
       {status?.running && (
         <>
           {/* Performance Note */}
-          <div className="rounded-md bg-amber-50 p-3 dark:bg-amber-950">
-            <p className="text-xs text-amber-800 dark:text-amber-200">
+          <div className="rounded-md bg-warning-subtle p-3">
+            <p className="text-xs text-warning">
               Local models are significantly slower than cloud APIs. Performance
               depends on your hardware.
             </p>
@@ -868,7 +868,7 @@ function OllamaConfig({ isActive, onSetActive }: OllamaConfigProps) {
                         {model.name}
                       </span>
                       {installed && (
-                        <span className="ml-2 inline-flex items-center rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800 dark:bg-green-900 dark:text-green-200">
+                        <span className="ml-2 inline-flex items-center rounded-full bg-success-subtle px-2 py-0.5 text-xs font-medium text-success">
                           Installed
                         </span>
                       )}
@@ -887,7 +887,7 @@ function OllamaConfig({ isActive, onSetActive }: OllamaConfigProps) {
                         <div className="w-32">
                           <div className="h-2 w-full rounded-full bg-hover">
                             <div
-                              className="h-2 rounded-full bg-blue-600 transition-all duration-300"
+                              className="h-2 rounded-full bg-info transition-all duration-300"
                               style={{ width: `${progressPercent}%` }}
                             />
                           </div>
@@ -903,7 +903,7 @@ function OllamaConfig({ isActive, onSetActive }: OllamaConfigProps) {
                         </div>
                         <button
                           onClick={handleCancelPull}
-                          className="text-xs text-error hover:text-red-700 dark:hover:text-red-300"
+                          className="text-xs text-error hover:text-error/80"
                         >
                           Cancel
                         </button>

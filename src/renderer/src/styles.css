@@ -18,8 +18,19 @@
 
   /* Semantic */
   --k-error: #ef4444;
+  --k-error-subtle: #fef2f2;
   --k-success: #16a34a;
+  --k-success-subtle: #f0fdf4;
   --k-warning: #ca8a04;
+  --k-warning-subtle: #fefce8;
+  --k-info: #2563eb;
+  --k-info-subtle: #eff6ff;
+
+  /* Interactive */
+  --k-link: #2563eb;
+  --k-link-hover: #1d4ed8;
+  --k-selected: #0ea5e9;
+  --k-selected-subtle: #e0f2fe;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -34,8 +45,17 @@
     --k-hint: #6b7280;
     --k-disabled: #4b5563;
     --k-error: #f87171;
+    --k-error-subtle: #450a0a;
     --k-success: #4ade80;
+    --k-success-subtle: #052e16;
     --k-warning: #facc15;
+    --k-warning-subtle: #422006;
+    --k-info: #60a5fa;
+    --k-info-subtle: #172554;
+    --k-link: #60a5fa;
+    --k-link-hover: #93c5fd;
+    --k-selected: #38bdf8;
+    --k-selected-subtle: #0c4a6e;
   }
 }
 
@@ -50,8 +70,17 @@
   --color-hint: var(--k-hint);
   --color-disabled: var(--k-disabled);
   --color-error: var(--k-error);
+  --color-error-subtle: var(--k-error-subtle);
   --color-success: var(--k-success);
+  --color-success-subtle: var(--k-success-subtle);
   --color-warning: var(--k-warning);
+  --color-warning-subtle: var(--k-warning-subtle);
+  --color-info: var(--k-info);
+  --color-info-subtle: var(--k-info-subtle);
+  --color-link: var(--k-link);
+  --color-link-hover: var(--k-link-hover);
+  --color-selected: var(--k-selected);
+  --color-selected-subtle: var(--k-selected-subtle);
 }
 
 @keyframes flash {
