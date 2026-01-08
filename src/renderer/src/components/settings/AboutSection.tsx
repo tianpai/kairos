@@ -86,7 +86,7 @@ function parseChangelog(raw: string): Array<ChangelogEntry> {
 }
 
 const changelogEntries = parseChangelog(changelogRaw)
-const currentVersionEntry = changelogEntries.find(
+export const currentVersionEntry = changelogEntries.find(
   (e) => e.version === pkg.version,
 )
 

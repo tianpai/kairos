@@ -4,6 +4,7 @@ import { Settings } from 'lucide-react'
 import JobInfoModal from '@sidebar/JobInfoModal'
 import { CollapsibleSidebar } from './CollapsibleSidebar'
 import { SidebarItem } from './SidebarItem'
+import { SettingsHoverPopup } from './SettingsHoverPopup'
 
 interface Application {
   id: string
@@ -41,6 +42,7 @@ export function Sidebar({
 }: SidebarProps) {
   const navigate = useNavigate()
   const [editingApp, setEditingApp] = useState<Application | null>(null)
+  const [isSettingsHovered, setIsSettingsHovered] = useState(false)
 
   const handleSaveEdit = (data: {
     companyName: string
@@ -62,13 +64,22 @@ export function Sidebar({
   }
 
   const settingsFooter = (
-    <button
-      onClick={() => navigate({ to: '/settings' })}
-      className="flex w-full cursor-pointer items-center gap-2 px-3 py-3 text-sm text-secondary transition-colors hover:bg-hover"
+    <div
+      className="relative"
+      onMouseEnter={() => setIsSettingsHovered(true)}
+      onMouseLeave={() => setIsSettingsHovered(false)}
     >
-      <Settings size={16} />
-      <span>Settings</span>
-    </button>
+      {isSettingsHovered && (
+        <SettingsHoverPopup applicationCount={applications.length} />
+      )}
+      <button
+        onClick={() => navigate({ to: '/settings' })}
+        className="flex w-full cursor-pointer items-center gap-2 px-3 py-3 text-sm text-secondary transition-colors hover:bg-hover"
+      >
+        <Settings size={16} />
+        <span>Settings</span>
+      </button>
+    </div>
   )
 
   return (
