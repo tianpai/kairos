@@ -1,6 +1,7 @@
 import { app, shell } from 'electron'
-import { autoUpdater, UpdateInfo } from 'electron-updater'
+import { autoUpdater } from 'electron-updater'
 import log from 'electron-log/main'
+import type { UpdateInfo } from 'electron-updater';
 
 export type UpdateStatus =
   | 'idle'

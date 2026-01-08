@@ -12,7 +12,7 @@ export function CollapsibleSidebar({
   collapsed,
   children,
   footer,
-  width = 'w-60',
+  width = 'w-48',
   className = '',
 }: CollapsibleSidebarProps) {
   return (

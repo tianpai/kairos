@@ -12,7 +12,6 @@ interface Application {
   dueDate: string
   matchPercentage: number
   jobUrl: string | null
-  originalResume: string | null
 }
 
 interface SidebarProps {
@@ -79,12 +78,10 @@ export function Sidebar({
           {applications.map((app) => (
             <SidebarItem
               key={app.id}
-              id={app.id}
               companyName={app.companyName}
               position={app.position}
               dueDate={app.dueDate}
               matchPercentage={app.matchPercentage}
-              isBuiltFromScratch={!app.originalResume}
               isSelected={app.id === selectedId}
               onClick={() => onSelect(app.id)}
               onEdit={() => setEditingApp(app)}
