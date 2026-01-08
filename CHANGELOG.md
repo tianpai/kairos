@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.1](https://github.com/tianpai/kairos/compare/v0.0.6...v0.1.1) (2026-01-08)
+
+
+### Features
+
+* add settings hover popup showing provider, model, and version ([19a45a3](https://github.com/tianpai/kairos/commit/19a45a3cd874dc01fef194fbbcc1409d054bd831))
+
+
+### Bug Fixes
+
+* add v0.0.6 entry to changelog for settings page display ([f3109e1](https://github.com/tianpai/kairos/commit/f3109e13b46d02339f4a8cd6c7e90032c1833ba7))
+
 ## 0.0.6
 
 "There is no bug in Ba Sing Se"
