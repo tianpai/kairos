@@ -211,14 +211,14 @@ function ProviderConfig({
         <Button
           onClick={handleSave}
           disabled={!apiKey.trim()}
-          className="bg-surface text-secondary hover:bg-hover"
+          variant="outline"
         >
           Save
         </Button>
         {currentKey && (
           <Button
             onClick={onDelete}
-            className="bg-red-50 text-error hover:bg-red-100 dark:bg-red-950 dark:hover:bg-red-900"
+            variant="danger"
           >
             Delete
           </Button>
@@ -226,7 +226,7 @@ function ProviderConfig({
         {currentKey && !isActive && (
           <Button
             onClick={onSetActive}
-            className="bg-surface text-secondary hover:bg-hover"
+            variant="outline"
           >
             Set as active
           </Button>
@@ -437,14 +437,14 @@ function ClaudeConfig({
               </span>
               <Button
                 onClick={onDisconnect}
-                className="bg-red-50 text-error hover:bg-red-100 dark:bg-red-950 dark:hover:bg-red-900"
+                variant="danger"
               >
                 Disconnect
               </Button>
               {!isActive && (
                 <Button
                   onClick={onSetActive}
-                  className="bg-surface text-secondary hover:bg-hover"
+                  variant="outline"
                 >
                   Set as active
                 </Button>
@@ -471,13 +471,13 @@ function ClaudeConfig({
                 <Button
                   onClick={handleSubmitCode}
                   disabled={!authCode.trim() || completeAuth.isPending}
-                  className="bg-surface text-secondary hover:bg-hover"
+                  variant="outline"
                 >
                   {completeAuth.isPending ? 'Connecting...' : 'Submit Code'}
                 </Button>
                 <Button
                   onClick={handleCancel}
-                  className="bg-surface text-secondary hover:bg-hover"
+                  variant="outline"
                 >
                   Cancel
                 </Button>
@@ -493,7 +493,7 @@ function ClaudeConfig({
               <Button
                 onClick={handleConnect}
                 disabled={startAuth.isPending}
-                className="bg-surface text-secondary hover:bg-hover"
+                variant="outline"
               >
                 {startAuth.isPending
                   ? 'Opening browser...'
@@ -552,7 +552,7 @@ function ClaudeConfig({
                 <Button
                   onClick={handleSaveCustomPath}
                   disabled={!customPathInput.trim()}
-                  className="bg-surface text-secondary hover:bg-hover"
+                  variant="outline"
                 >
                   Save
                 </Button>
@@ -608,7 +608,7 @@ function ClaudeConfig({
                 </div>
                 <Button
                   onClick={() => refetchCliStatus()}
-                  className="bg-surface text-secondary hover:bg-hover"
+                  variant="outline"
                 >
                   Retry Detection
                 </Button>
@@ -623,7 +623,7 @@ function ClaudeConfig({
                   {!isActive && (
                     <Button
                       onClick={onSetActive}
-                      className="bg-surface text-secondary hover:bg-hover"
+                      variant="outline"
                     >
                       Set as active
                     </Button>
@@ -784,7 +784,7 @@ function OllamaConfig({ isActive, onSetActive }: OllamaConfigProps) {
             {!isActive && installedModels && installedModels.length > 0 && (
               <Button
                 onClick={onSetActive}
-                className="bg-surface text-secondary hover:bg-hover"
+                variant="outline"
               >
                 Set as active
               </Button>
@@ -827,7 +827,7 @@ function OllamaConfig({ isActive, onSetActive }: OllamaConfigProps) {
             </div>
             <Button
               onClick={() => refetchStatus()}
-              className="bg-surface text-secondary hover:bg-hover"
+              variant="outline"
             >
               Retry Detection
             </Button>
@@ -877,7 +877,7 @@ function OllamaConfig({ isActive, onSetActive }: OllamaConfigProps) {
                       <Button
                         onClick={() => handlePullModel(model.id)}
                         disabled={!!pullingModel}
-                        className="bg-surface text-secondary hover:bg-hover"
+                        variant="outline"
                       >
                         Download
                       </Button>
