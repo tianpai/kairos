@@ -1,5 +1,6 @@
 import { useActiveProvider, useSelectedModel } from '@hooks/useSettings'
-import { currentVersionEntry } from '@components/settings/AboutSection'
+import { versionQuotes } from '@/data/versionQuotes'
+import pkg from '@root/package.json'
 
 function InfoRow({ label, value }: { label: string; value: string | number }) {
   return (
@@ -32,10 +33,10 @@ export function SettingsHoverPopup({
         <InfoRow label="Provider" value={providerDisplay} />
         <InfoRow label="Model" value={modelDisplay} />
         <InfoRow label="Applications" value={applicationCount} />
-        <InfoRow label="Version" value={currentVersionEntry?.version ?? '—'} />
-        {currentVersionEntry?.quote && (
+        <InfoRow label="Version" value={pkg.version} />
+        {versionQuotes[pkg.version] && (
           <div className="text-hint pt-1 text-xs italic">
-            "{currentVersionEntry.quote}"
+            "{versionQuotes[pkg.version]}"
           </div>
         )}
       </div>

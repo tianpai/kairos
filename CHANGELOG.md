@@ -4,8 +4,6 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## 0.1.1
 
-"You guys are getting interviews?"
-
 ### Features
 
 * add settings hover popup showing provider, model, and version ([19a45a3](https://github.com/tianpai/kairos/commit/19a45a3cd874dc01fef194fbbcc1409d054bd831))
@@ -16,8 +14,6 @@ All notable changes to this project will be documented in this file. See [standa
 * add v0.0.6 entry to changelog for settings page display ([f3109e1](https://github.com/tianpai/kairos/commit/f3109e13b46d02339f4a8cd6c7e90032c1833ba7))
 
 ## 0.0.6
-
-"There is no bug in Ba Sing Se"
 
 ### Features
 
@@ -81,34 +77,6 @@ All notable changes to this project will be documented in this file. See [standa
 - sidebar score not updating in realtime ([b6b7577](https://github.com/tianpai/kairos/commit/b6b75778a14cd15226f7c779661572523bc29c58))
 - update to latest models for claude ([b06a146](https://github.com/tianpai/kairos/commit/b06a1461945e3f52954bf43e4454f3b19782b889))
 - worker crash due to window not defined ([f3e0ce4](https://github.com/tianpai/kairos/commit/f3e0ce46c9f0ab2a32535e58859022e38565976e))
-
-## 0.0.5
-
-"A Quick Update"
-
-### Features
-
-- Auto-update support with GitHub Releases
-- Check for updates in Settings > About
-- Public README with screenshots and installation guide
-
-## 0.0.4 (Unreleased)
-
-"You shall be the Fellowship of the Ring"
-
-### Features
-
-- Add Anthropic API provider support
-- Add Google Gemini provider support
-- Add xAI Grok provider support
-- Add DeepSeek provider support
-- Add Ollama local model support
-- Support Claude Code subscription login with auto-detection
-
-### Bug Fixes
-
-- Update to latest Claude models
-- Remove duplicate provider name from settings panel
 
 ## 0.0.3 (2024-12-31)
 
