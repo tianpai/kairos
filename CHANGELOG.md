@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.6](https://github.com/tianpai/kairos/compare/v0.0.5...v0.0.6) (2026-01-08)
+
+
+### Bug Fixes
+
+* batch export select all toggle state and styling ([4ad25b1](https://github.com/tianpai/kairos/commit/4ad25b14e062da533ec52414f4285a04f165ab43))
+* new application button now checks active provider's API key ([957069b](https://github.com/tianpai/kairos/commit/957069bdfd43f1477736a9ff9666a10e92d58eb9))
+* upload modal now closes when creating application ([88c9895](https://github.com/tianpai/kairos/commit/88c9895b7220bddf16fd95b6be0f6ddb7eed447e))
+
 ### [0.0.5](https://github.com/tianpai/kairos/compare/v0.0.4...v0.0.5) (2026-01-07)
 
 

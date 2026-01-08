@@ -136,18 +136,18 @@ export function AboutSection() {
     <div className="space-y-6">
       <div>
         <h2 className="text-lg font-semibold">About</h2>
-        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+        <p className="mt-1 text-sm text-hint">
           Kairos - AI-powered resume optimization
         </p>
       </div>
 
       <div className="space-y-4">
         <div>
-          <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+          <p className="text-sm font-medium text-secondary">
             Version {pkg.version}
           </p>
           {currentVersionEntry?.quote && (
-            <p className="mt-1 text-sm text-gray-500 italic dark:text-gray-400">
+            <p className="mt-1 text-sm text-hint italic">
               "{currentVersionEntry.quote}"
             </p>
           )}
@@ -156,7 +156,7 @@ export function AboutSection() {
         {/* Update Section */}
         <div className="space-y-2">
           {isPackaged === false && (
-            <p className="text-sm text-gray-500 dark:text-gray-400">
+            <p className="text-sm text-hint">
               Development mode — update check disabled
             </p>
           )}
@@ -164,39 +164,39 @@ export function AboutSection() {
           {isPackaged === true && updateState.status === 'idle' && (
             <button
               onClick={checkForUpdates}
-              className="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+              className="text-sm text-link hover:text-link-hover"
             >
               Check for Updates
             </button>
           )}
 
           {updateState.status === 'checking' && (
-            <p className="text-sm text-gray-500 dark:text-gray-400">
+            <p className="text-sm text-hint">
               Checking for updates...
             </p>
           )}
 
           {updateState.status === 'not-available' && (
-            <p className="text-sm text-green-600 dark:text-green-400">
+            <p className="text-sm text-success">
               You're running the latest version
             </p>
           )}
 
           {updateState.status === 'available' && (
             <div className="space-y-2">
-              <p className="text-sm text-amber-600 dark:text-amber-400">
+              <p className="text-sm text-warning">
                 Version {updateState.version} is available
               </p>
               <div className="flex gap-2">
                 <button
                   onClick={handleDownload}
-                  className="rounded bg-blue-600 px-3 py-1 text-sm text-white hover:bg-blue-700"
+                  className="rounded bg-info px-3 py-1 text-sm text-white hover:bg-info/90"
                 >
                   Download Update
                 </button>
                 <button
                   onClick={openReleasesPage}
-                  className="text-sm text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
+                  className="text-sm text-secondary hover:text-primary"
                 >
                   View on GitHub
                 </button>
@@ -206,12 +206,12 @@ export function AboutSection() {
 
           {updateState.status === 'downloading' && (
             <div className="space-y-1">
-              <p className="text-sm text-gray-500 dark:text-gray-400">
+              <p className="text-sm text-hint">
                 Downloading... {updateState.progress?.percent.toFixed(0)}%
               </p>
-              <div className="h-1.5 w-48 overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
+              <div className="h-1.5 w-48 overflow-hidden rounded-full bg-hover">
                 <div
-                  className="h-full bg-blue-600 transition-all"
+                  className="h-full bg-info transition-all"
                   style={{ width: `${updateState.progress?.percent ?? 0}%` }}
                 />
               </div>
@@ -220,12 +220,12 @@ export function AboutSection() {
 
           {updateState.status === 'downloaded' && (
             <div className="space-y-2">
-              <p className="text-sm text-green-600 dark:text-green-400">
+              <p className="text-sm text-success">
                 Update ready to install
               </p>
               <button
                 onClick={handleInstall}
-                className="rounded bg-green-600 px-3 py-1 text-sm text-white hover:bg-green-700"
+                className="rounded bg-success px-3 py-1 text-sm text-white hover:bg-success/90"
               >
                 Restart to Install
               </button>
@@ -234,12 +234,12 @@ export function AboutSection() {
 
           {updateState.status === 'error' && (
             <div className="space-y-2">
-              <p className="text-sm text-red-600 dark:text-red-400">
+              <p className="text-sm text-error">
                 {updateState.error || 'Update check failed'}
               </p>
               <button
                 onClick={checkForUpdates}
-                className="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                className="text-sm text-link hover:text-link-hover"
               >
                 Try Again
               </button>
@@ -251,40 +251,40 @@ export function AboutSection() {
           href={GITHUB_URL}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
+          className="inline-flex items-center gap-2 text-sm text-secondary hover:text-primary"
         >
           <GitHubIcon size={14} />
           github.com/tianpai/kairos
         </a>
       </div>
 
-      <div className="border-t border-gray-200 pt-6 dark:border-gray-700">
-        <h3 className="mb-4 text-sm font-semibold text-gray-700 dark:text-gray-300">
+      <div className="border-t border-default pt-6">
+        <h3 className="mb-4 text-sm font-semibold text-secondary">
           Changelog
         </h3>
-        <div className="max-h-64 space-y-4 overflow-y-auto rounded-lg border border-gray-200 p-4 dark:border-gray-700">
+        <div className="max-h-64 space-y-4 overflow-y-auto rounded-lg border border-default p-4">
           {changelogEntries.map((entry) => (
             <div key={entry.version} className="space-y-2">
               <div className="flex items-baseline gap-2">
-                <span className="text-sm font-medium text-gray-900 dark:text-white">
+                <span className="text-sm font-medium text-primary">
                   {entry.version}
                 </span>
                 {entry.quote && (
-                  <span className="text-xs text-gray-400 italic dark:text-gray-500">
+                  <span className="text-xs text-hint italic">
                     "{entry.quote}"
                   </span>
                 )}
               </div>
               {entry.sections.map((section) => (
                 <div key={section.title} className="pl-2">
-                  <p className="text-xs font-medium text-gray-600 dark:text-gray-400">
+                  <p className="text-xs font-medium text-secondary">
                     {section.title}
                   </p>
                   <ul className="mt-1 space-y-0.5">
                     {section.items.map((item, i) => (
                       <li
                         key={i}
-                        className="text-xs text-gray-500 before:mr-1 before:content-['-'] dark:text-gray-400"
+                        className="text-xs text-hint before:mr-1 before:content-['-']"
                       >
                         {item}
                       </li>

@@ -12,7 +12,6 @@ interface Application {
   dueDate: string
   matchPercentage: number
   jobUrl: string | null
-  originalResume: string | null
 }
 
 interface SidebarProps {
@@ -65,7 +64,7 @@ export function Sidebar({
   const settingsFooter = (
     <button
       onClick={() => navigate({ to: '/settings' })}
-      className="flex w-full cursor-pointer items-center gap-2 px-3 py-3 text-sm text-gray-600 transition-colors hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
+      className="flex w-full cursor-pointer items-center gap-2 px-3 py-3 text-sm text-secondary transition-colors hover:bg-hover"
     >
       <Settings size={16} />
       <span>Settings</span>
@@ -79,12 +78,10 @@ export function Sidebar({
           {applications.map((app) => (
             <SidebarItem
               key={app.id}
-              id={app.id}
               companyName={app.companyName}
               position={app.position}
               dueDate={app.dueDate}
               matchPercentage={app.matchPercentage}
-              isBuiltFromScratch={!app.originalResume}
               isSelected={app.id === selectedId}
               onClick={() => onSelect(app.id)}
               onEdit={() => setEditingApp(app)}

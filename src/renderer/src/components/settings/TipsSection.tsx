@@ -1,4 +1,4 @@
-import { InvertedButton } from '@ui/InvertedButton'
+import { Button } from '@ui/Button'
 import { tips } from '@tips/tips.data'
 import { useTipsStore } from '@tips/tips.store'
 
@@ -20,7 +20,7 @@ export function TipsSection() {
     <div className="space-y-6">
       <div>
         <h2 className="text-lg font-semibold">Tips</h2>
-        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+        <p className="mt-1 text-sm text-hint">
           Manage app tips and hints.
         </p>
       </div>
@@ -31,13 +31,11 @@ export function TipsSection() {
           return (
             <div
               key={tip.id}
-              className="flex items-start justify-between gap-4 border-b border-gray-100 py-2 last:border-0 dark:border-gray-800"
+              className="flex items-start justify-between gap-4 border-b border-default py-2 last:border-0"
             >
-              <p className="text-sm text-gray-700 dark:text-gray-300">
-                {tip.message}
-              </p>
+              <p className="text-sm text-secondary">{tip.message}</p>
               {status && (
-                <span className="shrink-0 text-xs text-gray-400 dark:text-gray-500">
+                <span className="shrink-0 text-xs text-hint">
                   {status === 'hidden' ? 'Hidden' : 'Dismissed'}
                 </span>
               )}
@@ -46,7 +44,7 @@ export function TipsSection() {
         })}
       </div>
 
-      <InvertedButton onClick={reset}>Reset All Tips</InvertedButton>
+      <Button onClick={reset}>Reset All Tips</Button>
     </div>
   )
 }

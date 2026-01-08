@@ -84,7 +84,7 @@ export function HoldButton({
     >
       {isHolding && (
         <div
-          className="absolute inset-0 bg-black/10 transition-none dark:bg-white/20"
+          className="absolute inset-0 bg-active transition-none"
           style={{ width: `${progress}%` }}
         />
       )}

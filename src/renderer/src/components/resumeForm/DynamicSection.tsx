@@ -96,7 +96,7 @@ function EntryItem({
           <button
             type="button"
             {...listeners}
-            className="cursor-grab text-gray-400 opacity-0 transition-opacity group-hover:opacity-100 active:cursor-grabbing dark:text-gray-500"
+            className="cursor-grab text-hint opacity-0 transition-opacity group-hover:opacity-100 active:cursor-grabbing"
           >
             <GripVertical size={14} />
           </button>
@@ -110,7 +110,7 @@ function EntryItem({
             onClick={onRemove}
             className="cursor-pointer p-1 hover:text-red-600"
           >
-            <CircleX size={13} className="text-slate-500" />
+            <CircleX size={13} className="text-hint" />
           </button>
         )}
       </div>
@@ -201,14 +201,14 @@ function MultipleEntrySection({ schema, entries }: MultipleEntrySectionProps) {
       <button
         type="button"
         onClick={handleAdd}
-        className="flex w-full cursor-pointer items-center justify-center gap-1 rounded-md py-2 text-sm text-gray-600 transition-colors hover:bg-gray-100"
+        className="flex w-full cursor-pointer items-center justify-center gap-1 rounded-md py-2 text-sm text-secondary transition-colors hover:bg-hover"
       >
         <Plus size={14} />
         <span>New</span>
       </button>
 
       {entries.length === 0 && (
-        <p className="mb-2 text-xs text-gray-500 italic">
+        <p className="mb-2 text-xs text-hint italic">
           No {schema.label.toLowerCase()} added yet.
         </p>
       )}

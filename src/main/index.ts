@@ -17,12 +17,12 @@ import {
   getOllamaCuratedModels,
 } from './services/ai-models.service'
 import {
-  isOllamaRunning,
-  getOllamaVersion,
+  cancelPullModel,
   getInstalledCuratedModels,
   getOllamaCuratedModels as getOllamaCuratedModelsList,
+  getOllamaVersion,
+  isOllamaRunning,
   pullOllamaModel,
-  cancelPullModel,
   setOllamaBaseUrl,
 } from './services/ollama.service'
 import { claudeSubscriptionService } from './services/claude-subscription.service'
@@ -56,7 +56,7 @@ ipcMain.handle('settings:setApiKey', (_, key: string) => {
 })
 
 ipcMain.handle('settings:hasApiKey', () => {
-  return settingsService.hasOpenAIKey()
+  return settingsService.hasActiveProviderConfigured()
 })
 
 ipcMain.handle('settings:deleteApiKey', () => {

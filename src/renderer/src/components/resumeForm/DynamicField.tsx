@@ -15,7 +15,7 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { InvertedButton } from '@ui/InvertedButton'
+import { Button } from '@ui/Button'
 import { Select } from '@ui/Select'
 import { DateInput } from './DateInput'
 import { asString, asStringArray } from './fieldUtils'
@@ -104,7 +104,7 @@ function SortableTextItem({
       <button
         type="button"
         {...listeners}
-        className="mt-2.5 cursor-grab text-gray-400 opacity-0 transition-opacity group-hover:opacity-100 active:cursor-grabbing dark:text-gray-500"
+        className="mt-2.5 cursor-grab text-hint opacity-0 transition-opacity group-hover:opacity-100 active:cursor-grabbing"
       >
         <GripVertical size={12} />
       </button>
@@ -125,7 +125,7 @@ function SortableTextItem({
         >
           <CircleX
             size={14}
-            className="text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
+            className="text-hint hover:text-secondary"
           />
         </button>
       </div>
@@ -194,9 +194,9 @@ function TextArrayField({ schema, value, onChange }: FieldProps) {
           </SortableContext>
         </DndContext>
         <div className="text-right">
-          <InvertedButton type="button" onClick={addItem}>
+          <Button type="button" onClick={addItem}>
             <p className="text-xs"> Add {label} </p>
-          </InvertedButton>
+          </Button>
         </div>
       </div>
     </FieldWrapper>

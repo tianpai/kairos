@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { ExternalLink } from 'lucide-react'
-import { InvertedButton } from '@ui/InvertedButton'
+import { Button } from '@ui/Button'
 import { Modal } from '@ui/Modal'
 import { InputField } from '@ui/InputField'
 import { HoldButton } from '@ui/HoldButton'
@@ -63,15 +63,15 @@ export default function JobInfoModal({
             onClose()
             onDelete()
           }}
-          className="text-red-400 hover:bg-slate-100 dark:hover:bg-slate-700"
+          className="text-error hover:bg-hover"
         >
           Hold to Delete
         </HoldButton>
       }
       actions={
         <>
-          <InvertedButton onClick={onClose}>Cancel</InvertedButton>
-          <InvertedButton
+          <Button onClick={onClose}>Cancel</Button>
+          <Button
             onClick={() =>
               onSave({
                 companyName,
@@ -82,7 +82,7 @@ export default function JobInfoModal({
             }
           >
             Save
-          </InvertedButton>
+          </Button>
         </>
       }
     >
@@ -127,7 +127,7 @@ export default function JobInfoModal({
                 const url = normalizeUrl(jobUrl)
                 if (url) window.electron.shell.openExternal(url)
               }}
-              className="mb-0.5 rounded p-2 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-200"
+              className="mb-0.5 rounded p-2 text-hint transition-colors hover:bg-hover hover:text-primary"
               title="Open in browser"
             >
               <ExternalLink size={18} />

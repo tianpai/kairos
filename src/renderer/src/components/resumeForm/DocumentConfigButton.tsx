@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { FileCog } from 'lucide-react'
-import { InvertedButton } from '@ui/InvertedButton'
+import { Button } from '@ui/Button'
 import { DocumentConfigModal } from './DocumentConfigModal'
 import { useShortcutStore } from '@/components/layout/shortcut.store'
 
@@ -24,9 +24,9 @@ export function DocumentConfigButton() {
 
   return (
     <>
-      <InvertedButton onClick={() => setIsOpen(true)} title="Document settings">
+      <Button onClick={() => setIsOpen(true)} title="Document settings">
         <FileCog size={16} />
-      </InvertedButton>
+      </Button>
       <DocumentConfigModal isOpen={isOpen} onClose={() => setIsOpen(false)} />
     </>
   )

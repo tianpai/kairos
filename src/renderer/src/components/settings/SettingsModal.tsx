@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Modal } from '@ui/Modal'
-import { InvertedButton } from '@ui/InvertedButton'
+import { Button } from '@ui/Button'
 import { useApiKey, useDeleteApiKey, useSetApiKey } from '@hooks/useSettings'
 
 interface SettingsModalProps {
@@ -32,27 +32,27 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
       onClose={onClose}
       maxWidth="sm"
       actions={
-        <InvertedButton onClick={handleSave} disabled={!apiKey.trim()}>
+        <Button onClick={handleSave} disabled={!apiKey.trim()}>
           Save
-        </InvertedButton>
+        </Button>
       }
       leftActions={
         currentKey ? (
-          <InvertedButton
+          <Button
             onClick={handleDelete}
             bgColor="bg-red-600"
             hoverBgColor="hover:bg-red-100"
             hoverTextColor="hover:text-red-600"
           >
             Delete Key
-          </InvertedButton>
+          </Button>
         ) : null
       }
     >
       <div className="space-y-4">
         <h2 className="text-lg font-semibold">Settings</h2>
         <div>
-          <label className="block text-sm font-medium text-gray-700">
+          <label className="block text-sm font-medium text-secondary">
             OpenAI API Key
           </label>
           <input
@@ -60,9 +60,9 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
             value={apiKey}
             onChange={(e) => setApiKeyInput(e.target.value)}
             placeholder={currentKey ? '••••••••' : 'sk-...'}
-            className="mt-1 w-full border-2 border-gray-300 px-3 py-2 focus:border-black focus:outline-none"
+            className="mt-1 w-full border-2 border-default px-3 py-2 focus:border-primary focus:outline-none"
           />
-          <p className="mt-1 text-xs text-gray-500">
+          <p className="mt-1 text-xs text-hint">
             {currentKey
               ? 'Key is set. Enter new key to replace.'
               : 'Enter your OpenAI API key.'}

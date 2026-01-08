@@ -12,7 +12,7 @@ export default function Card({
   className = '',
   w = 'w-64',
   h = 'h-40',
-  bg = 'bg-[#f9f9f9]',
+  bg = 'bg-surface',
   interactive = false,
 }: CardProps) {
   const interactiveStyles = interactive

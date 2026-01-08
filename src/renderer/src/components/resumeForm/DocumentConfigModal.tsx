@@ -4,7 +4,7 @@ import { Select } from '@ui/Select'
 import { TemplateId } from '@templates/templateId'
 import { DocumentSetupSchema } from '@templates/shared/document-config'
 import { Modal } from '@ui/Modal'
-import { InvertedButton } from '@ui/InvertedButton'
+import { Button } from '@ui/Button'
 import { ColorPickerField } from './ColorPickerField'
 import { SectionManagerContent } from './SectionManager'
 import type { DocumentSetup } from '@templates/shared/document-config'
@@ -57,10 +57,10 @@ export function DocumentConfigModal({
       open={isOpen}
       onClose={onClose}
       maxWidth="xl"
-      actions={<InvertedButton onClick={onClose}>Done</InvertedButton>}
+      actions={<Button onClick={onClose}>Done</Button>}
     >
       <div className="mb-6">
-        <h2 className="text-xl dark:text-gray-200">Document Settings</h2>
+        <h2 className="text-xl text-primary">Document Settings</h2>
       </div>
 
       <div className="grid grid-cols-2 gap-8">
@@ -70,7 +70,7 @@ export function DocumentConfigModal({
         {/* Right: Document Config */}
         <div>
           <div className="mb-4">
-            <h3 className="text-lg font-medium dark:text-gray-200">Layout</h3>
+            <h3 className="text-lg font-medium text-primary">Layout</h3>
           </div>
 
           <div className="space-y-4">

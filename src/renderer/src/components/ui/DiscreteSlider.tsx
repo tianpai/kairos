@@ -49,10 +49,10 @@ export function DiscreteSlider({
       {label && <label className="block text-sm font-medium">{label}</label>}
       <div className="flex items-center gap-3">
         <div className="relative flex flex-1 items-center justify-between px-4">
-          <div className="absolute top-1/2 right-4 left-4 h-[1px] bg-black dark:bg-white" />
+          <div className="absolute top-1/2 right-4 left-4 h-[1px] bg-primary" />
           <div
             ref={indicatorRef}
-            className="pointer-events-none absolute z-20 flex h-8 w-8 items-center justify-center rounded-full bg-black text-sm font-medium text-white"
+            className="pointer-events-none absolute z-20 flex h-8 w-8 items-center justify-center rounded-full bg-primary text-sm font-medium text-base"
           >
             {value}
           </div>
@@ -64,7 +64,7 @@ export function DiscreteSlider({
                 else buttonsRef.current.delete(v)
               }}
               onClick={() => onChange(v)}
-              className="relative z-10 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-white text-sm font-medium text-black hover:bg-gray-300"
+              className="relative z-10 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-surface text-sm font-medium text-primary hover:bg-active"
             >
               {Math.abs(v - value) < 0.0001 ? '' : v}
             </button>

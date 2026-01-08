@@ -1,13 +1,11 @@
-import { Hammer, Info } from 'lucide-react'
+import { Info } from 'lucide-react'
 import { getScoreColor } from '@/utils/scoreThresholds'
 
 interface SidebarItemProps {
-  id: string
   companyName: string
   position: string
   dueDate: string
   matchPercentage: number
-  isBuiltFromScratch?: boolean
   isSelected: boolean
   onClick: () => void
   onEdit: () => void
@@ -34,62 +32,44 @@ export function SidebarItem({
   position,
   dueDate,
   matchPercentage,
-  isBuiltFromScratch = false,
   isSelected,
   onClick,
   onEdit,
 }: SidebarItemProps) {
   return (
     <div
-      className={`group relative flex w-full cursor-pointer items-center justify-between px-3 py-2 text-left transition-colors ${
-        isSelected
-          ? 'bg-gray-200 dark:bg-gray-700'
-          : 'hover:bg-gray-100 dark:hover:bg-gray-800'
+      className={`group relative w-full cursor-pointer px-3 py-2 text-left transition-colors ${
+        isSelected ? 'bg-active' : 'hover:bg-hover'
       }`}
       onClick={onClick}
     >
-      <div className="min-w-0 flex-1">
-        <div className="flex items-center gap-1 truncate text-sm font-medium text-gray-900 dark:text-white">
-          {isBuiltFromScratch && (
-            <span title="Built from scratch">
-              <Hammer
-                size={12}
-                className="shrink-0 text-gray-400 dark:text-gray-500"
-              />
-            </span>
-          )}
-          <span className="truncate">{companyName}</span>
-        </div>
-        <div className="truncate text-xs text-gray-500 dark:text-gray-400">
-          {position}
-        </div>
-        <div
-          className={`text-xs ${
-            isOverdue(dueDate)
-              ? 'text-red-500 dark:text-red-400'
-              : 'text-gray-500 dark:text-gray-400'
-          }`}
-        >
-          {formatDate(dueDate)}
-        </div>
+      <div className="truncate text-xs font-medium text-primary">
+        {companyName}
       </div>
-      <div className="ml-2 flex items-center gap-1">
+      <div className="truncate text-[11px] text-secondary">{position}</div>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-1 text-[11px]">
+          <span className={isOverdue(dueDate) ? 'text-error' : 'text-hint'}>
+            {formatDate(dueDate)}
+          </span>
+          <span className="text-hint">·</span>
+          <span
+            className="font-medium"
+            style={{ color: getScoreColor(matchPercentage) }}
+          >
+            {Math.round(matchPercentage)}%
+          </span>
+        </div>
         <button
           onClick={(e) => {
             e.stopPropagation()
             onEdit()
           }}
-          className="rounded p-1 opacity-0 transition-opacity group-hover:opacity-100 hover:bg-gray-300 dark:hover:bg-gray-600"
+          className="rounded p-1 opacity-0 transition-opacity group-hover:opacity-100 hover:bg-hover"
           title="Job Info"
         >
-          <Info size={14} className="text-gray-500 dark:text-gray-400" />
+          <Info size={14} className="text-hint" />
         </button>
-        <span
-          className="text-xs font-medium"
-          style={{ color: getScoreColor(matchPercentage) }}
-        >
-          {Math.round(matchPercentage)}%
-        </span>
       </div>
     </div>
   )

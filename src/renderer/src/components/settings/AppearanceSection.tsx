@@ -25,14 +25,14 @@ export function AppearanceSection() {
     <div className="space-y-6">
       <div>
         <h2 className="text-lg font-semibold">Appearance</h2>
-        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+        <p className="mt-1 text-sm text-hint">
           Customize the look and feel of the app.
         </p>
       </div>
 
       <div className="space-y-4">
         <div>
-          <label className="mb-3 block text-sm font-medium text-gray-700 dark:text-gray-300">
+          <label className="mb-3 block text-sm font-medium text-secondary">
             Theme
           </label>
           <div className="flex gap-2">
@@ -45,8 +45,8 @@ export function AppearanceSection() {
                   onClick={() => handleThemeChange(option.value)}
                   className={`flex items-center gap-2 rounded-md border-2 px-4 py-2 text-sm transition-colors ${
                     isSelected
-                      ? 'border-black bg-black text-white dark:border-white dark:bg-white dark:text-black'
-                      : 'border-gray-300 bg-white text-gray-700 hover:border-gray-400 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:border-gray-500'
+                      ? 'border-primary bg-primary text-base'
+                      : 'border-default bg-base text-secondary hover:border-hint'
                   }`}
                 >
                   <Icon size={16} />
@@ -55,7 +55,7 @@ export function AppearanceSection() {
               )
             })}
           </div>
-          <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+          <p className="mt-2 text-xs text-hint">
             In dark mode, the resume preview adapts for readability. Downloaded
             PDFs remain unchanged.
           </p>

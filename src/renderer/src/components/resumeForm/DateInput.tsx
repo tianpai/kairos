@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { InvertedCircleButton } from '@ui/InvertedCircleButton'
-import { InvertedButton } from '@ui/InvertedButton'
+import { Button } from '@ui/Button'
 import { INPUT_BASE } from './fieldStyles'
 
 // DateInput supports flexible date formats commonly used in resumes
@@ -48,7 +48,7 @@ function YearPicker({ onSelect }: { onSelect: (year: number) => void }) {
   ]
 
   return (
-    <div className="bg-white p-3 dark:bg-[#2a2a2a]">
+    <div className="bg-surface p-3">
       <div className="mb-3 flex items-center justify-between">
         <InvertedCircleButton
           onClick={() => setCenterYear((prev) => prev - 3)}
@@ -57,7 +57,7 @@ function YearPicker({ onSelect }: { onSelect: (year: number) => void }) {
         >
           <ChevronLeft className="h-3 w-3" />
         </InvertedCircleButton>
-        <span className="text-sm font-medium dark:text-gray-200">
+        <span className="text-sm font-medium">
           {centerYear - 4}-{centerYear + 4}
         </span>
         <InvertedCircleButton
@@ -75,7 +75,7 @@ function YearPicker({ onSelect }: { onSelect: (year: number) => void }) {
             key={y}
             type="button"
             onClick={() => onSelect(y)}
-            className="px-2 py-2 text-sm hover:bg-black hover:text-white dark:text-gray-200 dark:hover:bg-white dark:hover:text-black"
+            className="px-2 py-2 text-sm hover:bg-active"
           >
             {y}
           </button>
@@ -93,7 +93,7 @@ function MonthPicker({
   const [displayYear, setDisplayYear] = useState(new Date().getFullYear())
 
   return (
-    <div className="bg-white p-3 dark:bg-[#2a2a2a]">
+    <div className="bg-surface p-3">
       <div className="mb-3 flex items-center justify-between">
         <InvertedCircleButton
           onClick={() => setDisplayYear((prev) => prev - 1)}
@@ -102,7 +102,7 @@ function MonthPicker({
         >
           <ChevronLeft className="h-3 w-3" />
         </InvertedCircleButton>
-        <span className="text-sm font-medium dark:text-gray-200">
+        <span className="text-sm font-medium">
           {displayYear}
         </span>
         <InvertedCircleButton
@@ -120,7 +120,7 @@ function MonthPicker({
             key={monthName}
             type="button"
             onClick={() => onSelect(index, displayYear)}
-            className="bg-white px-2 py-2 text-sm hover:bg-black hover:text-white dark:bg-[#2a2a2a] dark:text-gray-200 dark:hover:bg-white dark:hover:text-black"
+            className="bg-surface px-2 py-2 text-sm hover:bg-active"
           >
             {monthName}
           </button>
@@ -154,12 +154,12 @@ export function DateInput({ id, value, onChange }: DateInputProps) {
   const getGranularityButtonProps = (targetGranularity: Granularity) => ({
     bgColor:
       granularity === targetGranularity
-        ? 'bg-black dark:bg-white'
-        : 'bg-white dark:bg-[#2a2a2a]',
+        ? 'bg-primary'
+        : 'bg-surface',
     textColor:
       granularity === targetGranularity
-        ? 'text-white dark:text-black'
-        : 'text-black dark:text-gray-200',
+        ? 'text-base'
+        : 'text-primary',
     className: 'flex-1 text-xs',
   })
 
@@ -176,22 +176,22 @@ export function DateInput({ id, value, onChange }: DateInputProps) {
 
       {/* Dropdown */}
       {isOpen && (
-        <div className="absolute z-50 mt-1 w-64 border border-gray-200 bg-white p-3 dark:border-gray-700 dark:bg-[#2a2a2a]">
+        <div className="absolute z-50 mt-1 w-64 border border-default bg-surface p-3">
           {/* Granularity Buttons */}
           <div className="mb-3 flex gap-0">
-            <InvertedButton
+            <Button
               onClick={() => setGranularity('year')}
               {...getGranularityButtonProps('year')}
             >
               YYYY
-            </InvertedButton>
-            <InvertedButton
+            </Button>
+            <Button
               onClick={() => setGranularity('month-year')}
               {...getGranularityButtonProps('month-year')}
             >
               MM, YYYY
-            </InvertedButton>
-            <InvertedButton
+            </Button>
+            <Button
               onClick={() => {
                 onChange('Present')
                 setIsOpen(false)
@@ -199,7 +199,7 @@ export function DateInput({ id, value, onChange }: DateInputProps) {
               {...getGranularityButtonProps('present')}
             >
               Present
-            </InvertedButton>
+            </Button>
           </div>
 
           {granularity === 'year' && (

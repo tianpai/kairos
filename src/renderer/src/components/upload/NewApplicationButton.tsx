@@ -6,7 +6,7 @@ import {
   useNewApplicationStore,
 } from './newApplication.store'
 import type { SubmitPayload } from './newApplication.store'
-import { InvertedButton } from '@/components/ui/InvertedButton'
+import { Button } from '@/components/ui/Button'
 import NewApplicationModal from '@/components/upload/NewApplicationModal'
 import { useCreateFromScratch } from '@/hooks/useCreateFromScratch'
 import { useBatchCreation } from '@/hooks/useBatchCreation'
@@ -105,7 +105,7 @@ export default function NewApplicationButton({
 
   return (
     <>
-      <InvertedButton
+      <Button
         onClick={openModal}
         disabled={!hasApiKey}
         title={
@@ -113,7 +113,7 @@ export default function NewApplicationButton({
         }
       >
         <FilePlus size={16} />
-      </InvertedButton>
+      </Button>
 
       <NewApplicationModal
         isOpen={isOpen}

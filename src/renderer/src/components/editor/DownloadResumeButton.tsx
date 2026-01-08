@@ -2,7 +2,7 @@ import { memo, useCallback, useEffect, useState } from 'react'
 import { useResumeStore } from '@typst-compiler/resumeState'
 import { compileToPDF } from '@typst-compiler/compile'
 import { FileDown } from 'lucide-react'
-import { InvertedButton } from '@ui/InvertedButton'
+import { Button } from '@ui/Button'
 import type { TemplateData } from '@templates/template.types'
 import { TemplateBuilder } from '@/templates/builder'
 import { useShortcutStore } from '@/components/layout/shortcut.store'
@@ -92,14 +92,14 @@ const DownloadResumeButton = memo(function DownloadResumeButton({
   }, [exportPdfRequested, handleDownload, clearExportPdfRequest])
 
   return (
-    <InvertedButton
+    <Button
       onClick={handleDownload}
       loading={isDownloading}
       ariaLabel="Download resume as PDF"
       title="Download"
     >
       <FileDown size={16} />
-    </InvertedButton>
+    </Button>
   )
 })
 

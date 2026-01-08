@@ -41,8 +41,8 @@ export default function ResumeForm() {
               onClick={() => setActiveTab(sectionId)}
               className={`w-full cursor-pointer rounded-lg px-3 py-1.5 text-left text-sm transition-colors ${
                 activeTab === sectionId
-                  ? 'bg-gray-200 font-medium text-gray-900 dark:bg-gray-700 dark:text-gray-100'
-                  : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
+                  ? 'bg-active font-medium text-primary'
+                  : 'text-secondary hover:bg-hover'
               }`}
             >
               {schema.label}

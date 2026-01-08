@@ -242,6 +242,7 @@ export function useSetActiveProvider() {
       window.electron.provider.setActive(provider),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['provider'] })
+      queryClient.invalidateQueries({ queryKey: ['settings', 'hasApiKey'] })
     },
   })
 }
