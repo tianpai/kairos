@@ -39,7 +39,7 @@ export default function SaveResumeButton({
       disabled={!jobId}
       ariaLabel="Save resume"
       title="Save"
-      className="-mr-[2px]"
+      className="-mr-0.5"
     >
       <Save size={16} />
     </Button>
