@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react'
 import { ApplicationInfoPopup } from './ApplicationInfoPopup'
+import { getScoreColor } from '@/utils/scoreThresholds'
 
 interface SidebarItemProps {
   companyName: string
@@ -43,13 +44,17 @@ export function SidebarItem({
   return (
     <div
       ref={ref}
-      className={`group relative w-full cursor-pointer px-3 py-2 text-left transition-colors ${
+      className={`group relative w-full cursor-pointer py-2 pr-3 pl-4 text-left transition-colors ${
         isSelected ? 'bg-active' : 'hover:bg-hover'
       }`}
       onClick={onClick}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={() => setIsHovered(false)}
     >
+      <div
+        className="absolute left-0 top-0 h-full w-0.5"
+        style={{ backgroundColor: getScoreColor(matchPercentage) }}
+      />
       {isHovered && (
         <ApplicationInfoPopup
           dueDate={dueDate}

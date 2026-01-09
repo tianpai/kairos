@@ -87,7 +87,7 @@ export function Sidebar({
   return (
     <>
       <CollapsibleSidebar collapsed={collapsed} footer={settingsFooter}>
-        <div className="pt-3">
+        <div>
           {applications.map((app) => (
             <SidebarItem
               key={app.id}

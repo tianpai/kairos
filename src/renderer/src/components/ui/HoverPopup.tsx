@@ -22,10 +22,20 @@ export function HoverPopup({
 }: HoverPopupProps) {
   // For left/right positions, use portal with fixed positioning
   if ((position === 'left' || position === 'right') && anchorRect) {
+    const popupHeight = 160 // Estimated popup height
+    const viewportHeight = window.innerHeight
+    const spaceBelow = viewportHeight - anchorRect.top
+
     const style: React.CSSProperties = {
       position: 'fixed',
-      top: anchorRect.top,
       zIndex: 50,
+    }
+
+    // If not enough space below, align popup bottom with anchor bottom
+    if (spaceBelow < popupHeight) {
+      style.bottom = viewportHeight - anchorRect.bottom
+    } else {
+      style.top = anchorRect.top
     }
 
     if (position === 'right') {
