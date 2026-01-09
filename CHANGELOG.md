@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.2](https://github.com/tianpai/kairos/compare/v0.1.1...v0.1.2) (2026-01-09)
+
+
+### Features
+
+* add application info popup on sidebar hover ([d3626cc](https://github.com/tianpai/kairos/commit/d3626cc5ee07a0a70fdefa1429495c37f6354d88))
+* add toast notifications for errors and workflow status ([92c446e](https://github.com/tianpai/kairos/commit/92c446eacf7391128a32cc7bfc92ae649e479a68))
+* changelog now displays as collapsible accordion with version quotes ([438956a](https://github.com/tianpai/kairos/commit/438956a1ac19f80d0db4487c3cf8578ce5ab12b6))
+
+
+### Bug Fixes
+
+* changelog format for version parsing and duplicate key warning ([2f20ada](https://github.com/tianpai/kairos/commit/2f20adac2abdfab50f8409d1136f5569eee69ab3))
+* sidebar state now persists across pages ([2d6f45e](https://github.com/tianpai/kairos/commit/2d6f45e298143913713c51be1d8878a45eb9d61c))
+* sidebar UI improvements and redesigned DiscreteSlider ([6c96deb](https://github.com/tianpai/kairos/commit/6c96deb6f3e4f02b769ae7fb51ff6ceef0a4e9c1))
+
 ## 0.1.1
 
 ### Features
