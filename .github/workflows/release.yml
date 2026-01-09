@@ -38,6 +38,8 @@ jobs:
           files: |
             dist/*.dmg
             dist/*.zip
+            dist/*.yml
+            dist/*.blockmap
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
