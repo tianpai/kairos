@@ -54,9 +54,20 @@ interface ChangelogEntry {
   sections: Array<{ title: string; items: Array<string> }>
 }
 
+interface GroupedChangelog {
+  minorVersion: string
+  quote?: string
+  entries: Array<ChangelogEntry>
+}
+
 function stripCommitLink(text: string): string {
   // Remove commit links like "([abc123](url))" from end of text
   return text.replace(/\s*\(\[[a-f0-9]+\]\([^)]+\)\)\s*$/, '').trim()
+}
+
+function getMinorVersion(version: string): string {
+  const [major, minor] = version.split('.')
+  return `${major}.${minor}`
 }
 
 function parseChangelog(raw: string): Array<ChangelogEntry> {
@@ -101,7 +112,30 @@ function parseChangelog(raw: string): Array<ChangelogEntry> {
   return entries
 }
 
+function groupByMinorVersion(entries: Array<ChangelogEntry>): Array<GroupedChangelog> {
+  const groups = new Map<string, GroupedChangelog>()
+
+  for (const entry of entries) {
+    const minorVersion = getMinorVersion(entry.version)
+    const minorFullVersion = `${minorVersion}.0`
+
+    if (!groups.has(minorVersion)) {
+      groups.set(minorVersion, {
+        minorVersion,
+        quote: versionQuotes[minorFullVersion],
+        entries: [],
+      })
+    }
+
+    groups.get(minorVersion)!.entries.push(entry)
+  }
+
+  return Array.from(groups.values())
+}
+
 const changelogEntries = parseChangelog(changelogRaw)
+const groupedChangelog = groupByMinorVersion(changelogEntries)
+
 export const currentVersionEntry = changelogEntries.find(
   (e) => e.version === pkg.version,
 )
@@ -278,40 +312,57 @@ export function AboutSection() {
         <h3 className="mb-4 text-sm font-semibold text-secondary">
           Changelog
         </h3>
-        <Accordion defaultValue={pkg.version} className="max-h-[calc(100vh-26rem)] overflow-y-auto">
-          {changelogEntries.map((entry) => (
+        <Accordion
+          defaultValue={getMinorVersion(pkg.version)}
+          className="max-h-[calc(100vh-26rem)] overflow-y-auto"
+        >
+          {groupedChangelog.map((group) => (
             <AccordionItem
-              key={entry.version}
-              value={entry.version}
+              key={group.minorVersion}
+              value={group.minorVersion}
               className="border-b border-default last:border-b-0"
             >
               <AccordionTrigger
-                value={entry.version}
+                value={group.minorVersion}
                 className="py-3 text-sm hover:bg-hover"
               >
                 <div className="flex items-baseline gap-2">
-                  <span className="font-medium text-primary">{entry.version}</span>
-                  {entry.quote && (
-                    <span className="text-xs text-hint italic">"{entry.quote}"</span>
+                  <span className="font-medium text-primary">
+                    {group.minorVersion}
+                  </span>
+                  {group.quote && (
+                    <span className="text-xs text-hint italic">
+                      "{group.quote}"
+                    </span>
                   )}
                 </div>
               </AccordionTrigger>
-              <AccordionContent value={entry.version} className="pb-3">
-                {entry.sections.map((section, idx) => (
-                  <div key={`${entry.version}-${idx}`} className="mt-2">
-                    <p className="text-xs font-medium text-secondary">
-                      {section.title}
+              <AccordionContent value={group.minorVersion} className="pb-3">
+                {group.entries.map((entry) => (
+                  <div key={entry.version} className="mt-3 first:mt-0">
+                    {/* Patch version header - muted and indented */}
+                    <p className="mb-1 text-xs font-medium text-hint">
+                      {entry.version}
                     </p>
-                    <ul className="mt-1 space-y-0.5">
-                      {section.items.map((item, i) => (
-                        <li
-                          key={i}
-                          className="text-xs text-hint before:mr-1.5 before:content-['•']"
-                        >
-                          {item}
-                        </li>
+                    <div className="pl-3">
+                      {entry.sections.map((section, idx) => (
+                        <div key={`${entry.version}-${idx}`} className="mt-1">
+                          <p className="text-xs font-medium text-secondary">
+                            {section.title}
+                          </p>
+                          <ul className="mt-0.5 space-y-0.5">
+                            {section.items.map((item, i) => (
+                              <li
+                                key={i}
+                                className="text-xs text-hint before:mr-1.5 before:content-['•']"
+                              >
+                                {item}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
                       ))}
-                    </ul>
+                    </div>
                   </div>
                 ))}
               </AccordionContent>
