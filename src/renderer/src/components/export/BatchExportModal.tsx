@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from 'react'
+import { toast } from 'sonner'
 import { Modal } from '@ui/Modal'
 import { Toggle } from '@ui/Toggle'
 import { getJobApplication } from '@api/jobs'
@@ -278,8 +279,16 @@ export function BatchExportModal({
 
     setExporting(false)
 
-    if (failed.length === 0) {
+    const succeeded = selectedApps.length - failed.length
+    if (succeeded === selectedApps.length) {
+      toast.success(`Exported ${succeeded} PDF${succeeded > 1 ? 's' : ''}`)
       onClose()
+    } else if (succeeded > 0) {
+      toast.warning(`Exported ${succeeded} of ${selectedApps.length} PDFs`, {
+        description: `${failed.length} failed to export`,
+      })
+    } else {
+      toast.error('Failed to export PDFs')
     }
   }, [selectedIds, applications, onClose])
 

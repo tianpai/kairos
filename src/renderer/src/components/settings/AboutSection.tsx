@@ -1,6 +1,13 @@
 import { useEffect, useState } from 'react'
 import changelogRaw from '@root/CHANGELOG.md?raw'
 import pkg from '@root/package.json'
+import { versionQuotes } from '@/data/versionQuotes'
+import {
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
+} from '@ui/Accordion'
 
 type UpdateStatus =
   | 'idle'
@@ -47,6 +54,22 @@ interface ChangelogEntry {
   sections: Array<{ title: string; items: Array<string> }>
 }
 
+interface GroupedChangelog {
+  minorVersion: string
+  quote?: string
+  entries: Array<ChangelogEntry>
+}
+
+function stripCommitLink(text: string): string {
+  // Remove commit links like "([abc123](url))" from end of text
+  return text.replace(/\s*\(\[[a-f0-9]+\]\([^)]+\)\)\s*$/, '').trim()
+}
+
+function getMinorVersion(version: string): string {
+  const [major, minor] = version.split('.')
+  return `${major}.${minor}`
+}
+
 function parseChangelog(raw: string): Array<ChangelogEntry> {
   const entries: Array<ChangelogEntry> = []
   const lines = raw.split('\n')
@@ -54,22 +77,25 @@ function parseChangelog(raw: string): Array<ChangelogEntry> {
   let currentSection: { title: string; items: Array<string> } | null = null
 
   for (const line of lines) {
-    const versionMatch = line.match(/^## (\d+\.\d+\.\d+)/)
+    // Match both formats:
+    // - "## 0.1.1" (manual)
+    // - "### [0.1.1](url) (date)" (standard-version)
+    const versionMatch = line.match(/^##?#?\s*\[?(\d+\.\d+\.\d+)\]?/)
     if (versionMatch) {
       if (current) entries.push(current)
-      current = { version: versionMatch[1], sections: [] }
+      current = {
+        version: versionMatch[1],
+        quote: versionQuotes[versionMatch[1]],
+        sections: [],
+      }
       currentSection = null
       continue
     }
 
     if (!current) continue
 
-    if (line.startsWith('"') && line.endsWith('"')) {
-      current.quote = line.slice(1, -1)
-      continue
-    }
-
-    const sectionMatch = line.match(/^### (.+)/)
+    // Match section headers, but not version lines
+    const sectionMatch = line.match(/^### ([A-Za-z ]+)$/)
     if (sectionMatch) {
       currentSection = { title: sectionMatch[1], items: [] }
       current.sections.push(currentSection)
@@ -77,7 +103,8 @@ function parseChangelog(raw: string): Array<ChangelogEntry> {
     }
 
     if ((line.startsWith('* ') || line.startsWith('- ')) && currentSection) {
-      currentSection.items.push(line.slice(2))
+      const itemText = stripCommitLink(line.slice(2))
+      currentSection.items.push(itemText)
     }
   }
 
@@ -85,8 +112,31 @@ function parseChangelog(raw: string): Array<ChangelogEntry> {
   return entries
 }
 
+function groupByMinorVersion(entries: Array<ChangelogEntry>): Array<GroupedChangelog> {
+  const groups = new Map<string, GroupedChangelog>()
+
+  for (const entry of entries) {
+    const minorVersion = getMinorVersion(entry.version)
+    const minorFullVersion = `${minorVersion}.0`
+
+    if (!groups.has(minorVersion)) {
+      groups.set(minorVersion, {
+        minorVersion,
+        quote: versionQuotes[minorFullVersion],
+        entries: [],
+      })
+    }
+
+    groups.get(minorVersion)!.entries.push(entry)
+  }
+
+  return Array.from(groups.values())
+}
+
 const changelogEntries = parseChangelog(changelogRaw)
-const currentVersionEntry = changelogEntries.find(
+const groupedChangelog = groupByMinorVersion(changelogEntries)
+
+export const currentVersionEntry = changelogEntries.find(
   (e) => e.version === pkg.version,
 )
 
@@ -262,39 +312,63 @@ export function AboutSection() {
         <h3 className="mb-4 text-sm font-semibold text-secondary">
           Changelog
         </h3>
-        <div className="max-h-64 space-y-4 overflow-y-auto rounded-lg border border-default p-4">
-          {changelogEntries.map((entry) => (
-            <div key={entry.version} className="space-y-2">
-              <div className="flex items-baseline gap-2">
-                <span className="text-sm font-medium text-primary">
-                  {entry.version}
-                </span>
-                {entry.quote && (
-                  <span className="text-xs text-hint italic">
-                    "{entry.quote}"
+        <Accordion
+          defaultValue={getMinorVersion(pkg.version)}
+          className="max-h-[calc(100vh-26rem)] overflow-y-auto"
+        >
+          {groupedChangelog.map((group) => (
+            <AccordionItem
+              key={group.minorVersion}
+              value={group.minorVersion}
+              className="border-b border-default last:border-b-0"
+            >
+              <AccordionTrigger
+                value={group.minorVersion}
+                className="py-3 text-sm hover:bg-hover"
+              >
+                <div className="flex items-baseline gap-2">
+                  <span className="font-medium text-primary">
+                    {group.minorVersion}
                   </span>
-                )}
-              </div>
-              {entry.sections.map((section) => (
-                <div key={section.title} className="pl-2">
-                  <p className="text-xs font-medium text-secondary">
-                    {section.title}
-                  </p>
-                  <ul className="mt-1 space-y-0.5">
-                    {section.items.map((item, i) => (
-                      <li
-                        key={i}
-                        className="text-xs text-hint before:mr-1 before:content-['-']"
-                      >
-                        {item}
-                      </li>
-                    ))}
-                  </ul>
+                  {group.quote && (
+                    <span className="text-xs text-hint italic">
+                      "{group.quote}"
+                    </span>
+                  )}
                 </div>
-              ))}
-            </div>
+              </AccordionTrigger>
+              <AccordionContent value={group.minorVersion} className="pb-3">
+                {group.entries.map((entry) => (
+                  <div key={entry.version} className="mt-3 first:mt-0">
+                    {/* Patch version header - muted and indented */}
+                    <p className="mb-1 text-xs font-medium text-hint">
+                      {entry.version}
+                    </p>
+                    <div className="pl-3">
+                      {entry.sections.map((section, idx) => (
+                        <div key={`${entry.version}-${idx}`} className="mt-1">
+                          <p className="text-xs font-medium text-secondary">
+                            {section.title}
+                          </p>
+                          <ul className="mt-0.5 space-y-0.5">
+                            {section.items.map((item, i) => (
+                              <li
+                                key={i}
+                                className="text-xs text-hint before:mr-1.5 before:content-['•']"
+                              >
+                                {item}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </AccordionContent>
+            </AccordionItem>
           ))}
-        </div>
+        </Accordion>
       </div>
     </div>
   )

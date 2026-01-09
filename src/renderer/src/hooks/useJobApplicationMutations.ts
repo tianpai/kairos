@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
+import { toast } from 'sonner'
 import { deleteJobApplication, updateJobApplication } from '@/api/jobs'
 
 interface UpdateData {
@@ -21,6 +22,9 @@ export function useJobApplicationMutations(selectedJobId?: string) {
         queryKey: ['jobApplication', selectedJobId],
       })
     },
+    onError: () => {
+      toast.error('Failed to update application')
+    },
   })
 
   const deleteMutation = useMutation({
@@ -30,6 +34,9 @@ export function useJobApplicationMutations(selectedJobId?: string) {
       if (deletedId === selectedJobId) {
         navigate({ to: '/', search: { jobId: undefined } })
       }
+    },
+    onError: () => {
+      toast.error('Failed to delete application')
     },
   })
 

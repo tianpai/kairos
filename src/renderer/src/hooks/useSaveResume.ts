@@ -1,4 +1,5 @@
 import { useMutation } from '@tanstack/react-query'
+import { toast } from 'sonner'
 import { useResumeStore } from '@typst-compiler/resumeState'
 import { saveParsedResume, saveResume } from '@/api/jobs'
 
@@ -21,6 +22,12 @@ export function useSaveResume(
         await saveParsedResume(jobId, data, data)
       }
       return saveResume(jobId, data, templateId)
+    },
+    onSuccess: () => {
+      toast.success('Resume saved')
+    },
+    onError: () => {
+      toast.error('Failed to save resume')
     },
   })
 }
