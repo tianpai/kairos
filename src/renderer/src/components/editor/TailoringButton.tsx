@@ -7,7 +7,7 @@ import {
   RESUME_TAILORING,
   startWorkflow,
   useWorkflowStore,
-} from '../../workflow'
+} from '@/workflow'
 import { useShortcutStore } from '@/components/layout/shortcut.store'
 
 export function TailoringButton() {
@@ -36,9 +36,9 @@ export function TailoringButton() {
   // Check if checklist matching is completed
   const isChecklistReady = Boolean(
     checklist &&
-      (checklist.hardRequirements.length > 0 ||
-        checklist.softRequirements.length > 0 ||
-        checklist.preferredSkills.length > 0),
+    (checklist.hardRequirements.length > 0 ||
+      checklist.softRequirements.length > 0 ||
+      checklist.preferredSkills.length > 0),
   )
 
   const handleClick = useCallback(() => {
@@ -56,15 +56,8 @@ export function TailoringButton() {
 
   // Determine disabled state and tooltip
   const isProcessing = isTailoringResume || isMatchingTailoredResume
-  const missingJobDescription = !hasJobDescription
-  const missingResumeContent = !hasResumeContent
-  const missingChecklist = !isChecklistReady
-
   const isDisabled =
-    isProcessing ||
-    missingJobDescription ||
-    missingResumeContent ||
-    missingChecklist
+    isProcessing || !hasJobDescription || !hasResumeContent || !isChecklistReady
 
   // Listen for keyboard shortcut
   useEffect(() => {
@@ -78,11 +71,11 @@ export function TailoringButton() {
 
   // Build tooltip message
   let tooltipMessage = 'Tailor resume'
-  if (missingJobDescription) {
+  if (!hasJobDescription) {
     tooltipMessage = 'Add job description to enable tailoring'
-  } else if (missingResumeContent) {
+  } else if (!hasResumeContent) {
     tooltipMessage = 'Add resume content to enable tailoring'
-  } else if (missingChecklist) {
+  } else if (!isChecklistReady) {
     tooltipMessage = 'Waiting for checklist to be ready'
   }
 

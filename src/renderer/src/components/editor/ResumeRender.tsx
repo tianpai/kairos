@@ -13,7 +13,7 @@ export default function ResumeRender({
     <div className="h-full overflow-y-auto p-6 select-none">
       {svgOutput && (
         <div
-          className={`mx-auto overflow-hidden border border-default select-none ${expanded ? 'w-full' : 'max-w-3xl'}`}
+          className={`border-default mx-auto overflow-hidden border select-none ${expanded ? 'w-full' : 'max-w-3xl'}`}
         >
           <div
             className="resume-page w-full select-none"

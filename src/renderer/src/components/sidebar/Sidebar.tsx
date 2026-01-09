@@ -4,6 +4,7 @@ import { Settings } from 'lucide-react'
 import JobInfoModal from '@sidebar/JobInfoModal'
 import { CollapsibleSidebar } from './CollapsibleSidebar'
 import { SidebarItem } from './SidebarItem'
+import { SettingsHoverPopup } from './SettingsHoverPopup'
 
 interface Application {
   id: string
@@ -12,6 +13,8 @@ interface Application {
   dueDate: string
   matchPercentage: number
   jobUrl: string | null
+  createdAt: string
+  updatedAt: string
 }
 
 interface SidebarProps {
@@ -41,6 +44,7 @@ export function Sidebar({
 }: SidebarProps) {
   const navigate = useNavigate()
   const [editingApp, setEditingApp] = useState<Application | null>(null)
+  const [isSettingsHovered, setIsSettingsHovered] = useState(false)
 
   const handleSaveEdit = (data: {
     companyName: string
@@ -62,19 +66,28 @@ export function Sidebar({
   }
 
   const settingsFooter = (
-    <button
-      onClick={() => navigate({ to: '/settings' })}
-      className="flex w-full cursor-pointer items-center gap-2 px-3 py-3 text-sm text-secondary transition-colors hover:bg-hover"
+    <div
+      className="relative"
+      onMouseEnter={() => setIsSettingsHovered(true)}
+      onMouseLeave={() => setIsSettingsHovered(false)}
     >
-      <Settings size={16} />
-      <span>Settings</span>
-    </button>
+      {isSettingsHovered && (
+        <SettingsHoverPopup applicationCount={applications.length} />
+      )}
+      <button
+        onClick={() => navigate({ to: '/settings' })}
+        className="flex w-full cursor-pointer items-center gap-2 px-3 py-3 text-sm text-secondary transition-colors hover:bg-hover"
+      >
+        <Settings size={16} />
+        <span>Settings</span>
+      </button>
+    </div>
   )
 
   return (
     <>
       <CollapsibleSidebar collapsed={collapsed} footer={settingsFooter}>
-        <div className="pt-3">
+        <div>
           {applications.map((app) => (
             <SidebarItem
               key={app.id}
@@ -83,6 +96,8 @@ export function Sidebar({
               dueDate={app.dueDate}
               matchPercentage={app.matchPercentage}
               isSelected={app.id === selectedId}
+              createdAt={app.createdAt}
+              updatedAt={app.updatedAt}
               onClick={() => onSelect(app.id)}
               onEdit={() => setEditingApp(app)}
             />

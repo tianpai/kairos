@@ -17,7 +17,7 @@ export default function SettingsPage() {
   const [activeSection, setActiveSection] =
     useState<SettingsSection>('providers')
 
-  const { settingsSidebarCollapsed, toggleSettingsSidebar } = useLayoutStore()
+  const { sidebarCollapsed, toggleSidebar } = useLayoutStore()
 
   return (
     <AppLayout
@@ -26,11 +26,9 @@ export default function SettingsPage() {
           left={
             <>
               <Button
-                onClick={toggleSettingsSidebar}
-                ariaLabel={
-                  settingsSidebarCollapsed ? 'Show sidebar' : 'Hide sidebar'
-                }
-                title={settingsSidebarCollapsed ? 'Show sidebar' : 'Hide sidebar'}
+                onClick={toggleSidebar}
+                ariaLabel={sidebarCollapsed ? 'Show sidebar' : 'Hide sidebar'}
+                title={sidebarCollapsed ? 'Show sidebar' : 'Hide sidebar'}
               >
                 <PanelLeft size={16} />
               </Button>
@@ -48,7 +46,7 @@ export default function SettingsPage() {
       }
       sidebar={
         <SettingsSidebar
-          collapsed={settingsSidebarCollapsed}
+          collapsed={sidebarCollapsed}
           activeSection={activeSection}
           onSectionChange={setActiveSection}
         />
