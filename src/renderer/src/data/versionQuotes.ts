@@ -8,12 +8,6 @@
  */
 
 export const versionQuotes: Record<string, string> = {
-  '0.0.1': 'Sigh, another Electron app',
-  '0.0.2': 'Just buy more RAM',
-  '0.0.3': "I need you to hurry up now, 'cause I can't wait much longer",
-  '0.0.4': 'You shall be the Fellowship of the Ring',
-  '0.0.5': 'A Quick Update',
-  '0.0.6': 'There is no bug in Ba Sing Se',
+  '0.0.0': 'In the beginning, there was nothing',
   '0.1.0': 'You guys are getting interviews?',
-  '0.1.1': 'You guys are getting interviews?',
 }
