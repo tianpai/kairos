@@ -1,4 +1,5 @@
 import { useActiveProvider, useSelectedModel } from '@hooks/useSettings'
+import { HoverPopup } from '@ui/HoverPopup'
 import { versionQuotes } from '@/data/versionQuotes'
 import pkg from '@root/package.json'
 
@@ -28,7 +29,7 @@ export function SettingsHoverPopup({
   const modelDisplay = activeProvider ? (selectedModel ?? 'None') : 'None'
 
   return (
-    <div className="border-default bg-surface absolute bottom-full left-0 z-50 w-64 rounded-lg border-2 p-3">
+    <HoverPopup position="top">
       <div className="space-y-1 text-sm">
         <InfoRow label="Provider" value={providerDisplay} />
         <InfoRow label="Model" value={modelDisplay} />
@@ -40,6 +41,6 @@ export function SettingsHoverPopup({
           </div>
         )}
       </div>
-    </div>
+    </HoverPopup>
   )
 }

@@ -13,6 +13,8 @@ interface Application {
   dueDate: string
   matchPercentage: number
   jobUrl: string | null
+  createdAt: string
+  updatedAt: string
 }
 
 interface SidebarProps {
@@ -94,6 +96,8 @@ export function Sidebar({
               dueDate={app.dueDate}
               matchPercentage={app.matchPercentage}
               isSelected={app.id === selectedId}
+              createdAt={app.createdAt}
+              updatedAt={app.updatedAt}
               onClick={() => onSelect(app.id)}
               onEdit={() => setEditingApp(app)}
             />
