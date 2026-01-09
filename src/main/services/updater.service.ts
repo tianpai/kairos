@@ -140,7 +140,10 @@ class UpdaterService {
 
   quitAndInstall(): void {
     log.info('[Updater] Quitting and installing...')
-    autoUpdater.quitAndInstall(false, true)
+    // Defer to ensure IPC response is sent before app quits
+    setImmediate(() => {
+      autoUpdater.quitAndInstall(false, true)
+    })
   }
 
   getCurrentVersion(): string {
