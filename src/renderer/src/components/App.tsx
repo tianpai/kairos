@@ -1,12 +1,22 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useSearch } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
-import { Columns2, Columns3, PanelLeft } from 'lucide-react'
+import { Toaster } from 'sonner'
+import {
+  CircleAlert,
+  CircleCheck,
+  CircleX,
+  Columns2,
+  Columns3,
+  Info,
+  PanelLeft,
+} from 'lucide-react'
 import { TailoringButton } from '@editor/TailoringButton'
 import { PageHeader } from '@ui/PageHeader'
 import { Button } from '@ui/Button'
 import { getAllJobApplications, getJobApplication } from '@api/jobs'
 import { useWorkflowSync } from '@hooks/useWorkflowSync'
+import { useCurrentTheme } from '@hooks/useTheme'
 import { useSyncJobApplicationToStore } from '@hooks/useSyncJobApplicationToStore'
 import { useJobApplicationMutations } from '@hooks/useJobApplicationMutations'
 import ResumeRender from '@editor/ResumeRender'
@@ -48,6 +58,9 @@ export default function App() {
   const clearBatchExportRequest = useShortcutStore(
     (state) => state.clearBatchExportRequest,
   )
+
+  // Theme for toast notifications
+  const { data: currentTheme } = useCurrentTheme()
 
   // Fetch all applications for sidebar
   const { data: applications = [] } = useQuery({
@@ -98,7 +111,8 @@ export default function App() {
         break
       case 'next':
         // Move DOWN in sidebar (toward older items at bottom)
-        targetId = applications[Math.min(applications.length - 1, currentIndex + 1)]?.id
+        targetId =
+          applications[Math.min(applications.length - 1, currentIndex + 1)]?.id
         break
       case 'oldest':
         // Jump to bottom of sidebar
@@ -115,7 +129,13 @@ export default function App() {
     }
 
     clearNavigationRequest()
-  }, [navigationRequested, applications, jobId, navigate, clearNavigationRequest])
+  }, [
+    navigationRequested,
+    applications,
+    jobId,
+    navigate,
+    clearNavigationRequest,
+  ])
 
   const handleSelectApplication = (id: string) => {
     navigate({ to: '/', search: { jobId: id } })
@@ -135,110 +155,121 @@ export default function App() {
 
   return (
     <>
-    <AppLayout
-      header={
-        <PageHeader
-          left={
-            <>
-              <Button
-                onClick={toggleSidebar}
-                ariaLabel={sidebarCollapsed ? 'Show sidebar' : 'Hide sidebar'}
-                title={sidebarCollapsed ? 'Show sidebar' : 'Hide sidebar'}
-              >
-                <PanelLeft size={16} />
-              </Button>
-              <NewApplicationButton onSuccess={handleUploadSuccess} />
-            </>
-          }
-          center={
-            hasSelection &&
-            companyName &&
-            position && (
+      <AppLayout
+        header={
+          <PageHeader
+            left={
               <>
-                <span>{companyName}</span>
-                <span className="mx-2">-</span>
-                <span>{position}</span>
-              </>
-            )
-          }
-          right={
-            hasSelection && (
-              <>
-                <span
-                  className="mr-2 text-sm font-medium"
-                  style={{ color: getScoreColor(matchPercentage) }}
-                >
-                  {Math.round(matchPercentage)}%
-                </span>
-                <TailoringButton />
-                <DocumentConfigButton />
                 <Button
-                  onClick={toggleChecklist}
-                  ariaLabel={
-                    showChecklist
-                      ? 'Switch to 2 columns'
-                      : 'Switch to 3 columns'
-                  }
-                  title="Toggle columns"
+                  onClick={toggleSidebar}
+                  ariaLabel={sidebarCollapsed ? 'Show sidebar' : 'Hide sidebar'}
+                  title={sidebarCollapsed ? 'Show sidebar' : 'Hide sidebar'}
                 >
-                  {showChecklist ? (
-                    <Columns2 size={16} />
-                  ) : (
-                    <Columns3 size={16} />
-                  )}
+                  <PanelLeft size={16} />
                 </Button>
-                <SaveResumeButton
-                  jobId={jobId}
-                  isBuiltFromScratch={isBuiltFromScratch}
-                />
-                <DownloadResumeButton
-                  companyName={companyName}
-                  position={position}
-                />
+                <NewApplicationButton onSuccess={handleUploadSuccess} />
               </>
-            )
-          }
-        />
-      }
-      sidebar={
-        <Sidebar
-          applications={applications}
-          selectedId={jobId}
-          onSelect={handleSelectApplication}
-          collapsed={sidebarCollapsed}
-          onEdit={handleUpdate}
-          onDelete={handleDelete}
-        />
-      }
-    >
-      {hasSelection ? (
-        <div className="relative grid h-full grid-cols-8 overflow-hidden">
-          <div
-            className={`h-full overflow-hidden ${showChecklist ? 'col-span-2' : 'col-span-3'}`}
-          >
-            <ResumeForm />
-          </div>
-          <div
-            className={`h-full overflow-hidden ${showChecklist ? 'col-span-4' : 'col-span-5'}`}
-          >
-            <ResumeRender expanded={!showChecklist} />
-          </div>
-          {showChecklist && (
-            <div className="relative z-10 col-span-2 h-full overflow-hidden">
-              <Checklist jobId={jobId} />
+            }
+            center={
+              hasSelection &&
+              companyName &&
+              position && (
+                <>
+                  <span>{companyName}</span>
+                  <span className="mx-2">-</span>
+                  <span>{position}</span>
+                </>
+              )
+            }
+            right={
+              hasSelection && (
+                <>
+                  <span
+                    className="mr-2 text-sm font-medium"
+                    style={{ color: getScoreColor(matchPercentage) }}
+                  >
+                    {Math.round(matchPercentage)}%
+                  </span>
+                  <TailoringButton />
+                  <DocumentConfigButton />
+                  <Button
+                    onClick={toggleChecklist}
+                    ariaLabel={
+                      showChecklist
+                        ? 'Switch to 2 columns'
+                        : 'Switch to 3 columns'
+                    }
+                    title="Toggle columns"
+                  >
+                    {showChecklist ? (
+                      <Columns2 size={16} />
+                    ) : (
+                      <Columns3 size={16} />
+                    )}
+                  </Button>
+                  <SaveResumeButton
+                    jobId={jobId}
+                    isBuiltFromScratch={isBuiltFromScratch}
+                  />
+                  <DownloadResumeButton
+                    companyName={companyName}
+                    position={position}
+                  />
+                </>
+              )
+            }
+          />
+        }
+        sidebar={
+          <Sidebar
+            applications={applications}
+            selectedId={jobId}
+            onSelect={handleSelectApplication}
+            collapsed={sidebarCollapsed}
+            onEdit={handleUpdate}
+            onDelete={handleDelete}
+          />
+        }
+      >
+        {hasSelection ? (
+          <div className="relative grid h-full grid-cols-8 overflow-hidden">
+            <div
+              className={`h-full overflow-hidden ${showChecklist ? 'col-span-2' : 'col-span-3'}`}
+            >
+              <ResumeForm />
             </div>
-          )}
-        </div>
-      ) : (
-        <EmptyState hasApplications={hasApplications} />
-      )}
-    </AppLayout>
+            <div
+              className={`h-full overflow-hidden ${showChecklist ? 'col-span-4' : 'col-span-5'}`}
+            >
+              <ResumeRender expanded={!showChecklist} />
+            </div>
+            {showChecklist && (
+              <div className="relative z-10 col-span-2 h-full overflow-hidden">
+                <Checklist jobId={jobId} />
+              </div>
+            )}
+          </div>
+        ) : (
+          <EmptyState hasApplications={hasApplications} />
+        )}
+      </AppLayout>
 
-    <BatchExportModal
-      open={showBatchExport}
-      onClose={() => setShowBatchExport(false)}
-      applications={applications}
-    />
-  </>
+      <BatchExportModal
+        open={showBatchExport}
+        onClose={() => setShowBatchExport(false)}
+        applications={applications}
+      />
+
+      <Toaster
+        position="bottom-right"
+        theme={currentTheme}
+        icons={{
+          success: <CircleCheck size={20} className="text-success" />,
+          error: <CircleX size={20} className="text-error" />,
+          warning: <CircleAlert size={20} className="text-warning" />,
+          info: <Info size={20} className="text-info" />,
+        }}
+      />
+    </>
   )
 }

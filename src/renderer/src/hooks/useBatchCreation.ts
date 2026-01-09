@@ -1,14 +1,11 @@
 import { useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
 import {
   DEFAULT_TEMPLATE_NAME,
   premadeTemplates,
 } from '@templates/premade-tmpl'
 import { TemplateId } from '@templates/templateId'
-import {
-  RESUME_PARSING,
-  startWorkflow,
-  waitForTask,
-} from '../workflow'
+import { RESUME_PARSING, startWorkflow, waitForTask } from '@/workflow'
 import {
   createFromExisting,
   createJobApplication,
@@ -20,8 +17,22 @@ import {
   getDefaultDueDate,
   useNewApplicationStore,
 } from '@/components/upload/newApplication.store'
+import { friendlyError } from '@/utils/error'
 
 type BatchEntry = { jobDescription: string; jobUrl?: string }
+
+/** Show toast based on batch creation results */
+function showBatchResultToast(succeeded: number, total: number): void {
+  if (succeeded === total) {
+    toast.success(`Created ${total} application${total > 1 ? 's' : ''}`)
+  } else if (succeeded > 0) {
+    toast.warning(`Created ${succeeded} of ${total} applications`, {
+      description: `${total - succeeded} failed to create`,
+    })
+  } else {
+    toast.error('Failed to create applications')
+  }
+}
 
 async function createBatchApp(
   entry: BatchEntry,
@@ -117,10 +128,13 @@ export function useBatchCreation() {
           status: 'failed',
           errorMessage: 'Resume parsing failed',
         })
+        toast.error('Resume parsing failed', {
+          description: 'Could not parse resume to create remaining applications',
+        })
         return
       }
 
-      await Promise.all(
+      const results = await Promise.all(
         restEntries.map((entry) =>
           createBatchApp(
             entry,
@@ -132,13 +146,21 @@ export function useBatchCreation() {
         ),
       )
 
+      const restSucceeded = results.filter((r) => r.success).length
+      const totalSucceeded = 1 + restSucceeded // +1 for first app
+
       invalidateApps()
       setBatchProgress({ status: 'completed' })
+      showBatchResultToast(totalSucceeded, entries.length)
     } catch (err) {
       console.error('[Batch] Upload failed:', err)
+      const message = err instanceof Error ? err.message : 'Failed to create applications'
       setBatchProgress({
         status: 'failed',
-        errorMessage: 'Batch creation failed',
+        errorMessage: message,
+      })
+      toast.error('Failed to create applications', {
+        description: friendlyError(message),
       })
     }
   }
@@ -162,10 +184,13 @@ export function useBatchCreation() {
           status: 'failed',
           errorMessage: 'Source has no parsed resume',
         })
+        toast.error('Source has no parsed resume', {
+          description: 'Select an application with a parsed resume',
+        })
         return
       }
 
-      await Promise.all(
+      const results = await Promise.all(
         entries.map((entry) =>
           createBatchApp(
             entry,
@@ -177,13 +202,20 @@ export function useBatchCreation() {
         ),
       )
 
+      const succeeded = results.filter((r) => r.success).length
+
       invalidateApps()
       setBatchProgress({ status: 'completed' })
+      showBatchResultToast(succeeded, entries.length)
     } catch (err) {
       console.error('[Batch] Existing failed:', err)
+      const message = err instanceof Error ? err.message : 'Failed to create applications'
       setBatchProgress({
         status: 'failed',
-        errorMessage: 'Batch creation failed',
+        errorMessage: message,
+      })
+      toast.error('Failed to create applications', {
+        description: friendlyError(message),
       })
     }
   }

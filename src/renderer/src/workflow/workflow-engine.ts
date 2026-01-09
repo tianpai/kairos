@@ -11,8 +11,10 @@
  */
 
 import log from 'electron-log/renderer'
+import { toast } from 'sonner'
 import { tip } from '@tips/tips.service'
 import { saveWorkflow } from '@api/jobs'
+import { friendlyError } from '@/utils/error'
 
 import { getMissingInputs, getTask, resolveTaskInput } from './define-task'
 import {
@@ -384,6 +386,11 @@ async function startReadyTasks(
       log.info(
         `[WorkflowEngine] Workflow '${workflowInstance.workflowName}' completed`,
       )
+      const workflowLabel =
+        workflowInstance.workflowName === 'tailoring'
+          ? 'Tailoring complete'
+          : 'Processing complete'
+      toast.success(workflowLabel)
     }
     return
   }
@@ -395,6 +402,11 @@ async function startReadyTasks(
   for (const taskName of readyTasks) {
     void runTaskIfReady(workflow, jobId, taskName)
   }
+}
+
+/** Convert TASK_NAME to "Task name" */
+function humanizeTaskName(taskName: string): string {
+  return taskName.toLowerCase().replace(/_/g, ' ')
 }
 
 /**
@@ -410,6 +422,10 @@ async function failTask(
   const store = useWorkflowStore.getState()
   store.setTaskStatus(jobId, taskName, 'failed', error)
   store.failWorkflow(jobId, `Task ${taskName} failed: ${error}`)
+
+  // Notify user
+  const taskLabel = humanizeTaskName(taskName)
+  toast.error(`Failed: ${taskLabel}`, { description: friendlyError(error) })
 
   // Persist failure
   const failedWorkflow = store.getWorkflow(jobId)!
