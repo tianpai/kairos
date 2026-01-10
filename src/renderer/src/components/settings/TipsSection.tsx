@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Button } from '@ui/Button'
 import { getTipsByCategory } from '@tips/tips.data'
 import { CATEGORY_LABELS } from '@tips/tips.types'
