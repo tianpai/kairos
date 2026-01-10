@@ -14,7 +14,6 @@ import log from 'electron-log/renderer'
 import { toast } from 'sonner'
 import { tip } from '@tips/tips.service'
 import { saveWorkflow } from '@api/jobs'
-import { friendlyError } from '@/utils/error'
 
 import { getMissingInputs, getTask, resolveTaskInput } from './define-task'
 import {
@@ -28,6 +27,7 @@ import type { Workflow } from './define-workflow'
 import type { TaskName, WorkflowContext } from './task-contracts'
 import type { TaskStateMap, WorkflowInstance } from './workflow.store'
 import type { WorkflowStepsData } from '@api/jobs'
+import { friendlyError } from '@/utils/error'
 
 // =============================================================================
 // Public API

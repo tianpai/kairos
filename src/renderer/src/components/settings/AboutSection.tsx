@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react'
 import changelogRaw from '@root/CHANGELOG.md?raw'
 import pkg from '@root/package.json'
-import { versionQuotes } from '@/data/versionQuotes'
 import {
   Accordion,
+  AccordionContent,
   AccordionItem,
   AccordionTrigger,
-  AccordionContent,
 } from '@ui/Accordion'
+import { versionQuotes } from '@/data/versionQuotes'
 
 type UpdateStatus =
   | 'idle'
