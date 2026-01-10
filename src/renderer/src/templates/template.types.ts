@@ -2,6 +2,7 @@
  * Shared types for template system
  */
 
+import type { LucideIcon } from 'lucide-react'
 import type { z } from 'zod'
 
 /**
@@ -96,6 +97,8 @@ export interface SectionUISchema {
   id: string
   /** Display name (e.g., "Personal Information", "Work Experience") */
   label: string
+  /** Icon component from lucide-react */
+  icon: LucideIcon
   /** true = array, false = single object */
   multiple: boolean
   /** combined with multiple → 4 cardinality cases */

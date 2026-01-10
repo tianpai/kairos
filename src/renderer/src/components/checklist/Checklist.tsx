@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { ListTodo, SquarePen } from 'lucide-react'
+import { ListTodo, ShieldCheck, SquarePen, Star, Users } from 'lucide-react'
 import { getJobApplication, updateJobDescription } from '@api/jobs'
 import { ChecklistSection } from '@checklist/ChecklistSection'
 import { Button } from '@ui/Button'
+import { Tooltip } from '@ui/Tooltip'
 import { useResumeStore } from '@typst-compiler/resumeState'
+import type { LucideIcon } from 'lucide-react'
 import {
   CHECKLIST_PARSING,
   startWorkflow,
@@ -98,10 +100,10 @@ export default function Checklist({ jobId }: ChecklistProps) {
 
   const selectedKeywordsArray = Array.from(selectedKeywords)
 
-  const tabs: Array<{ key: TabType; label: string }> = [
-    { key: 'hard', label: 'Must Have' },
-    { key: 'soft', label: 'Soft Skills' },
-    { key: 'preferred', label: 'Preferred' },
+  const tabs: Array<{ key: TabType; label: string; icon: LucideIcon }> = [
+    { key: 'hard', label: 'Must Have', icon: ShieldCheck },
+    { key: 'soft', label: 'Soft Skills', icon: Users },
+    { key: 'preferred', label: 'Preferred', icon: Star },
   ]
 
   // Show JD input form when no job description exists
@@ -138,26 +140,26 @@ export default function Checklist({ jobId }: ChecklistProps) {
     <div className="flex h-full flex-col">
       {checklist ? (
         <>
-          {/* Vertical Tab Navigation */}
-          <div className="m-2 flex flex-col rounded-lg p-2">
-            {tabs.map((tab) => (
-              <button
-                key={tab.key}
-                type="button"
-                onClick={() => setActiveTab(tab.key)}
-                className={`w-full cursor-pointer rounded-lg px-3 py-1.5 text-right text-sm transition-colors ${
-                  activeTab === tab.key
-                    ? 'bg-active font-medium text-primary'
-                    : 'text-secondary hover:bg-hover'
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
+          {/* Tab Navigation */}
+          <div className="bg-app-header my-2 ml-1 mr-2 flex flex-wrap justify-center gap-1 rounded-lg p-2">
+            {tabs.map((tab) => {
+              const Icon = tab.icon
+              return (
+                <Tooltip key={tab.key} content={tab.label}>
+                  <Button
+                    variant="icon"
+                    active={activeTab === tab.key}
+                    onClick={() => setActiveTab(tab.key)}
+                  >
+                    <Icon size={16} />
+                  </Button>
+                </Tooltip>
+              )
+            })}
           </div>
 
           {/* Active Section Content */}
-          <div className="flex-1 overflow-y-auto p-4">
+          <div className="flex-1 overflow-y-auto py-4 pl-1 pr-4">
             {activeTab === 'hard' && (
               <ChecklistSection
                 requirements={checklist.hardRequirements}

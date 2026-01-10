@@ -3,6 +3,7 @@
  * Special section that wraps the entire document with #show:
  */
 
+import { User } from 'lucide-react'
 import { z } from 'zod'
 import { SECTION_IDS } from '@templates/template.types'
 import type { Section, SectionUISchema } from '@templates/template.types'
@@ -61,6 +62,7 @@ export class PersonalInfoSection implements Section<PersonalInfo> {
     return {
       id: SECTION_IDS.PERSONAL_INFO,
       label: 'Personal Information',
+      icon: User,
       multiple: false,
       required: true,
       fields: [

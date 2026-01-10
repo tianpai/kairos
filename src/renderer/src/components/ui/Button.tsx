@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 const variantStyles = {
   default: 'text-secondary hover:text-primary px-3 py-2',
   ghost: 'text-hint hover:bg-hover hover:text-secondary p-1',
+  icon: 'text-secondary hover:bg-hover p-2',
   outline:
     'border-2 border-default bg-base text-secondary hover:border-hint px-3 py-2',
   danger:
@@ -16,6 +17,7 @@ interface ButtonProps {
   type?: 'button' | 'submit' | 'reset'
   disabled?: boolean
   loading?: boolean
+  active?: boolean
   children: ReactNode
   className?: string
   ariaLabel?: string
@@ -28,20 +30,23 @@ export function Button({
   type = 'button',
   disabled = false,
   loading = false,
+  active = false,
   children,
   className = '',
   ariaLabel,
   title,
   variant = 'default',
 }: ButtonProps) {
+  const activeStyles = active ? 'bg-active text-primary' : ''
+
   return (
     <button
       type={type}
       onClick={onClick}
       disabled={disabled || loading}
       aria-label={ariaLabel}
-      title={title || ariaLabel}
-      className={`inline-flex cursor-pointer items-center justify-center rounded-md transition-colors duration-200 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 ${variantStyles[variant]} ${className}`}
+      title={title}
+      className={`inline-flex cursor-pointer items-center justify-center rounded-md transition-colors duration-200 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 ${variantStyles[variant]} ${activeStyles} ${className}`}
     >
       {loading ? (
         <span

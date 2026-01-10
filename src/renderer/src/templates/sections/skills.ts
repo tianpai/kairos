@@ -3,6 +3,7 @@
  * Self-contained: schema, UI schema, styles, and content generation
  */
 
+import { BicepsFlexed } from 'lucide-react'
 import { z } from 'zod'
 import { SECTION_IDS } from '@templates/template.types'
 import {
@@ -65,6 +66,7 @@ export class SkillsSection implements Section<Skill> {
 const UI_SCHEMA: SectionUISchema = {
   id: SECTION_IDS.SKILLS,
   label: 'Skills',
+  icon: BicepsFlexed,
   multiple: true,
   required: false,
   fields: [

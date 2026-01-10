@@ -29,7 +29,7 @@ interface DynamicSectionProps {
 }
 
 function SectionWrapper({ children }: { children: React.ReactNode }) {
-  return <div className="mb-4 p-2">{children}</div>
+  return <div className="mb-4 py-2 pl-2 pr-1">{children}</div>
 }
 
 interface FieldListProps {

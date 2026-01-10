@@ -3,6 +3,7 @@
  * Self-contained: schema, UI schema, styles, and content generation
  */
 
+import { FolderKanban } from 'lucide-react'
 import { z } from 'zod'
 import { SECTION_IDS } from '@templates/template.types'
 import {
@@ -80,6 +81,7 @@ ${bullets}`
 const UI_SCHEMA: SectionUISchema = {
   id: SECTION_IDS.PROJECTS,
   label: 'Projects',
+  icon: FolderKanban,
   multiple: true,
   required: false,
   fields: [

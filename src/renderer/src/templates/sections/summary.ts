@@ -1,3 +1,4 @@
+import { Sparkles } from 'lucide-react'
 import { z } from 'zod'
 import { SECTION_IDS } from '@templates/template.types'
 import { escapeTypstMarkup } from '@templates/shared/codegen-helper'
@@ -43,6 +44,7 @@ export class SummarySection implements Section<Summary> {
 const UI_SCHEMA: SectionUISchema = {
   id: SECTION_IDS.SUMMARY,
   label: 'Summary',
+  icon: Sparkles,
   multiple: false,
   required: false,
   fields: [
