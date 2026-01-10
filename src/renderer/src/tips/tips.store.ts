@@ -1,47 +1,54 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import type { Tip, TipId, TipState } from './tips.types'
+import { getTipById } from './tips.data'
+import type { TipId, TipState } from './tips.types'
 
 const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000
+const TOAST_WINDOW_MS = 10000 // Batch deduplication window for same-event tips
+
+// Store timeout ref outside Zustand state (not persisted, runtime only)
+let toastClearTimeout: ReturnType<typeof setTimeout> | null = null
+
+function clearToastTimeout() {
+  if (toastClearTimeout) {
+    clearTimeout(toastClearTimeout)
+    toastClearTimeout = null
+  }
+}
 
 export const useTipsStore = create<TipState>()(
   persist(
     (set, get) => ({
-      activeTip: null,
       shownCount: {},
       dismissedAt: {},
       neverShowAgain: [],
       completedActions: [],
       cooldownMs: SEVEN_DAYS_MS,
-
-      showTip: (tip: Tip) => {
-        const state = get()
-        if (!state.canShow(tip.id)) return
-
-        set({ activeTip: tip })
-        state.incrementShownCount(tip.id)
-      },
+      activeToastTip: null, // Ensures only one tip visible at a time
+      lastShownInToastAt: {}, // Tracks per-tip timing for batch deduplication
 
       dismiss: () => {
-        const { activeTip } = get()
-        if (!activeTip) return
+        const { activeToastTip } = get()
+        if (!activeToastTip) return
 
+        clearToastTimeout()
         set((state) => ({
-          activeTip: null,
+          activeToastTip: null,
           dismissedAt: {
             ...state.dismissedAt,
-            [activeTip.id]: Date.now(),
+            [activeToastTip]: Date.now(),
           },
         }))
       },
 
       neverShow: () => {
-        const { activeTip } = get()
-        if (!activeTip) return
+        const { activeToastTip } = get()
+        if (!activeToastTip) return
 
+        clearToastTimeout()
         set((state) => ({
-          activeTip: null,
-          neverShowAgain: [...state.neverShowAgain, activeTip.id],
+          activeToastTip: null,
+          neverShowAgain: [...state.neverShowAgain, activeToastTip],
         }))
       },
 
@@ -62,8 +69,8 @@ export const useTipsStore = create<TipState>()(
           }
         }
 
-        // Check if another tip is already showing
-        if (state.activeTip !== null) {
+        // Check if tip is currently showing in toast
+        if (state.activeToastTip !== null) {
           return false
         }
 
@@ -91,13 +98,51 @@ export const useTipsStore = create<TipState>()(
       },
 
       reset: () => {
+        clearToastTimeout()
         set({
-          activeTip: null,
+          activeToastTip: null,
           shownCount: {},
           dismissedAt: {},
           neverShowAgain: [],
           completedActions: [],
+          lastShownInToastAt: {},
         })
+      },
+
+      setToastTip: (tipId: TipId | null) => {
+        const { activeToastTip } = get()
+        if (activeToastTip !== tipId) {
+          clearToastTimeout()
+          set((state) => ({
+            activeToastTip: tipId,
+            lastShownInToastAt: {
+              ...state.lastShownInToastAt,
+              ...(tipId ? { [tipId]: Date.now() } : {}),
+            },
+          }))
+
+          // Auto-clear after toast window
+          if (tipId) {
+            toastClearTimeout = setTimeout(() => {
+              get().setToastTip(null)
+            }, TOAST_WINDOW_MS)
+          }
+        }
+      },
+
+      isToastTipShowing: (tipId: TipId) => {
+        const { lastShownInToastAt } = get()
+        const lastShown = lastShownInToastAt[tipId]
+        if (!lastShown) return false
+
+        const elapsed = Date.now() - lastShown
+        return elapsed < TOAST_WINDOW_MS
+      },
+
+      getActiveToastTip: () => {
+        const { activeToastTip } = get()
+        if (!activeToastTip) return null
+        return getTipById(activeToastTip) ?? null
       },
     }),
     {
@@ -108,7 +153,29 @@ export const useTipsStore = create<TipState>()(
         neverShowAgain: state.neverShowAgain,
         completedActions: state.completedActions,
         cooldownMs: state.cooldownMs,
+        // Don't persist lastShownInToastAt - only relevant for 10s window
       }),
+      onRehydrateStorage: () => (state) => {
+        if (!state) return
+
+        const now = Date.now()
+
+        // Clean up expired dismissedAt entries (older than cooldown)
+        const cleanedDismissedAt: Record<string, number> = {}
+        for (const [tipId, timestamp] of Object.entries(state.dismissedAt)) {
+          if (now - timestamp < state.cooldownMs) {
+            cleanedDismissedAt[tipId] = timestamp
+          }
+        }
+
+        // Update state if any entries were cleaned
+        if (
+          Object.keys(cleanedDismissedAt).length !==
+          Object.keys(state.dismissedAt).length
+        ) {
+          state.dismissedAt = cleanedDismissedAt
+        }
+      },
     },
   ),
 )
