@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.3](https://github.com/tianpai/kairos/compare/v0.1.2...v0.1.3) (2026-01-10)
+
+
+### Features
+
+* integrate tips into success toast with hybrid selection ([6043f50](https://github.com/tianpai/kairos/commit/6043f50d6f89dd1db14ec7141cca7c4703c9da1c))
+
+
+### Bug Fixes
+
+* add write permissions to release workflow ([852d65d](https://github.com/tianpai/kairos/commit/852d65dafea35e648b22fbc78ae8aaa3c6962d0b))
+* defer quitAndInstall to ensure IPC response completes ([a627ed4](https://github.com/tianpai/kairos/commit/a627ed4ac6f39d188a8545a854d8bd3d68ecefa9))
+* group changelog by minor version with shared quotes ([7385038](https://github.com/tianpai/kairos/commit/7385038c08a379e8de2cabf48f00ed393e72e2e8))
+* include yml and blockmap files in release ([84bcee4](https://github.com/tianpai/kairos/commit/84bcee4ebda32ef1a9b3a69ba7b1df4c59bc6109))
+
 ### [0.1.2](https://github.com/tianpai/kairos/compare/v0.1.1...v0.1.2) (2026-01-09)
 
 
