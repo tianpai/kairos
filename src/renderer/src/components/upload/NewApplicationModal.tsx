@@ -50,7 +50,7 @@ export default function NewApplicationModal({
       open={isOpen}
       onClose={onClose}
       variant="popup"
-      maxWidth="xl"
+      maxWidth="2xl"
       actions={
         <>
           <Button onClick={onClose}>Cancel</Button>

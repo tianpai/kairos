@@ -1,15 +1,15 @@
-import { useEffect, useRef, useCallback } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import { useNavigate } from '@tanstack/react-router'
+import type { JobApplicationListItem } from '@shared/types'
 import {
+  clearLastViewedApplicationId,
   getLastViewedApplicationId,
   setLastViewedApplicationId,
-  clearLastViewedApplicationId,
 } from '@/utils/lastViewedApplication'
-import type { JobApplicationListItem } from '@shared/types'
 
 interface UseLastViewedApplicationOptions {
   jobId: string | undefined
-  applications: JobApplicationListItem[]
+  applications: Array<JobApplicationListItem>
 }
 
 export function useLastViewedApplication({

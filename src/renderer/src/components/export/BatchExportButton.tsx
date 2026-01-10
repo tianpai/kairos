@@ -1,6 +1,4 @@
 import { useEffect } from 'react'
-import { FolderOpen } from 'lucide-react'
-import { Button } from '@ui/Button'
 import { useShortcutStore } from '@layout/shortcut.store'
 import { BatchExportModal } from './BatchExportModal'
 import { useBatchExportStore } from './batchExport.store'
@@ -30,16 +28,10 @@ export function BatchExportButton({ applications }: BatchExportButtonProps) {
   }, [batchExportRequested, clearBatchExportRequest, open])
 
   return (
-    <>
-      <Button onClick={open} title="Export multiple PDFs">
-        <FolderOpen size={16} />
-      </Button>
-
-      <BatchExportModal
-        open={isOpen}
-        onClose={close}
-        applications={applications}
-      />
-    </>
+    <BatchExportModal
+      open={isOpen}
+      onClose={close}
+      applications={applications}
+    />
   )
 }

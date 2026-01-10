@@ -99,9 +99,9 @@ export default function Checklist({ jobId }: ChecklistProps) {
   const selectedKeywordsArray = Array.from(selectedKeywords)
 
   const tabs: Array<{ key: TabType; label: string }> = [
-    { key: 'hard', label: 'Hard Requirements' },
-    { key: 'soft', label: 'Soft Requirements' },
-    { key: 'preferred', label: 'Preferred Skills' },
+    { key: 'hard', label: 'Must Have' },
+    { key: 'soft', label: 'Soft Skills' },
+    { key: 'preferred', label: 'Preferred' },
   ]
 
   // Show JD input form when no job description exists
@@ -139,13 +139,13 @@ export default function Checklist({ jobId }: ChecklistProps) {
       {checklist ? (
         <>
           {/* Vertical Tab Navigation */}
-          <div className="bg-surface m-2 flex flex-col rounded-lg p-2">
+          <div className="m-2 flex flex-col rounded-lg p-2">
             {tabs.map((tab) => (
               <button
                 key={tab.key}
                 type="button"
                 onClick={() => setActiveTab(tab.key)}
-                className={`w-full cursor-pointer rounded-lg px-3 py-1.5 text-left text-sm transition-colors ${
+                className={`w-full cursor-pointer rounded-lg px-3 py-1.5 text-right text-sm transition-colors ${
                   activeTab === tab.key
                     ? 'bg-active font-medium text-primary'
                     : 'text-secondary hover:bg-hover'
