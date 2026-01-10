@@ -1,4 +1,4 @@
-import { useNavigate, useSearch } from '@tanstack/react-router'
+import { useSearch } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { Toaster } from 'sonner'
 import { CircleAlert, CircleCheck, CircleX, Info } from 'lucide-react'
@@ -8,6 +8,7 @@ import { useCurrentTheme } from '@hooks/useTheme'
 import { useSyncJobApplicationToStore } from '@hooks/useSyncJobApplicationToStore'
 import { useJobApplicationMutations } from '@hooks/useJobApplicationMutations'
 import { useAppNavigation } from '@hooks/useAppNavigation'
+import { useLastViewedApplication } from '@hooks/useLastViewedApplication'
 import ResumeRender from '@editor/ResumeRender'
 import ResumeForm from '@resumeForm/ResumeForm'
 import Checklist from '@checklist/Checklist'
@@ -19,7 +20,6 @@ import { useLayoutStore } from '@layout/layout.store'
 import { BatchExportButton } from '@/components/export/BatchExportButton'
 
 export default function App() {
-  const navigate = useNavigate()
   const { jobId } = useSearch({ from: '/' })
 
   // Layout state from store
@@ -43,12 +43,20 @@ export default function App() {
   // Fetch selected application details
   const { data: jobApplication } = useQuery({
     queryKey: ['jobApplication', jobId],
-    queryFn: () => getJobApplication(jobId!),
+    queryFn: function () {
+      return getJobApplication(jobId!)
+    },
     enabled: !!jobId,
   })
 
   // Mutations for edit and delete
   const { handleUpdate, handleDelete } = useJobApplicationMutations(jobId)
+
+  // Last viewed application persistence and navigation
+  const { selectApplication, navigateAfterDelete } = useLastViewedApplication({
+    jobId,
+    applications,
+  })
 
   // Sync workflow state between DB and store
   useWorkflowSync(jobId, jobApplication)
@@ -59,12 +67,14 @@ export default function App() {
   // Handle keyboard shortcuts
   useAppNavigation(applications, jobId)
 
-  const handleSelectApplication = (id: string) => {
-    navigate({ to: '/', search: { jobId: id } })
+  function handleDeleteApplication(id: string) {
+    handleDelete(id, function () {
+      navigateAfterDelete(id)
+    })
   }
 
-  const handleUploadSuccess = (newJobId: string) => {
-    navigate({ to: '/', search: { jobId: newJobId } })
+  function handleUploadSuccess(newJobId: string) {
+    selectApplication(newJobId)
   }
 
   const hasApplications = applications.length > 0
@@ -85,10 +95,10 @@ export default function App() {
           <Sidebar
             applications={applications}
             selectedId={jobId}
-            onSelect={handleSelectApplication}
+            onSelect={selectApplication}
             collapsed={sidebarCollapsed}
             onEdit={handleUpdate}
-            onDelete={handleDelete}
+            onDelete={handleDeleteApplication}
           />
         }
       >
