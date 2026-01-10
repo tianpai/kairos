@@ -1,7 +1,15 @@
 import { useEffect, useState } from 'react'
 import { Check, Copy, Eye, EyeOff } from 'lucide-react'
+import {
+  OpenAI,
+  DeepSeek,
+  Claude,
+  Ollama,
+  Grok,
+  Gemini,
+  Anthropic,
+} from '@lobehub/icons'
 import { Button } from '@ui/Button'
-import { GenericSidebarItem } from '@sidebar/GenericSidebarItem'
 import {
   useActiveProvider,
   useAnthropicApiKey,
@@ -101,6 +109,19 @@ const PROVIDERS: Array<ProviderInfo> = [
     placeholder: 'sk-ant-...',
   },
 ]
+
+const PROVIDER_ICONS: Record<
+  ProviderType,
+  React.ComponentType<{ size?: number }>
+> = {
+  openai: OpenAI,
+  deepseek: DeepSeek,
+  claude: Claude,
+  ollama: Ollama,
+  xai: Grok,
+  gemini: Gemini,
+  anthropic: Anthropic,
+}
 
 interface ProviderConfigProps {
   provider: ProviderInfo
@@ -943,28 +964,6 @@ function OllamaConfig({ isActive, onSetActive }: OllamaConfigProps) {
   )
 }
 
-function ProviderStatusBadge({
-  isConfigured,
-  isActive,
-}: {
-  isConfigured: boolean
-  isActive: boolean
-}) {
-  if (isActive) {
-    return (
-      <span className="text-xs font-medium text-primary">
-        Selected
-      </span>
-    )
-  }
-  if (isConfigured) {
-    return (
-      <span className="h-2 w-2 rounded-full bg-success" title="Configured" />
-    )
-  }
-  return null
-}
-
 export function ProvidersSection() {
   const [selectedProvider, setSelectedProvider] =
     useState<ProviderType>('openai')
@@ -1010,78 +1009,63 @@ export function ProvidersSection() {
     await claudeLogout.mutateAsync()
   }
 
-  const getProviderStatus = (providerId: ProviderType) => {
-    switch (providerId) {
-      case 'openai':
-        return {
-          isConfigured: !!openaiKey,
-          isActive: activeProvider === 'openai',
-        }
-      case 'deepseek':
-        return {
-          isConfigured: !!deepseekKey,
-          isActive: activeProvider === 'deepseek',
-        }
-      case 'claude':
-        return {
-          isConfigured: !!isClaudeAuthenticated,
-          isActive: activeProvider === 'claude',
-        }
-      case 'ollama':
-        return {
-          isConfigured:
-            ollamaStatus?.running && (ollamaInstalledModels?.length ?? 0) > 0,
-          isActive: activeProvider === 'ollama',
-        }
-      case 'xai':
-        return {
-          isConfigured: !!xaiKey,
-          isActive: activeProvider === 'xai',
-        }
-      case 'gemini':
-        return {
-          isConfigured: !!geminiKey,
-          isActive: activeProvider === 'gemini',
-        }
-      case 'anthropic':
-        return {
-          isConfigured: !!anthropicKey,
-          isActive: activeProvider === 'anthropic',
-        }
-    }
+  const providerStatus: Record<ProviderType, { isConfigured: boolean; isActive: boolean }> = {
+    openai: { isConfigured: !!openaiKey, isActive: activeProvider === 'openai' },
+    deepseek: { isConfigured: !!deepseekKey, isActive: activeProvider === 'deepseek' },
+    claude: { isConfigured: !!isClaudeAuthenticated, isActive: activeProvider === 'claude' },
+    ollama: {
+      isConfigured: !!ollamaStatus?.running && (ollamaInstalledModels?.length ?? 0) > 0,
+      isActive: activeProvider === 'ollama',
+    },
+    xai: { isConfigured: !!xaiKey, isActive: activeProvider === 'xai' },
+    gemini: { isConfigured: !!geminiKey, isActive: activeProvider === 'gemini' },
+    anthropic: { isConfigured: !!anthropicKey, isActive: activeProvider === 'anthropic' },
   }
 
-  const getProviderSublabel = (providerId: ProviderType) => {
-    const status = getProviderStatus(providerId)
-    if (status.isActive) return 'Active'
-    if (status.isConfigured) return 'Configured'
-    return 'Not configured'
-  }
+  // API key config for providers that use API keys (excludes claude, ollama)
+  const apiKeyConfig = {
+    openai: { key: openaiKey, setKey: setOpenaiKey, deleteKey: deleteOpenaiKey },
+    deepseek: { key: deepseekKey, setKey: setDeepseekKey, deleteKey: deleteDeepseekKey },
+    xai: { key: xaiKey, setKey: setXaiKey, deleteKey: deleteXaiKey },
+    gemini: { key: geminiKey, setKey: setGeminiKey, deleteKey: deleteGeminiKey },
+    anthropic: { key: anthropicKey, setKey: setAnthropicKey, deleteKey: deleteAnthropicKey },
+  } as Record<ProviderType, { key: string | null | undefined; setKey: typeof setOpenaiKey; deleteKey: typeof deleteOpenaiKey }>
 
   return (
     <div className="flex h-full gap-6">
       {/* Provider List */}
-      <div className="w-48 shrink-0 border-r border-default pr-4">
+      <div className="w-52 shrink-0 border-r border-default pr-4">
         <h2 className="mb-3 text-sm font-semibold text-hint">
           Providers
         </h2>
         <div className="space-y-1">
           {PROVIDERS.map((provider) => {
-            const status = getProviderStatus(provider.id)
+            const status = providerStatus[provider.id]
+            const Icon = PROVIDER_ICONS[provider.id]
+            const isSelected = selectedProvider === provider.id
             return (
-              <GenericSidebarItem
+              <button
                 key={provider.id}
-                label={provider.name}
-                sublabel={getProviderSublabel(provider.id)}
-                isSelected={selectedProvider === provider.id}
                 onClick={() => setSelectedProvider(provider.id)}
-                rightContent={
-                  <ProviderStatusBadge
-                    isConfigured={status.isConfigured}
-                    isActive={status.isActive}
+                className={`flex w-full items-center gap-3 rounded-md border-2 border-default px-3 py-2 text-left transition-colors ${
+                  isSelected ? 'bg-surface' : 'bg-base hover:bg-hover'
+                }`}
+              >
+                <Icon size={20} />
+                <span
+                  className={`flex-1 text-sm ${
+                    isSelected ? 'font-medium text-primary' : 'text-secondary'
+                  }`}
+                >
+                  {provider.name}
+                </span>
+                {(status.isActive || status.isConfigured) && (
+                  <span
+                    className={`h-2 w-2 rounded-full ${status.isActive ? 'bg-info' : 'bg-success'}`}
+                    title={status.isActive ? 'Active' : 'Configured'}
                   />
-                }
-              />
+                )}
+              </button>
             )
           })}
         </div>
@@ -1101,50 +1085,14 @@ export function ProvidersSection() {
             isActive={activeProvider === 'ollama'}
             onSetActive={() => setActiveProvider.mutateAsync('ollama')}
           />
-        ) : selectedProvider === 'openai' ? (
-          <ProviderConfig
-            provider={PROVIDERS.find((p) => p.id === 'openai')!}
-            currentKey={openaiKey}
-            isActive={activeProvider === 'openai'}
-            onSetActive={() => setActiveProvider.mutateAsync('openai')}
-            onSave={(key) => setOpenaiKey.mutateAsync(key)}
-            onDelete={() => deleteOpenaiKey.mutateAsync()}
-          />
-        ) : selectedProvider === 'deepseek' ? (
-          <ProviderConfig
-            provider={PROVIDERS.find((p) => p.id === 'deepseek')!}
-            currentKey={deepseekKey}
-            isActive={activeProvider === 'deepseek'}
-            onSetActive={() => setActiveProvider.mutateAsync('deepseek')}
-            onSave={(key) => setDeepseekKey.mutateAsync(key)}
-            onDelete={() => deleteDeepseekKey.mutateAsync()}
-          />
-        ) : selectedProvider === 'xai' ? (
-          <ProviderConfig
-            provider={PROVIDERS.find((p) => p.id === 'xai')!}
-            currentKey={xaiKey}
-            isActive={activeProvider === 'xai'}
-            onSetActive={() => setActiveProvider.mutateAsync('xai')}
-            onSave={(key) => setXaiKey.mutateAsync(key)}
-            onDelete={() => deleteXaiKey.mutateAsync()}
-          />
-        ) : selectedProvider === 'gemini' ? (
-          <ProviderConfig
-            provider={PROVIDERS.find((p) => p.id === 'gemini')!}
-            currentKey={geminiKey}
-            isActive={activeProvider === 'gemini'}
-            onSetActive={() => setActiveProvider.mutateAsync('gemini')}
-            onSave={(key) => setGeminiKey.mutateAsync(key)}
-            onDelete={() => deleteGeminiKey.mutateAsync()}
-          />
         ) : (
           <ProviderConfig
-            provider={PROVIDERS.find((p) => p.id === 'anthropic')!}
-            currentKey={anthropicKey}
-            isActive={activeProvider === 'anthropic'}
-            onSetActive={() => setActiveProvider.mutateAsync('anthropic')}
-            onSave={(key) => setAnthropicKey.mutateAsync(key)}
-            onDelete={() => deleteAnthropicKey.mutateAsync()}
+            provider={PROVIDERS.find((p) => p.id === selectedProvider)!}
+            currentKey={apiKeyConfig[selectedProvider].key}
+            isActive={activeProvider === selectedProvider}
+            onSetActive={() => setActiveProvider.mutateAsync(selectedProvider)}
+            onSave={(key) => apiKeyConfig[selectedProvider].setKey.mutateAsync(key)}
+            onDelete={() => apiKeyConfig[selectedProvider].deleteKey.mutateAsync()}
           />
         )}
       </div>
