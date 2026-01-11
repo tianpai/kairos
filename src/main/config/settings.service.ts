@@ -376,4 +376,43 @@ export class SettingsService {
   setTheme(theme: ThemeSource): void {
     this.store.set("theme", theme);
   }
+
+  // Reset all provider settings to defaults
+  // Note: "claude" = CLI/OAuth auth, "anthropic" = direct API key auth (separate providers)
+  resetAllProviders(): void {
+    // Reset all API keys
+    this.store.set("aiProviders.openai.apiKey", null);
+    this.store.set("aiProviders.deepseek.apiKey", null);
+    this.store.set("aiProviders.xai.apiKey", null);
+    this.store.set("aiProviders.gemini.apiKey", null);
+    this.store.set("aiProviders.anthropic.apiKey", null);
+
+    // Reset all selected models
+    this.store.set("aiProviders.openai.selectedModel", null);
+    this.store.set("aiProviders.deepseek.selectedModel", null);
+    this.store.set("aiProviders.claude.selectedModel", null);
+    this.store.set("aiProviders.ollama.selectedModel", null);
+    this.store.set("aiProviders.xai.selectedModel", null);
+    this.store.set("aiProviders.gemini.selectedModel", null);
+    this.store.set("aiProviders.anthropic.selectedModel", null);
+
+    // Reset cached models
+    this.store.set("aiProviders.openai.cachedModels", []);
+    this.store.set("aiProviders.deepseek.cachedModels", []);
+    this.store.set("aiProviders.claude.cachedModels", []);
+    this.store.set("aiProviders.ollama.cachedModels", []);
+    this.store.set("aiProviders.xai.cachedModels", []);
+    this.store.set("aiProviders.gemini.cachedModels", []);
+    this.store.set("aiProviders.anthropic.cachedModels", []);
+
+    // Reset Claude CLI/OAuth config
+    this.store.set("aiProviders.claude.authMode", "cli");
+    this.store.set("aiProviders.claude.cliPath", null);
+
+    // Reset Ollama to default
+    this.store.set("aiProviders.ollama.baseUrl", "http://localhost:11434");
+
+    // Reset active provider to default
+    this.store.set("activeProvider", "openai");
+  }
 }

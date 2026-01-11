@@ -382,6 +382,15 @@ ipcMain.handle('provider:setActive', (_, provider: ProviderType) => {
   log.info(`AI provider switched: ${previous} -> ${provider}`)
 })
 
+// Reset all providers IPC handler
+ipcMain.handle('settings:resetAllProviders', async () => {
+  settingsService.resetAllProviders()
+  await claudeSubscriptionService.logout()
+  clearClaudePathCache()
+  log.info('All provider settings reset')
+  return { success: true }
+})
+
 // Theme IPC handlers
 ipcMain.handle('theme:get', () => {
   return settingsService.getTheme()

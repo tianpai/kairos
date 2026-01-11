@@ -134,6 +134,8 @@ contextBridge.exposeInMainWorld("electron", {
       ipcRenderer.invoke("settings:hasAnthropicApiKey"),
     deleteAnthropicApiKey: (): Promise<void> =>
       ipcRenderer.invoke("settings:deleteAnthropicApiKey"),
+    resetAllProviders: (): Promise<{ success: boolean }> =>
+      ipcRenderer.invoke("settings:resetAllProviders"),
   },
   models: {
     fetch: (provider: string): Promise<Array<{ id: string; name: string }>> =>
@@ -257,6 +259,8 @@ contextBridge.exposeInMainWorld("electron", {
       ipcRenderer.invoke("jobs:update", id, data),
     delete: (id: string): Promise<{ success: boolean }> =>
       ipcRenderer.invoke("jobs:delete", id),
+    deleteAll: (): Promise<{ success: boolean }> =>
+      ipcRenderer.invoke("jobs:deleteAll"),
     saveResume: (id: string, data: unknown): Promise<{ success: boolean }> =>
       ipcRenderer.invoke("jobs:saveResume", id, data),
     updateJobDescription: (

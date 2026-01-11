@@ -233,6 +233,15 @@ export class JobApplicationService {
     return { success: true }
   }
 
+  deleteAllJobApplications(): { success: boolean } {
+    // Delete in order: jobApplications first (has FK to companies), then companies
+    this.db.transaction((tx) => {
+      tx.delete(jobApplications).run()
+      tx.delete(companies).run()
+    })
+    return { success: true }
+  }
+
   async updateJobApplication(
     id: string,
     dto: UpdateJobApplicationInput,

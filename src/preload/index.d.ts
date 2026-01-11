@@ -95,6 +95,11 @@ interface IElectronAPI {
     setGeminiApiKey: (key: string) => Promise<void>;
     hasGeminiApiKey: () => Promise<boolean>;
     deleteGeminiApiKey: () => Promise<void>;
+    // Anthropic
+    hasAnthropicApiKey: () => Promise<boolean>;
+    deleteAnthropicApiKey: () => Promise<void>;
+    // Reset
+    resetAllProviders: () => Promise<{ success: boolean }>;
   };
   models: {
     fetch: (provider: ProviderType) => Promise<ModelInfo[]>;
@@ -163,6 +168,7 @@ interface IElectronAPI {
     get: (id: string) => Promise<unknown>;
     update: (id: string, data: unknown) => Promise<unknown>;
     delete: (id: string) => Promise<{ success: boolean }>;
+    deleteAll: () => Promise<{ success: boolean }>;
     saveResume: (id: string, data: unknown) => Promise<{ success: boolean }>;
     updateJobDescription: (
       id: string,

@@ -103,6 +103,17 @@ export function registerJobsHandlers(service: JobApplicationService): void {
     }
   })
 
+  ipcMain.handle('jobs:deleteAll', async () => {
+    try {
+      const result = await service.deleteAllJobApplications()
+      log.info('All job applications deleted')
+      return result
+    } catch (error) {
+      log.error('jobs:deleteAll failed', error)
+      throw error
+    }
+  })
+
   ipcMain.handle('jobs:saveResume', async (_, id: string, data: unknown) => {
     const validated = SaveResumeSchema.parse(data)
     return service.saveResume(id, validated)

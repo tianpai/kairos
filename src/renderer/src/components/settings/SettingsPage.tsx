@@ -5,10 +5,11 @@ import { PageHeader } from '@ui/PageHeader'
 import { Button } from '@ui/Button'
 import { AppLayout } from '@layout/AppLayout'
 import { useLayoutStore } from '@layout/layout.store'
-import {  SettingsSidebar } from './SettingsSidebar'
+import { SettingsSidebar } from './SettingsSidebar'
 import { ProvidersSection } from './ProvidersSection'
 import { AppearanceSection } from './AppearanceSection'
 import { TipsSection } from './TipsSection'
+import { GeneralSection } from './GeneralSection'
 import { AboutSection } from './AboutSection'
 import type {SettingsSection} from './SettingsSidebar';
 
@@ -56,6 +57,7 @@ export default function SettingsPage() {
         {activeSection === 'providers' && <ProvidersSection />}
         {activeSection === 'appearance' && <AppearanceSection />}
         {activeSection === 'tips' && <TipsSection />}
+        {activeSection === 'general' && <GeneralSection />}
         {activeSection === 'about' && <AboutSection />}
       </main>
     </AppLayout>
