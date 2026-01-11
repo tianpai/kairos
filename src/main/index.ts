@@ -413,13 +413,17 @@ async function initializeDatabase() {
 }
 
 async function createWindow() {
+  // Match background color to current theme to prevent white flash during resize
+  const isDark = nativeTheme.shouldUseDarkColors
+  const backgroundColor = isDark ? '#1a1a1a' : '#F5F5F5'
+
   mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
     show: false,
     titleBarStyle: 'hiddenInset',
     trafficLightPosition: { x: 16, y: 16 },
-    backgroundColor: '#fafafa',
+    backgroundColor,
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       nodeIntegration: false,

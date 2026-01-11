@@ -48,7 +48,7 @@ export function ApplicationInfoPopup({
   onEdit,
 }: ApplicationInfoPopupProps): JSX.Element {
   return (
-    <HoverPopup position="right" anchorRect={anchorRect}>
+    <HoverPopup position="right" anchorRect={anchorRect} width="w-72">
       <div className="space-y-1 text-sm">
         <div className="flex items-center justify-between gap-8">
           <span className="text-hint">Score</span>

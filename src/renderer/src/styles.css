@@ -97,6 +97,7 @@
   animation: flash 2s ease-in-out infinite;
 }
 
+html,
 body {
   background-color: var(--k-base);
   color: var(--k-primary);
