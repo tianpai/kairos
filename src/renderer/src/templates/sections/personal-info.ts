@@ -74,6 +74,9 @@ export class PersonalInfoSection implements Section<PersonalInfo> {
         { key: 'linkedin', label: 'LinkedIn', type: 'text' },
         { key: 'personalSite', label: 'Personal Website', type: 'text' },
         { key: 'pronouns', label: 'Pronouns', type: 'text' },
+        { key: 'authorPosition', label: 'Name Alignment', type: 'select', options: ['left', 'center', 'right'] },
+        { key: 'personalInfoPosition', label: 'Contact Alignment', type: 'select', options: ['left', 'center', 'right'] },
+        { key: 'authorFontSize', label: 'Name Font Size', type: 'select', options: ['17pt', '18pt', '19pt', '20pt', '21pt', '22pt'] },
       ],
     }
   }

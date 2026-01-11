@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react'
 import { Check, Copy, Eye, EyeOff } from 'lucide-react'
 import {
-  OpenAI,
-  DeepSeek,
-  Claude,
-  Ollama,
-  Grok,
-  Gemini,
   Anthropic,
+  Claude,
+  DeepSeek,
+  Gemini,
+  Grok,
+  Ollama,
+  OpenAI,
 } from '@lobehub/icons'
 import { Button } from '@ui/Button'
 import {

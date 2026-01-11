@@ -6,12 +6,12 @@ import { ChecklistSection } from '@checklist/ChecklistSection'
 import { Button } from '@ui/Button'
 import { Tooltip } from '@ui/Tooltip'
 import { useResumeStore } from '@typst-compiler/resumeState'
-import type { LucideIcon } from 'lucide-react'
 import {
   CHECKLIST_PARSING,
   startWorkflow,
   useWorkflowStore,
 } from '../../workflow'
+import type { LucideIcon } from 'lucide-react'
 
 interface ChecklistProps {
   jobId: string | undefined
