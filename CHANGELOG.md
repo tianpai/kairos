@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.4](https://github.com/tianpai/kairos/compare/v0.1.3...v0.1.4) (2026-01-11)
+
+
+### Features
+
+* compact icon navigation for resume and checklist sections ([3a5a7b7](https://github.com/tianpai/kairos/commit/3a5a7b703f6a28d95b50bab336d01ead899d17b6))
+* provider settings show brand icons with cleaner card layout ([aa5634e](https://github.com/tianpai/kairos/commit/aa5634e97f619541af3dfbd5ef609d367af7a8fb))
+* restore last viewed application on startup ([fd0466d](https://github.com/tianpai/kairos/commit/fd0466db7e0f0865759eed67f6b7ddeb2b48efa8))
+
 ### [0.1.3](https://github.com/tianpai/kairos/compare/v0.1.2...v0.1.3) (2026-01-10)
 
 
