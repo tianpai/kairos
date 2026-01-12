@@ -7,25 +7,8 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@ui/Accordion'
+import type { UpdateState, UpdateStatus } from '../../../../shared/updater'
 import { versionQuotes } from '@/data/versionQuotes'
-
-type UpdateStatus =
-  | 'idle'
-  | 'checking'
-  | 'available'
-  | 'not-available'
-  | 'downloading'
-  | 'downloaded'
-  | 'error'
-
-interface UpdateState {
-  status: UpdateStatus
-  version?: string
-  error?: string
-  progress?: {
-    percent: number
-  }
-}
 
 function GitHubIcon({ size = 24 }: { size?: number }) {
   return (
@@ -151,7 +134,7 @@ export function AboutSection() {
   const checkForUpdates = async () => {
     setUpdateState({ status: 'checking' })
     try {
-      const state = (await window.electron.updater.check()) as UpdateState
+      const state = (await window.electron.updater.check())
       setUpdateState(state)
     } catch {
       setUpdateState({ status: 'error', error: 'Failed to check for updates' })
@@ -163,7 +146,7 @@ export function AboutSection() {
       await window.electron.updater.download()
       // Poll for state updates during download
       const pollInterval = setInterval(async () => {
-        const state = (await window.electron.updater.getState()) as UpdateState
+        const state = (await window.electron.updater.getState())
         setUpdateState(state)
         if (state.status === 'downloaded' || state.status === 'error') {
           clearInterval(pollInterval)

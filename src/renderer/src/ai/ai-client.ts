@@ -1,4 +1,5 @@
 import log from 'electron-log/renderer'
+import type { ProviderType } from '../../../shared/providers'
 import type { TaskName } from '../workflow/task-contracts'
 
 type PendingTask = {
@@ -13,15 +14,6 @@ export interface ExecuteOptions {
   streaming?: boolean
   onPartial?: (partial: unknown) => void
 }
-
-type ProviderType =
-  | 'openai'
-  | 'deepseek'
-  | 'claude'
-  | 'ollama'
-  | 'xai'
-  | 'gemini'
-  | 'anthropic'
 
 interface ServerInfo {
   port: number
@@ -42,7 +34,7 @@ async function getActiveProviderConfig(): Promise<{
   model: string
   apiKey: string
 }> {
-  const provider = (await window.electron.provider.getActive()) as ProviderType
+  const provider = (await window.electron.provider.getActive())
 
   // Get API key or OAuth token based on provider
   let apiKey: string | null

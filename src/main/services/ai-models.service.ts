@@ -1,4 +1,4 @@
-export type ProviderType = "openai" | "deepseek" | "claude" | "ollama" | "xai" | "gemini" | "anthropic"
+import type { ProviderType } from "../../shared/providers"
 
 export interface ModelInfo {
   id: string

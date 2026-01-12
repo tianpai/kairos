@@ -1,47 +1,12 @@
 type ThemeSource = "system" | "light" | "dark";
 type ThemeMode = "light" | "dark";
-type ProviderType =
-  | "openai"
-  | "deepseek"
-  | "claude"
-  | "ollama"
-  | "xai"
-  | "gemini";
+type ProviderType = import("../shared/providers").ProviderType;
+type UpdateState = import("../shared/updater").UpdateState;
+type OllamaPullProgress = import("../shared/ollama").OllamaPullProgress;
 
 interface ModelInfo {
   id: string;
   name: string;
-}
-
-interface OllamaPullProgress {
-  status: string;
-  digest?: string;
-  total?: number;
-  completed?: number;
-}
-
-type UpdateStatus =
-  | "idle"
-  | "checking"
-  | "available"
-  | "not-available"
-  | "downloading"
-  | "downloaded"
-  | "error";
-
-interface UpdateProgress {
-  percent: number;
-  bytesPerSecond: number;
-  transferred: number;
-  total: number;
-}
-
-interface UpdateState {
-  status: UpdateStatus;
-  version?: string;
-  releaseNotes?: string;
-  error?: string;
-  progress?: UpdateProgress;
 }
 
 interface IElectronAPI {

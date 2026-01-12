@@ -47,15 +47,7 @@ import {
   useSetXAIApiKey,
   useXAIApiKey,
 } from '@hooks/useSettings'
-
-type ProviderType =
-  | 'openai'
-  | 'deepseek'
-  | 'claude'
-  | 'ollama'
-  | 'xai'
-  | 'gemini'
-  | 'anthropic'
+import type { ProviderType } from '../../../../shared/providers'
 
 interface ProviderInfo {
   id: ProviderType

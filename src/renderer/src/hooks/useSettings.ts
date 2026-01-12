@@ -1,13 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-
-type ProviderType =
-  | 'openai'
-  | 'deepseek'
-  | 'claude'
-  | 'ollama'
-  | 'xai'
-  | 'gemini'
-  | 'anthropic'
+import type { ProviderType } from '../../../shared/providers'
 
 // OpenAI API Key hooks
 export function useHasApiKey() {
