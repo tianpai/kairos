@@ -47,6 +47,10 @@ function createEmptyEntry(): JdEntry {
   return { id: generateId(), jobDescription: '', jobUrl: '' }
 }
 
+function getFilledEntries(entries: Array<JdEntry>): Array<JdEntry> {
+  return entries.filter((e) => e.jobDescription.trim().length > 0)
+}
+
 interface NewApplicationState {
   isOpen: boolean
   resumeSource: ResumeSource
@@ -148,14 +152,15 @@ export const useNewApplicationStore = create<NewApplicationStore>()((set, get) =
 
     if (isSubmitting || batchProgress.status === 'processing') return false
 
-    const isBatch = entries.length > 1
+    const filledEntries = getFilledEntries(entries)
+    const isBatch = filledEntries.length > 1
     if (resumeSource === 'scratch' && isBatch) return false
     if (resumeSource === 'upload' && !selectedFile) return false
     if (resumeSource === 'existing' && !selectedSourceId) return false
 
     // Scratch mode doesn't require JD, all other modes require JD for AI extraction
     if (resumeSource === 'scratch') return true
-    return entries.every((e) => e.jobDescription.trim().length > 0)
+    return filledEntries.length > 0
   },
 
   buildPayload: () => {
@@ -163,12 +168,14 @@ export const useNewApplicationStore = create<NewApplicationStore>()((set, get) =
     if (!state.canSubmit()) return null
 
     const { resumeSource, selectedFile, selectedSourceId, entries } = state
+    const filledEntries = getFilledEntries(entries)
+    const payloadEntries = filledEntries.length > 0 ? filledEntries : entries.slice(0, 1)
 
     return {
       resumeSource,
       resumeFile: resumeSource === 'upload' ? selectedFile ?? undefined : undefined,
       sourceJobId: resumeSource === 'existing' ? selectedSourceId ?? undefined : undefined,
-      entries: entries.map((e) => ({
+      entries: payloadEntries.map((e) => ({
         jobDescription: e.jobDescription.trim(),
         jobUrl: normalizeUrl(e.jobUrl),
       })),
