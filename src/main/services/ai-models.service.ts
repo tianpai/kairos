@@ -42,13 +42,6 @@ const ANTHROPIC_FALLBACK_MODELS: Array<ModelInfo> = [
   { id: "claude-opus-4-5-20251101", name: "Claude Opus 4.5" },
 ]
 
-// Claude models are hardcoded (OAuth doesn't provide a model list endpoint)
-const CLAUDE_MODELS: Array<ModelInfo> = [
-  { id: "claude-sonnet-4-5-20250929", name: "Claude Sonnet 4.5" },
-  { id: "claude-opus-4-5-20251101", name: "Claude Opus 4.5" },
-  { id: "claude-haiku-4-5-20251001", name: "Claude Haiku 4.5" },
-]
-
 // Ollama curated models (known good for structured output)
 const OLLAMA_CURATED_MODELS: Array<ModelInfo> = [
   { id: "llama3.2:3b", name: "Llama 3.2 3B (Recommended)" },
@@ -241,10 +234,6 @@ export async function fetchAnthropicModels(
   }
 }
 
-export function getClaudeModels(): Array<ModelInfo> {
-  return CLAUDE_MODELS
-}
-
 export function getOllamaCuratedModels(): Array<ModelInfo> {
   return OLLAMA_CURATED_MODELS
 }
@@ -259,8 +248,6 @@ export function getFallbackModels(provider: ProviderType): Array<ModelInfo> {
       return XAI_FALLBACK_MODELS.map((id) => ({ id, name: id }))
     case "gemini":
       return GEMINI_FALLBACK_MODELS.map((id) => ({ id, name: id }))
-    case "claude":
-      return CLAUDE_MODELS
     case "ollama":
       return OLLAMA_CURATED_MODELS
     case "anthropic":
@@ -280,8 +267,6 @@ export function getDefaultModel(provider: ProviderType): string {
       return "grok-3-fast"
     case "gemini":
       return "gemini-2.5-flash"
-    case "claude":
-      return "claude-sonnet-4-5-20250929"
     case "ollama":
       return "llama3.2:3b"
     case "anthropic":

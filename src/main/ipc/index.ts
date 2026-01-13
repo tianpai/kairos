@@ -6,18 +6,15 @@ import { registerFsHandlers } from "./fs.handlers";
 import { registerAIServerHandlers } from "./ai-server.handlers";
 import { registerUpdaterHandlers } from "./updater.handlers";
 import { registerSettingsHandlers } from "./settings.handlers";
-import { registerClaudeHandlers } from "./claude.handlers";
 import { registerOllamaHandlers } from "./ollama.handlers";
 import { registerModelHandlers } from "./models.handlers";
 import { registerProviderHandlers } from "./provider.handlers";
 import { registerThemeHandlers } from "./theme.handlers";
 import { registerShellHandlers } from "./shell.handlers";
 import type { SettingsService } from "../config/settings.service";
-import type { ClaudeSubscriptionService } from "../services/claude-subscription.service";
 
 export interface IpcDependencies {
   settingsService: SettingsService;
-  claudeSubscriptionService: ClaudeSubscriptionService;
 }
 
 export function registerAllHandlers(deps: IpcDependencies): void {
@@ -29,7 +26,6 @@ export function registerAllHandlers(deps: IpcDependencies): void {
   registerAIServerHandlers();
   registerUpdaterHandlers();
   registerSettingsHandlers(deps);
-  registerClaudeHandlers(deps);
   registerOllamaHandlers(deps);
   registerModelHandlers(deps);
   registerProviderHandlers(deps);

@@ -9,9 +9,7 @@ import {
   runMigrations,
 } from "./services/database.service";
 import { createAppMenu } from "./menu";
-import { claudeSubscriptionService } from "./services/claude-subscription.service";
 import { aiServerService } from "./services/ai-server.service";
-import { setUserConfiguredPath } from "./services/claude-code-cli-validation.service";
 
 // Initialize logger
 log.initialize();
@@ -30,7 +28,7 @@ async function initializeDatabase() {
   await runMigrations();
 
   // Register IPC handlers
-  registerAllHandlers({ settingsService, claudeSubscriptionService });
+  registerAllHandlers({ settingsService });
 }
 
 async function createWindow() {
@@ -85,8 +83,6 @@ app.whenReady().then(async () => {
     });
     // Apply saved theme preference
     nativeTheme.themeSource = settingsService.getTheme();
-    // Initialize Claude CLI path from saved settings
-    setUserConfiguredPath(settingsService.getClaudeCliPath());
     // Start AI server (handles all AI API calls from renderer)
     await aiServerService.start();
     await initializeDatabase();

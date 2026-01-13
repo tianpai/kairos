@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react'
 import { Check, Copy, Eye, EyeOff } from 'lucide-react'
 import {
   Anthropic,
-  Claude,
   DeepSeek,
   Gemini,
   Grok,
@@ -14,13 +13,6 @@ import {
   useActiveProvider,
   useAnthropicApiKey,
   useApiKey,
-  useClaudeAuthMode,
-  useClaudeCliStatus,
-  useClaudeCompleteAuth,
-  useClaudeConfiguredCliPath,
-  useClaudeIsAuthenticated,
-  useClaudeLogout,
-  useClaudeStartAuth,
   useDeepSeekApiKey,
   useDefaultModel,
   useDeleteAnthropicApiKey,
@@ -39,8 +31,6 @@ import {
   useSetActiveProvider,
   useSetAnthropicApiKey,
   useSetApiKey,
-  useSetClaudeAuthMode,
-  useSetClaudeCliPath,
   useSetDeepSeekApiKey,
   useSetGeminiApiKey,
   useSetSelectedModel,
@@ -68,13 +58,6 @@ const PROVIDERS: Array<ProviderInfo> = [
     name: 'DeepSeek',
     description: 'DeepSeek Chat and DeepSeek Reasoner models',
     placeholder: 'sk-...',
-  },
-  {
-    id: 'claude',
-    name: 'Claude Code',
-    description:
-      'Claude Sonnet 4, Opus 4, and Haiku via your Claude subscription',
-    placeholder: '',
   },
   {
     id: 'ollama',
@@ -108,7 +91,6 @@ const PROVIDER_ICONS: Record<
 > = {
   openai: OpenAI,
   deepseek: DeepSeek,
-  claude: Claude,
   ollama: Ollama,
   xai: Grok,
   gemini: Gemini,
@@ -247,423 +229,6 @@ function ProviderConfig({
       </div>
 
       {currentKey && (
-        <div className="border-t border-default pt-4">
-          <label className="block text-sm font-medium text-secondary">
-            Model
-          </label>
-          <select
-            value={displayModel}
-            onChange={(e) => handleModelChange(e.target.value)}
-            disabled={isLoadingModels}
-            className="mt-1 w-full rounded-md border-2 border-default bg-base px-3 py-2 text-primary focus:border-black focus:outline-none disabled:opacity-50 dark:focus:border-white"
-          >
-            {isLoadingModels ? (
-              <option>Loading models...</option>
-            ) : (
-              models?.map((model) => (
-                <option key={model.id} value={model.id}>
-                  {model.name}
-                </option>
-              ))
-            )}
-          </select>
-          <p className="mt-1 text-xs text-hint">
-            Select the model to use for AI tasks.
-          </p>
-        </div>
-      )}
-    </div>
-  )
-}
-
-interface ClaudeConfigProps {
-  isAuthenticated: boolean
-  isActive: boolean
-  onSetActive: () => void
-  onDisconnect: () => void
-}
-
-function ClaudeConfig({
-  isAuthenticated,
-  isActive,
-  onSetActive,
-  onDisconnect,
-}: ClaudeConfigProps) {
-  const [authCode, setAuthCode] = useState('')
-  const [isAwaitingCode, setIsAwaitingCode] = useState(false)
-  const [codeVerifier, setCodeVerifier] = useState<string | null>(null)
-  const [useCustomPath, setUseCustomPath] = useState(false)
-  const [customPathInput, setCustomPathInput] = useState('')
-
-  // Auth mode hooks
-  const { data: authMode } = useClaudeAuthMode()
-  const setAuthMode = useSetClaudeAuthMode()
-  const {
-    data: cliStatus,
-    refetch: refetchCliStatus,
-    isLoading: isCheckingCli,
-  } = useClaudeCliStatus()
-  const { data: configuredPath } = useClaudeConfiguredCliPath()
-  const setCliPath = useSetClaudeCliPath()
-
-  // Initialize custom path state from configured path
-  useEffect(() => {
-    if (configuredPath) {
-      setUseCustomPath(true)
-      setCustomPathInput(configuredPath)
-    }
-  }, [configuredPath])
-
-  // Auth hooks
-  const startAuth = useClaudeStartAuth()
-  const completeAuth = useClaudeCompleteAuth()
-
-  // Model selection
-  const {
-    data: models,
-    isLoading: isLoadingModels,
-    refetch: refetchModels,
-  } = useFetchModels('claude')
-  const { data: selectedModel } = useSelectedModel('claude')
-  const { data: defaultModel } = useDefaultModel('claude')
-  const setSelectedModel = useSetSelectedModel()
-
-  // Refetch models when authenticated
-  useEffect(() => {
-    if (isAuthenticated) {
-      refetchModels()
-      setIsAwaitingCode(false)
-      setAuthCode('')
-      setCodeVerifier(null)
-    }
-  }, [isAuthenticated, refetchModels])
-
-  const handleConnect = async () => {
-    const result = await startAuth.mutateAsync()
-    setCodeVerifier(result.codeVerifier)
-    setIsAwaitingCode(true)
-  }
-
-  const handleSubmitCode = async () => {
-    if (!authCode.trim()) return
-    await completeAuth.mutateAsync({
-      code: authCode.trim(),
-      codeVerifier: codeVerifier ?? undefined,
-    })
-  }
-
-  const handleCancel = () => {
-    setIsAwaitingCode(false)
-    setAuthCode('')
-    setCodeVerifier(null)
-  }
-
-  const handleModelChange = async (model: string) => {
-    await setSelectedModel.mutateAsync({ provider: 'claude', model })
-  }
-
-  const handleToggleAuthMode = (checked: boolean) => {
-    const newMode = checked ? 'cli' : 'oauth'
-    setAuthMode.mutate(newMode)
-  }
-
-  const handleSaveCustomPath = async () => {
-    if (customPathInput.trim()) {
-      await setCliPath.mutateAsync(customPathInput.trim())
-      refetchCliStatus()
-    }
-  }
-
-  const handleClearCustomPath = async () => {
-    await setCliPath.mutateAsync(null)
-    setCustomPathInput('')
-    setUseCustomPath(false)
-    refetchCliStatus()
-  }
-
-  const displayModel = selectedModel ?? defaultModel ?? ''
-
-  return (
-    <div className="space-y-4">
-      {/* Authentication Method Toggle */}
-      <div>
-        <label className="block text-sm font-medium text-secondary">
-          Authentication Method
-        </label>
-        <div className="mt-2 flex items-center gap-3">
-          <button
-            onClick={() => handleToggleAuthMode(false)}
-            className={`rounded-md px-3 py-1.5 text-sm transition-colors ${
-              authMode === 'oauth'
-                ? 'bg-primary text-base'
-                : 'bg-surface text-secondary hover:bg-hover'
-            }`}
-          >
-            OAuth Subscription
-          </button>
-          <button
-            onClick={() => handleToggleAuthMode(true)}
-            className={`rounded-md px-3 py-1.5 text-sm transition-colors ${
-              authMode === 'cli'
-                ? 'bg-primary text-base'
-                : 'bg-surface text-secondary hover:bg-hover'
-            }`}
-          >
-            Claude Code CLI
-          </button>
-        </div>
-
-        {/* Warning/Info based on mode */}
-        {authMode === 'oauth' && (
-          <p className="mt-2 text-xs text-warning">
-            Using personal Claude subscription for third-party apps may risk
-            account restrictions.
-          </p>
-        )}
-        {authMode === 'cli' && (
-          <div className="mt-2 space-y-1">
-            <p className="text-xs text-hint">
-              Requires Claude Code CLI installed and authenticated on your
-              system.
-            </p>
-            <p className="inline-flex items-center gap-1 rounded bg-warning-subtle px-2 py-0.5 text-xs font-medium text-warning">
-              Experimental feature
-            </p>
-          </div>
-        )}
-      </div>
-
-      {/* Divider */}
-      <div className="border-t border-default" />
-
-      {/* Conditional Content based on authMode */}
-      {authMode === 'oauth' ? (
-        <div>
-          <label className="block text-sm font-medium text-secondary">
-            OAuth Authentication
-          </label>
-          {isAuthenticated ? (
-            <div className="mt-2 flex items-center gap-3">
-              <span className="inline-flex items-center gap-1 text-sm text-success">
-                <Check size={14} />
-                Connected
-              </span>
-              <Button
-                onClick={onDisconnect}
-                variant="danger"
-              >
-                Disconnect
-              </Button>
-              {!isActive && (
-                <Button
-                  onClick={onSetActive}
-                  variant="outline"
-                >
-                  Set as active
-                </Button>
-              )}
-            </div>
-          ) : isAwaitingCode ? (
-            <div className="mt-2 space-y-3">
-              <p className="text-sm text-secondary">
-                After authorizing in the browser, paste the code from the URL
-                below:
-              </p>
-              <input
-                type="text"
-                value={authCode}
-                onChange={(e) => setAuthCode(e.target.value)}
-                placeholder="Paste authorization code here..."
-                className="w-full rounded-md border-2 border-default bg-base px-3 py-2 text-primary focus:border-black focus:outline-none dark:focus:border-white"
-              />
-              <p className="text-xs text-hint">
-                Look for the code in the URL after &quot;?code=&quot; (before
-                any # symbol)
-              </p>
-              <div className="flex gap-2">
-                <Button
-                  onClick={handleSubmitCode}
-                  disabled={!authCode.trim() || completeAuth.isPending}
-                  variant="outline"
-                >
-                  {completeAuth.isPending ? 'Connecting...' : 'Submit Code'}
-                </Button>
-                <Button
-                  onClick={handleCancel}
-                  variant="outline"
-                >
-                  Cancel
-                </Button>
-              </div>
-              {completeAuth.isError && (
-                <p className="text-sm text-error">
-                  Failed to connect. Please try again.
-                </p>
-              )}
-            </div>
-          ) : (
-            <div className="mt-2">
-              <Button
-                onClick={handleConnect}
-                disabled={startAuth.isPending}
-                variant="outline"
-              >
-                {startAuth.isPending
-                  ? 'Opening browser...'
-                  : 'Connect with Claude'}
-              </Button>
-              <p className="mt-2 text-xs text-hint">
-                Sign in with your Claude subscription to use Claude models.
-              </p>
-            </div>
-          )}
-        </div>
-      ) : (
-        /* CLI Mode */
-        <div className="space-y-4">
-          {/* Path Configuration */}
-          <div>
-            <label className="block text-sm font-medium text-secondary">
-              CLI Path
-            </label>
-            <div className="mt-2 flex items-center gap-2">
-              <label className="flex items-center gap-2">
-                <input
-                  type="radio"
-                  checked={!useCustomPath}
-                  onChange={() => {
-                    setUseCustomPath(false)
-                    if (configuredPath) handleClearCustomPath()
-                  }}
-                  className="text-primary focus:ring-primary"
-                />
-                <span className="text-sm text-secondary">
-                  Auto-detect
-                </span>
-              </label>
-              <label className="flex items-center gap-2">
-                <input
-                  type="radio"
-                  checked={useCustomPath}
-                  onChange={() => setUseCustomPath(true)}
-                  className="text-primary focus:ring-primary"
-                />
-                <span className="text-sm text-secondary">
-                  Custom path
-                </span>
-              </label>
-            </div>
-            {useCustomPath && (
-              <div className="mt-2 flex gap-2">
-                <input
-                  type="text"
-                  value={customPathInput}
-                  onChange={(e) => setCustomPathInput(e.target.value)}
-                  placeholder="/path/to/claude"
-                  className="flex-1 rounded-md border-2 border-default bg-base px-3 py-2 text-sm text-primary focus:border-black focus:outline-none dark:focus:border-white"
-                />
-                <Button
-                  onClick={handleSaveCustomPath}
-                  disabled={!customPathInput.trim()}
-                  variant="outline"
-                >
-                  Save
-                </Button>
-              </div>
-            )}
-          </div>
-
-          {/* CLI Status */}
-          <div>
-            <label className="block text-sm font-medium text-secondary">
-              Status
-            </label>
-            {isCheckingCli ? (
-              <p className="mt-2 text-sm text-hint">
-                Checking CLI status...
-              </p>
-            ) : !cliStatus?.installed ? (
-              <div className="mt-2 space-y-3">
-                <p className="text-sm text-secondary">
-                  Claude Code CLI not found
-                  {useCustomPath ? ' at specified path' : ''}.
-                </p>
-                <div className="rounded-md bg-info-subtle p-4">
-                  <p className="text-sm font-medium text-info">
-                    Installation:
-                  </p>
-                  <ol className="mt-2 list-decimal space-y-1 pl-5 text-sm text-info">
-                    <li>
-                      Install via{' '}
-                      <code className="rounded bg-info-subtle/80 px-1 font-mono">
-                        npm install -g @anthropic-ai/claude-code
-                      </code>
-                    </li>
-                    <li>
-                      Or download from{' '}
-                      <a
-                        href="https://claude.ai/code"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="underline hover:no-underline"
-                      >
-                        claude.ai/code
-                      </a>
-                    </li>
-                    <li>
-                      Run{' '}
-                      <code className="rounded bg-info-subtle/80 px-1 font-mono">
-                        claude
-                      </code>{' '}
-                      to authenticate
-                    </li>
-                  </ol>
-                </div>
-                <Button
-                  onClick={() => refetchCliStatus()}
-                  variant="outline"
-                >
-                  Retry Detection
-                </Button>
-              </div>
-            ) : (
-              <div className="mt-2 space-y-2">
-                <div className="flex items-center gap-3">
-                  <span className="inline-flex items-center gap-1 text-sm text-success">
-                    <Check size={14} />
-                    Ready (v{cliStatus.version})
-                  </span>
-                  {!isActive && (
-                    <Button
-                      onClick={onSetActive}
-                      variant="outline"
-                    >
-                      Set as active
-                    </Button>
-                  )}
-                </div>
-                <p className="text-xs text-hint">
-                  Path:{' '}
-                  <code className="rounded bg-surface px-1 font-mono">
-                    {cliStatus.path}
-                  </code>
-                </p>
-                <p className="text-xs text-hint">
-                  Make sure you have run{' '}
-                  <code className="rounded bg-surface px-1 font-mono">
-                    claude
-                  </code>{' '}
-                  in terminal at least once to log in.
-                </p>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Model Selection (shared between both modes) */}
-      {((authMode === 'oauth' && isAuthenticated) ||
-        (authMode === 'cli' && cliStatus?.authenticated)) && (
         <div className="border-t border-default pt-4">
           <label className="block text-sm font-medium text-secondary">
             Model
@@ -970,10 +535,6 @@ export function ProvidersSection() {
   const setDeepseekKey = useSetDeepSeekApiKey()
   const deleteDeepseekKey = useDeleteDeepSeekApiKey()
 
-  // Claude hooks
-  const { data: isClaudeAuthenticated } = useClaudeIsAuthenticated()
-  const claudeLogout = useClaudeLogout()
-
   // Ollama hooks
   const { data: ollamaStatus } = useOllamaStatus()
   const { data: ollamaInstalledModels } = useOllamaInstalledModels()
@@ -997,14 +558,9 @@ export function ProvidersSection() {
   const { data: activeProvider } = useActiveProvider()
   const setActiveProvider = useSetActiveProvider()
 
-  const handleClaudeDisconnect = async () => {
-    await claudeLogout.mutateAsync()
-  }
-
   const providerStatus: Record<ProviderType, { isConfigured: boolean; isActive: boolean }> = {
     openai: { isConfigured: !!openaiKey, isActive: activeProvider === 'openai' },
     deepseek: { isConfigured: !!deepseekKey, isActive: activeProvider === 'deepseek' },
-    claude: { isConfigured: !!isClaudeAuthenticated, isActive: activeProvider === 'claude' },
     ollama: {
       isConfigured: !!ollamaStatus?.running && (ollamaInstalledModels?.length ?? 0) > 0,
       isActive: activeProvider === 'ollama',
@@ -1014,7 +570,7 @@ export function ProvidersSection() {
     anthropic: { isConfigured: !!anthropicKey, isActive: activeProvider === 'anthropic' },
   }
 
-  // API key config for providers that use API keys (excludes claude, ollama)
+  // API key config for providers that use API keys (excludes ollama)
   const apiKeyConfig = {
     openai: { key: openaiKey, setKey: setOpenaiKey, deleteKey: deleteOpenaiKey },
     deepseek: { key: deepseekKey, setKey: setDeepseekKey, deleteKey: deleteDeepseekKey },
@@ -1065,14 +621,7 @@ export function ProvidersSection() {
 
       {/* Provider Configuration */}
       <div className="flex-1">
-        {selectedProvider === 'claude' ? (
-          <ClaudeConfig
-            isAuthenticated={isClaudeAuthenticated ?? false}
-            isActive={activeProvider === 'claude'}
-            onSetActive={() => setActiveProvider.mutateAsync('claude')}
-            onDisconnect={handleClaudeDisconnect}
-          />
-        ) : selectedProvider === 'ollama' ? (
+        {selectedProvider === 'ollama' ? (
           <OllamaConfig
             isActive={activeProvider === 'ollama'}
             onSetActive={() => setActiveProvider.mutateAsync('ollama')}

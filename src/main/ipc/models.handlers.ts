@@ -6,7 +6,6 @@ import {
   fetchGeminiModels,
   fetchOpenAIModels,
   fetchXAIModels,
-  getClaudeModels,
   getDefaultModel,
   getFallbackModels,
 } from "../services/ai-models.service";
@@ -52,10 +51,6 @@ export function registerModelHandlers({
         }
         models = await fetchGeminiModels(apiKey);
         settingsService.setGeminiCachedModels(models.map((m) => m.id));
-      } else if (provider === "claude") {
-        // Claude uses hardcoded models (OAuth doesn't have model list endpoint)
-        models = getClaudeModels();
-        settingsService.setClaudeCachedModels(models.map((m) => m.id));
       } else if (provider === "ollama") {
         // Ollama returns intersection of installed and curated models
         models = await getInstalledCuratedModels();
@@ -86,8 +81,6 @@ export function registerModelHandlers({
       return settingsService.getXAICachedModels();
     } else if (provider === "gemini") {
       return settingsService.getGeminiCachedModels();
-    } else if (provider === "claude") {
-      return settingsService.getClaudeCachedModels();
     } else if (provider === "ollama") {
       return settingsService.getOllamaCachedModels();
     } else if (provider === "anthropic") {
@@ -105,8 +98,6 @@ export function registerModelHandlers({
       return settingsService.getXAISelectedModel();
     } else if (provider === "gemini") {
       return settingsService.getGeminiSelectedModel();
-    } else if (provider === "claude") {
-      return settingsService.getClaudeSelectedModel();
     } else if (provider === "ollama") {
       return settingsService.getOllamaSelectedModel();
     } else if (provider === "anthropic") {
@@ -136,10 +127,6 @@ export function registerModelHandlers({
         const previous = settingsService.getGeminiSelectedModel();
         settingsService.setGeminiSelectedModel(model);
         log.info(`Gemini model changed: ${previous ?? "default"} -> ${model}`);
-      } else if (provider === "claude") {
-        const previous = settingsService.getClaudeSelectedModel();
-        settingsService.setClaudeSelectedModel(model);
-        log.info(`Claude model changed: ${previous ?? "default"} -> ${model}`);
       } else if (provider === "ollama") {
         const previous = settingsService.getOllamaSelectedModel();
         settingsService.setOllamaSelectedModel(model);

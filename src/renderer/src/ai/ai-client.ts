@@ -41,9 +41,6 @@ async function getActiveProviderConfig(): Promise<{
   if (provider === 'ollama') {
     // Ollama doesn't need an API key, but we pass a dummy for consistency
     apiKey = 'ollama'
-  } else if (provider === 'claude') {
-    // Get OAuth access token for Claude
-    apiKey = await window.electron.claudeSubscription.getAccessToken()
   } else if (provider === 'deepseek') {
     apiKey = await window.electron.settings.getDeepSeekApiKey()
   } else if (provider === 'xai') {

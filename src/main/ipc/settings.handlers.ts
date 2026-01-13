@@ -1,17 +1,13 @@
 import { ipcMain } from "electron";
 import log from "electron-log/main";
-import { clearClaudePathCache } from "../services/claude-code-cli-validation.service";
 import type { SettingsService } from "../config/settings.service";
-import type { ClaudeSubscriptionService } from "../services/claude-subscription.service";
 
 interface SettingsHandlerDeps {
   settingsService: SettingsService;
-  claudeSubscriptionService: ClaudeSubscriptionService;
 }
 
 export function registerSettingsHandlers({
   settingsService,
-  claudeSubscriptionService,
 }: SettingsHandlerDeps): void {
   // OpenAI API key handlers
   ipcMain.handle("settings:getApiKey", () => {
@@ -101,8 +97,6 @@ export function registerSettingsHandlers({
   // Reset all providers
   ipcMain.handle("settings:resetAllProviders", async () => {
     settingsService.resetAllProviders();
-    await claudeSubscriptionService.logout();
-    clearClaudePathCache();
     log.info("All provider settings reset");
     return { success: true };
   });

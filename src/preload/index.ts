@@ -154,42 +154,6 @@ contextBridge.exposeInMainWorld("electron", {
     setActive: (provider: string): Promise<void> =>
       ipcRenderer.invoke("provider:setActive", provider),
   },
-  claudeSubscription: {
-    // OAuth methods
-    startAuthorization: (): Promise<{ codeVerifier: string }> =>
-      ipcRenderer.invoke("claude:startAuth"),
-    completeAuthorization: (
-      code: string,
-      codeVerifier?: string,
-    ): Promise<unknown> =>
-      ipcRenderer.invoke("claude:completeAuth", code, codeVerifier),
-    getAccessToken: (): Promise<string> =>
-      ipcRenderer.invoke("claude:getAccessToken"),
-    isAuthenticated: (): Promise<boolean> =>
-      ipcRenderer.invoke("claude:isAuthenticated"),
-    logout: (): Promise<void> => ipcRenderer.invoke("claude:logout"),
-    cancelAuthorization: (): void => {
-      ipcRenderer.invoke("claude:cancelAuth");
-    },
-    // Auth mode methods
-    getAuthMode: (): Promise<"oauth" | "cli"> =>
-      ipcRenderer.invoke("claude:getAuthMode"),
-    setAuthMode: (mode: "oauth" | "cli"): Promise<void> =>
-      ipcRenderer.invoke("claude:setAuthMode", mode),
-    // CLI validation methods
-    isCliInstalled: (): Promise<boolean> =>
-      ipcRenderer.invoke("claude:cli:isInstalled"),
-    isCliAuthenticated: (): Promise<boolean> =>
-      ipcRenderer.invoke("claude:cli:isAuthenticated"),
-    getCliVersion: (): Promise<string | null> =>
-      ipcRenderer.invoke("claude:cli:getVersion"),
-    getCliPath: (): Promise<string | null> =>
-      ipcRenderer.invoke("claude:cli:getPath"),
-    setCliPath: (path: string | null): Promise<void> =>
-      ipcRenderer.invoke("claude:cli:setPath", path),
-    getConfiguredCliPath: (): Promise<string | null> =>
-      ipcRenderer.invoke("claude:cli:getConfiguredPath"),
-  },
   ollama: {
     isRunning: (): Promise<boolean> => ipcRenderer.invoke("ollama:isRunning"),
     getVersion: (): Promise<string | null> =>
