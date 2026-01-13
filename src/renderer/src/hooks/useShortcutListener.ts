@@ -21,66 +21,66 @@ export function useShortcutListener() {
 
   useEffect(() => {
     // Settings - direct navigation
-    const unsubSettings = window.electron.shortcuts.onSettings(() => {
+    const unsubSettings = window.kairos.shortcuts.onSettings(() => {
       navigate({ to: '/settings' })
     })
 
     // New Application - store flag
-    const unsubNewApp = window.electron.shortcuts.onNewApplication(() => {
+    const unsubNewApp = window.kairos.shortcuts.onNewApplication(() => {
       requestNewApplication()
     })
 
     // Save - store flag
-    const unsubSave = window.electron.shortcuts.onSave(() => {
+    const unsubSave = window.kairos.shortcuts.onSave(() => {
       requestSave()
     })
 
     // Export PDF - store flag
-    const unsubExportPdf = window.electron.shortcuts.onExportPdf(() => {
+    const unsubExportPdf = window.kairos.shortcuts.onExportPdf(() => {
       requestExportPdf()
     })
 
     // Batch Export - store flag
-    const unsubBatchExport = window.electron.shortcuts.onBatchExport(() => {
+    const unsubBatchExport = window.kairos.shortcuts.onBatchExport(() => {
       requestBatchExport()
     })
 
     // Document Settings - store flag
-    const unsubDocSettings = window.electron.shortcuts.onDocumentSettings(
+    const unsubDocSettings = window.kairos.shortcuts.onDocumentSettings(
       () => {
         requestDocumentSettings()
       },
     )
 
     // Tailor - store flag
-    const unsubTailor = window.electron.shortcuts.onTailor(() => {
+    const unsubTailor = window.kairos.shortcuts.onTailor(() => {
       requestTailor()
     })
 
     // Navigation - store flags with direction
-    const unsubPrevApp = window.electron.shortcuts.onPrevApp(() => {
+    const unsubPrevApp = window.kairos.shortcuts.onPrevApp(() => {
       requestNavigation('prev')
     })
 
-    const unsubNextApp = window.electron.shortcuts.onNextApp(() => {
+    const unsubNextApp = window.kairos.shortcuts.onNextApp(() => {
       requestNavigation('next')
     })
 
-    const unsubLatestApp = window.electron.shortcuts.onLatestApp(() => {
+    const unsubLatestApp = window.kairos.shortcuts.onLatestApp(() => {
       requestNavigation('latest')
     })
 
-    const unsubOldestApp = window.electron.shortcuts.onOldestApp(() => {
+    const unsubOldestApp = window.kairos.shortcuts.onOldestApp(() => {
       requestNavigation('oldest')
     })
 
     // Toggle Sidebar - direct store call
-    const unsubToggleSidebar = window.electron.shortcuts.onToggleSidebar(() => {
+    const unsubToggleSidebar = window.kairos.shortcuts.onToggleSidebar(() => {
       useLayoutStore.getState().toggleSidebar()
     })
 
     // Toggle Columns - direct store call
-    const unsubToggleColumns = window.electron.shortcuts.onToggleColumns(() => {
+    const unsubToggleColumns = window.kairos.shortcuts.onToggleColumns(() => {
       useLayoutStore.getState().toggleChecklist()
     })
 

@@ -1,63 +1,35 @@
-import { useEffect, useState } from 'react'
-import { useNavigate, useSearch } from '@tanstack/react-router'
+import { useSearch } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { Toaster } from 'sonner'
-import {
-  CircleAlert,
-  CircleCheck,
-  CircleX,
-  Columns2,
-  Columns3,
-  Info,
-  PanelLeft,
-} from 'lucide-react'
-import { TailoringButton } from '@editor/TailoringButton'
-import { PageHeader } from '@ui/PageHeader'
-import { Button } from '@ui/Button'
+import { CircleAlert, CircleCheck, CircleX, Info } from 'lucide-react'
 import { getAllJobApplications, getJobApplication } from '@api/jobs'
 import { useWorkflowSync } from '@hooks/useWorkflowSync'
 import { useCurrentTheme } from '@hooks/useTheme'
 import { useSyncJobApplicationToStore } from '@hooks/useSyncJobApplicationToStore'
 import { useJobApplicationMutations } from '@hooks/useJobApplicationMutations'
+import { useAppNavigation } from '@hooks/useAppNavigation'
+import { useLastViewedApplication } from '@hooks/useLastViewedApplication'
 import ResumeRender from '@editor/ResumeRender'
 import ResumeForm from '@resumeForm/ResumeForm'
 import Checklist from '@checklist/Checklist'
-import DownloadResumeButton from '@editor/DownloadResumeButton'
-import SaveResumeButton from '@editor/SaveResumeButton'
-import { DocumentConfigButton } from '@resumeForm/DocumentConfigButton'
 import { EmptyState } from '@layout/EmptyState'
 import { Sidebar } from '@sidebar/Sidebar'
 import { AppLayout } from '@layout/AppLayout'
+import { AppHeader } from '@layout/AppHeader'
 import { useLayoutStore } from '@layout/layout.store'
-import { useShortcutStore } from '@layout/shortcut.store'
-import { getScoreColor } from '@/utils/scoreThresholds'
-import NewApplicationButton from '@/components/upload/NewApplicationButton'
-import { BatchExportModal } from '@/components/export/BatchExportModal'
+import { BatchExportButton } from '@/components/export/BatchExportButton'
 
 export default function App() {
-  const navigate = useNavigate()
   const { jobId } = useSearch({ from: '/' })
 
   // Layout state from store
-  const { sidebarCollapsed, showChecklist, toggleSidebar, toggleChecklist } =
-    useLayoutStore()
+  const { sidebarCollapsed, showChecklist } = useLayoutStore()
 
-  // Navigation shortcut state
-  const navigationRequested = useShortcutStore(
-    (state) => state.navigationRequested,
-  )
-  const clearNavigationRequest = useShortcutStore(
-    (state) => state.clearNavigationRequest,
-  )
-
-  // Batch export state
-  const [showBatchExport, setShowBatchExport] = useState(false)
-  const batchExportRequested = useShortcutStore(
-    (state) => state.batchExportRequested,
-  )
-  const clearBatchExportRequest = useShortcutStore(
-    (state) => state.clearBatchExportRequest,
-  )
+  // Grid layout classes
+  const gridClasses = {
+    form: showChecklist ? 'col-span-2' : 'col-span-3',
+    preview: showChecklist ? 'col-span-4' : 'col-span-5',
+  }
 
   // Theme for toast notifications
   const { data: currentTheme } = useCurrentTheme()
@@ -71,12 +43,20 @@ export default function App() {
   // Fetch selected application details
   const { data: jobApplication } = useQuery({
     queryKey: ['jobApplication', jobId],
-    queryFn: () => getJobApplication(jobId!),
+    queryFn: function () {
+      return getJobApplication(jobId!)
+    },
     enabled: !!jobId,
   })
 
   // Mutations for edit and delete
   const { handleUpdate, handleDelete } = useJobApplicationMutations(jobId)
+
+  // Last viewed application persistence and navigation
+  const { selectApplication, navigateAfterDelete } = useLastViewedApplication({
+    jobId,
+    applications,
+  })
 
   // Sync workflow state between DB and store
   useWorkflowSync(jobId, jobApplication)
@@ -84,163 +64,50 @@ export default function App() {
   // Sync job application data to store (templateId + tailored resume)
   useSyncJobApplicationToStore(jobApplication)
 
-  // Handle batch export shortcut
-  useEffect(() => {
-    if (batchExportRequested) {
-      setShowBatchExport(true)
-      clearBatchExportRequest()
-    }
-  }, [batchExportRequested, clearBatchExportRequest])
+  // Handle keyboard shortcuts
+  useAppNavigation(applications, jobId)
 
-  // Handle navigation shortcuts
-  useEffect(() => {
-    if (!navigationRequested || applications.length === 0) {
-      if (navigationRequested) {
-        clearNavigationRequest()
-      }
-      return
-    }
-
-    const currentIndex = applications.findIndex((app) => app.id === jobId)
-    let targetId: string | undefined
-
-    switch (navigationRequested) {
-      case 'prev':
-        // Move UP in sidebar (toward newer items at top)
-        targetId = applications[Math.max(0, currentIndex - 1)]?.id
-        break
-      case 'next':
-        // Move DOWN in sidebar (toward older items at bottom)
-        targetId =
-          applications[Math.min(applications.length - 1, currentIndex + 1)]?.id
-        break
-      case 'oldest':
-        // Jump to bottom of sidebar
-        targetId = applications[applications.length - 1]?.id
-        break
-      case 'latest':
-        // Jump to top of sidebar
-        targetId = applications[0]?.id
-        break
-    }
-
-    if (targetId && targetId !== jobId) {
-      navigate({ to: '/', search: { jobId: targetId } })
-    }
-
-    clearNavigationRequest()
-  }, [
-    navigationRequested,
-    applications,
-    jobId,
-    navigate,
-    clearNavigationRequest,
-  ])
-
-  const handleSelectApplication = (id: string) => {
-    navigate({ to: '/', search: { jobId: id } })
+  function handleDeleteApplication(id: string) {
+    handleDelete(id, function () {
+      navigateAfterDelete(id)
+    })
   }
 
-  const handleUploadSuccess = (newJobId: string) => {
-    navigate({ to: '/', search: { jobId: newJobId } })
+  function handleUploadSuccess(newJobId: string) {
+    selectApplication(newJobId)
   }
-
-  const companyName = jobApplication?.companyName
-  const position = jobApplication?.position
-  const matchPercentage = jobApplication?.matchPercentage ?? 0
-  const isBuiltFromScratch = !jobApplication?.originalResume
 
   const hasApplications = applications.length > 0
-  const hasSelection = !!jobId && !!jobApplication
+  const hasActiveJob = !!jobId && !!jobApplication
 
   return (
     <>
       <AppLayout
         header={
-          <PageHeader
-            left={
-              <>
-                <Button
-                  onClick={toggleSidebar}
-                  ariaLabel={sidebarCollapsed ? 'Show sidebar' : 'Hide sidebar'}
-                  title={sidebarCollapsed ? 'Show sidebar' : 'Hide sidebar'}
-                >
-                  <PanelLeft size={16} />
-                </Button>
-                <NewApplicationButton onSuccess={handleUploadSuccess} />
-              </>
-            }
-            center={
-              hasSelection &&
-              companyName &&
-              position && (
-                <>
-                  <span>{companyName}</span>
-                  <span className="mx-2">-</span>
-                  <span>{position}</span>
-                </>
-              )
-            }
-            right={
-              hasSelection && (
-                <>
-                  <span
-                    className="mr-2 text-sm font-medium"
-                    style={{ color: getScoreColor(matchPercentage) }}
-                  >
-                    {Math.round(matchPercentage)}%
-                  </span>
-                  <TailoringButton />
-                  <DocumentConfigButton />
-                  <Button
-                    onClick={toggleChecklist}
-                    ariaLabel={
-                      showChecklist
-                        ? 'Switch to 2 columns'
-                        : 'Switch to 3 columns'
-                    }
-                    title="Toggle columns"
-                  >
-                    {showChecklist ? (
-                      <Columns2 size={16} />
-                    ) : (
-                      <Columns3 size={16} />
-                    )}
-                  </Button>
-                  <SaveResumeButton
-                    jobId={jobId}
-                    isBuiltFromScratch={isBuiltFromScratch}
-                  />
-                  <DownloadResumeButton
-                    companyName={companyName}
-                    position={position}
-                  />
-                </>
-              )
-            }
+          <AppHeader
+            hasActiveJob={hasActiveJob}
+            jobId={jobId}
+            jobApplication={jobApplication}
+            onUploadSuccess={handleUploadSuccess}
           />
         }
         sidebar={
           <Sidebar
             applications={applications}
             selectedId={jobId}
-            onSelect={handleSelectApplication}
+            onSelect={selectApplication}
             collapsed={sidebarCollapsed}
             onEdit={handleUpdate}
-            onDelete={handleDelete}
+            onDelete={handleDeleteApplication}
           />
         }
       >
-        {hasSelection ? (
+        {hasActiveJob ? (
           <div className="relative grid h-full grid-cols-8 overflow-hidden">
-            <div
-              className={`h-full overflow-hidden ${showChecklist ? 'col-span-2' : 'col-span-3'}`}
-            >
+            <div className={`h-full overflow-hidden ${gridClasses.form}`}>
               <ResumeForm />
             </div>
-            <div
-              className={`h-full overflow-hidden ${showChecklist ? 'col-span-4' : 'col-span-5'}`}
-            >
+            <div className={`h-full overflow-hidden ${gridClasses.preview}`}>
               <ResumeRender expanded={!showChecklist} />
             </div>
             {showChecklist && (
@@ -254,11 +121,7 @@ export default function App() {
         )}
       </AppLayout>
 
-      <BatchExportModal
-        open={showBatchExport}
-        onClose={() => setShowBatchExport(false)}
-        applications={applications}
-      />
+      <BatchExportButton applications={applications} />
 
       <Toaster
         position="bottom-right"

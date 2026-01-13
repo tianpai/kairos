@@ -3,6 +3,7 @@
  * Self-contained: schema, UI schema, styles, and content generation
  */
 
+import { BriefcaseBusiness } from 'lucide-react'
 import { z } from 'zod'
 import {
   escapeTypstString,
@@ -80,6 +81,7 @@ ${bullets}`
 const UI_SCHEMA: SectionUISchema = {
   id: SECTION_IDS.WORK_EXPERIENCE,
   label: 'Work Experience',
+  icon: BriefcaseBusiness,
   multiple: true,
   required: false,
   fields: [

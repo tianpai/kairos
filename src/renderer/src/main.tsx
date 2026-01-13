@@ -15,7 +15,6 @@ import App from '@/components/App'
 import SettingsPage from '@/components/settings/SettingsPage'
 import * as TanStackQueryProvider from '@/integrations/tanstack-query/root-provider.tsx'
 import { useShortcutListener } from '@/hooks/useShortcutListener'
-import { TipBanner } from '@/tips'
 
 import './styles.css'
 
@@ -49,7 +48,6 @@ function RootLayout() {
   return (
     <>
       <Outlet />
-      <TipBanner />
       {/* <TanStackRouterDevtools /> */}
     </>
   )

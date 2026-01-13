@@ -1,5 +1,6 @@
-import { useState, createContext, useContext, ReactNode } from 'react'
+import { createContext, useContext, useState } from 'react'
 import { ChevronDown } from 'lucide-react'
+import type { ReactNode } from 'react';
 
 interface AccordionContextType {
   openItem: string | null

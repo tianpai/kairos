@@ -14,13 +14,6 @@ interface SettingsSchema {
       selectedModel: string | null;
       cachedModels: Array<string>;
     };
-    claude: {
-      // No apiKey - Claude uses OAuth tokens or CLI
-      authMode: "oauth" | "cli";
-      cliPath: string | null; // User-configured path to claude binary
-      selectedModel: string | null;
-      cachedModels: Array<string>;
-    };
     ollama: {
       // No apiKey - Ollama runs locally
       baseUrl: string;
@@ -43,7 +36,7 @@ interface SettingsSchema {
       cachedModels: Array<string>;
     };
   };
-  activeProvider: "openai" | "deepseek" | "claude" | "ollama" | "xai" | "gemini" | "anthropic";
+  activeProvider: "openai" | "deepseek" | "ollama" | "xai" | "gemini" | "anthropic";
   theme: ThemeSource;
 }
 
@@ -61,12 +54,6 @@ export class SettingsService {
           },
           deepseek: {
             apiKey: null,
-            selectedModel: null,
-            cachedModels: [],
-          },
-          claude: {
-            authMode: "cli",
-            cliPath: null,
             selectedModel: null,
             cachedModels: [],
           },
@@ -95,14 +82,6 @@ export class SettingsService {
         theme: "system",
       },
     });
-
-    // Migrate existing Claude users to OAuth mode (backward compatibility)
-    // New users without existing Claude config will default to CLI
-    if (!this.store.has("aiProviders.claude.authMode")) {
-      const hasClaudeModels = this.store.has("aiProviders.claude.selectedModel");
-      const defaultMode = hasClaudeModels ? "oauth" : "cli";
-      this.store.set("aiProviders.claude.authMode", defaultMode);
-    }
   }
 
   getOpenAIKey(): string | null {
@@ -176,39 +155,6 @@ export class SettingsService {
 
   setDeepSeekCachedModels(models: Array<string>): void {
     this.store.set("aiProviders.deepseek.cachedModels", models);
-  }
-
-  // Claude methods (no API key - uses OAuth tokens or CLI)
-  getClaudeAuthMode(): "oauth" | "cli" {
-    return this.store.get("aiProviders.claude.authMode");
-  }
-
-  setClaudeAuthMode(mode: "oauth" | "cli"): void {
-    this.store.set("aiProviders.claude.authMode", mode);
-  }
-
-  getClaudeCliPath(): string | null {
-    return this.store.get("aiProviders.claude.cliPath");
-  }
-
-  setClaudeCliPath(path: string | null): void {
-    this.store.set("aiProviders.claude.cliPath", path);
-  }
-
-  getClaudeSelectedModel(): string | null {
-    return this.store.get("aiProviders.claude.selectedModel");
-  }
-
-  setClaudeSelectedModel(model: string): void {
-    this.store.set("aiProviders.claude.selectedModel", model);
-  }
-
-  getClaudeCachedModels(): Array<string> {
-    return this.store.get("aiProviders.claude.cachedModels");
-  }
-
-  setClaudeCachedModels(models: Array<string>): void {
-    this.store.set("aiProviders.claude.cachedModels", models);
   }
 
   // Ollama methods (no API key - runs locally)
@@ -336,11 +282,11 @@ export class SettingsService {
   }
 
   // Active provider methods
-  getActiveProvider(): "openai" | "deepseek" | "claude" | "ollama" | "xai" | "gemini" | "anthropic" {
+  getActiveProvider(): "openai" | "deepseek" | "ollama" | "xai" | "gemini" | "anthropic" {
     return this.store.get("activeProvider");
   }
 
-  setActiveProvider(provider: "openai" | "deepseek" | "claude" | "ollama" | "xai" | "gemini" | "anthropic"): void {
+  setActiveProvider(provider: "openai" | "deepseek" | "ollama" | "xai" | "gemini" | "anthropic"): void {
     this.store.set("activeProvider", provider);
   }
 
@@ -357,10 +303,6 @@ export class SettingsService {
         return this.hasGeminiKey();
       case "anthropic":
         return this.hasAnthropicKey();
-      case "claude":
-        // Claude uses OAuth or CLI - renderer checks actual auth status
-        // Return true here, let renderer handle detailed check
-        return true;
       case "ollama":
         // Ollama runs locally - renderer checks if server is running
         // Return true here, let renderer handle detailed check
@@ -375,5 +317,37 @@ export class SettingsService {
 
   setTheme(theme: ThemeSource): void {
     this.store.set("theme", theme);
+  }
+
+  // Reset all provider settings to defaults
+  resetAllProviders(): void {
+    // Reset all API keys
+    this.store.set("aiProviders.openai.apiKey", null);
+    this.store.set("aiProviders.deepseek.apiKey", null);
+    this.store.set("aiProviders.xai.apiKey", null);
+    this.store.set("aiProviders.gemini.apiKey", null);
+    this.store.set("aiProviders.anthropic.apiKey", null);
+
+    // Reset all selected models
+    this.store.set("aiProviders.openai.selectedModel", null);
+    this.store.set("aiProviders.deepseek.selectedModel", null);
+    this.store.set("aiProviders.ollama.selectedModel", null);
+    this.store.set("aiProviders.xai.selectedModel", null);
+    this.store.set("aiProviders.gemini.selectedModel", null);
+    this.store.set("aiProviders.anthropic.selectedModel", null);
+
+    // Reset cached models
+    this.store.set("aiProviders.openai.cachedModels", []);
+    this.store.set("aiProviders.deepseek.cachedModels", []);
+    this.store.set("aiProviders.ollama.cachedModels", []);
+    this.store.set("aiProviders.xai.cachedModels", []);
+    this.store.set("aiProviders.gemini.cachedModels", []);
+    this.store.set("aiProviders.anthropic.cachedModels", []);
+
+    // Reset Ollama to default
+    this.store.set("aiProviders.ollama.baseUrl", "http://localhost:11434");
+
+    // Reset active provider to default
+    this.store.set("activeProvider", "openai");
   }
 }

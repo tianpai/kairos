@@ -34,7 +34,10 @@ export default function NewApplicationModal({
   const buildPayload = useNewApplicationStore((s) => s.buildPayload)
   const entries = useNewApplicationStore((s) => s.entries)
 
-  const entryCount = entries.length
+  const filledEntryCount = entries.filter(
+    (entry) => entry.jobDescription.trim().length > 0,
+  ).length
+  const entryCount = Math.max(1, filledEntryCount)
 
   function handleSubmit() {
     if (isSubmitting) return
@@ -50,7 +53,7 @@ export default function NewApplicationModal({
       open={isOpen}
       onClose={onClose}
       variant="popup"
-      maxWidth="xl"
+      maxWidth="2xl"
       actions={
         <>
           <Button onClick={onClose}>Cancel</Button>

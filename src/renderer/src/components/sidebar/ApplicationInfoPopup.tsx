@@ -1,17 +1,9 @@
 import { Info } from 'lucide-react'
 import { HoverPopup } from '@ui/HoverPopup'
+import { InfoRow } from '@ui/InfoRow'
 import { getScoreColor } from '@/utils/scoreThresholds'
 
-function InfoRow({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex items-center justify-between gap-8">
-      <span className="text-hint">{label}</span>
-      <span className="text-secondary">{value}</span>
-    </div>
-  )
-}
-
-const formatDateTime = (dateStr: string): string => {
+function formatDateTime(dateStr: string): string {
   const date = new Date(dateStr)
   return date.toLocaleDateString('en-US', {
     month: 'short',
@@ -22,7 +14,7 @@ const formatDateTime = (dateStr: string): string => {
   })
 }
 
-const formatDate = (dateStr: string): string => {
+function formatDate(dateStr: string): string {
   const date = new Date(dateStr)
   return date.toLocaleDateString('en-US', {
     month: 'short',
@@ -31,7 +23,7 @@ const formatDate = (dateStr: string): string => {
   })
 }
 
-const isOverdue = (dateStr: string): boolean => {
+function isOverdue(dateStr: string): boolean {
   const date = new Date(dateStr)
   const today = new Date()
   today.setHours(0, 0, 0, 0)
@@ -54,9 +46,9 @@ export function ApplicationInfoPopup({
   updatedAt,
   anchorRect,
   onEdit,
-}: ApplicationInfoPopupProps) {
+}: ApplicationInfoPopupProps): JSX.Element {
   return (
-    <HoverPopup position="right" anchorRect={anchorRect}>
+    <HoverPopup position="right" anchorRect={anchorRect} width="w-72">
       <div className="space-y-1 text-sm">
         <div className="flex items-center justify-between gap-8">
           <span className="text-hint">Score</span>

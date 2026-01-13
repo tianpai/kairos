@@ -1,6 +1,6 @@
 {
   "name": "kairos",
-  "version": "0.1.2",
+  "version": "0.1.6",
   "description": "AI-powered resume optimization desktop application",
   "main": "./out/main/index.js",
   "author": "",
@@ -30,6 +30,7 @@
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
+    "@lobehub/icons": "^4.0.2",
     "@myriaddreamin/typst-ts-renderer": "^0.6.1-rc4",
     "@myriaddreamin/typst-ts-web-compiler": "^0.6.1-rc4",
     "@myriaddreamin/typst.ts": "^0.6.1-rc4",

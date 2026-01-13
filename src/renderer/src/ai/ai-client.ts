@@ -1,4 +1,5 @@
 import log from 'electron-log/renderer'
+import type { ProviderType } from '../../../shared/providers'
 import type { TaskName } from '../workflow/task-contracts'
 
 type PendingTask = {
@@ -13,15 +14,6 @@ export interface ExecuteOptions {
   streaming?: boolean
   onPartial?: (partial: unknown) => void
 }
-
-type ProviderType =
-  | 'openai'
-  | 'deepseek'
-  | 'claude'
-  | 'ollama'
-  | 'xai'
-  | 'gemini'
-  | 'anthropic'
 
 interface ServerInfo {
   port: number
@@ -42,26 +34,23 @@ async function getActiveProviderConfig(): Promise<{
   model: string
   apiKey: string
 }> {
-  const provider = (await window.electron.provider.getActive()) as ProviderType
+  const provider = (await window.kairos.provider.getActive())
 
   // Get API key or OAuth token based on provider
   let apiKey: string | null
   if (provider === 'ollama') {
     // Ollama doesn't need an API key, but we pass a dummy for consistency
     apiKey = 'ollama'
-  } else if (provider === 'claude') {
-    // Get OAuth access token for Claude
-    apiKey = await window.electron.claudeSubscription.getAccessToken()
   } else if (provider === 'deepseek') {
-    apiKey = await window.electron.settings.getDeepSeekApiKey()
+    apiKey = await window.kairos.settings.getDeepSeekApiKey()
   } else if (provider === 'xai') {
-    apiKey = await window.electron.settings.getXAIApiKey()
+    apiKey = await window.kairos.settings.getXAIApiKey()
   } else if (provider === 'gemini') {
-    apiKey = await window.electron.settings.getGeminiApiKey()
+    apiKey = await window.kairos.settings.getGeminiApiKey()
   } else if (provider === 'anthropic') {
-    apiKey = await window.electron.settings.getAnthropicApiKey()
+    apiKey = await window.kairos.settings.getAnthropicApiKey()
   } else {
-    apiKey = await window.electron.settings.getApiKey()
+    apiKey = await window.kairos.settings.getApiKey()
   }
 
   if (!apiKey) {
@@ -69,8 +58,8 @@ async function getActiveProviderConfig(): Promise<{
   }
 
   // Get selected model or default
-  const selected = await window.electron.models.getSelected(provider)
-  const model = selected ?? (await window.electron.models.getDefault(provider))
+  const selected = await window.kairos.models.getSelected(provider)
+  const model = selected ?? (await window.kairos.models.getDefault(provider))
 
   return { provider, model, apiKey }
 }
@@ -83,7 +72,7 @@ class AIClient {
 
   private async getServerInfo(): Promise<ServerInfo> {
     if (!this.serverInfo) {
-      this.serverInfo = await window.electron.aiServer.getInfo()
+      this.serverInfo = await window.kairos.aiServer.getInfo()
     }
     return this.serverInfo
   }

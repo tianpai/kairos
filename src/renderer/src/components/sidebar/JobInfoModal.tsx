@@ -125,7 +125,7 @@ export default function JobInfoModal({
               type="button"
               onClick={() => {
                 const url = normalizeUrl(jobUrl)
-                if (url) window.electron.shell.openExternal(url)
+                if (url) window.kairos.shell.openExternal(url)
               }}
               className="mb-0.5 rounded p-2 text-hint transition-colors hover:bg-hover hover:text-primary"
               title="Open in browser"

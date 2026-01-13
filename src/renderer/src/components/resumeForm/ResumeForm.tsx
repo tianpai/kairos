@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useResumeStore } from '@typst-compiler/resumeState'
+import { Button } from '@ui/Button'
+import { Tooltip } from '@ui/Tooltip'
 import { DynamicSection } from '@/components/resumeForm/DynamicSection'
 import { TemplateBuilder } from '@/templates/builder'
 import { TemplateId } from '@/templates/templateId'
@@ -30,23 +32,21 @@ export default function ResumeForm() {
 
   return (
     <div className="flex h-full flex-col">
-      {/* Vertical Tab Navigation */}
-      <div className="bg-app-header m-2 flex flex-col rounded-lg p-2">
+      {/* Section Navigation */}
+      <div className="bg-app-header my-2 ml-2 mr-1 flex flex-wrap justify-center gap-1 rounded-lg p-2">
         {sectionOrder.map((sectionId) => {
           const schema = schemaById[sectionId]
+          const Icon = schema.icon
           return (
-            <button
-              key={sectionId}
-              type="button"
-              onClick={() => setActiveTab(sectionId)}
-              className={`w-full cursor-pointer rounded-lg px-3 py-1.5 text-left text-sm transition-colors ${
-                activeTab === sectionId
-                  ? 'bg-active font-medium text-primary'
-                  : 'text-secondary hover:bg-hover'
-              }`}
-            >
-              {schema.label}
-            </button>
+            <Tooltip key={sectionId} content={schema.label}>
+              <Button
+                variant="icon"
+                active={activeTab === sectionId}
+                onClick={() => setActiveTab(sectionId)}
+              >
+                <Icon size={16} />
+              </Button>
+            </Tooltip>
           )
         })}
       </div>

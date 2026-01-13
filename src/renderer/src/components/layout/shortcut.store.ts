@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 
-type NavigationDirection = 'prev' | 'next' | 'oldest' | 'latest'
+export type NavigationDirection = 'prev' | 'next' | 'oldest' | 'latest'
 
 interface ShortcutState {
   // Flags

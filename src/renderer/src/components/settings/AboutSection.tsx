@@ -1,31 +1,14 @@
 import { useEffect, useState } from 'react'
 import changelogRaw from '@root/CHANGELOG.md?raw'
 import pkg from '@root/package.json'
-import { versionQuotes } from '@/data/versionQuotes'
 import {
   Accordion,
+  AccordionContent,
   AccordionItem,
   AccordionTrigger,
-  AccordionContent,
 } from '@ui/Accordion'
-
-type UpdateStatus =
-  | 'idle'
-  | 'checking'
-  | 'available'
-  | 'not-available'
-  | 'downloading'
-  | 'downloaded'
-  | 'error'
-
-interface UpdateState {
-  status: UpdateStatus
-  version?: string
-  error?: string
-  progress?: {
-    percent: number
-  }
-}
+import type { UpdateState, UpdateStatus } from '../../../../shared/updater'
+import { versionQuotes } from '@/data/versionQuotes'
 
 function GitHubIcon({ size = 24 }: { size?: number }) {
   return (
@@ -145,13 +128,13 @@ export function AboutSection() {
   const [isPackaged, setIsPackaged] = useState<boolean | null>(null)
 
   useEffect(() => {
-    window.electron.updater.isPackaged().then(setIsPackaged)
+    window.kairos.updater.isPackaged().then(setIsPackaged)
   }, [])
 
   const checkForUpdates = async () => {
     setUpdateState({ status: 'checking' })
     try {
-      const state = (await window.electron.updater.check()) as UpdateState
+      const state = (await window.kairos.updater.check())
       setUpdateState(state)
     } catch {
       setUpdateState({ status: 'error', error: 'Failed to check for updates' })
@@ -160,10 +143,10 @@ export function AboutSection() {
 
   const handleDownload = async () => {
     try {
-      await window.electron.updater.download()
+      await window.kairos.updater.download()
       // Poll for state updates during download
       const pollInterval = setInterval(async () => {
-        const state = (await window.electron.updater.getState()) as UpdateState
+        const state = (await window.kairos.updater.getState())
         setUpdateState(state)
         if (state.status === 'downloaded' || state.status === 'error') {
           clearInterval(pollInterval)
@@ -175,11 +158,11 @@ export function AboutSection() {
   }
 
   const handleInstall = () => {
-    window.electron.updater.quitAndInstall()
+    window.kairos.updater.quitAndInstall()
   }
 
   const openReleasesPage = () => {
-    window.electron.updater.openReleasesPage()
+    window.kairos.updater.openReleasesPage()
   }
 
   return (

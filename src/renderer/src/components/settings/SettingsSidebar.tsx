@@ -1,9 +1,9 @@
-import { Cpu, Info, Lightbulb, Palette } from 'lucide-react'
+import { Cpu, Info, Lightbulb, Palette, Settings } from 'lucide-react'
 import { CollapsibleSidebar } from '@sidebar/CollapsibleSidebar'
 import { GenericSidebarItem } from '@sidebar/GenericSidebarItem'
 import type { LucideIcon } from 'lucide-react'
 
-export type SettingsSection = 'providers' | 'appearance' | 'tips' | 'about'
+export type SettingsSection = 'providers' | 'appearance' | 'tips' | 'general' | 'about'
 
 interface NavItem {
   id: SettingsSection
@@ -12,6 +12,7 @@ interface NavItem {
 }
 
 const NAV_ITEMS: Array<NavItem> = [
+  { id: 'general', label: 'General', icon: Settings },
   { id: 'providers', label: 'Providers', icon: Cpu },
   { id: 'appearance', label: 'Appearance', icon: Palette },
   { id: 'tips', label: 'Tips', icon: Lightbulb },

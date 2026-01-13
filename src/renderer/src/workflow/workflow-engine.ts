@@ -14,7 +14,7 @@ import log from 'electron-log/renderer'
 import { toast } from 'sonner'
 import { tip } from '@tips/tips.service'
 import { saveWorkflow } from '@api/jobs'
-import { friendlyError } from '@/utils/error'
+import { useTipsStore } from '@tips/tips.store'
 
 import { getMissingInputs, getTask, resolveTaskInput } from './define-task'
 import {
@@ -28,6 +28,7 @@ import type { Workflow } from './define-workflow'
 import type { TaskName, WorkflowContext } from './task-contracts'
 import type { TaskStateMap, WorkflowInstance } from './workflow.store'
 import type { WorkflowStepsData } from '@api/jobs'
+import { friendlyError } from '@/utils/error'
 
 // =============================================================================
 // Public API
@@ -312,12 +313,6 @@ async function executeTask<T extends TaskName>(
       store.updateContext(jobId, { [task.provides]: result })
     }
 
-    // Trigger tip
-    if (task.tipEvent) {
-      const tipData = task.getTipData?.(result)
-      tip.trigger(task.tipEvent, tipData)
-    }
-
     // Mark completed
     store.setTaskStatus(jobId, taskName, 'completed')
     log.info(`[WorkflowEngine] Task completed: ${taskName}`)
@@ -390,7 +385,43 @@ async function startReadyTasks(
         workflowInstance.workflowName === 'tailoring'
           ? 'Tailoring complete'
           : 'Processing complete'
-      toast.success(workflowLabel)
+
+      // Check for tip events in completed tasks
+      let tipEvent = null
+      let tipData = {}
+
+      for (const [taskName, status] of Object.entries(
+        workflowInstance.taskStates,
+      )) {
+        if (status === 'completed') {
+          const task = getTask(taskName as TaskName)
+          if (task?.tipEvent) {
+            tipEvent = task.tipEvent
+            // Try to get tip data from context
+            if (task.provides && context) {
+              const result = context[task.provides as keyof typeof context]
+              tipData = task.getTipData?.(result as never) ?? {}
+            }
+            break // Use the first matching task with tipEvent
+          }
+        }
+      }
+
+      const tipMessage = tipEvent
+        ? tip.appendToSuccess(tipEvent, tipData)
+        : null
+
+      toast.success(workflowLabel, {
+        ...(tipMessage && {
+          description: tipMessage,
+          action: {
+            label: 'Never show',
+            onClick: () => {
+              useTipsStore.getState().neverShow()
+            },
+          },
+        }),
+      })
     }
     return
   }

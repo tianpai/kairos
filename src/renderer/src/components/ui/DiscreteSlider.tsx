@@ -1,3 +1,5 @@
+import { cn } from '@/utils/cn'
+
 interface DiscreteSliderProps {
   values: Array<number>
   value: number
@@ -12,7 +14,7 @@ export function DiscreteSlider({
   onChange,
   label,
   unit,
-}: DiscreteSliderProps) {
+}: DiscreteSliderProps): JSX.Element {
   return (
     <div className="w-full space-y-1">
       {label && (
@@ -31,11 +33,15 @@ export function DiscreteSlider({
             <button
               key={v}
               onClick={() => onChange(v)}
-              className={`px-3 py-1.5 text-sm transition-colors ${
+              className={cn(
+                'px-3 py-1.5 text-sm transition-colors',
                 isSelected
                   ? 'bg-active text-primary'
-                  : 'bg-surface text-secondary hover:bg-hover'
-              } ${isFirst ? 'rounded-l-md' : ''} ${isLast ? 'rounded-r-md' : ''} ${!isLast ? 'border-r border-default' : ''}`}
+                  : 'bg-surface text-secondary hover:bg-hover',
+                isFirst && 'rounded-l-md',
+                isLast && 'rounded-r-md',
+                !isLast && 'border-r border-default',
+              )}
             >
               {v}
             </button>

@@ -1,31 +1,8 @@
 import { app, shell } from 'electron'
 import { autoUpdater } from 'electron-updater'
 import log from 'electron-log/main'
-import type { UpdateInfo } from 'electron-updater';
-
-export type UpdateStatus =
-  | 'idle'
-  | 'checking'
-  | 'available'
-  | 'not-available'
-  | 'downloading'
-  | 'downloaded'
-  | 'error'
-
-export interface UpdateProgress {
-  percent: number
-  bytesPerSecond: number
-  transferred: number
-  total: number
-}
-
-export interface UpdateState {
-  status: UpdateStatus
-  version?: string
-  releaseNotes?: string
-  error?: string
-  progress?: UpdateProgress
-}
+import type { UpdateInfo } from 'electron-updater'
+import type { UpdateState, UpdateStatus } from '../../shared/updater'
 
 class UpdaterService {
   private currentState: UpdateState = { status: 'idle' }
@@ -140,7 +117,10 @@ class UpdaterService {
 
   quitAndInstall(): void {
     log.info('[Updater] Quitting and installing...')
-    autoUpdater.quitAndInstall(false, true)
+    // Defer to ensure IPC response is sent before app quits
+    setImmediate(() => {
+      autoUpdater.quitAndInstall(false, true)
+    })
   }
 
   getCurrentVersion(): string {

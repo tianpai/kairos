@@ -3,6 +3,7 @@
  * Special section that wraps the entire document with #show:
  */
 
+import { User } from 'lucide-react'
 import { z } from 'zod'
 import { SECTION_IDS } from '@templates/template.types'
 import type { Section, SectionUISchema } from '@templates/template.types'
@@ -61,6 +62,7 @@ export class PersonalInfoSection implements Section<PersonalInfo> {
     return {
       id: SECTION_IDS.PERSONAL_INFO,
       label: 'Personal Information',
+      icon: User,
       multiple: false,
       required: true,
       fields: [
@@ -72,6 +74,9 @@ export class PersonalInfoSection implements Section<PersonalInfo> {
         { key: 'linkedin', label: 'LinkedIn', type: 'text' },
         { key: 'personalSite', label: 'Personal Website', type: 'text' },
         { key: 'pronouns', label: 'Pronouns', type: 'text' },
+        { key: 'authorPosition', label: 'Name Alignment', type: 'select', options: ['left', 'center', 'right'] },
+        { key: 'personalInfoPosition', label: 'Contact Alignment', type: 'select', options: ['left', 'center', 'right'] },
+        { key: 'authorFontSize', label: 'Name Font Size', type: 'select', options: ['17pt', '18pt', '19pt', '20pt', '21pt', '22pt'] },
       ],
     }
   }

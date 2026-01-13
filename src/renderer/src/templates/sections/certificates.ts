@@ -3,6 +3,7 @@
  * Self-contained: schema, UI schema, styles, and content generation
  */
 
+import { Award } from 'lucide-react'
 import { z } from 'zod'
 import { escapeTypstString } from '@templates/shared/codegen-helper'
 import { SECTION_IDS } from '@templates/template.types'
@@ -71,6 +72,7 @@ export class CertificatesSection implements Section<Certificate> {
 const UI_SCHEMA: SectionUISchema = {
   id: SECTION_IDS.CERTIFICATES,
   label: 'Certificates',
+  icon: Award,
   multiple: true,
   required: false,
   fields: [

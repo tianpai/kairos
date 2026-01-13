@@ -36,7 +36,7 @@ your resume for each application.
 
 ### AI Providers
 
-Bring your own API key or use Claude Code subscription:
+Bring your own API key:
 
 - OpenAI
 - Anthropic Claude

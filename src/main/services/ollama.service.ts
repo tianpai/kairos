@@ -1,4 +1,5 @@
 import type { ModelInfo } from "./ai-models.service"
+import type { OllamaPullProgress } from "../../shared/ollama"
 
 const OLLAMA_DEFAULT_BASE_URL = "http://localhost:11434"
 
@@ -16,13 +17,6 @@ export interface OllamaModel {
   size: number
   digest: string
   modified_at: string
-}
-
-export interface OllamaPullProgress {
-  status: string
-  digest?: string
-  total?: number
-  completed?: number
 }
 
 interface OllamaVersionResponse {

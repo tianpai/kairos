@@ -3,6 +3,7 @@
     "**/*.ts",
     "**/*.tsx",
     "../preload/index.d.ts",
+    "../shared/**/*",
     "eslint.config.js",
     "prettier.config.js",
     "vite.config.ts"

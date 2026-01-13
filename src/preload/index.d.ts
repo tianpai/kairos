@@ -1,50 +1,15 @@
 type ThemeSource = "system" | "light" | "dark";
 type ThemeMode = "light" | "dark";
-type ProviderType =
-  | "openai"
-  | "deepseek"
-  | "claude"
-  | "ollama"
-  | "xai"
-  | "gemini";
+type ProviderType = import("../shared/providers").ProviderType;
+type UpdateState = import("../shared/updater").UpdateState;
+type OllamaPullProgress = import("../shared/ollama").OllamaPullProgress;
 
 interface ModelInfo {
   id: string;
   name: string;
 }
 
-interface OllamaPullProgress {
-  status: string;
-  digest?: string;
-  total?: number;
-  completed?: number;
-}
-
-type UpdateStatus =
-  | "idle"
-  | "checking"
-  | "available"
-  | "not-available"
-  | "downloading"
-  | "downloaded"
-  | "error";
-
-interface UpdateProgress {
-  percent: number;
-  bytesPerSecond: number;
-  transferred: number;
-  total: number;
-}
-
-interface UpdateState {
-  status: UpdateStatus;
-  version?: string;
-  releaseNotes?: string;
-  error?: string;
-  progress?: UpdateProgress;
-}
-
-interface IElectronAPI {
+interface KairosAPI {
   shortcuts: {
     onSettings: (callback: () => void) => () => void;
     onNewApplication: (callback: () => void) => () => void;
@@ -95,10 +60,17 @@ interface IElectronAPI {
     setGeminiApiKey: (key: string) => Promise<void>;
     hasGeminiApiKey: () => Promise<boolean>;
     deleteGeminiApiKey: () => Promise<void>;
+    // Anthropic
+    getAnthropicApiKey: () => Promise<string | null>;
+    setAnthropicApiKey: (key: string) => Promise<void>;
+    hasAnthropicApiKey: () => Promise<boolean>;
+    deleteAnthropicApiKey: () => Promise<void>;
+    // Reset
+    resetAllProviders: () => Promise<{ success: boolean }>;
   };
   models: {
     fetch: (provider: ProviderType) => Promise<ModelInfo[]>;
-    getCached: (provider: ProviderType) => Promise<string[]>;
+    getCachedIds: (provider: ProviderType) => Promise<string[]>;
     getSelected: (provider: ProviderType) => Promise<string | null>;
     setSelected: (provider: ProviderType, model: string) => Promise<void>;
     getDefault: (provider: ProviderType) => Promise<string>;
@@ -106,28 +78,6 @@ interface IElectronAPI {
   provider: {
     getActive: () => Promise<ProviderType>;
     setActive: (provider: ProviderType) => Promise<void>;
-  };
-  claudeSubscription: {
-    // OAuth methods
-    startAuthorization: () => Promise<{ codeVerifier: string }>;
-    completeAuthorization: (
-      code: string,
-      codeVerifier?: string,
-    ) => Promise<unknown>;
-    getAccessToken: () => Promise<string>;
-    isAuthenticated: () => Promise<boolean>;
-    logout: () => Promise<void>;
-    cancelAuthorization: () => void;
-    // Auth mode methods
-    getAuthMode: () => Promise<"oauth" | "cli">;
-    setAuthMode: (mode: "oauth" | "cli") => Promise<void>;
-    // CLI validation methods
-    isCliInstalled: () => Promise<boolean>;
-    isCliAuthenticated: () => Promise<boolean>;
-    getCliVersion: () => Promise<string | null>;
-    getCliPath: () => Promise<string | null>;
-    setCliPath: (path: string | null) => Promise<void>;
-    getConfiguredCliPath: () => Promise<string | null>;
   };
   ollama: {
     isRunning: () => Promise<boolean>;
@@ -159,10 +109,12 @@ interface IElectronAPI {
     // CRUD
     create: (data: unknown) => Promise<{ id: string }>;
     createFromScratch: (data: unknown) => Promise<{ id: string }>;
+    createFromExisting: (data: unknown) => Promise<{ id: string }>;
     getAll: () => Promise<unknown[]>;
     get: (id: string) => Promise<unknown>;
     update: (id: string, data: unknown) => Promise<unknown>;
     delete: (id: string) => Promise<{ success: boolean }>;
+    deleteAll: () => Promise<{ success: boolean }>;
     saveResume: (id: string, data: unknown) => Promise<{ success: boolean }>;
     updateJobDescription: (
       id: string,
@@ -200,7 +152,7 @@ interface IElectronAPI {
 
 declare global {
   interface Window {
-    electron: IElectronAPI;
+    kairos: KairosAPI;
   }
 }
 
