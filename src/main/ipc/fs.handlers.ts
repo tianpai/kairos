@@ -1,21 +1,21 @@
-import { writeFile } from 'node:fs/promises'
-import { join } from 'node:path'
-import { ipcMain } from 'electron'
-import log from 'electron-log/main'
+import { writeFile } from "node:fs/promises";
+import { join } from "node:path";
+import { ipcMain } from "electron";
+import log from "electron-log/main";
 
 export function registerFsHandlers(): void {
   ipcMain.handle(
-    'fs:writeFile',
+    "fs:writeFile",
     async (_, folderPath: string, filename: string, data: ArrayBuffer) => {
       try {
-        const filePath = join(folderPath, filename)
-        await writeFile(filePath, Buffer.from(data))
-        log.info(`File written: ${filePath}`)
-        return { success: true, path: filePath }
+        const filePath = join(folderPath, filename);
+        await writeFile(filePath, Buffer.from(data));
+        log.info(`File written: ${filePath}`);
+        return { success: true, path: filePath };
       } catch (error) {
-        log.error('fs:writeFile failed', error)
-        throw error
+        log.error("fs:writeFile failed", error);
+        throw error;
       }
     },
-  )
+  );
 }
