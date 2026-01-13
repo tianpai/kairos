@@ -128,13 +128,13 @@ export function AboutSection() {
   const [isPackaged, setIsPackaged] = useState<boolean | null>(null)
 
   useEffect(() => {
-    window.electron.updater.isPackaged().then(setIsPackaged)
+    window.kairos.updater.isPackaged().then(setIsPackaged)
   }, [])
 
   const checkForUpdates = async () => {
     setUpdateState({ status: 'checking' })
     try {
-      const state = (await window.electron.updater.check())
+      const state = (await window.kairos.updater.check())
       setUpdateState(state)
     } catch {
       setUpdateState({ status: 'error', error: 'Failed to check for updates' })
@@ -143,10 +143,10 @@ export function AboutSection() {
 
   const handleDownload = async () => {
     try {
-      await window.electron.updater.download()
+      await window.kairos.updater.download()
       // Poll for state updates during download
       const pollInterval = setInterval(async () => {
-        const state = (await window.electron.updater.getState())
+        const state = (await window.kairos.updater.getState())
         setUpdateState(state)
         if (state.status === 'downloaded' || state.status === 'error') {
           clearInterval(pollInterval)
@@ -158,11 +158,11 @@ export function AboutSection() {
   }
 
   const handleInstall = () => {
-    window.electron.updater.quitAndInstall()
+    window.kairos.updater.quitAndInstall()
   }
 
   const openReleasesPage = () => {
-    window.electron.updater.openReleasesPage()
+    window.kairos.updater.openReleasesPage()
   }
 
   return (

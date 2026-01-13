@@ -13,7 +13,7 @@ export function GeneralSection() {
   const handleDeleteAllData = async () => {
     setIsDeleting(true)
     try {
-      await window.electron.jobs.deleteAll()
+      await window.kairos.jobs.deleteAll()
 
       // Clear localStorage for application state
       localStorage.removeItem('resume-storage')
@@ -37,7 +37,7 @@ export function GeneralSection() {
   const handleResetProviders = async () => {
     setIsResetting(true)
     try {
-      await window.electron.settings.resetAllProviders()
+      await window.kairos.settings.resetAllProviders()
 
       // Invalidate provider-related queries
       await queryClient.invalidateQueries()

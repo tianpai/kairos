@@ -72,7 +72,7 @@ export function registerModelHandlers({
     }
   });
 
-  ipcMain.handle("models:getCached", (_, provider: ProviderType) => {
+  ipcMain.handle("models:getCachedIds", (_, provider: ProviderType) => {
     if (provider === "openai") {
       return settingsService.getOpenAICachedModels();
     } else if (provider === "deepseek") {

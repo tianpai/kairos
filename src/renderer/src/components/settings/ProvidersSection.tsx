@@ -285,7 +285,7 @@ function OllamaConfig({ isActive, onSetActive }: OllamaConfigProps) {
 
   // Listen for pull progress events
   useEffect(() => {
-    const unsubscribe = window.electron.ollama.onPullProgress((data) => {
+    const unsubscribe = window.kairos.ollama.onPullProgress((data) => {
       if (data.modelName === pullingModel) {
         setPullProgress(data)
         // Check if download is complete

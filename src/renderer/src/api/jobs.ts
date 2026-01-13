@@ -89,40 +89,40 @@ export interface UpdateJobApplicationPayload {
 export async function createJobApplication(
   payload: CreateJobApplicationPayload,
 ): Promise<CreateJobApplicationResponse> {
-  return window.electron.jobs.create(payload)
+  return window.kairos.jobs.create(payload)
 }
 
 export function createFromScratch(
   payload: CreateFromScratchPayload,
 ): Promise<CreateJobApplicationResponse> {
-  return window.electron.jobs.createFromScratch(payload)
+  return window.kairos.jobs.createFromScratch(payload)
 }
 
 export function createFromExisting(
   payload: CreateFromExistingPayload,
 ): Promise<CreateJobApplicationResponse> {
-  return window.electron.jobs.createFromExisting(payload)
+  return window.kairos.jobs.createFromExisting(payload)
 }
 
 export async function getAllJobApplications(): Promise<Array<JobApplication>> {
-  return window.electron.jobs.getAll() as Promise<Array<JobApplication>>
+  return window.kairos.jobs.getAll() as Promise<Array<JobApplication>>
 }
 
 export async function getJobApplication(
   id: string,
 ): Promise<JobApplicationDetails> {
-  return window.electron.jobs.get(id) as Promise<JobApplicationDetails>
+  return window.kairos.jobs.get(id) as Promise<JobApplicationDetails>
 }
 
 export async function updateJobApplication(
   id: string,
   payload: UpdateJobApplicationPayload,
 ): Promise<void> {
-  await window.electron.jobs.update(id, payload)
+  await window.kairos.jobs.update(id, payload)
 }
 
 export async function deleteJobApplication(id: string): Promise<void> {
-  await window.electron.jobs.delete(id)
+  await window.kairos.jobs.delete(id)
 }
 
 export async function saveResume(
@@ -130,7 +130,7 @@ export async function saveResume(
   resumeStructure: Record<string, unknown>,
   templateId: string,
 ): Promise<GeneralAPIResponse> {
-  return window.electron.jobs.saveResume(jobId, { resumeStructure, templateId })
+  return window.kairos.jobs.saveResume(jobId, { resumeStructure, templateId })
 }
 
 // Workflow data operations
@@ -140,7 +140,7 @@ export async function saveParsedResume(
   parsedResume: Record<string, unknown>,
   tailoredResume: Record<string, unknown>,
 ): Promise<GeneralAPIResponse> {
-  return window.electron.jobs.saveParsedResume(jobId, {
+  return window.kairos.jobs.saveParsedResume(jobId, {
     parsedResume,
     tailoredResume,
   })
@@ -150,21 +150,21 @@ export async function saveTailoredResume(
   jobId: string,
   tailoredResume: Record<string, unknown>,
 ): Promise<GeneralAPIResponse> {
-  return window.electron.jobs.saveTailoredResume(jobId, { tailoredResume })
+  return window.kairos.jobs.saveTailoredResume(jobId, { tailoredResume })
 }
 
 export async function saveChecklist(
   jobId: string,
   checklist: Checklist,
 ): Promise<GeneralAPIResponse> {
-  return window.electron.jobs.saveChecklist(jobId, { checklist })
+  return window.kairos.jobs.saveChecklist(jobId, { checklist })
 }
 
 export async function saveMatchScore(
   jobId: string,
   matchPercentage: number,
 ): Promise<GeneralAPIResponse> {
-  return window.electron.jobs.saveMatchScore(jobId, { matchPercentage })
+  return window.kairos.jobs.saveMatchScore(jobId, { matchPercentage })
 }
 
 export async function saveWorkflow(
@@ -172,7 +172,7 @@ export async function saveWorkflow(
   workflowSteps: WorkflowStepsData,
   workflowStatus: string,
 ): Promise<GeneralAPIResponse> {
-  return window.electron.jobs.saveWorkflowState(jobId, {
+  return window.kairos.jobs.saveWorkflowState(jobId, {
     workflowSteps,
     workflowStatus,
   })
@@ -182,5 +182,5 @@ export function updateJobDescription(
   jobId: string,
   jobDescription: string,
 ): Promise<GeneralAPIResponse> {
-  return window.electron.jobs.updateJobDescription(jobId, { jobDescription })
+  return window.kairos.jobs.updateJobDescription(jobId, { jobDescription })
 }

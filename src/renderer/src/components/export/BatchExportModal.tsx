@@ -199,7 +199,7 @@ export function BatchExportModal({
   const handleExport = useCallback(async () => {
     if (selectedIds.size === 0) return
 
-    const folderPath = await window.electron.dialog.selectFolder()
+    const folderPath = await window.kairos.dialog.selectFolder()
     if (!folderPath) return
 
     setExporting(true)
@@ -259,7 +259,7 @@ export function BatchExportModal({
         const name = personalInfo?.name?.trim() || 'resume'
         const filename = generateFilename(name, app.companyName, app.position)
 
-        await window.electron.fs.writeFile(
+        await window.kairos.fs.writeFile(
           folderPath,
           filename,
           new Uint8Array(pdfBinary).buffer,

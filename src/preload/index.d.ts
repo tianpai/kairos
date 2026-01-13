@@ -9,7 +9,7 @@ interface ModelInfo {
   name: string;
 }
 
-interface IElectronAPI {
+interface KairosAPI {
   shortcuts: {
     onSettings: (callback: () => void) => () => void;
     onNewApplication: (callback: () => void) => () => void;
@@ -61,6 +61,8 @@ interface IElectronAPI {
     hasGeminiApiKey: () => Promise<boolean>;
     deleteGeminiApiKey: () => Promise<void>;
     // Anthropic
+    getAnthropicApiKey: () => Promise<string | null>;
+    setAnthropicApiKey: (key: string) => Promise<void>;
     hasAnthropicApiKey: () => Promise<boolean>;
     deleteAnthropicApiKey: () => Promise<void>;
     // Reset
@@ -68,7 +70,7 @@ interface IElectronAPI {
   };
   models: {
     fetch: (provider: ProviderType) => Promise<ModelInfo[]>;
-    getCached: (provider: ProviderType) => Promise<string[]>;
+    getCachedIds: (provider: ProviderType) => Promise<string[]>;
     getSelected: (provider: ProviderType) => Promise<string | null>;
     setSelected: (provider: ProviderType, model: string) => Promise<void>;
     getDefault: (provider: ProviderType) => Promise<string>;
@@ -107,6 +109,7 @@ interface IElectronAPI {
     // CRUD
     create: (data: unknown) => Promise<{ id: string }>;
     createFromScratch: (data: unknown) => Promise<{ id: string }>;
+    createFromExisting: (data: unknown) => Promise<{ id: string }>;
     getAll: () => Promise<unknown[]>;
     get: (id: string) => Promise<unknown>;
     update: (id: string, data: unknown) => Promise<unknown>;
@@ -149,7 +152,7 @@ interface IElectronAPI {
 
 declare global {
   interface Window {
-    electron: IElectronAPI;
+    kairos: KairosAPI;
   }
 }
 

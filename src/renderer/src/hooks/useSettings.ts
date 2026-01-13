@@ -5,21 +5,21 @@ import type { ProviderType } from '../../../shared/providers'
 export function useHasApiKey() {
   return useQuery({
     queryKey: ['settings', 'hasApiKey'],
-    queryFn: () => window.electron.settings.hasApiKey(),
+    queryFn: () => window.kairos.settings.hasApiKey(),
   })
 }
 
 export function useApiKey() {
   return useQuery({
     queryKey: ['settings', 'apiKey'],
-    queryFn: () => window.electron.settings.getApiKey(),
+    queryFn: () => window.kairos.settings.getApiKey(),
   })
 }
 
 export function useSetApiKey() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (key: string) => window.electron.settings.setApiKey(key),
+    mutationFn: (key: string) => window.kairos.settings.setApiKey(key),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['settings'] })
     },
@@ -29,7 +29,7 @@ export function useSetApiKey() {
 export function useDeleteApiKey() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: () => window.electron.settings.deleteApiKey(),
+    mutationFn: () => window.kairos.settings.deleteApiKey(),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['settings'] })
     },
@@ -40,14 +40,14 @@ export function useDeleteApiKey() {
 export function useHasDeepSeekApiKey() {
   return useQuery({
     queryKey: ['settings', 'hasDeepSeekApiKey'],
-    queryFn: () => window.electron.settings.hasDeepSeekApiKey(),
+    queryFn: () => window.kairos.settings.hasDeepSeekApiKey(),
   })
 }
 
 export function useDeepSeekApiKey() {
   return useQuery({
     queryKey: ['settings', 'deepSeekApiKey'],
-    queryFn: () => window.electron.settings.getDeepSeekApiKey(),
+    queryFn: () => window.kairos.settings.getDeepSeekApiKey(),
   })
 }
 
@@ -55,7 +55,7 @@ export function useSetDeepSeekApiKey() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: (key: string) =>
-      window.electron.settings.setDeepSeekApiKey(key),
+      window.kairos.settings.setDeepSeekApiKey(key),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['settings'] })
     },
@@ -65,7 +65,7 @@ export function useSetDeepSeekApiKey() {
 export function useDeleteDeepSeekApiKey() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: () => window.electron.settings.deleteDeepSeekApiKey(),
+    mutationFn: () => window.kairos.settings.deleteDeepSeekApiKey(),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['settings'] })
     },
@@ -76,21 +76,21 @@ export function useDeleteDeepSeekApiKey() {
 export function useHasXAIApiKey() {
   return useQuery({
     queryKey: ['settings', 'hasXAIApiKey'],
-    queryFn: () => window.electron.settings.hasXAIApiKey(),
+    queryFn: () => window.kairos.settings.hasXAIApiKey(),
   })
 }
 
 export function useXAIApiKey() {
   return useQuery({
     queryKey: ['settings', 'xaiApiKey'],
-    queryFn: () => window.electron.settings.getXAIApiKey(),
+    queryFn: () => window.kairos.settings.getXAIApiKey(),
   })
 }
 
 export function useSetXAIApiKey() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (key: string) => window.electron.settings.setXAIApiKey(key),
+    mutationFn: (key: string) => window.kairos.settings.setXAIApiKey(key),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['settings'] })
     },
@@ -100,7 +100,7 @@ export function useSetXAIApiKey() {
 export function useDeleteXAIApiKey() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: () => window.electron.settings.deleteXAIApiKey(),
+    mutationFn: () => window.kairos.settings.deleteXAIApiKey(),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['settings'] })
     },
@@ -111,21 +111,21 @@ export function useDeleteXAIApiKey() {
 export function useHasGeminiApiKey() {
   return useQuery({
     queryKey: ['settings', 'hasGeminiApiKey'],
-    queryFn: () => window.electron.settings.hasGeminiApiKey(),
+    queryFn: () => window.kairos.settings.hasGeminiApiKey(),
   })
 }
 
 export function useGeminiApiKey() {
   return useQuery({
     queryKey: ['settings', 'geminiApiKey'],
-    queryFn: () => window.electron.settings.getGeminiApiKey(),
+    queryFn: () => window.kairos.settings.getGeminiApiKey(),
   })
 }
 
 export function useSetGeminiApiKey() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (key: string) => window.electron.settings.setGeminiApiKey(key),
+    mutationFn: (key: string) => window.kairos.settings.setGeminiApiKey(key),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['settings'] })
     },
@@ -135,7 +135,7 @@ export function useSetGeminiApiKey() {
 export function useDeleteGeminiApiKey() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: () => window.electron.settings.deleteGeminiApiKey(),
+    mutationFn: () => window.kairos.settings.deleteGeminiApiKey(),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['settings'] })
     },
@@ -146,14 +146,14 @@ export function useDeleteGeminiApiKey() {
 export function useHasAnthropicApiKey() {
   return useQuery({
     queryKey: ['settings', 'hasAnthropicApiKey'],
-    queryFn: () => window.electron.settings.hasAnthropicApiKey(),
+    queryFn: () => window.kairos.settings.hasAnthropicApiKey(),
   })
 }
 
 export function useAnthropicApiKey() {
   return useQuery({
     queryKey: ['settings', 'anthropicApiKey'],
-    queryFn: () => window.electron.settings.getAnthropicApiKey(),
+    queryFn: () => window.kairos.settings.getAnthropicApiKey(),
   })
 }
 
@@ -161,7 +161,7 @@ export function useSetAnthropicApiKey() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: (key: string) =>
-      window.electron.settings.setAnthropicApiKey(key),
+      window.kairos.settings.setAnthropicApiKey(key),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['settings'] })
     },
@@ -171,7 +171,7 @@ export function useSetAnthropicApiKey() {
 export function useDeleteAnthropicApiKey() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: () => window.electron.settings.deleteAnthropicApiKey(),
+    mutationFn: () => window.kairos.settings.deleteAnthropicApiKey(),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['settings'] })
     },
@@ -182,7 +182,7 @@ export function useDeleteAnthropicApiKey() {
 export function useFetchModels(provider: ProviderType) {
   return useQuery({
     queryKey: ['models', provider],
-    queryFn: () => window.electron.models.fetch(provider),
+    queryFn: () => window.kairos.models.fetch(provider),
     staleTime: 5 * 60 * 1000, // 5 minutes
   })
 }
@@ -190,7 +190,7 @@ export function useFetchModels(provider: ProviderType) {
 export function useSelectedModel(provider: ProviderType) {
   return useQuery({
     queryKey: ['models', 'selected', provider],
-    queryFn: () => window.electron.models.getSelected(provider),
+    queryFn: () => window.kairos.models.getSelected(provider),
   })
 }
 
@@ -203,7 +203,7 @@ export function useSetSelectedModel() {
     }: {
       provider: ProviderType
       model: string
-    }) => window.electron.models.setSelected(provider, model),
+    }) => window.kairos.models.setSelected(provider, model),
     onSuccess: (_, { provider }) => {
       queryClient.invalidateQueries({
         queryKey: ['models', 'selected', provider],
@@ -215,7 +215,7 @@ export function useSetSelectedModel() {
 export function useDefaultModel(provider: ProviderType) {
   return useQuery({
     queryKey: ['models', 'default', provider],
-    queryFn: () => window.electron.models.getDefault(provider),
+    queryFn: () => window.kairos.models.getDefault(provider),
   })
 }
 
@@ -223,7 +223,7 @@ export function useDefaultModel(provider: ProviderType) {
 export function useActiveProvider() {
   return useQuery({
     queryKey: ['provider', 'active'],
-    queryFn: () => window.electron.provider.getActive(),
+    queryFn: () => window.kairos.provider.getActive(),
   })
 }
 
@@ -231,7 +231,7 @@ export function useSetActiveProvider() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: (provider: ProviderType) =>
-      window.electron.provider.setActive(provider),
+      window.kairos.provider.setActive(provider),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['provider'] })
       queryClient.invalidateQueries({ queryKey: ['settings', 'hasApiKey'] })
@@ -245,8 +245,8 @@ export function useOllamaStatus() {
     queryKey: ['ollama', 'status'],
     queryFn: async () => {
       const [running, version] = await Promise.all([
-        window.electron.ollama.isRunning(),
-        window.electron.ollama.getVersion(),
+        window.kairos.ollama.isRunning(),
+        window.kairos.ollama.getVersion(),
       ])
       return { running, version }
     },
@@ -257,14 +257,14 @@ export function useOllamaStatus() {
 export function useOllamaInstalledModels() {
   return useQuery({
     queryKey: ['ollama', 'installedModels'],
-    queryFn: () => window.electron.ollama.getInstalledModels(),
+    queryFn: () => window.kairos.ollama.getInstalledModels(),
   })
 }
 
 export function useOllamaCuratedModels() {
   return useQuery({
     queryKey: ['ollama', 'curatedModels'],
-    queryFn: () => window.electron.ollama.getCuratedModels(),
+    queryFn: () => window.kairos.ollama.getCuratedModels(),
   })
 }
 
@@ -272,7 +272,7 @@ export function useOllamaPullModel() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: (modelName: string) =>
-      window.electron.ollama.pullModel(modelName),
+      window.kairos.ollama.pullModel(modelName),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['ollama', 'installedModels'] })
       queryClient.invalidateQueries({ queryKey: ['models', 'ollama'] })
@@ -282,21 +282,21 @@ export function useOllamaPullModel() {
 
 export function useOllamaCancelPull() {
   return useMutation({
-    mutationFn: () => window.electron.ollama.cancelPull(),
+    mutationFn: () => window.kairos.ollama.cancelPull(),
   })
 }
 
 export function useOllamaBaseUrl() {
   return useQuery({
     queryKey: ['ollama', 'baseUrl'],
-    queryFn: () => window.electron.ollama.getBaseUrl(),
+    queryFn: () => window.kairos.ollama.getBaseUrl(),
   })
 }
 
 export function useSetOllamaBaseUrl() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (url: string) => window.electron.ollama.setBaseUrl(url),
+    mutationFn: (url: string) => window.kairos.ollama.setBaseUrl(url),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['ollama'] })
     },
