@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.6](https://github.com/tianpai/kairos/compare/v0.1.5...v0.1.6) (2026-01-13)
+
+
+### Features
+
+* add macOS code signing and notarization ([136c406](https://github.com/tianpai/kairos/commit/136c4060c219f1a35b0f4c96dc271df822b7eba7))
+
 ### [0.1.5](https://github.com/tianpai/kairos/compare/v0.1.4...v0.1.5) (2026-01-13)
 
 
