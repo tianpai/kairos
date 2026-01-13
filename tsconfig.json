@@ -11,7 +11,11 @@
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
     "experimentalDecorators": true,
-    "emitDecoratorMetadata": true
+    "emitDecoratorMetadata": true,
+    "baseUrl": ".",
+    "paths": {
+      "@type/*": ["src/shared/type/*"]
+    }
   },
   "include": ["src/main/**/*", "src/preload/**/*", "src/shared/**/*"],
   "exclude": ["node_modules", "out", "src/renderer"]

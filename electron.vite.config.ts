@@ -40,7 +40,7 @@ export default defineConfig({
       alias: {
         "@nest": resolve(__dirname, "src/main/nest"),
         "@templates/": `${rendererRoot}/src/templates/`,
-        "@type/": `${rendererRoot}/src/type/`,
+        "@type/": resolve(__dirname, "src/shared/type") + "/",
       },
     },
   },
@@ -74,7 +74,7 @@ export default defineConfig({
         "@components/": `${rendererRoot}/src/components/`,
         "@editor/": `${rendererRoot}/src/components/editor/`,
         "@checklist/": `${rendererRoot}/src/components/checklist/`,
-        "@type/": `${rendererRoot}/src/type/`,
+        "@type/": resolve(__dirname, "src/shared/type") + "/",
         "@api/": `${rendererRoot}/src/api/`,
         "@ui/": `${rendererRoot}/src/components/ui/`,
         "@resumeForm/": `${rendererRoot}/src/components/resumeForm/`,
