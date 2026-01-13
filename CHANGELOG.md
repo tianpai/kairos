@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.5](https://github.com/tianpai/kairos/compare/v0.1.4...v0.1.5) (2026-01-13)
+
+
+### Features
+
+* add reset and delete all data options in settings ([e34932f](https://github.com/tianpai/kairos/commit/e34932f60a7b833700afaf6c74560ef67e091bd1))
+* fix white screen flash when resizing app and improve popup layout ([705798e](https://github.com/tianpai/kairos/commit/705798e48aedc21d6918859036d90a88f75c97eb))
+
+
+### Bug Fixes
+
+* add name and contact alignment settings to personal info section ([fac8555](https://github.com/tianpai/kairos/commit/fac8555b900de5fe909d6ffa0d5978ca614a8bf0))
+* drop Claude Code OAuth support ([b354fd6](https://github.com/tianpai/kairos/commit/b354fd65603245c0cc7ce0d0c0904f2f0db37152))
+* multi JD cannot create new applications ([f07b4c1](https://github.com/tianpai/kairos/commit/f07b4c1be8acdb23028b4a580ff247eb8c6afd62))
+
 ### [0.1.4](https://github.com/tianpai/kairos/compare/v0.1.3...v0.1.4) (2026-01-11)
 
 
