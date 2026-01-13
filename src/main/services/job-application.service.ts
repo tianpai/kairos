@@ -5,7 +5,6 @@ import type * as schema from '../db/schema'
 import type { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3'
 import type {
   CreateFromExistingInput,
-  CreateFromScratchInput,
   CreateJobApplicationInput,
   SaveChecklistInput,
   SaveParsedResumeInput,
@@ -83,31 +82,6 @@ export class JobApplicationService {
     return { id: jobId }
   }
 
-  async createFromScratch(dto: CreateFromScratchInput): Promise<{ id: string }> {
-    const jobId = randomUUID()
-    const company = this.getOrCreateCompany(dto.companyName)
-    const now = nowISO()
-
-    this.db
-      .insert(jobApplications)
-      .values({
-        id: jobId,
-        companyId: company.id,
-        position: dto.position,
-        dueDate: dto.dueDate,
-        matchPercentage: 0,
-        templateId: dto.templateId,
-        jobDescription: dto.jobDescription ?? null,
-        jobUrl: dto.jobUrl ?? null,
-        originalResume: null,
-        createdAt: now,
-        updatedAt: now,
-      })
-      .run()
-
-    return { id: jobId }
-  }
-
   async createFromExisting(dto: CreateFromExistingInput): Promise<{ id: string }> {
     const sourceJob = this.requireJobApplication(dto.sourceJobId)
     const jobId = randomUUID()
@@ -145,7 +119,7 @@ export class JobApplicationService {
       matchPercentage: number
       applicationStatus: string | null
       jobUrl: string | null
-      originalResume: string | null
+      originalResume: string
       createdAt: string
       updatedAt: string
     }>
@@ -185,7 +159,7 @@ export class JobApplicationService {
     jobDescription: string | null
     parsedResume: Record<string, unknown> | null
     tailoredResume: Record<string, unknown> | null
-    originalResume: string | null
+    originalResume: string
     checklist: Record<string, unknown> | null
     workflowStatus: string | null
     workflowSteps: Record<string, unknown> | null

@@ -19,7 +19,7 @@ export const jobApplications = sqliteTable('job_applications', {
   templateId: text('template_id').notNull(),
   jobDescription: text('job_description'),
   checklist: text('checklist', { mode: 'json' }).$type<Record<string, unknown> | null>(),
-  originalResume: text('original_resume'),
+  originalResume: text('original_resume').notNull(),
   parsedResume: text('parsed_resume', { mode: 'json' }).$type<Record<string, unknown> | null>(),
   tailoredResume: text('tailored_resume', { mode: 'json' }).$type<Record<string, unknown> | null>(),
   workflowStatus: text('workflow_status'),

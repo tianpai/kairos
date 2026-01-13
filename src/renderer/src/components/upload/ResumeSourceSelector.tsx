@@ -1,4 +1,4 @@
-export type ResumeSource = 'upload' | 'existing' | 'scratch'
+export type ResumeSource = 'upload' | 'existing'
 
 interface ResumeSourceSelectorProps {
   value: ResumeSource
@@ -8,7 +8,6 @@ interface ResumeSourceSelectorProps {
 const options: Array<{ value: ResumeSource; label: string }> = [
   { value: 'upload', label: 'Upload resume' },
   { value: 'existing', label: 'Use existing' },
-  { value: 'scratch', label: 'From scratch' },
 ]
 
 export function ResumeSourceSelector({

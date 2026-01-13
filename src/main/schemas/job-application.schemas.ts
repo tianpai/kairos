@@ -11,16 +11,6 @@ export const CreateJobApplicationSchema = z.object({
   rawResumeContent: z.string().min(1),
 })
 
-// Create job application from scratch (no resume upload)
-export const CreateFromScratchSchema = z.object({
-  companyName: z.string().min(1),
-  position: z.string().min(1),
-  dueDate: z.string().date(),
-  jobDescription: z.string().optional(),
-  jobUrl: z.string().url().optional(),
-  templateId: z.string().min(1),
-})
-
 // Create job application from existing (copy resume from another application)
 export const CreateFromExistingSchema = z.object({
   sourceJobId: z.string().uuid(),
@@ -75,7 +65,6 @@ export const UpdateJobDescriptionSchema = z.object({
 
 // Inferred types
 export type CreateJobApplicationInput = z.infer<typeof CreateJobApplicationSchema>
-export type CreateFromScratchInput = z.infer<typeof CreateFromScratchSchema>
 export type CreateFromExistingInput = z.infer<typeof CreateFromExistingSchema>
 export type UpdateJobApplicationInput = z.infer<typeof UpdateJobApplicationSchema>
 export type UpdateJobDescriptionInput = z.infer<typeof UpdateJobDescriptionSchema>

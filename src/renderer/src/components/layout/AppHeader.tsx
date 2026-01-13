@@ -14,14 +14,12 @@ interface AppHeaderProps {
   hasActiveJob: boolean
   jobId?: string
   jobApplication?: JobApplicationDetails
-  onUploadSuccess: (newJobId: string) => void
 }
 
 export function AppHeader({
   hasActiveJob,
   jobId,
   jobApplication,
-  onUploadSuccess,
 }: AppHeaderProps) {
   const { sidebarCollapsed, showChecklist, toggleSidebar, toggleChecklist } =
     useLayoutStore()
@@ -29,7 +27,6 @@ export function AppHeader({
   const companyName = jobApplication?.companyName
   const position = jobApplication?.position
   const matchPercentage = jobApplication?.matchPercentage ?? 0
-  const isBuiltFromScratch = !jobApplication?.originalResume
 
   return (
     <PageHeader
@@ -42,7 +39,7 @@ export function AppHeader({
           >
             <PanelLeft size={16} />
           </Button>
-          <NewApplicationButton onSuccess={onUploadSuccess} />
+          <NewApplicationButton />
         </>
       }
       center={
@@ -74,10 +71,7 @@ export function AppHeader({
             >
               {showChecklist ? <Columns2 size={16} /> : <Columns3 size={16} />}
             </Button>
-            <SaveResumeButton
-              jobId={jobId}
-              isBuiltFromScratch={isBuiltFromScratch}
-            />
+            <SaveResumeButton jobId={jobId} />
             <DownloadResumeButton
               companyName={companyName}
               position={position}

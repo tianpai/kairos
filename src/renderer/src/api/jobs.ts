@@ -21,15 +21,6 @@ export interface CreateJobApplicationPayload extends JobApplicationInput {
   templateId: string
 }
 
-export interface CreateFromScratchPayload {
-  companyName: string
-  position: string
-  dueDate: string
-  jobDescription?: string
-  jobUrl?: string
-  templateId: string
-}
-
 export interface CreateFromExistingPayload {
   sourceJobId: string
   companyName: string
@@ -48,7 +39,7 @@ export interface JobApplication {
   matchPercentage: number
   applicationStatus: string | null
   jobUrl: string | null
-  originalResume: string | null
+  originalResume: string
   createdAt: string
   updatedAt: string
 }
@@ -90,12 +81,6 @@ export async function createJobApplication(
   payload: CreateJobApplicationPayload,
 ): Promise<CreateJobApplicationResponse> {
   return window.kairos.jobs.create(payload)
-}
-
-export function createFromScratch(
-  payload: CreateFromScratchPayload,
-): Promise<CreateJobApplicationResponse> {
-  return window.kairos.jobs.createFromScratch(payload)
 }
 
 export function createFromExisting(

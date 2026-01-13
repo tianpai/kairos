@@ -12,7 +12,7 @@ interface NewApplicationModalProps {
   onClose: () => void
   onSubmit: (payload: SubmitPayload) => void
   isSubmitting?: boolean
-  errorMessage?: string | null
+  hasApiKey?: boolean
 }
 
 export default function NewApplicationModal({
@@ -20,7 +20,7 @@ export default function NewApplicationModal({
   onClose,
   onSubmit,
   isSubmitting = false,
-  errorMessage = null,
+  hasApiKey = true,
 }: NewApplicationModalProps) {
   const resumeSource = useNewApplicationStore((s) => s.resumeSource)
   const setResumeSource = useNewApplicationStore((s) => s.setResumeSource)
@@ -40,7 +40,7 @@ export default function NewApplicationModal({
   const entryCount = Math.max(1, filledEntryCount)
 
   function handleSubmit() {
-    if (isSubmitting) return
+    if (isSubmitting || !hasApiKey) return
     const payload = buildPayload()
     if (payload) onSubmit(payload)
   }
@@ -59,7 +59,7 @@ export default function NewApplicationModal({
           <Button onClick={onClose}>Cancel</Button>
           <Button
             onClick={handleSubmit}
-            disabled={!canSubmit()}
+            disabled={!hasApiKey || !canSubmit()}
             loading={isSubmitting}
           >
             {buttonText}
@@ -86,12 +86,9 @@ export default function NewApplicationModal({
           />
         )}
 
-        <JobDetailsSection requireJobDescription={resumeSource !== 'scratch'} />
+        <JobDetailsSection />
       </div>
 
-      {errorMessage && (
-        <p className="mt-4 text-center text-sm text-rose-500">{errorMessage}</p>
-      )}
     </Modal>
   )
 }

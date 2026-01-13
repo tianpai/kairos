@@ -6,14 +6,10 @@ import { useShortcutStore } from '@/components/layout/shortcut.store'
 
 interface SaveResumeButtonProps {
   jobId?: string
-  isBuiltFromScratch?: boolean
 }
 
-export default function SaveResumeButton({
-  jobId,
-  isBuiltFromScratch = false,
-}: SaveResumeButtonProps) {
-  const { mutate: saveResume } = useSaveResume(jobId!, { isBuiltFromScratch })
+export default function SaveResumeButton({ jobId }: SaveResumeButtonProps) {
+  const { mutate: saveResume } = useSaveResume(jobId!)
 
   const saveRequested = useShortcutStore((state) => state.saveRequested)
   const clearSaveRequest = useShortcutStore((state) => state.clearSaveRequest)

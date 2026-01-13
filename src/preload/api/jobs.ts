@@ -4,8 +4,6 @@ export const jobs = {
   // CRUD
   create: (data: unknown): Promise<{ id: string }> =>
     ipcRenderer.invoke("jobs:create", data),
-  createFromScratch: (data: unknown): Promise<{ id: string }> =>
-    ipcRenderer.invoke("jobs:createFromScratch", data),
   createFromExisting: (data: unknown): Promise<{ id: string }> =>
     ipcRenderer.invoke("jobs:createFromExisting", data),
   getAll: (): Promise<Array<unknown>> => ipcRenderer.invoke("jobs:getAll"),
