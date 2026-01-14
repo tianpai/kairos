@@ -1,16 +1,9 @@
 import { useEffect, useState } from 'react'
-import { ExternalLink } from 'lucide-react'
 import { Button } from '@ui/Button'
 import { Modal } from '@ui/Modal'
 import { InputField } from '@ui/InputField'
 import { HoldButton } from '@ui/HoldButton'
-
-function normalizeUrl(url: string): string | null {
-  const trimmed = url.trim()
-  if (!trimmed) return null
-  if (/^https?:\/\//i.test(trimmed)) return trimmed
-  return `https://${trimmed}`
-}
+import { normalizeUrl } from '@utils/format'
 
 interface JobInfoModalProps {
   open: boolean
@@ -114,25 +107,12 @@ export default function JobInfoModal({
             <InputField
               id="jobUrl"
               label="Job URL"
-              type="url"
+              type="text"
               value={jobUrl}
               onChange={setJobUrl}
               placeholder="https://..."
             />
           </div>
-          {jobUrl.trim() && (
-            <button
-              type="button"
-              onClick={() => {
-                const url = normalizeUrl(jobUrl)
-                if (url) window.kairos.shell.openExternal(url)
-              }}
-              className="text-hint hover:bg-hover hover:text-primary mb-0.5 rounded p-2 transition-colors"
-              title="Open in browser"
-            >
-              <ExternalLink size={18} />
-            </button>
-          )}
         </div>
       </div>
     </Modal>

@@ -6,7 +6,7 @@ import { CollapsibleSidebar } from './CollapsibleSidebar'
 import { SidebarItem } from './SidebarItem'
 import { SettingsHoverPopup } from './SettingsHoverPopup'
 
-interface Application {
+export interface Application {
   id: string
   companyName: string
   position: string
@@ -91,13 +91,8 @@ export function Sidebar({
           {applications.map((app) => (
             <SidebarItem
               key={app.id}
-              companyName={app.companyName}
-              position={app.position}
-              dueDate={app.dueDate}
-              matchPercentage={app.matchPercentage}
+              application={app}
               isSelected={app.id === selectedId}
-              createdAt={app.createdAt}
-              updatedAt={app.updatedAt}
               onClick={() => onSelect(app.id)}
               onEdit={() => setEditingApp(app)}
             />

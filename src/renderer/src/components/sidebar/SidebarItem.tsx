@@ -1,27 +1,18 @@
 import { useRef, useState } from 'react'
 import { ApplicationInfoPopup } from './ApplicationInfoPopup'
+import type { Application } from './Sidebar'
 import { getScoreColor } from '@/utils/scoreThresholds'
 
 interface SidebarItemProps {
-  companyName: string
-  position: string
-  dueDate: string
-  matchPercentage: number
+  application: Application
   isSelected: boolean
-  createdAt: string
-  updatedAt: string
   onClick: () => void
   onEdit: () => void
 }
 
 export function SidebarItem({
-  companyName,
-  position,
-  dueDate,
-  matchPercentage,
+  application,
   isSelected,
-  createdAt,
-  updatedAt,
   onClick,
   onEdit,
 }: SidebarItemProps) {
@@ -53,22 +44,21 @@ export function SidebarItem({
     >
       <div
         className="absolute top-0 left-0 h-full w-0.5"
-        style={{ backgroundColor: getScoreColor(matchPercentage) }}
+        style={{ backgroundColor: getScoreColor(application.matchPercentage) }}
       />
       {isHovered && (
         <ApplicationInfoPopup
-          dueDate={dueDate}
-          matchPercentage={matchPercentage}
-          createdAt={createdAt}
-          updatedAt={updatedAt}
+          application={application}
           anchorRect={anchorRect}
           onEdit={handleEdit}
         />
       )}
       <div className="text-primary truncate text-xs font-medium">
-        {companyName}
+        {application.companyName}
       </div>
-      <div className="text-secondary truncate text-[11px]">{position}</div>
+      <div className="text-secondary truncate text-[11px]">
+        {application.position}
+      </div>
     </div>
   )
 }
