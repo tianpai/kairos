@@ -12,6 +12,7 @@ import { shell } from "./api/shell";
 import { shortcuts } from "./api/shortcuts";
 import { theme } from "./api/theme";
 import { updater } from "./api/updater";
+import { workflow } from "./api/workflow";
 
 contextBridge.exposeInMainWorld("kairos", {
   shortcuts,
@@ -26,5 +27,6 @@ contextBridge.exposeInMainWorld("kairos", {
   theme,
   aiServer,
   jobs,
+  workflow,
   updater,
 });

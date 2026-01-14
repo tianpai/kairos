@@ -11,7 +11,9 @@ import { registerModelHandlers } from "./models.handlers";
 import { registerProviderHandlers } from "./provider.handlers";
 import { registerThemeHandlers } from "./theme.handlers";
 import { registerShellHandlers } from "./shell.handlers";
+import { registerWorkflowHandlers } from "./workflow.handlers";
 import type { SettingsService } from "../config/settings.service";
+import { WorkflowService } from "../workflow/workflow.service";
 
 export interface IpcDependencies {
   settingsService: SettingsService;
@@ -20,6 +22,7 @@ export interface IpcDependencies {
 export function registerAllHandlers(deps: IpcDependencies): void {
   const database = getDatabase();
   const jobService = new JobApplicationService(database);
+  const workflowService = new WorkflowService(jobService, deps.settingsService);
   registerJobsHandlers(jobService);
   registerDialogHandlers();
   registerFsHandlers();
@@ -31,4 +34,5 @@ export function registerAllHandlers(deps: IpcDependencies): void {
   registerProviderHandlers(deps);
   registerThemeHandlers(deps);
   registerShellHandlers();
+  registerWorkflowHandlers(workflowService);
 }

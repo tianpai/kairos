@@ -3,6 +3,15 @@ type ThemeMode = "light" | "dark";
 type ProviderType = import("../shared/providers").ProviderType;
 type UpdateState = import("../shared/updater").UpdateState;
 type OllamaPullProgress = import("../shared/ollama").OllamaPullProgress;
+type WorkflowStartPayload = import("../shared/type/workflow-ipc").WorkflowStartPayload;
+type WorkflowRetryPayload = import("../shared/type/workflow-ipc").WorkflowRetryPayload;
+type WorkflowGetStatePayload = import("../shared/type/workflow-ipc").WorkflowGetStatePayload;
+type WorkflowStateChanged = import("../shared/type/workflow-ipc").WorkflowStateChanged;
+type WorkflowTaskCompleted = import("../shared/type/workflow-ipc").WorkflowTaskCompleted;
+type WorkflowTaskFailed = import("../shared/type/workflow-ipc").WorkflowTaskFailed;
+type WorkflowCompleted = import("../shared/type/workflow-ipc").WorkflowCompleted;
+type WorkflowAiPartial = import("../shared/type/workflow-ipc").WorkflowAiPartial;
+type WorkflowStepsData = import("../shared/type/workflow").WorkflowStepsData;
 
 interface ModelInfo {
   id: string;
@@ -137,6 +146,20 @@ interface KairosAPI {
       id: string,
       data: unknown,
     ) => Promise<{ success: boolean }>;
+  };
+  workflow: {
+    start: (payload: WorkflowStartPayload) => Promise<{ success: boolean }>;
+    retry: (
+      payload: WorkflowRetryPayload,
+    ) => Promise<{ success: boolean; failedTasks: string[] }>;
+    getState: (
+      payload: WorkflowGetStatePayload,
+    ) => Promise<{ workflow: WorkflowStepsData | null }>;
+    onStateChanged: (callback: (payload: WorkflowStateChanged) => void) => () => void;
+    onTaskCompleted: (callback: (payload: WorkflowTaskCompleted) => void) => () => void;
+    onTaskFailed: (callback: (payload: WorkflowTaskFailed) => void) => () => void;
+    onCompleted: (callback: (payload: WorkflowCompleted) => void) => () => void;
+    onAiPartial: (callback: (payload: WorkflowAiPartial) => void) => () => void;
   };
   updater: {
     check: () => Promise<UpdateState>;

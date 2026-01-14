@@ -5,17 +5,6 @@
  * 1. Infers all types from the task name (via TaskContracts)
  * 2. Validates inputKeys at compile time
  * 3. Auto-registers the task in the global registry
- *
- * Usage:
- * ```typescript
- * export const myTask = defineTask({
- *   name: 'my.task',
- *   inputKeys: ['key1', 'key2'],
- *   provides: 'outputKey',
- *   execute: async (input) => { ... },
- *   onSuccess: async (jobId, result) => { ... },
- * })
- * ```
  */
 
 import type {
@@ -25,7 +14,7 @@ import type {
   TaskProvides,
   ValidInputKeys,
   WorkflowContext,
-} from './task-contracts'
+} from '@type/task-contracts'
 
 /**
  * Task configuration object
@@ -33,6 +22,9 @@ import type {
 export interface TaskConfig<T extends TaskName> {
   /** Task identifier - must match a key in TaskContracts */
   name: T
+
+  /** Enable streaming and partial events for AI tasks */
+  streaming?: boolean
 
   /**
    * Context keys required as input.
@@ -51,7 +43,7 @@ export interface TaskConfig<T extends TaskName> {
   tipEvent?: string
 
   /** Execute the task */
-  execute: (input: TaskInput<T>) => Promise<TaskOutput<T>>
+  execute: (input: TaskInput<T>, meta: TaskExecutionMeta) => Promise<TaskOutput<T>>
 
   /** Handle successful completion (persist to DB) */
   onSuccess: (jobId: string, result: TaskOutput<T>) => Promise<void>
@@ -68,9 +60,16 @@ export interface Task<T extends TaskName = TaskName> {
   readonly inputKeys: ValidInputKeys<T>
   readonly provides?: string
   readonly tipEvent?: string
-  execute: (input: TaskInput<T>) => Promise<TaskOutput<T>>
+  readonly streaming?: boolean
+  execute: (input: TaskInput<T>, meta: TaskExecutionMeta) => Promise<TaskOutput<T>>
   onSuccess: (jobId: string, result: TaskOutput<T>) => Promise<void>
   getTipData?: (result: TaskOutput<T>) => Record<string, unknown>
+}
+
+export interface TaskExecutionMeta {
+  jobId: string
+  taskName: TaskName
+  emitPartial?: (partial: unknown) => void
 }
 
 /**
@@ -80,18 +79,6 @@ const taskRegistry = new Map<TaskName, Task>()
 
 /**
  * Define a new task with full type inference
- *
- * @example
- * ```typescript
- * export const scoreUpdatingTask = defineTask({
- *   name: 'score.updating',
- *   inputKeys: ['checklist'],
- *   tipEvent: 'score.updated',
- *   execute: async ({ checklist }) => calculateScore(checklist),
- *   onSuccess: async (jobId, score) => saveMatchScore(jobId, score),
- *   getTipData: (score) => ({ score }),
- * })
- * ```
  */
 export function defineTask<T extends TaskName>(config: TaskConfig<T>): Task<T> {
   const task: Task<T> = {
@@ -99,6 +86,7 @@ export function defineTask<T extends TaskName>(config: TaskConfig<T>): Task<T> {
     inputKeys: config.inputKeys,
     provides: config.provides as string | undefined,
     tipEvent: config.tipEvent,
+    streaming: config.streaming,
     execute: config.execute,
     onSuccess: config.onSuccess,
     getTipData: config.getTipData,

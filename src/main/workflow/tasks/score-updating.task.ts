@@ -5,10 +5,10 @@
  * This is a local computation (no AI worker needed).
  */
 
-import log from 'electron-log/renderer'
-import { saveMatchScore } from '@api/jobs'
+import log from 'electron-log/main'
 import { defineTask } from '../define-task'
 import type { Checklist, ChecklistRequirement } from '@type/checklist'
+import type { WorkflowTaskDeps } from './task-deps'
 
 // =============================================================================
 // Score Calculation Logic
@@ -69,29 +69,33 @@ export function calculateScore(checklist: Checklist): number {
 // Task Definition
 // =============================================================================
 
-export const scoreUpdatingTask = defineTask({
-  name: 'score.updating',
-  inputKeys: ['checklist'],
-  // No 'provides' - score is saved directly to DB, not added to context
-  tipEvent: 'score.updated',
+export function registerScoreUpdatingTask({
+  jobService,
+}: WorkflowTaskDeps): void {
+  defineTask({
+    name: 'score.updating',
+    inputKeys: ['checklist'],
+    // No 'provides' - score is saved directly to DB, not added to context
+    tipEvent: 'score.updated',
 
-  async execute({ checklist }) {
-    if (!checklist?.hardRequirements) {
-      log.warn('Score update: no checklist found')
-      return 0
-    }
+    async execute({ checklist }, _meta) {
+      if (!checklist?.hardRequirements) {
+        log.warn('Score update: no checklist found')
+        return 0
+      }
 
-    const score = calculateScore(checklist)
-    log.info(`Score calculated: ${score}%`)
-    return score
-  },
+      const score = calculateScore(checklist)
+      log.info(`Score calculated: ${score}%`)
+      return score
+    },
 
-  async onSuccess(jobId, matchPercentage) {
-    await saveMatchScore(jobId, matchPercentage)
-    log.info(`Score saved: ${matchPercentage}% for job ${jobId}`)
-  },
+    async onSuccess(jobId, matchPercentage) {
+      await jobService.saveMatchScore(jobId, matchPercentage)
+      log.info(`Score saved: ${matchPercentage}% for job ${jobId}`)
+    },
 
-  getTipData(score) {
-    return { score }
-  },
-})
+    getTipData(score) {
+      return { score }
+    },
+  })
+}
