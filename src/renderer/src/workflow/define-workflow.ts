@@ -24,12 +24,14 @@ import type { TaskName } from './task-contracts'
 // Type-Level Workflow Validation
 // =============================================================================
 
+type NoInfer<T> = [T][T extends unknown ? 0 : never]
+
 /**
  * Task step in a workflow - defines prerequisites
  */
 export interface TaskStep<TWorkflowTasks extends TaskName = TaskName> {
   /** Tasks that must complete before this one runs */
-  after: Array<TWorkflowTasks>
+  after: Array<NoInfer<TWorkflowTasks>>
 }
 
 /**

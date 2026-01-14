@@ -34,9 +34,7 @@ import './tasks/jobinfo-extracting.task'
 // Register all workflows (order doesn't matter, they self-register)
 // =============================================================================
 
-import './workflows/create-application.workflow'
-import './workflows/tailoring.workflow'
-import './workflows/checklist-only.workflow'
+import './workflows'
 
 // =============================================================================
 // Public API Re-exports

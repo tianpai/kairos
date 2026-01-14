@@ -12,13 +12,13 @@ import type {Server} from 'node:http';
 import type {NextFunction, Request, Response} from 'express';
 import type { AIProviderConfig } from '../ai/provider.interface'
 import type { Checklist } from '@type/checklist'
-
-// Task type constants (mirroring renderer's task-names.ts)
-const RESUME_PARSING = 'resume.parsing'
-const RESUME_TAILORING = 'resume.tailoring'
-const CHECKLIST_PARSING = 'checklist.parsing'
-const CHECKLIST_MATCHING = 'checklist.matching'
-const JOBINFO_EXTRACTING = 'jobinfo.extracting'
+import {
+  CHECKLIST_MATCHING,
+  CHECKLIST_PARSING,
+  JOBINFO_EXTRACTING,
+  RESUME_PARSING,
+  RESUME_TAILORING,
+} from '@type/task-names'
 
 type TaskType =
   | typeof RESUME_PARSING

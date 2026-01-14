@@ -36,7 +36,7 @@
       "@dashboard/*": ["./src/components/dashboard/*"],
       "@editor/*": ["./src/components/editor/*"],
       "@checklist/*": ["./src/components/checklist/*"],
-      "@type/*": ["../../shared/type/*"],
+      "@type/*": ["../shared/type/*"],
       "@api/*": ["./src/api/*"],
       "@ui/*": ["./src/components/ui/*"],
       "@resumeForm/*": ["./src/components/resumeForm/*"],

@@ -5,9 +5,11 @@
  * Do NOT add imports from files that use `window` or DOM APIs.
  */
 
-export const RESUME_PARSING = 'resume.parsing' as const
-export const RESUME_TAILORING = 'resume.tailoring' as const
-export const CHECKLIST_PARSING = 'checklist.parsing' as const
-export const CHECKLIST_MATCHING = 'checklist.matching' as const
-export const SCORE_UPDATING = 'score.updating' as const
-export const JOBINFO_EXTRACTING = 'jobinfo.extracting' as const
+export {
+  RESUME_PARSING,
+  RESUME_TAILORING,
+  CHECKLIST_PARSING,
+  CHECKLIST_MATCHING,
+  SCORE_UPDATING,
+  JOBINFO_EXTRACTING,
+} from '@type/task-names'
