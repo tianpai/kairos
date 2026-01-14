@@ -55,16 +55,16 @@ export function GeneralSection() {
     <div className="space-y-6">
       <div>
         <h2 className="text-lg font-semibold">General</h2>
-        <p className="mt-1 text-sm text-hint">Manage your application data.</p>
+        <p className="text-hint mt-1 text-sm">Manage your application data.</p>
       </div>
 
       <div className="space-y-4">
-        <div className="rounded-lg border border-error/30 bg-error-subtle/30 p-4">
-          <h3 className="text-sm font-medium text-error">Danger Zone</h3>
+        <div className="border-error/30 bg-error-subtle/30 rounded-lg border p-4">
+          <h3 className="text-error text-sm font-medium">Danger Zone</h3>
 
           <div className="mt-4 space-y-4">
             <div>
-              <p className="text-sm text-secondary">
+              <p className="text-secondary text-sm">
                 Delete all job applications and resumes. Provider settings will
                 be preserved.
               </p>
@@ -80,7 +80,7 @@ export function GeneralSection() {
             </div>
 
             <div>
-              <p className="text-sm text-secondary">
+              <p className="text-secondary text-sm">
                 Remove all API keys and authentication. You'll need to
                 reconfigure providers to use AI features.
               </p>
@@ -90,7 +90,9 @@ export function GeneralSection() {
                   disabled={isResetting}
                   className="text-error hover:bg-error-subtle"
                 >
-                  {isResetting ? 'Resetting...' : 'Hold to Reset Provider Settings'}
+                  {isResetting
+                    ? 'Resetting...'
+                    : 'Hold to Reset Provider Settings'}
                 </HoldButton>
               </div>
             </div>

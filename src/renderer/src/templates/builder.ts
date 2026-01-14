@@ -107,7 +107,7 @@ export class TemplateBuilder {
 
       // Get data for this section
       const rawData = data[sectionConfig.id]
-       
+
       if (rawData === undefined) continue
 
       // Normalize to array (sections always expect arrays)

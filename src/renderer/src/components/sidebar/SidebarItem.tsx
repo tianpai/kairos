@@ -52,7 +52,7 @@ export function SidebarItem({
       onMouseLeave={() => setIsHovered(false)}
     >
       <div
-        className="absolute left-0 top-0 h-full w-0.5"
+        className="absolute top-0 left-0 h-full w-0.5"
         style={{ backgroundColor: getScoreColor(matchPercentage) }}
       />
       {isHovered && (
@@ -65,10 +65,10 @@ export function SidebarItem({
           onEdit={handleEdit}
         />
       )}
-      <div className="truncate text-xs font-medium text-primary">
+      <div className="text-primary truncate text-xs font-medium">
         {companyName}
       </div>
-      <div className="truncate text-[11px] text-secondary">{position}</div>
+      <div className="text-secondary truncate text-[11px]">{position}</div>
     </div>
   )
 }

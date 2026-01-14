@@ -17,7 +17,7 @@ export function CollapsibleSidebar({
 }: CollapsibleSidebarProps) {
   return (
     <aside
-      className={`flex h-full flex-col border-r border-default bg-surface transition-all duration-200 ease-in-out ${
+      className={`border-default bg-surface flex h-full flex-col border-r transition-all duration-200 ease-in-out ${
         collapsed ? 'w-0 overflow-hidden border-r-0' : width
       } ${className}`}
     >
@@ -27,9 +27,7 @@ export function CollapsibleSidebar({
         <div className="flex-1 overflow-y-auto">{children}</div>
 
         {/* Optional footer */}
-        {footer && (
-          <div className="border-t border-default">{footer}</div>
-        )}
+        {footer && <div className="border-default border-t">{footer}</div>}
       </div>
     </aside>
   )

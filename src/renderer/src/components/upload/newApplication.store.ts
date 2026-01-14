@@ -72,7 +72,11 @@ interface NewApplicationActions {
   setSelectedSourceId: (id: string | null) => void
   addEntry: () => void
   removeEntry: (id: string) => void
-  updateEntry: (id: string, field: 'jobDescription' | 'jobUrl', value: string) => void
+  updateEntry: (
+    id: string,
+    field: 'jobDescription' | 'jobUrl',
+    value: string,
+  ) => void
 
   // Submission
   setSubmitting: (isSubmitting: boolean) => void
@@ -96,79 +100,93 @@ const initialState: NewApplicationState = {
   batchProgress: { status: 'idle', current: 0, total: 0, errorMessage: null },
 }
 
-export const useNewApplicationStore = create<NewApplicationStore>()((set, get) => ({
-  ...initialState,
+export const useNewApplicationStore = create<NewApplicationStore>()(
+  (set, get) => ({
+    ...initialState,
 
-  openModal: () => set({ isOpen: true }),
+    openModal: () => set({ isOpen: true }),
 
-  closeModal: () => {
-    const { isSubmitting, batchProgress } = get()
-    if (!isSubmitting && batchProgress.status !== 'processing') {
-      set({ ...initialState, entries: [createEmptyEntry()] })
-    }
-  },
+    closeModal: () => {
+      const { isSubmitting, batchProgress } = get()
+      if (!isSubmitting && batchProgress.status !== 'processing') {
+        set({ ...initialState, entries: [createEmptyEntry()] })
+      }
+    },
 
-  setResumeSource: (source) =>
-    set({ resumeSource: source, selectedFile: null, selectedSourceId: null }),
+    setResumeSource: (source) =>
+      set({ resumeSource: source, selectedFile: null, selectedSourceId: null }),
 
-  setSelectedFile: (file) => set({ selectedFile: file }),
+    setSelectedFile: (file) => set({ selectedFile: file }),
 
-  setSelectedSourceId: (id) => set({ selectedSourceId: id }),
+    setSelectedSourceId: (id) => set({ selectedSourceId: id }),
 
-  addEntry: () => {
-    const { entries } = get()
-    if (entries.length < MAX_ENTRIES) {
-      set({ entries: [...entries, createEmptyEntry()] })
-    }
-  },
+    addEntry: () => {
+      const { entries } = get()
+      if (entries.length < MAX_ENTRIES) {
+        set({ entries: [...entries, createEmptyEntry()] })
+      }
+    },
 
-  removeEntry: (id) => {
-    const { entries } = get()
-    if (entries.length > 1) {
-      set({ entries: entries.filter((e) => e.id !== id) })
-    }
-  },
+    removeEntry: (id) => {
+      const { entries } = get()
+      if (entries.length > 1) {
+        set({ entries: entries.filter((e) => e.id !== id) })
+      }
+    },
 
-  updateEntry: (id, field, value) =>
-    set((s) => ({
-      entries: s.entries.map((e) => (e.id === id ? { ...e, [field]: value } : e)),
-    })),
-
-  setSubmitting: (isSubmitting) => set({ isSubmitting }),
-
-  setBatchProgress: (update) =>
-    set((s) => ({ batchProgress: { ...s.batchProgress, ...update } })),
-
-  reset: () => set({ ...initialState, entries: [createEmptyEntry()] }),
-
-  canSubmit: () => {
-    const { resumeSource, selectedFile, selectedSourceId, entries, isSubmitting, batchProgress } =
-      get()
-
-    if (isSubmitting || batchProgress.status === 'processing') return false
-
-    const filledEntries = getFilledEntries(entries)
-    if (resumeSource === 'upload' && !selectedFile) return false
-    if (resumeSource === 'existing' && !selectedSourceId) return false
-
-    return filledEntries.length > 0
-  },
-
-  buildPayload: () => {
-    const state = get()
-    if (!state.canSubmit()) return null
-
-    const { resumeSource, selectedFile, selectedSourceId, entries } = state
-    const filledEntries = getFilledEntries(entries)
-
-    return {
-      resumeSource,
-      resumeFile: resumeSource === 'upload' ? selectedFile ?? undefined : undefined,
-      sourceJobId: resumeSource === 'existing' ? selectedSourceId ?? undefined : undefined,
-      entries: filledEntries.map((e) => ({
-        jobDescription: e.jobDescription.trim(),
-        jobUrl: normalizeUrl(e.jobUrl),
+    updateEntry: (id, field, value) =>
+      set((s) => ({
+        entries: s.entries.map((e) =>
+          e.id === id ? { ...e, [field]: value } : e,
+        ),
       })),
-    }
-  },
-}))
+
+    setSubmitting: (isSubmitting) => set({ isSubmitting }),
+
+    setBatchProgress: (update) =>
+      set((s) => ({ batchProgress: { ...s.batchProgress, ...update } })),
+
+    reset: () => set({ ...initialState, entries: [createEmptyEntry()] }),
+
+    canSubmit: () => {
+      const {
+        resumeSource,
+        selectedFile,
+        selectedSourceId,
+        entries,
+        isSubmitting,
+        batchProgress,
+      } = get()
+
+      if (isSubmitting || batchProgress.status === 'processing') return false
+
+      const filledEntries = getFilledEntries(entries)
+      if (resumeSource === 'upload' && !selectedFile) return false
+      if (resumeSource === 'existing' && !selectedSourceId) return false
+
+      return filledEntries.length > 0
+    },
+
+    buildPayload: () => {
+      const state = get()
+      if (!state.canSubmit()) return null
+
+      const { resumeSource, selectedFile, selectedSourceId, entries } = state
+      const filledEntries = getFilledEntries(entries)
+
+      return {
+        resumeSource,
+        resumeFile:
+          resumeSource === 'upload' ? (selectedFile ?? undefined) : undefined,
+        sourceJobId:
+          resumeSource === 'existing'
+            ? (selectedSourceId ?? undefined)
+            : undefined,
+        entries: filledEntries.map((e) => ({
+          jobDescription: e.jobDescription.trim(),
+          jobUrl: normalizeUrl(e.jobUrl),
+        })),
+      }
+    },
+  }),
+)

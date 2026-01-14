@@ -1,28 +1,28 @@
-import type { ZodSchema } from 'zod'
+import type { ZodSchema } from "zod";
 
 export type DeepPartial<T> = T extends object
   ? { [P in keyof T]?: DeepPartial<T[P]> }
-  : T
+  : T;
 
 export interface GenerateParams<T> {
-  systemPrompt: string
-  userPrompt: string
-  schema: ZodSchema<T>
-  model?: string
+  systemPrompt: string;
+  userPrompt: string;
+  schema: ZodSchema<T>;
+  model?: string;
 }
 
 export interface StreamParams<T> extends GenerateParams<T> {
-  onPartial?: (partial: DeepPartial<T>) => void
+  onPartial?: (partial: DeepPartial<T>) => void;
 }
 
 export interface AIProvider {
-  generateStructuredOutput: <T>(params: GenerateParams<T>) => Promise<T>
-  streamStructuredOutput: <T>(params: StreamParams<T>) => Promise<T>
+  generateStructuredOutput: <T>(params: GenerateParams<T>) => Promise<T>;
+  streamStructuredOutput: <T>(params: StreamParams<T>) => Promise<T>;
 }
 
 export interface AIProviderConfig {
-  type: 'openai' | 'deepseek' | 'ollama' | 'xai' | 'gemini' | 'anthropic'
-  apiKey?: string
-  baseUrl?: string
-  defaultModel?: string
+  type: "openai" | "deepseek" | "ollama" | "xai" | "gemini" | "anthropic";
+  apiKey?: string;
+  baseUrl?: string;
+  defaultModel?: string;
 }

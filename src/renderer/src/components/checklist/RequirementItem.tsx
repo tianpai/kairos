@@ -34,10 +34,10 @@ export function RequirementItem({
 
   return (
     <div className="mb-2">
-      <div className="flex items-start gap-2 rounded-lg bg-hover p-3">
+      <div className="bg-hover flex items-start gap-2 rounded-lg p-3">
         <StatusIcon className={`mt-0.5 h-4 w-4 shrink-0 ${iconColor}`} />
         <div className="flex-1">
-          <p className="text-sm text-secondary">
+          <p className="text-secondary text-sm">
             <HighlightedRequirement
               text={requirement.requirement}
               keywords={requirement.keywords}
@@ -46,7 +46,7 @@ export function RequirementItem({
             />
           </p>
           {hasWarning && (
-            <p className="mt-1 text-xs text-hint">{requirement.reason}</p>
+            <p className="text-hint mt-1 text-xs">{requirement.reason}</p>
           )}
         </div>
       </div>

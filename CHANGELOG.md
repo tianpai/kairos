@@ -4,83 +4,73 @@ All notable changes to this project will be documented in this file. See [standa
 
 ### [0.1.7](https://github.com/tianpai/kairos/compare/v0.1.6...v0.1.7) (2026-01-14)
 
-
 ### Bug Fixes
 
-* drop from-scratch application creation ([4da7628](https://github.com/tianpai/kairos/commit/4da76283244a36e842ad17fb306ee566314891f6))
+- drop from-scratch application creation ([4da7628](https://github.com/tianpai/kairos/commit/4da76283244a36e842ad17fb306ee566314891f6))
 
 ### [0.1.6](https://github.com/tianpai/kairos/compare/v0.1.5...v0.1.6) (2026-01-13)
 
-
 ### Features
 
-* add macOS code signing and notarization ([136c406](https://github.com/tianpai/kairos/commit/136c4060c219f1a35b0f4c96dc271df822b7eba7))
+- add macOS code signing and notarization ([136c406](https://github.com/tianpai/kairos/commit/136c4060c219f1a35b0f4c96dc271df822b7eba7))
 
 ### [0.1.5](https://github.com/tianpai/kairos/compare/v0.1.4...v0.1.5) (2026-01-13)
 
-
 ### Features
 
-* add reset and delete all data options in settings ([e34932f](https://github.com/tianpai/kairos/commit/e34932f60a7b833700afaf6c74560ef67e091bd1))
-* fix white screen flash when resizing app and improve popup layout ([705798e](https://github.com/tianpai/kairos/commit/705798e48aedc21d6918859036d90a88f75c97eb))
-
+- add reset and delete all data options in settings ([e34932f](https://github.com/tianpai/kairos/commit/e34932f60a7b833700afaf6c74560ef67e091bd1))
+- fix white screen flash when resizing app and improve popup layout ([705798e](https://github.com/tianpai/kairos/commit/705798e48aedc21d6918859036d90a88f75c97eb))
 
 ### Bug Fixes
 
-* add name and contact alignment settings to personal info section ([fac8555](https://github.com/tianpai/kairos/commit/fac8555b900de5fe909d6ffa0d5978ca614a8bf0))
-* drop Claude Code OAuth support ([b354fd6](https://github.com/tianpai/kairos/commit/b354fd65603245c0cc7ce0d0c0904f2f0db37152))
-* multi JD cannot create new applications ([f07b4c1](https://github.com/tianpai/kairos/commit/f07b4c1be8acdb23028b4a580ff247eb8c6afd62))
+- add name and contact alignment settings to personal info section ([fac8555](https://github.com/tianpai/kairos/commit/fac8555b900de5fe909d6ffa0d5978ca614a8bf0))
+- drop Claude Code OAuth support ([b354fd6](https://github.com/tianpai/kairos/commit/b354fd65603245c0cc7ce0d0c0904f2f0db37152))
+- multi JD cannot create new applications ([f07b4c1](https://github.com/tianpai/kairos/commit/f07b4c1be8acdb23028b4a580ff247eb8c6afd62))
 
 ### [0.1.4](https://github.com/tianpai/kairos/compare/v0.1.3...v0.1.4) (2026-01-11)
 
-
 ### Features
 
-* compact icon navigation for resume and checklist sections ([3a5a7b7](https://github.com/tianpai/kairos/commit/3a5a7b703f6a28d95b50bab336d01ead899d17b6))
-* provider settings show brand icons with cleaner card layout ([aa5634e](https://github.com/tianpai/kairos/commit/aa5634e97f619541af3dfbd5ef609d367af7a8fb))
-* restore last viewed application on startup ([fd0466d](https://github.com/tianpai/kairos/commit/fd0466db7e0f0865759eed67f6b7ddeb2b48efa8))
+- compact icon navigation for resume and checklist sections ([3a5a7b7](https://github.com/tianpai/kairos/commit/3a5a7b703f6a28d95b50bab336d01ead899d17b6))
+- provider settings show brand icons with cleaner card layout ([aa5634e](https://github.com/tianpai/kairos/commit/aa5634e97f619541af3dfbd5ef609d367af7a8fb))
+- restore last viewed application on startup ([fd0466d](https://github.com/tianpai/kairos/commit/fd0466db7e0f0865759eed67f6b7ddeb2b48efa8))
 
 ### [0.1.3](https://github.com/tianpai/kairos/compare/v0.1.2...v0.1.3) (2026-01-10)
 
-
 ### Features
 
-* integrate tips into success toast with hybrid selection ([6043f50](https://github.com/tianpai/kairos/commit/6043f50d6f89dd1db14ec7141cca7c4703c9da1c))
-
+- integrate tips into success toast with hybrid selection ([6043f50](https://github.com/tianpai/kairos/commit/6043f50d6f89dd1db14ec7141cca7c4703c9da1c))
 
 ### Bug Fixes
 
-* add write permissions to release workflow ([852d65d](https://github.com/tianpai/kairos/commit/852d65dafea35e648b22fbc78ae8aaa3c6962d0b))
-* defer quitAndInstall to ensure IPC response completes ([a627ed4](https://github.com/tianpai/kairos/commit/a627ed4ac6f39d188a8545a854d8bd3d68ecefa9))
-* group changelog by minor version with shared quotes ([7385038](https://github.com/tianpai/kairos/commit/7385038c08a379e8de2cabf48f00ed393e72e2e8))
-* include yml and blockmap files in release ([84bcee4](https://github.com/tianpai/kairos/commit/84bcee4ebda32ef1a9b3a69ba7b1df4c59bc6109))
+- add write permissions to release workflow ([852d65d](https://github.com/tianpai/kairos/commit/852d65dafea35e648b22fbc78ae8aaa3c6962d0b))
+- defer quitAndInstall to ensure IPC response completes ([a627ed4](https://github.com/tianpai/kairos/commit/a627ed4ac6f39d188a8545a854d8bd3d68ecefa9))
+- group changelog by minor version with shared quotes ([7385038](https://github.com/tianpai/kairos/commit/7385038c08a379e8de2cabf48f00ed393e72e2e8))
+- include yml and blockmap files in release ([84bcee4](https://github.com/tianpai/kairos/commit/84bcee4ebda32ef1a9b3a69ba7b1df4c59bc6109))
 
 ### [0.1.2](https://github.com/tianpai/kairos/compare/v0.1.1...v0.1.2) (2026-01-09)
 
-
 ### Features
 
-* add application info popup on sidebar hover ([d3626cc](https://github.com/tianpai/kairos/commit/d3626cc5ee07a0a70fdefa1429495c37f6354d88))
-* add toast notifications for errors and workflow status ([92c446e](https://github.com/tianpai/kairos/commit/92c446eacf7391128a32cc7bfc92ae649e479a68))
-* changelog now displays as collapsible accordion with version quotes ([438956a](https://github.com/tianpai/kairos/commit/438956a1ac19f80d0db4487c3cf8578ce5ab12b6))
-
+- add application info popup on sidebar hover ([d3626cc](https://github.com/tianpai/kairos/commit/d3626cc5ee07a0a70fdefa1429495c37f6354d88))
+- add toast notifications for errors and workflow status ([92c446e](https://github.com/tianpai/kairos/commit/92c446eacf7391128a32cc7bfc92ae649e479a68))
+- changelog now displays as collapsible accordion with version quotes ([438956a](https://github.com/tianpai/kairos/commit/438956a1ac19f80d0db4487c3cf8578ce5ab12b6))
 
 ### Bug Fixes
 
-* changelog format for version parsing and duplicate key warning ([2f20ada](https://github.com/tianpai/kairos/commit/2f20adac2abdfab50f8409d1136f5569eee69ab3))
-* sidebar state now persists across pages ([2d6f45e](https://github.com/tianpai/kairos/commit/2d6f45e298143913713c51be1d8878a45eb9d61c))
-* sidebar UI improvements and redesigned DiscreteSlider ([6c96deb](https://github.com/tianpai/kairos/commit/6c96deb6f3e4f02b769ae7fb51ff6ceef0a4e9c1))
+- changelog format for version parsing and duplicate key warning ([2f20ada](https://github.com/tianpai/kairos/commit/2f20adac2abdfab50f8409d1136f5569eee69ab3))
+- sidebar state now persists across pages ([2d6f45e](https://github.com/tianpai/kairos/commit/2d6f45e298143913713c51be1d8878a45eb9d61c))
+- sidebar UI improvements and redesigned DiscreteSlider ([6c96deb](https://github.com/tianpai/kairos/commit/6c96deb6f3e4f02b769ae7fb51ff6ceef0a4e9c1))
 
 ## 0.1.1
 
 ### Features
 
-* add settings hover popup showing provider, model, and version ([19a45a3](https://github.com/tianpai/kairos/commit/19a45a3cd874dc01fef194fbbcc1409d054bd831))
-
+- add settings hover popup showing provider, model, and version ([19a45a3](https://github.com/tianpai/kairos/commit/19a45a3cd874dc01fef194fbbcc1409d054bd831))
 
 ### Bug Fixes
 
-* add v0.0.6 entry to changelog for settings page display ([f3109e1](https://github.com/tianpai/kairos/commit/f3109e13b46d02339f4a8cd6c7e90032c1833ba7))
+- add v0.0.6 entry to changelog for settings page display ([f3109e1](https://github.com/tianpai/kairos/commit/f3109e13b46d02339f4a8cd6c7e90032c1833ba7))
 
 ## 0.0.6
 

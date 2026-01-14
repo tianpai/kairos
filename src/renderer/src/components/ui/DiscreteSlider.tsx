@@ -23,7 +23,7 @@ export function DiscreteSlider({
           {unit && <span className="text-hint"> ({unit})</span>}
         </label>
       )}
-      <div className="inline-flex rounded-md border border-default">
+      <div className="border-default inline-flex rounded-md border">
         {values.map((v, index) => {
           const isSelected = Math.abs(v - value) < 0.0001
           const isFirst = index === 0
@@ -40,7 +40,7 @@ export function DiscreteSlider({
                   : 'bg-surface text-secondary hover:bg-hover',
                 isFirst && 'rounded-l-md',
                 isLast && 'rounded-r-md',
-                !isLast && 'border-r border-default',
+                !isLast && 'border-default border-r',
               )}
             >
               {v}

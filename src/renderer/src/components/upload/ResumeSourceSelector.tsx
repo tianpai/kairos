@@ -15,7 +15,7 @@ export function ResumeSourceSelector({
   onChange,
 }: ResumeSourceSelectorProps) {
   return (
-    <div className="flex rounded-lg border border-default bg-surface p-0.5">
+    <div className="border-default bg-surface flex rounded-lg border p-0.5">
       {options.map((option) => (
         <button
           key={option.value}

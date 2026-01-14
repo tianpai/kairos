@@ -3,7 +3,12 @@ import { CollapsibleSidebar } from '@sidebar/CollapsibleSidebar'
 import { GenericSidebarItem } from '@sidebar/GenericSidebarItem'
 import type { LucideIcon } from 'lucide-react'
 
-export type SettingsSection = 'providers' | 'appearance' | 'tips' | 'general' | 'about'
+export type SettingsSection =
+  | 'providers'
+  | 'appearance'
+  | 'tips'
+  | 'general'
+  | 'about'
 
 interface NavItem {
   id: SettingsSection

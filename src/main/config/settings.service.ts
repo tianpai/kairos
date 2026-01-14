@@ -36,7 +36,13 @@ interface SettingsSchema {
       cachedModels: Array<string>;
     };
   };
-  activeProvider: "openai" | "deepseek" | "ollama" | "xai" | "gemini" | "anthropic";
+  activeProvider:
+    | "openai"
+    | "deepseek"
+    | "ollama"
+    | "xai"
+    | "gemini"
+    | "anthropic";
   theme: ThemeSource;
 }
 
@@ -282,11 +288,19 @@ export class SettingsService {
   }
 
   // Active provider methods
-  getActiveProvider(): "openai" | "deepseek" | "ollama" | "xai" | "gemini" | "anthropic" {
+  getActiveProvider():
+    | "openai"
+    | "deepseek"
+    | "ollama"
+    | "xai"
+    | "gemini"
+    | "anthropic" {
     return this.store.get("activeProvider");
   }
 
-  setActiveProvider(provider: "openai" | "deepseek" | "ollama" | "xai" | "gemini" | "anthropic"): void {
+  setActiveProvider(
+    provider: "openai" | "deepseek" | "ollama" | "xai" | "gemini" | "anthropic",
+  ): void {
     this.store.set("activeProvider", provider);
   }
 

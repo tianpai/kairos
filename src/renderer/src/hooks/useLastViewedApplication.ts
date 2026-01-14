@@ -26,7 +26,7 @@ export function useLastViewedApplication({
         setLastViewedApplicationId(jobId)
       }
     },
-    [jobId]
+    [jobId],
   )
 
   // Restore last viewed application on startup
@@ -50,14 +50,14 @@ export function useLastViewedApplication({
         clearLastViewedApplicationId()
       }
     },
-    [jobId, applications, navigate]
+    [jobId, applications, navigate],
   )
 
   const selectApplication = useCallback(
     function selectApplication(id: string) {
       navigate({ to: '/', search: { jobId: id } })
     },
-    [navigate]
+    [navigate],
   )
 
   const navigateAfterDelete = useCallback(
@@ -76,7 +76,7 @@ export function useLastViewedApplication({
         navigate({ to: '/', search: { jobId: undefined } })
       }
     },
-    [jobId, applications, navigate]
+    [jobId, applications, navigate],
   )
 
   return {

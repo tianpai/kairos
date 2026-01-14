@@ -127,7 +127,7 @@ export default function JobInfoModal({
                 const url = normalizeUrl(jobUrl)
                 if (url) window.kairos.shell.openExternal(url)
               }}
-              className="mb-0.5 rounded p-2 text-hint transition-colors hover:bg-hover hover:text-primary"
+              className="text-hint hover:bg-hover hover:text-primary mb-0.5 rounded p-2 transition-colors"
               title="Open in browser"
             >
               <ExternalLink size={18} />

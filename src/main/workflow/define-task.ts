@@ -14,68 +14,74 @@ import type {
   TaskProvides,
   ValidInputKeys,
   WorkflowContext,
-} from '@type/task-contracts'
+} from "@type/task-contracts";
 
 /**
  * Task configuration object
  */
 export interface TaskConfig<T extends TaskName> {
   /** Task identifier - must match a key in TaskContracts */
-  name: T
+  name: T;
 
   /** Enable streaming and partial events for AI tasks */
-  streaming?: boolean
+  streaming?: boolean;
 
   /**
    * Context keys required as input.
    * Must be keys that exist in both TaskInput<T> and WorkflowContext.
    */
-  inputKeys: ValidInputKeys<T>
+  inputKeys: ValidInputKeys<T>;
 
   /**
    * Context key to write output to.
    * Must match the 'provides' field in TaskContracts for this task.
    * Omit if task doesn't write to context.
    */
-  provides?: TaskProvides<T>
+  provides?: TaskProvides<T>;
 
   /** Optional tip event to trigger after success */
-  tipEvent?: string
+  tipEvent?: string;
 
   /** Execute the task */
-  execute: (input: TaskInput<T>, meta: TaskExecutionMeta) => Promise<TaskOutput<T>>
+  execute: (
+    input: TaskInput<T>,
+    meta: TaskExecutionMeta,
+  ) => Promise<TaskOutput<T>>;
 
   /** Handle successful completion (persist to DB) */
-  onSuccess: (jobId: string, result: TaskOutput<T>) => Promise<void>
+  onSuccess: (jobId: string, result: TaskOutput<T>) => Promise<void>;
 
   /** Optional: get data to pass to tip.trigger() */
-  getTipData?: (result: TaskOutput<T>) => Record<string, unknown>
+  getTipData?: (result: TaskOutput<T>) => Record<string, unknown>;
 }
 
 /**
  * Runtime task instance with metadata
  */
 export interface Task<T extends TaskName = TaskName> {
-  readonly name: T
-  readonly inputKeys: ValidInputKeys<T>
-  readonly provides?: string
-  readonly tipEvent?: string
-  readonly streaming?: boolean
-  execute: (input: TaskInput<T>, meta: TaskExecutionMeta) => Promise<TaskOutput<T>>
-  onSuccess: (jobId: string, result: TaskOutput<T>) => Promise<void>
-  getTipData?: (result: TaskOutput<T>) => Record<string, unknown>
+  readonly name: T;
+  readonly inputKeys: ValidInputKeys<T>;
+  readonly provides?: string;
+  readonly tipEvent?: string;
+  readonly streaming?: boolean;
+  execute: (
+    input: TaskInput<T>,
+    meta: TaskExecutionMeta,
+  ) => Promise<TaskOutput<T>>;
+  onSuccess: (jobId: string, result: TaskOutput<T>) => Promise<void>;
+  getTipData?: (result: TaskOutput<T>) => Record<string, unknown>;
 }
 
 export interface TaskExecutionMeta {
-  jobId: string
-  taskName: TaskName
-  emitPartial?: (partial: unknown) => void
+  jobId: string;
+  taskName: TaskName;
+  emitPartial?: (partial: unknown) => void;
 }
 
 /**
  * Global task registry - populated by defineTask calls
  */
-const taskRegistry = new Map<TaskName, Task>()
+const taskRegistry = new Map<TaskName, Task>();
 
 /**
  * Define a new task with full type inference
@@ -90,33 +96,33 @@ export function defineTask<T extends TaskName>(config: TaskConfig<T>): Task<T> {
     execute: config.execute,
     onSuccess: config.onSuccess,
     getTipData: config.getTipData,
-  }
+  };
 
   // Auto-register
-  taskRegistry.set(config.name, task as Task)
+  taskRegistry.set(config.name, task as Task);
 
-  return task
+  return task;
 }
 
 /**
  * Get a task by name (type-safe)
  */
 export function getTask<T extends TaskName>(name: T): Task<T> | undefined {
-  return taskRegistry.get(name) as Task<T> | undefined
+  return taskRegistry.get(name) as Task<T> | undefined;
 }
 
 /**
  * Get all registered tasks
  */
 export function getAllTasks(): ReadonlyMap<TaskName, Task> {
-  return taskRegistry
+  return taskRegistry;
 }
 
 /**
  * Check if a task is registered
  */
 export function hasTask(name: TaskName): boolean {
-  return taskRegistry.has(name)
+  return taskRegistry.has(name);
 }
 
 /**
@@ -128,17 +134,17 @@ export function resolveTaskInput<T extends TaskName>(
   task: Task<T>,
   context: WorkflowContext,
 ): TaskInput<T> | null {
-  const input: Record<string, unknown> = {}
+  const input: Record<string, unknown> = {};
 
   for (const key of task.inputKeys) {
-    const value = context[key]
+    const value = context[key];
     if (value === undefined) {
-      return null
+      return null;
     }
-    input[key as string] = value
+    input[key as string] = value;
   }
 
-  return input as TaskInput<T>
+  return input as TaskInput<T>;
 }
 
 /**
@@ -148,13 +154,13 @@ export function getMissingInputs<T extends TaskName>(
   task: Task<T>,
   context: WorkflowContext,
 ): Array<string> {
-  const missing: Array<string> = []
+  const missing: Array<string> = [];
 
   for (const key of task.inputKeys) {
     if (context[key] === undefined) {
-      missing.push(key as string)
+      missing.push(key as string);
     }
   }
 
-  return missing
+  return missing;
 }

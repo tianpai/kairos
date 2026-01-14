@@ -79,12 +79,12 @@ export function HoldButton({
       className={cn(
         'relative overflow-hidden rounded-full border border-transparent px-4 py-2 text-sm font-medium select-none',
         disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer',
-        className
+        className,
       )}
     >
       {isHolding && (
         <div
-          className="absolute inset-0 bg-active transition-none"
+          className="bg-active absolute inset-0 transition-none"
           style={{ width: `${progress}%` }}
         />
       )}

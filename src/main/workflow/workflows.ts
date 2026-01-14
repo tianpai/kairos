@@ -1,4 +1,4 @@
-import { defineWorkflow } from './define-workflow'
+import { defineWorkflow } from "./define-workflow";
 
 /**
  * Checklist Only Workflow
@@ -10,14 +10,14 @@ import { defineWorkflow } from './define-workflow'
  *   jobinfo.extracting (independent, runs in parallel)
  */
 export const checklistOnlyWorkflow = defineWorkflow({
-  name: 'checklist-only',
+  name: "checklist-only",
   tasks: {
-    'checklist.parsing': { after: [] },
-    'jobinfo.extracting': { after: [] },
-    'checklist.matching': { after: ['checklist.parsing'] },
-    'score.updating': { after: ['checklist.matching'] },
+    "checklist.parsing": { after: [] },
+    "jobinfo.extracting": { after: [] },
+    "checklist.matching": { after: ["checklist.parsing"] },
+    "score.updating": { after: ["checklist.matching"] },
   },
-})
+});
 
 /**
  * Create Application Workflow
@@ -31,15 +31,15 @@ export const checklistOnlyWorkflow = defineWorkflow({
  *   jobinfo.extracting (independent, runs in parallel)
  */
 export const createApplicationWorkflow = defineWorkflow({
-  name: 'create-application',
+  name: "create-application",
   tasks: {
-    'resume.parsing': { after: [] },
-    'checklist.parsing': { after: [] },
-    'jobinfo.extracting': { after: [] },
-    'checklist.matching': { after: ['resume.parsing', 'checklist.parsing'] },
-    'score.updating': { after: ['checklist.matching'] },
+    "resume.parsing": { after: [] },
+    "checklist.parsing": { after: [] },
+    "jobinfo.extracting": { after: [] },
+    "checklist.matching": { after: ["resume.parsing", "checklist.parsing"] },
+    "score.updating": { after: ["checklist.matching"] },
   },
-})
+});
 
 /**
  * Tailoring Workflow
@@ -51,10 +51,10 @@ export const createApplicationWorkflow = defineWorkflow({
  * Assumes checklist already exists from create-application workflow.
  */
 export const tailoringWorkflow = defineWorkflow({
-  name: 'tailoring',
+  name: "tailoring",
   tasks: {
-    'resume.tailoring': { after: [] },
-    'checklist.matching': { after: ['resume.tailoring'] },
-    'score.updating': { after: ['checklist.matching'] },
+    "resume.tailoring": { after: [] },
+    "checklist.matching": { after: ["resume.tailoring"] },
+    "score.updating": { after: ["checklist.matching"] },
   },
-})
+});

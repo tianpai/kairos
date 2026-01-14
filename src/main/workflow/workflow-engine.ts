@@ -11,28 +11,24 @@
  * - Emit workflow events for renderer updates
  */
 
-import log from 'electron-log/main'
-import type { TaskName, WorkflowContext } from '@type/task-contracts'
-import type { TaskStatus, WorkflowStepsData } from '@type/workflow'
-import type { JobApplicationService } from '../services/job-application.service'
-import {
-  getMissingInputs,
-  getTask,
-  resolveTaskInput,
-} from './define-task'
+import log from "electron-log/main";
+import type { TaskName, WorkflowContext } from "@type/task-contracts";
+import type { TaskStatus, WorkflowStepsData } from "@type/workflow";
+import type { JobApplicationService } from "../services/job-application.service";
+import { getMissingInputs, getTask, resolveTaskInput } from "./define-task";
 import {
   arePrerequisitesSatisfied,
   getEntryTasks,
   getWorkflow,
-} from './define-workflow'
-import { emitWorkflowEvent } from './workflow-events'
-import { WorkflowStore } from './workflow-store'
-import type { Task, TaskExecutionMeta } from './define-task'
-import type { Workflow } from './define-workflow'
-import type { TaskStateMap, WorkflowInstance } from './workflow-store'
+} from "./define-workflow";
+import { emitWorkflowEvent } from "./workflow-events";
+import { WorkflowStore } from "./workflow-store";
+import type { Task, TaskExecutionMeta } from "./define-task";
+import type { Workflow } from "./define-workflow";
+import type { TaskStateMap, WorkflowInstance } from "./workflow-store";
 
 export class WorkflowEngine {
-  private store = new WorkflowStore()
+  private store = new WorkflowStore();
 
   constructor(private readonly jobService: JobApplicationService) {}
 
@@ -44,11 +40,11 @@ export class WorkflowEngine {
     jobId: string,
     initialContext: Partial<WorkflowContext>,
   ): Promise<void> {
-    log.info(`[WorkflowEngine] Starting '${workflowName}' for job ${jobId}`)
+    log.info(`[WorkflowEngine] Starting '${workflowName}' for job ${jobId}`);
 
-    const workflow = getWorkflow(workflowName)
+    const workflow = getWorkflow(workflowName);
     if (!workflow) {
-      throw new Error(`Unknown workflow: ${workflowName}`)
+      throw new Error(`Unknown workflow: ${workflowName}`);
     }
 
     // Validate all tasks in workflow are registered
@@ -56,32 +52,32 @@ export class WorkflowEngine {
       if (!getTask(taskName)) {
         throw new Error(
           `Workflow '${workflowName}' references unregistered task: ${taskName}`,
-        )
+        );
       }
     }
 
     // Get task names array
-    const tasks = Array.from(workflow.tasks.keys())
+    const tasks = Array.from(workflow.tasks.keys());
 
     // Initialize workflow in store
-    this.store.initWorkflow(jobId, workflowName, tasks, initialContext)
+    this.store.initWorkflow(jobId, workflowName, tasks, initialContext);
 
     // Persist initial state
-    const workflowInstance = this.store.getWorkflow(jobId)!
-    await this.persistWorkflow(jobId, workflowInstance)
-    this.emitStateChanged(jobId)
+    const workflowInstance = this.store.getWorkflow(jobId)!;
+    await this.persistWorkflow(jobId, workflowInstance);
+    this.emitStateChanged(jobId);
 
     // Start entry tasks
-    const entryTasks = getEntryTasks(workflow)
-    log.info(`[WorkflowEngine] Entry tasks: ${entryTasks.join(', ')}`)
+    const entryTasks = getEntryTasks(workflow);
+    log.info(`[WorkflowEngine] Entry tasks: ${entryTasks.join(", ")}`);
 
     for (const taskName of entryTasks) {
       void this.runTaskIfReady(workflow, jobId, taskName).catch((error) => {
         log.error(
           `[WorkflowEngine] Failed to run entry task ${taskName} for job ${jobId}`,
           error,
-        )
-      })
+        );
+      });
     }
   }
 
@@ -89,31 +85,31 @@ export class WorkflowEngine {
    * Retry failed tasks in a workflow
    */
   async retryFailedTasks(jobId: string): Promise<Array<TaskName>> {
-    const workflowInstance = this.store.getWorkflow(jobId)
+    const workflowInstance = this.store.getWorkflow(jobId);
 
     if (!workflowInstance) {
-      throw new Error(`No workflow instance for job ${jobId}`)
+      throw new Error(`No workflow instance for job ${jobId}`);
     }
 
-    if (workflowInstance.status !== 'failed') {
-      throw new Error('Can only retry failed workflows')
+    if (workflowInstance.status !== "failed") {
+      throw new Error("Can only retry failed workflows");
     }
 
-    const workflow = getWorkflow(workflowInstance.workflowName)
+    const workflow = getWorkflow(workflowInstance.workflowName);
     if (!workflow) {
-      throw new Error(`Unknown workflow: ${workflowInstance.workflowName}`)
+      throw new Error(`Unknown workflow: ${workflowInstance.workflowName}`);
     }
 
     // Find failed tasks
-    const failedTasks: Array<TaskName> = []
-    const resetTaskStates: TaskStateMap = { ...workflowInstance.taskStates }
+    const failedTasks: Array<TaskName> = [];
+    const resetTaskStates: TaskStateMap = { ...workflowInstance.taskStates };
 
     for (const [taskName, status] of Object.entries(
       workflowInstance.taskStates,
     )) {
-      if (status === 'failed') {
-        failedTasks.push(taskName as TaskName)
-        resetTaskStates[taskName as TaskName] = 'pending'
+      if (status === "failed") {
+        failedTasks.push(taskName as TaskName);
+        resetTaskStates[taskName as TaskName] = "pending";
       }
     }
 
@@ -121,29 +117,29 @@ export class WorkflowEngine {
     this.store.loadWorkflow(jobId, {
       ...workflowInstance,
       taskStates: resetTaskStates,
-      status: 'running',
+      status: "running",
       error: undefined,
-    })
+    });
 
     // Persist and restart
-    const updatedWorkflow = this.store.getWorkflow(jobId)!
-    await this.persistWorkflow(jobId, updatedWorkflow)
-    this.emitStateChanged(jobId)
-    await this.startReadyTasks(workflow, jobId)
+    const updatedWorkflow = this.store.getWorkflow(jobId)!;
+    await this.persistWorkflow(jobId, updatedWorkflow);
+    this.emitStateChanged(jobId);
+    await this.startReadyTasks(workflow, jobId);
 
-    return failedTasks
+    return failedTasks;
   }
 
   /**
    * Return the in-memory workflow instance, if present.
    */
   getWorkflow(jobId: string): WorkflowInstance | undefined {
-    return this.store.getWorkflow(jobId)
+    return this.store.getWorkflow(jobId);
   }
 
   getWorkflowSteps(jobId: string): WorkflowStepsData | null {
-    const workflow = this.store.getWorkflow(jobId)
-    return workflow ? this.toWorkflowSteps(workflow) : null
+    const workflow = this.store.getWorkflow(jobId);
+    return workflow ? this.toWorkflowSteps(workflow) : null;
   }
 
   /**
@@ -151,29 +147,29 @@ export class WorkflowEngine {
    * Called when loading workflow state from DB on app start/navigation.
    */
   recoverStaleWorkflow(workflowSteps: WorkflowStepsData): {
-    recovered: WorkflowStepsData
-    wasStale: boolean
+    recovered: WorkflowStepsData;
+    wasStale: boolean;
   } {
-    if (workflowSteps.status !== 'running') {
-      return { recovered: workflowSteps, wasStale: false }
+    if (workflowSteps.status !== "running") {
+      return { recovered: workflowSteps, wasStale: false };
     }
 
     // Workflow was "running" - mark as failed (interrupted)
-    const recoveredTaskStates: Record<string, TaskStatus> = {}
+    const recoveredTaskStates: Record<string, TaskStatus> = {};
 
     for (const [task, status] of Object.entries(workflowSteps.taskStates)) {
-      recoveredTaskStates[task] = status === 'running' ? 'failed' : status
+      recoveredTaskStates[task] = status === "running" ? "failed" : status;
     }
 
     return {
       recovered: {
         ...workflowSteps,
-        status: 'failed',
+        status: "failed",
         taskStates: recoveredTaskStates,
-        error: 'Workflow was interrupted',
+        error: "Workflow was interrupted",
       },
       wasStale: true,
-    }
+    };
   }
 
   /**
@@ -187,19 +183,19 @@ export class WorkflowEngine {
       await this.jobService.saveWorkflowState(jobId, {
         workflowSteps: this.toWorkflowSteps(workflow),
         workflowStatus: workflow.status,
-      })
+      });
     } catch (error) {
-      log.error('[WorkflowEngine] Failed to persist workflow state:', error)
+      log.error("[WorkflowEngine] Failed to persist workflow state:", error);
     }
   }
 
   private emitStateChanged(jobId: string): void {
-    const workflow = this.store.getWorkflow(jobId)
-    if (!workflow) return
-    emitWorkflowEvent('workflow:stateChanged', {
+    const workflow = this.store.getWorkflow(jobId);
+    if (!workflow) return;
+    emitWorkflowEvent("workflow:stateChanged", {
       jobId,
       workflow: this.toWorkflowSteps(workflow),
-    })
+    });
   }
 
   private toWorkflowSteps(workflow: WorkflowInstance): WorkflowStepsData {
@@ -208,7 +204,7 @@ export class WorkflowEngine {
       taskStates: workflow.taskStates as Record<string, TaskStatus>,
       status: workflow.status,
       ...(workflow.error ? { error: workflow.error } : {}),
-    }
+    };
   }
 
   /**
@@ -219,49 +215,49 @@ export class WorkflowEngine {
     jobId: string,
     taskName: TaskName,
   ): Promise<void> {
-    const workflowInstance = this.store.getWorkflow(jobId)
-    const context = this.store.getContext(jobId)
+    const workflowInstance = this.store.getWorkflow(jobId);
+    const context = this.store.getContext(jobId);
 
     if (!workflowInstance || !context) {
-      return
+      return;
     }
 
-    const status = workflowInstance.taskStates[taskName]
-    if (status !== 'pending') {
-      return
+    const status = workflowInstance.taskStates[taskName];
+    if (status !== "pending") {
+      return;
     }
 
     // Check prerequisites
-    const completedTasks = new Set<TaskName>()
+    const completedTasks = new Set<TaskName>();
     for (const [name, s] of Object.entries(workflowInstance.taskStates)) {
-      if (s === 'completed') {
-        completedTasks.add(name as TaskName)
+      if (s === "completed") {
+        completedTasks.add(name as TaskName);
       }
     }
 
     if (!arePrerequisitesSatisfied(workflow, taskName, completedTasks)) {
-      log.debug(`[WorkflowEngine] Task ${taskName} waiting on prerequisites`)
-      return
+      log.debug(`[WorkflowEngine] Task ${taskName} waiting on prerequisites`);
+      return;
     }
 
     // Check inputs
-    const task = getTask(taskName)
+    const task = getTask(taskName);
     if (!task) {
-      await this.failTask(jobId, taskName, `Task ${taskName} not registered`)
-      return
+      await this.failTask(jobId, taskName, `Task ${taskName} not registered`);
+      return;
     }
 
-    const input = resolveTaskInput(task, context)
+    const input = resolveTaskInput(task, context);
     if (input === null) {
-      const missing = getMissingInputs(task, context)
+      const missing = getMissingInputs(task, context);
       log.debug(
-        `[WorkflowEngine] Task ${taskName} blocked on inputs: ${missing.join(', ')}`,
-      )
-      return
+        `[WorkflowEngine] Task ${taskName} blocked on inputs: ${missing.join(", ")}`,
+      );
+      return;
     }
 
     // Run the task
-    await this.executeTask(workflow, jobId, task, input)
+    await this.executeTask(workflow, jobId, task, input);
   }
 
   /**
@@ -271,22 +267,22 @@ export class WorkflowEngine {
     workflow: Workflow,
     jobId: string,
     task: Task<T>,
-    input: Parameters<Task<T>['execute']>[0],
+    input: Parameters<Task<T>["execute"]>[0],
   ): Promise<void> {
-    const taskName = task.name
+    const taskName = task.name;
 
     // Verify workflow is still running
-    const workflowInstance = this.store.getWorkflow(jobId)
-    if (!workflowInstance || workflowInstance.status !== 'running') {
+    const workflowInstance = this.store.getWorkflow(jobId);
+    if (!workflowInstance || workflowInstance.status !== "running") {
       log.warn(
         `[WorkflowEngine] Task ${taskName} skipped - workflow not running for job ${jobId}`,
-      )
-      return
+      );
+      return;
     }
 
-    log.info(`[WorkflowEngine] Running task: ${taskName}`)
-    this.store.setTaskStatus(jobId, taskName, 'running')
-    this.emitStateChanged(jobId)
+    log.info(`[WorkflowEngine] Running task: ${taskName}`);
+    this.store.setTaskStatus(jobId, taskName, "running");
+    this.emitStateChanged(jobId);
 
     try {
       const meta: TaskExecutionMeta = {
@@ -294,51 +290,51 @@ export class WorkflowEngine {
         taskName,
         emitPartial: task.streaming
           ? (partial) => {
-              emitWorkflowEvent('workflow:aiPartial', {
+              emitWorkflowEvent("workflow:aiPartial", {
                 jobId,
                 taskName,
                 partial,
-              })
+              });
             }
           : undefined,
-      }
+      };
 
       // Execute
-      const result = await task.execute(input, meta)
+      const result = await task.execute(input, meta);
 
       // Persist task result
-      await task.onSuccess(jobId, result)
+      await task.onSuccess(jobId, result);
 
       // Update context if task provides a key
       if (task.provides) {
-        this.store.updateContext(jobId, { [task.provides]: result })
+        this.store.updateContext(jobId, { [task.provides]: result });
       }
 
       // Mark completed
-      this.store.setTaskStatus(jobId, taskName, 'completed')
-      log.info(`[WorkflowEngine] Task completed: ${taskName}`)
+      this.store.setTaskStatus(jobId, taskName, "completed");
+      log.info(`[WorkflowEngine] Task completed: ${taskName}`);
 
       // Persist workflow state
-      const updatedWorkflow = this.store.getWorkflow(jobId)!
-      await this.persistWorkflow(jobId, updatedWorkflow)
+      const updatedWorkflow = this.store.getWorkflow(jobId)!;
+      await this.persistWorkflow(jobId, updatedWorkflow);
 
       // Emit completion event for renderer UI
-      emitWorkflowEvent('workflow:taskCompleted', {
+      emitWorkflowEvent("workflow:taskCompleted", {
         jobId,
         taskName,
         provides: task.provides,
         result: task.provides ? (result as unknown) : undefined,
         tipEvent: task.tipEvent,
         tipData: task.getTipData ? task.getTipData(result as never) : undefined,
-      })
-      this.emitStateChanged(jobId)
+      });
+      this.emitStateChanged(jobId);
 
       // Start dependent tasks
-      await this.startReadyTasks(workflow, jobId)
+      await this.startReadyTasks(workflow, jobId);
     } catch (error) {
-      log.error(`[WorkflowEngine] Task ${taskName} execution failed:`, error)
-      const message = error instanceof Error ? error.message : String(error)
-      await this.failTask(jobId, taskName, message)
+      log.error(`[WorkflowEngine] Task ${taskName} execution failed:`, error);
+      const message = error instanceof Error ? error.message : String(error);
+      await this.failTask(jobId, taskName, message);
     }
   }
 
@@ -349,34 +345,42 @@ export class WorkflowEngine {
     workflow: Workflow,
     jobId: string,
   ): Promise<void> {
-    const workflowInstance = this.store.getWorkflow(jobId)
-    const context = this.store.getContext(jobId)
+    const workflowInstance = this.store.getWorkflow(jobId);
+    const context = this.store.getContext(jobId);
 
-    if (!workflowInstance || workflowInstance.status !== 'running' || !context) {
-      return
+    if (
+      !workflowInstance ||
+      workflowInstance.status !== "running" ||
+      !context
+    ) {
+      return;
     }
 
     // Find ready tasks
-    const readyTasks: Array<TaskName> = []
-    const completedTasks = new Set<TaskName>()
+    const readyTasks: Array<TaskName> = [];
+    const completedTasks = new Set<TaskName>();
 
     for (const [name, status] of Object.entries(workflowInstance.taskStates)) {
-      if (status === 'completed') {
-        completedTasks.add(name as TaskName)
+      if (status === "completed") {
+        completedTasks.add(name as TaskName);
       }
     }
 
     for (const [taskName, status] of Object.entries(
       workflowInstance.taskStates,
     )) {
-      if (status !== 'pending') continue
+      if (status !== "pending") continue;
 
       if (
-        arePrerequisitesSatisfied(workflow, taskName as TaskName, completedTasks)
+        arePrerequisitesSatisfied(
+          workflow,
+          taskName as TaskName,
+          completedTasks,
+        )
       ) {
-        const task = getTask(taskName as TaskName)
+        const task = getTask(taskName as TaskName);
         if (task && resolveTaskInput(task, context) !== null) {
-          readyTasks.push(taskName as TaskName)
+          readyTasks.push(taskName as TaskName);
         }
       }
     }
@@ -384,41 +388,41 @@ export class WorkflowEngine {
     // Check if workflow is complete
     if (readyTasks.length === 0) {
       const allCompleted = Object.values(workflowInstance.taskStates).every(
-        (s) => s === 'completed',
-      )
+        (s) => s === "completed",
+      );
       if (allCompleted) {
-        this.store.completeWorkflow(jobId)
-        const completedWorkflow = this.store.getWorkflow(jobId)!
-        await this.persistWorkflow(jobId, completedWorkflow)
+        this.store.completeWorkflow(jobId);
+        const completedWorkflow = this.store.getWorkflow(jobId)!;
+        await this.persistWorkflow(jobId, completedWorkflow);
         log.info(
           `[WorkflowEngine] Workflow '${workflowInstance.workflowName}' completed`,
-        )
+        );
 
-        const tipPayload = this.getTipPayload(jobId, completedWorkflow)
+        const tipPayload = this.getTipPayload(jobId, completedWorkflow);
 
-        emitWorkflowEvent('workflow:completed', {
+        emitWorkflowEvent("workflow:completed", {
           jobId,
           workflowName: workflowInstance.workflowName,
-          status: 'completed',
+          status: "completed",
           ...tipPayload,
-        })
-        this.emitStateChanged(jobId)
-        this.store.clearWorkflow(jobId)
+        });
+        this.emitStateChanged(jobId);
+        this.store.clearWorkflow(jobId);
       }
-      return
+      return;
     }
 
     // Start ready tasks in parallel
     log.info(
-      `[WorkflowEngine] Starting ${readyTasks.length} ready task(s): ${readyTasks.join(', ')}`,
-    )
+      `[WorkflowEngine] Starting ${readyTasks.length} ready task(s): ${readyTasks.join(", ")}`,
+    );
     for (const taskName of readyTasks) {
       void this.runTaskIfReady(workflow, jobId, taskName).catch((error) => {
         log.error(
           `[WorkflowEngine] Failed to run task ${taskName} for job ${jobId}`,
           error,
-        )
-      })
+        );
+      });
     }
   }
 
@@ -426,24 +430,26 @@ export class WorkflowEngine {
     jobId: string,
     workflowInstance: WorkflowInstance,
   ): { tipEvent?: string; tipData?: Record<string, unknown> } {
-    const context = this.store.getContext(jobId)
-    if (!context) return {}
+    const context = this.store.getContext(jobId);
+    if (!context) return {};
 
     for (const [taskName, status] of Object.entries(
       workflowInstance.taskStates,
     )) {
-      if (status !== 'completed') continue
-      const task = getTask(taskName as TaskName)
+      if (status !== "completed") continue;
+      const task = getTask(taskName as TaskName);
       if (task?.tipEvent) {
         const tipData =
           task.provides && task.getTipData
-            ? task.getTipData(context[task.provides as keyof typeof context] as never)
-            : {}
-        return { tipEvent: task.tipEvent, tipData }
+            ? task.getTipData(
+                context[task.provides as keyof typeof context] as never,
+              )
+            : {};
+        return { tipEvent: task.tipEvent, tipData };
       }
     }
 
-    return {}
+    return {};
   }
 
   /**
@@ -454,20 +460,20 @@ export class WorkflowEngine {
     taskName: TaskName,
     error: string,
   ): Promise<void> {
-    log.error(`[WorkflowEngine] Task ${taskName} failed: ${error}`)
+    log.error(`[WorkflowEngine] Task ${taskName} failed: ${error}`);
 
-    this.store.setTaskStatus(jobId, taskName, 'failed', error)
-    this.store.failWorkflow(jobId, `Task ${taskName} failed: ${error}`)
+    this.store.setTaskStatus(jobId, taskName, "failed", error);
+    this.store.failWorkflow(jobId, `Task ${taskName} failed: ${error}`);
 
     // Persist failure
-    const failedWorkflow = this.store.getWorkflow(jobId)!
-    await this.persistWorkflow(jobId, failedWorkflow)
+    const failedWorkflow = this.store.getWorkflow(jobId)!;
+    await this.persistWorkflow(jobId, failedWorkflow);
 
-    emitWorkflowEvent('workflow:taskFailed', {
+    emitWorkflowEvent("workflow:taskFailed", {
       jobId,
       taskName,
       error,
-    })
-    this.emitStateChanged(jobId)
+    });
+    this.emitStateChanged(jobId);
   }
 }

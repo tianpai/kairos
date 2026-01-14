@@ -25,14 +25,14 @@ export function AppearanceSection() {
     <div className="space-y-6">
       <div>
         <h2 className="text-lg font-semibold">Appearance</h2>
-        <p className="mt-1 text-sm text-hint">
+        <p className="text-hint mt-1 text-sm">
           Customize the look and feel of the app.
         </p>
       </div>
 
       <div className="space-y-4">
         <div>
-          <label className="mb-3 block text-sm font-medium text-secondary">
+          <label className="text-secondary mb-3 block text-sm font-medium">
             Theme
           </label>
           <div className="flex gap-2">
@@ -55,7 +55,7 @@ export function AppearanceSection() {
               )
             })}
           </div>
-          <p className="mt-2 text-xs text-hint">
+          <p className="text-hint mt-2 text-xs">
             In dark mode, the resume preview adapts for readability. Downloaded
             PDFs remain unchanged.
           </p>

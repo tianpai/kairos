@@ -32,20 +32,20 @@ export function GenericSidebarItem({
           <Icon
             size={16}
             className={
-              isSelected ? 'shrink-0 text-primary' : 'shrink-0 text-hint'
+              isSelected ? 'text-primary shrink-0' : 'text-hint shrink-0'
             }
           />
         )}
         <div className="min-w-0 flex-1">
           <div
             className={`truncate text-sm ${
-              isSelected ? 'font-medium text-primary' : 'text-secondary'
+              isSelected ? 'text-primary font-medium' : 'text-secondary'
             }`}
           >
             {label}
           </div>
           {sublabel && (
-            <div className="truncate text-xs text-hint">{sublabel}</div>
+            <div className="text-hint truncate text-xs">{sublabel}</div>
           )}
         </div>
       </div>

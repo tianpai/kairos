@@ -39,10 +39,7 @@ function SelectedFile({
         onClick={onRemoveFile}
         className="absolute top-1/2 right-2 -translate-y-1/2 p-0.5 opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100"
       >
-        <CircleX
-          size={14}
-          className="text-hint hover:text-secondary"
-        />
+        <CircleX size={14} className="text-hint hover:text-secondary" />
       </button>
     </div>
   )
@@ -70,7 +67,7 @@ function FileDropzone({
           : 'border-default hover:border-hint'
       }`}
     >
-      <UploadCloud className="h-4 w-4 text-hint" />
+      <UploadCloud className="text-hint h-4 w-4" />
       <span className="text-hint">
         Drop or click to upload ({acceptedFileTypes})
       </span>

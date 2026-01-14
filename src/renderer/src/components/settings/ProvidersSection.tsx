@@ -160,7 +160,7 @@ function ProviderConfig({
   return (
     <div className="space-y-4">
       <div>
-        <label className="block text-sm font-medium text-secondary">
+        <label className="text-secondary block text-sm font-medium">
           API Key
         </label>
         <div className="relative mt-1">
@@ -169,7 +169,7 @@ function ProviderConfig({
             value={apiKey || (showKey ? (currentKey ?? '') : '')}
             onChange={(e) => setApiKeyInput(e.target.value)}
             placeholder={currentKey ? '********' : provider.placeholder}
-            className="w-full rounded-md border-2 border-default bg-base py-2 pr-16 pl-3 text-primary focus:border-black focus:outline-none dark:focus:border-white"
+            className="border-default bg-base text-primary w-full rounded-md border-2 py-2 pr-16 pl-3 focus:border-black focus:outline-none dark:focus:border-white"
             readOnly={!apiKey && showKey && !!currentKey}
           />
           <div className="absolute inset-y-0 right-0 flex items-center gap-1 pr-2">
@@ -177,7 +177,7 @@ function ProviderConfig({
               <button
                 type="button"
                 onClick={handleCopy}
-                className="rounded p-1 text-hint hover:bg-hover hover:text-secondary"
+                className="text-hint hover:bg-hover hover:text-secondary rounded p-1"
                 title={copied ? 'Copied!' : 'Copy to clipboard'}
               >
                 <Copy size={14} />
@@ -187,7 +187,7 @@ function ProviderConfig({
               <button
                 type="button"
                 onClick={() => setShowKey(!showKey)}
-                className="rounded p-1 text-hint hover:bg-hover hover:text-secondary"
+                className="text-hint hover:bg-hover hover:text-secondary rounded p-1"
                 title={showKey ? 'Hide' : 'Show'}
               >
                 {showKey ? <EyeOff size={14} /> : <Eye size={14} />}
@@ -195,7 +195,7 @@ function ProviderConfig({
             )}
           </div>
         </div>
-        <p className="mt-1 text-xs text-hint">
+        <p className="text-hint mt-1 text-xs">
           {currentKey
             ? 'Key is set. Enter new key to replace.'
             : `Enter your ${provider.name} API key.`}
@@ -211,33 +211,27 @@ function ProviderConfig({
           Save
         </Button>
         {currentKey && (
-          <Button
-            onClick={onDelete}
-            variant="danger"
-          >
+          <Button onClick={onDelete} variant="danger">
             Delete
           </Button>
         )}
         {currentKey && !isActive && (
-          <Button
-            onClick={onSetActive}
-            variant="outline"
-          >
+          <Button onClick={onSetActive} variant="outline">
             Set as active
           </Button>
         )}
       </div>
 
       {currentKey && (
-        <div className="border-t border-default pt-4">
-          <label className="block text-sm font-medium text-secondary">
+        <div className="border-default border-t pt-4">
+          <label className="text-secondary block text-sm font-medium">
             Model
           </label>
           <select
             value={displayModel}
             onChange={(e) => handleModelChange(e.target.value)}
             disabled={isLoadingModels}
-            className="mt-1 w-full rounded-md border-2 border-default bg-base px-3 py-2 text-primary focus:border-black focus:outline-none disabled:opacity-50 dark:focus:border-white"
+            className="border-default bg-base text-primary mt-1 w-full rounded-md border-2 px-3 py-2 focus:border-black focus:outline-none disabled:opacity-50 dark:focus:border-white"
           >
             {isLoadingModels ? (
               <option>Loading models...</option>
@@ -249,7 +243,7 @@ function ProviderConfig({
               ))
             )}
           </select>
-          <p className="mt-1 text-xs text-hint">
+          <p className="text-hint mt-1 text-xs">
             Select the model to use for AI tasks.
           </p>
         </div>
@@ -350,34 +344,27 @@ function OllamaConfig({ isActive, onSetActive }: OllamaConfigProps) {
     <div className="space-y-4">
       {/* Status Section */}
       <div>
-        <label className="block text-sm font-medium text-secondary">
+        <label className="text-secondary block text-sm font-medium">
           Status
         </label>
         {status?.running ? (
           <div className="mt-2 flex items-center gap-3">
-            <span className="inline-flex items-center gap-1 text-sm text-success">
+            <span className="text-success inline-flex items-center gap-1 text-sm">
               <Check size={14} />
               Running {status.version && `(v${status.version})`}
             </span>
             {!isActive && installedModels && installedModels.length > 0 && (
-              <Button
-                onClick={onSetActive}
-                variant="outline"
-              >
+              <Button onClick={onSetActive} variant="outline">
                 Set as active
               </Button>
             )}
           </div>
         ) : (
           <div className="mt-2 space-y-3">
-            <p className="text-sm text-secondary">
-              Ollama is not running.
-            </p>
-            <div className="rounded-md bg-info-subtle p-4">
-              <p className="text-sm font-medium text-info">
-                Installation:
-              </p>
-              <ol className="mt-2 list-decimal space-y-1 pl-5 text-sm text-info">
+            <p className="text-secondary text-sm">Ollama is not running.</p>
+            <div className="bg-info-subtle rounded-md p-4">
+              <p className="text-info text-sm font-medium">Installation:</p>
+              <ol className="text-info mt-2 list-decimal space-y-1 pl-5 text-sm">
                 <li>
                   Download from{' '}
                   <a
@@ -391,22 +378,19 @@ function OllamaConfig({ isActive, onSetActive }: OllamaConfigProps) {
                 </li>
                 <li>
                   Or install via{' '}
-                  <code className="rounded bg-info-subtle/80 px-1 font-mono">
+                  <code className="bg-info-subtle/80 rounded px-1 font-mono">
                     brew install ollama
                   </code>
                 </li>
                 <li>
                   Start with{' '}
-                  <code className="rounded bg-info-subtle/80 px-1 font-mono">
+                  <code className="bg-info-subtle/80 rounded px-1 font-mono">
                     ollama serve
                   </code>
                 </li>
               </ol>
             </div>
-            <Button
-              onClick={() => refetchStatus()}
-              variant="outline"
-            >
+            <Button onClick={() => refetchStatus()} variant="outline">
               Retry Detection
             </Button>
           </div>
@@ -417,18 +401,18 @@ function OllamaConfig({ isActive, onSetActive }: OllamaConfigProps) {
       {status?.running && (
         <>
           {/* Performance Note */}
-          <div className="rounded-md bg-warning-subtle p-3">
-            <p className="text-xs text-warning">
+          <div className="bg-warning-subtle rounded-md p-3">
+            <p className="text-warning text-xs">
               Local models are significantly slower than cloud APIs. Performance
               depends on your hardware.
             </p>
           </div>
 
-          <div className="border-t border-default pt-4">
-            <label className="block text-sm font-medium text-secondary">
+          <div className="border-default border-t pt-4">
+            <label className="text-secondary block text-sm font-medium">
               Available Models
             </label>
-            <p className="mt-1 text-xs text-hint">
+            <p className="text-hint mt-1 text-xs">
               Models optimized for structured output. Download to use.
             </p>
             <div className="mt-3 space-y-2">
@@ -439,14 +423,14 @@ function OllamaConfig({ isActive, onSetActive }: OllamaConfigProps) {
                 return (
                   <div
                     key={model.id}
-                    className="flex items-center justify-between rounded-md border border-default px-3 py-2"
+                    className="border-default flex items-center justify-between rounded-md border px-3 py-2"
                   >
                     <div>
-                      <span className="text-sm font-medium text-primary">
+                      <span className="text-primary text-sm font-medium">
                         {model.name}
                       </span>
                       {installed && (
-                        <span className="ml-2 inline-flex items-center rounded-full bg-success-subtle px-2 py-0.5 text-xs font-medium text-success">
+                        <span className="bg-success-subtle text-success ml-2 inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium">
                           Installed
                         </span>
                       )}
@@ -463,13 +447,13 @@ function OllamaConfig({ isActive, onSetActive }: OllamaConfigProps) {
                     {isPulling && (
                       <div className="flex items-center gap-2">
                         <div className="w-32">
-                          <div className="h-2 w-full rounded-full bg-hover">
+                          <div className="bg-hover h-2 w-full rounded-full">
                             <div
-                              className="h-2 rounded-full bg-info transition-all duration-300"
+                              className="bg-info h-2 rounded-full transition-all duration-300"
                               style={{ width: `${progressPercent}%` }}
                             />
                           </div>
-                          <p className="mt-1 text-xs text-hint">
+                          <p className="text-hint mt-1 text-xs">
                             {pullProgress?.progress.status ===
                             'pulling manifest'
                               ? 'Starting...'
@@ -481,7 +465,7 @@ function OllamaConfig({ isActive, onSetActive }: OllamaConfigProps) {
                         </div>
                         <button
                           onClick={handleCancelPull}
-                          className="text-xs text-error hover:text-error/80"
+                          className="text-error hover:text-error/80 text-xs"
                         >
                           Cancel
                         </button>
@@ -495,14 +479,14 @@ function OllamaConfig({ isActive, onSetActive }: OllamaConfigProps) {
 
           {/* Model Selection (only if has installed models) */}
           {installedModels && installedModels.length > 0 && (
-            <div className="border-t border-default pt-4">
-              <label className="block text-sm font-medium text-secondary">
+            <div className="border-default border-t pt-4">
+              <label className="text-secondary block text-sm font-medium">
                 Active Model
               </label>
               <select
                 value={displayModel}
                 onChange={(e) => handleModelChange(e.target.value)}
-                className="mt-1 w-full rounded-md border-2 border-default bg-base px-3 py-2 text-primary focus:border-black focus:outline-none dark:focus:border-white"
+                className="border-default bg-base text-primary mt-1 w-full rounded-md border-2 px-3 py-2 focus:border-black focus:outline-none dark:focus:border-white"
               >
                 {installedModels.map((model) => (
                   <option key={model.id} value={model.id}>
@@ -510,7 +494,7 @@ function OllamaConfig({ isActive, onSetActive }: OllamaConfigProps) {
                   </option>
                 ))}
               </select>
-              <p className="mt-1 text-xs text-hint">
+              <p className="text-hint mt-1 text-xs">
                 Select the model to use for AI tasks.
               </p>
             </div>
@@ -558,34 +542,71 @@ export function ProvidersSection() {
   const { data: activeProvider } = useActiveProvider()
   const setActiveProvider = useSetActiveProvider()
 
-  const providerStatus: Record<ProviderType, { isConfigured: boolean; isActive: boolean }> = {
-    openai: { isConfigured: !!openaiKey, isActive: activeProvider === 'openai' },
-    deepseek: { isConfigured: !!deepseekKey, isActive: activeProvider === 'deepseek' },
+  const providerStatus: Record<
+    ProviderType,
+    { isConfigured: boolean; isActive: boolean }
+  > = {
+    openai: {
+      isConfigured: !!openaiKey,
+      isActive: activeProvider === 'openai',
+    },
+    deepseek: {
+      isConfigured: !!deepseekKey,
+      isActive: activeProvider === 'deepseek',
+    },
     ollama: {
-      isConfigured: !!ollamaStatus?.running && (ollamaInstalledModels?.length ?? 0) > 0,
+      isConfigured:
+        !!ollamaStatus?.running && (ollamaInstalledModels?.length ?? 0) > 0,
       isActive: activeProvider === 'ollama',
     },
     xai: { isConfigured: !!xaiKey, isActive: activeProvider === 'xai' },
-    gemini: { isConfigured: !!geminiKey, isActive: activeProvider === 'gemini' },
-    anthropic: { isConfigured: !!anthropicKey, isActive: activeProvider === 'anthropic' },
+    gemini: {
+      isConfigured: !!geminiKey,
+      isActive: activeProvider === 'gemini',
+    },
+    anthropic: {
+      isConfigured: !!anthropicKey,
+      isActive: activeProvider === 'anthropic',
+    },
   }
 
   // API key config for providers that use API keys (excludes ollama)
   const apiKeyConfig = {
-    openai: { key: openaiKey, setKey: setOpenaiKey, deleteKey: deleteOpenaiKey },
-    deepseek: { key: deepseekKey, setKey: setDeepseekKey, deleteKey: deleteDeepseekKey },
+    openai: {
+      key: openaiKey,
+      setKey: setOpenaiKey,
+      deleteKey: deleteOpenaiKey,
+    },
+    deepseek: {
+      key: deepseekKey,
+      setKey: setDeepseekKey,
+      deleteKey: deleteDeepseekKey,
+    },
     xai: { key: xaiKey, setKey: setXaiKey, deleteKey: deleteXaiKey },
-    gemini: { key: geminiKey, setKey: setGeminiKey, deleteKey: deleteGeminiKey },
-    anthropic: { key: anthropicKey, setKey: setAnthropicKey, deleteKey: deleteAnthropicKey },
-  } as Record<ProviderType, { key: string | null | undefined; setKey: typeof setOpenaiKey; deleteKey: typeof deleteOpenaiKey }>
+    gemini: {
+      key: geminiKey,
+      setKey: setGeminiKey,
+      deleteKey: deleteGeminiKey,
+    },
+    anthropic: {
+      key: anthropicKey,
+      setKey: setAnthropicKey,
+      deleteKey: deleteAnthropicKey,
+    },
+  } as Record<
+    ProviderType,
+    {
+      key: string | null | undefined
+      setKey: typeof setOpenaiKey
+      deleteKey: typeof deleteOpenaiKey
+    }
+  >
 
   return (
     <div className="flex h-full gap-6">
       {/* Provider List */}
-      <div className="w-52 shrink-0 border-r border-default pr-4">
-        <h2 className="mb-3 text-sm font-semibold text-hint">
-          Providers
-        </h2>
+      <div className="border-default w-52 shrink-0 border-r pr-4">
+        <h2 className="text-hint mb-3 text-sm font-semibold">Providers</h2>
         <div className="space-y-1">
           {PROVIDERS.map((provider) => {
             const status = providerStatus[provider.id]
@@ -595,14 +616,14 @@ export function ProvidersSection() {
               <button
                 key={provider.id}
                 onClick={() => setSelectedProvider(provider.id)}
-                className={`flex w-full items-center gap-3 rounded-md border-2 border-default px-3 py-2 text-left transition-colors ${
+                className={`border-default flex w-full items-center gap-3 rounded-md border-2 px-3 py-2 text-left transition-colors ${
                   isSelected ? 'bg-surface' : 'bg-base hover:bg-hover'
                 }`}
               >
                 <Icon size={20} />
                 <span
                   className={`flex-1 text-sm ${
-                    isSelected ? 'font-medium text-primary' : 'text-secondary'
+                    isSelected ? 'text-primary font-medium' : 'text-secondary'
                   }`}
                 >
                   {provider.name}
@@ -632,8 +653,12 @@ export function ProvidersSection() {
             currentKey={apiKeyConfig[selectedProvider].key}
             isActive={activeProvider === selectedProvider}
             onSetActive={() => setActiveProvider.mutateAsync(selectedProvider)}
-            onSave={(key) => apiKeyConfig[selectedProvider].setKey.mutateAsync(key)}
-            onDelete={() => apiKeyConfig[selectedProvider].deleteKey.mutateAsync()}
+            onSave={(key) =>
+              apiKeyConfig[selectedProvider].setKey.mutateAsync(key)
+            }
+            onDelete={() =>
+              apiKeyConfig[selectedProvider].deleteKey.mutateAsync()
+            }
           />
         )}
       </div>

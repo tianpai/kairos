@@ -4,7 +4,7 @@
  * Provides a type-safe way to define workflows as pure data.
  */
 
-import type { TaskName } from '@type/task-contracts'
+import type { TaskName } from "@type/task-contracts";
 
 // =============================================================================
 // Types
@@ -12,7 +12,7 @@ import type { TaskName } from '@type/task-contracts'
 
 /** Task step in a workflow - defines prerequisites */
 export interface WorkflowStep {
-  after: ReadonlyArray<TaskName>
+  after: ReadonlyArray<TaskName>;
 }
 
 /**
@@ -21,19 +21,19 @@ export interface WorkflowStep {
  */
 export interface WorkflowDefinition<TTasks extends TaskName = TaskName> {
   /** Unique workflow identifier */
-  name: string
+  name: string;
 
   /**
    * Tasks in this workflow.
    * 'after' arrays can only reference other tasks in the workflow.
    */
-  tasks: Record<TTasks, WorkflowStep>
+  tasks: Record<TTasks, WorkflowStep>;
 }
 
 /** Runtime workflow instance */
 export interface Workflow {
-  name: string
-  tasks: Map<TaskName, Set<TaskName>>
+  name: string;
+  tasks: Map<TaskName, Set<TaskName>>;
 }
 
 // =============================================================================
@@ -41,7 +41,7 @@ export interface Workflow {
 // =============================================================================
 
 /** Global workflow registry */
-const workflowRegistry = new Map<string, Workflow>()
+const workflowRegistry = new Map<string, Workflow>();
 
 // =============================================================================
 // Public API
@@ -55,49 +55,49 @@ export function defineWorkflow<TTasks extends TaskName>(
   def: WorkflowDefinition<TTasks>,
 ): Workflow {
   // Convert to runtime structure
-  const tasks = new Map<TaskName, Set<TaskName>>()
+  const tasks = new Map<TaskName, Set<TaskName>>();
   for (const [taskName, step] of Object.entries(def.tasks)) {
-    tasks.set(taskName as TaskName, new Set(step.after))
+    tasks.set(taskName as TaskName, new Set(step.after));
   }
 
   const workflow: Workflow = {
     name: def.name,
     tasks,
-  }
+  };
 
   // Register workflow
-  workflowRegistry.set(def.name, workflow)
+  workflowRegistry.set(def.name, workflow);
 
-  return workflow
+  return workflow;
 }
 
 /**
  * Get a workflow by name
  */
 export function getWorkflow(name: string): Workflow | undefined {
-  return workflowRegistry.get(name)
+  return workflowRegistry.get(name);
 }
 
 /**
  * Get all registered workflows
  */
 export function getAllWorkflows(): ReadonlyMap<string, Workflow> {
-  return workflowRegistry
+  return workflowRegistry;
 }
 
 /**
  * Get entry tasks (no prerequisites)
  */
 export function getEntryTasks(workflow: Workflow): Array<TaskName> {
-  const entryTasks: Array<TaskName> = []
+  const entryTasks: Array<TaskName> = [];
 
   for (const [taskName, prerequisites] of workflow.tasks) {
     if (prerequisites.size === 0) {
-      entryTasks.push(taskName)
+      entryTasks.push(taskName);
     }
   }
 
-  return entryTasks
+  return entryTasks;
 }
 
 /**
@@ -108,60 +108,58 @@ export function arePrerequisitesSatisfied(
   taskName: TaskName,
   completed: Set<TaskName>,
 ): boolean {
-  const prerequisites = workflow.tasks.get(taskName)
-  if (!prerequisites) return false
+  const prerequisites = workflow.tasks.get(taskName);
+  if (!prerequisites) return false;
 
   for (const prereq of prerequisites) {
     if (!completed.has(prereq)) {
-      return false
+      return false;
     }
   }
 
-  return true
+  return true;
 }
 
 /**
  * Validate workflow DAG (no cycles, all references valid)
  */
 export function validateWorkflow(workflow: Workflow): Array<string> {
-  const errors: Array<string> = []
-  const taskNames = new Set(workflow.tasks.keys())
+  const errors: Array<string> = [];
+  const taskNames = new Set(workflow.tasks.keys());
 
   // Check that all prerequisites exist
   for (const [taskName, prerequisites] of workflow.tasks) {
     for (const prereq of prerequisites) {
       if (!taskNames.has(prereq)) {
-        errors.push(
-          `Task '${taskName}' has unknown prerequisite '${prereq}'`,
-        )
+        errors.push(`Task '${taskName}' has unknown prerequisite '${prereq}'`);
       }
     }
   }
 
   // Check for cycles using DFS
-  const visiting = new Set<TaskName>()
-  const visited = new Set<TaskName>()
+  const visiting = new Set<TaskName>();
+  const visited = new Set<TaskName>();
 
   function hasCycle(task: TaskName): boolean {
-    if (visited.has(task)) return false
-    if (visiting.has(task)) return true
+    if (visited.has(task)) return false;
+    if (visiting.has(task)) return true;
 
-    visiting.add(task)
-    const prerequisites = workflow.tasks.get(task) ?? new Set()
+    visiting.add(task);
+    const prerequisites = workflow.tasks.get(task) ?? new Set();
     for (const prereq of prerequisites) {
-      if (hasCycle(prereq)) return true
+      if (hasCycle(prereq)) return true;
     }
-    visiting.delete(task)
-    visited.add(task)
-    return false
+    visiting.delete(task);
+    visited.add(task);
+    return false;
   }
 
   for (const task of taskNames) {
     if (hasCycle(task)) {
-      errors.push(`Workflow '${workflow.name}' contains a cycle`)
-      break
+      errors.push(`Workflow '${workflow.name}' contains a cycle`);
+      break;
     }
   }
 
-  return errors
+  return errors;
 }

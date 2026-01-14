@@ -75,7 +75,7 @@ function YearPicker({ onSelect }: { onSelect: (year: number) => void }) {
             key={y}
             type="button"
             onClick={() => onSelect(y)}
-            className="px-2 py-2 text-sm hover:bg-active"
+            className="hover:bg-active px-2 py-2 text-sm"
           >
             {y}
           </button>
@@ -102,9 +102,7 @@ function MonthPicker({
         >
           <ChevronLeft className="h-3 w-3" />
         </InvertedCircleButton>
-        <span className="text-sm font-medium">
-          {displayYear}
-        </span>
+        <span className="text-sm font-medium">{displayYear}</span>
         <InvertedCircleButton
           onClick={() => setDisplayYear((prev) => prev + 1)}
           ariaLabel="Next year"
@@ -120,7 +118,7 @@ function MonthPicker({
             key={monthName}
             type="button"
             onClick={() => onSelect(index, displayYear)}
-            className="bg-surface px-2 py-2 text-sm hover:bg-active"
+            className="bg-surface hover:bg-active px-2 py-2 text-sm"
           >
             {monthName}
           </button>
@@ -152,14 +150,8 @@ export function DateInput({ id, value, onChange }: DateInputProps) {
   }, [isOpen])
 
   const getGranularityButtonProps = (targetGranularity: Granularity) => ({
-    bgColor:
-      granularity === targetGranularity
-        ? 'bg-primary'
-        : 'bg-surface',
-    textColor:
-      granularity === targetGranularity
-        ? 'text-base'
-        : 'text-primary',
+    bgColor: granularity === targetGranularity ? 'bg-primary' : 'bg-surface',
+    textColor: granularity === targetGranularity ? 'text-base' : 'text-primary',
     className: 'flex-1 text-xs',
   })
 
@@ -176,7 +168,7 @@ export function DateInput({ id, value, onChange }: DateInputProps) {
 
       {/* Dropdown */}
       {isOpen && (
-        <div className="absolute z-50 mt-1 w-64 border border-default bg-surface p-3">
+        <div className="border-default bg-surface absolute z-50 mt-1 w-64 border p-3">
           {/* Granularity Buttons */}
           <div className="mb-3 flex gap-0">
             <Button

@@ -36,7 +36,12 @@ export default function NewApplicationButton() {
       openModal()
     }
     clearNewApplicationRequest()
-  }, [newApplicationRequested, hasApiKey, clearNewApplicationRequest, openModal])
+  }, [
+    newApplicationRequested,
+    hasApiKey,
+    clearNewApplicationRequest,
+    openModal,
+  ])
 
   async function handleSubmit(payload: SubmitPayload) {
     if (!hasApiKey) return

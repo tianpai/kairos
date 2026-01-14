@@ -95,7 +95,9 @@ function parseChangelog(raw: string): Array<ChangelogEntry> {
   return entries
 }
 
-function groupByMinorVersion(entries: Array<ChangelogEntry>): Array<GroupedChangelog> {
+function groupByMinorVersion(
+  entries: Array<ChangelogEntry>,
+): Array<GroupedChangelog> {
   const groups = new Map<string, GroupedChangelog>()
 
   for (const entry of entries) {
@@ -124,7 +126,9 @@ export const currentVersionEntry = changelogEntries.find(
 )
 
 export function AboutSection() {
-  const [updateState, setUpdateState] = useState<UpdateState>({ status: 'idle' })
+  const [updateState, setUpdateState] = useState<UpdateState>({
+    status: 'idle',
+  })
   const [isPackaged, setIsPackaged] = useState<boolean | null>(null)
 
   useEffect(() => {
@@ -134,7 +138,7 @@ export function AboutSection() {
   const checkForUpdates = async () => {
     setUpdateState({ status: 'checking' })
     try {
-      const state = (await window.kairos.updater.check())
+      const state = await window.kairos.updater.check()
       setUpdateState(state)
     } catch {
       setUpdateState({ status: 'error', error: 'Failed to check for updates' })
@@ -146,7 +150,7 @@ export function AboutSection() {
       await window.kairos.updater.download()
       // Poll for state updates during download
       const pollInterval = setInterval(async () => {
-        const state = (await window.kairos.updater.getState())
+        const state = await window.kairos.updater.getState()
         setUpdateState(state)
         if (state.status === 'downloaded' || state.status === 'error') {
           clearInterval(pollInterval)
@@ -169,18 +173,18 @@ export function AboutSection() {
     <div className="space-y-6">
       <div>
         <h2 className="text-lg font-semibold">About</h2>
-        <p className="mt-1 text-sm text-hint">
+        <p className="text-hint mt-1 text-sm">
           Kairos - AI-powered resume optimization
         </p>
       </div>
 
       <div className="space-y-4">
         <div>
-          <p className="text-sm font-medium text-secondary">
+          <p className="text-secondary text-sm font-medium">
             Version {pkg.version}
           </p>
           {currentVersionEntry?.quote && (
-            <p className="mt-1 text-sm text-hint italic">
+            <p className="text-hint mt-1 text-sm italic">
               "{currentVersionEntry.quote}"
             </p>
           )}
@@ -189,7 +193,7 @@ export function AboutSection() {
         {/* Update Section */}
         <div className="space-y-2">
           {isPackaged === false && (
-            <p className="text-sm text-hint">
+            <p className="text-hint text-sm">
               Development mode — update check disabled
             </p>
           )}
@@ -197,39 +201,37 @@ export function AboutSection() {
           {isPackaged === true && updateState.status === 'idle' && (
             <button
               onClick={checkForUpdates}
-              className="text-sm text-link hover:text-link-hover"
+              className="text-link hover:text-link-hover text-sm"
             >
               Check for Updates
             </button>
           )}
 
           {updateState.status === 'checking' && (
-            <p className="text-sm text-hint">
-              Checking for updates...
-            </p>
+            <p className="text-hint text-sm">Checking for updates...</p>
           )}
 
           {updateState.status === 'not-available' && (
-            <p className="text-sm text-success">
+            <p className="text-success text-sm">
               You're running the latest version
             </p>
           )}
 
           {updateState.status === 'available' && (
             <div className="space-y-2">
-              <p className="text-sm text-warning">
+              <p className="text-warning text-sm">
                 Version {updateState.version} is available
               </p>
               <div className="flex gap-2">
                 <button
                   onClick={handleDownload}
-                  className="rounded bg-info px-3 py-1 text-sm text-white hover:bg-info/90"
+                  className="bg-info hover:bg-info/90 rounded px-3 py-1 text-sm text-white"
                 >
                   Download Update
                 </button>
                 <button
                   onClick={openReleasesPage}
-                  className="text-sm text-secondary hover:text-primary"
+                  className="text-secondary hover:text-primary text-sm"
                 >
                   View on GitHub
                 </button>
@@ -239,12 +241,12 @@ export function AboutSection() {
 
           {updateState.status === 'downloading' && (
             <div className="space-y-1">
-              <p className="text-sm text-hint">
+              <p className="text-hint text-sm">
                 Downloading... {updateState.progress?.percent.toFixed(0)}%
               </p>
-              <div className="h-1.5 w-48 overflow-hidden rounded-full bg-hover">
+              <div className="bg-hover h-1.5 w-48 overflow-hidden rounded-full">
                 <div
-                  className="h-full bg-info transition-all"
+                  className="bg-info h-full transition-all"
                   style={{ width: `${updateState.progress?.percent ?? 0}%` }}
                 />
               </div>
@@ -253,12 +255,10 @@ export function AboutSection() {
 
           {updateState.status === 'downloaded' && (
             <div className="space-y-2">
-              <p className="text-sm text-success">
-                Update ready to install
-              </p>
+              <p className="text-success text-sm">Update ready to install</p>
               <button
                 onClick={handleInstall}
-                className="rounded bg-success px-3 py-1 text-sm text-white hover:bg-success/90"
+                className="bg-success hover:bg-success/90 rounded px-3 py-1 text-sm text-white"
               >
                 Restart to Install
               </button>
@@ -267,12 +267,12 @@ export function AboutSection() {
 
           {updateState.status === 'error' && (
             <div className="space-y-2">
-              <p className="text-sm text-error">
+              <p className="text-error text-sm">
                 {updateState.error || 'Update check failed'}
               </p>
               <button
                 onClick={checkForUpdates}
-                className="text-sm text-link hover:text-link-hover"
+                className="text-link hover:text-link-hover text-sm"
               >
                 Try Again
               </button>
@@ -284,17 +284,15 @@ export function AboutSection() {
           href={GITHUB_URL}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 text-sm text-secondary hover:text-primary"
+          className="text-secondary hover:text-primary inline-flex items-center gap-2 text-sm"
         >
           <GitHubIcon size={14} />
           github.com/tianpai/kairos
         </a>
       </div>
 
-      <div className="border-t border-default pt-6">
-        <h3 className="mb-4 text-sm font-semibold text-secondary">
-          Changelog
-        </h3>
+      <div className="border-default border-t pt-6">
+        <h3 className="text-secondary mb-4 text-sm font-semibold">Changelog</h3>
         <Accordion
           defaultValue={getMinorVersion(pkg.version)}
           className="max-h-[calc(100vh-26rem)] overflow-y-auto"
@@ -303,18 +301,18 @@ export function AboutSection() {
             <AccordionItem
               key={group.minorVersion}
               value={group.minorVersion}
-              className="border-b border-default last:border-b-0"
+              className="border-default border-b last:border-b-0"
             >
               <AccordionTrigger
                 value={group.minorVersion}
-                className="py-3 text-sm hover:bg-hover"
+                className="hover:bg-hover py-3 text-sm"
               >
                 <div className="flex items-baseline gap-2">
-                  <span className="font-medium text-primary">
+                  <span className="text-primary font-medium">
                     {group.minorVersion}
                   </span>
                   {group.quote && (
-                    <span className="text-xs text-hint italic">
+                    <span className="text-hint text-xs italic">
                       "{group.quote}"
                     </span>
                   )}
@@ -324,20 +322,20 @@ export function AboutSection() {
                 {group.entries.map((entry) => (
                   <div key={entry.version} className="mt-3 first:mt-0">
                     {/* Patch version header - muted and indented */}
-                    <p className="mb-1 text-xs font-medium text-hint">
+                    <p className="text-hint mb-1 text-xs font-medium">
                       {entry.version}
                     </p>
                     <div className="pl-3">
                       {entry.sections.map((section, idx) => (
                         <div key={`${entry.version}-${idx}`} className="mt-1">
-                          <p className="text-xs font-medium text-secondary">
+                          <p className="text-secondary text-xs font-medium">
                             {section.title}
                           </p>
                           <ul className="mt-0.5 space-y-0.5">
                             {section.items.map((item, i) => (
                               <li
                                 key={i}
-                                className="text-xs text-hint before:mr-1.5 before:content-['•']"
+                                className="text-hint text-xs before:mr-1.5 before:content-['•']"
                               >
                                 {item}
                               </li>

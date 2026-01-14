@@ -85,31 +85,31 @@ export function useWorkflowSync(
 
   // Effect 2: Subscribe to workflow events from main
   useEffect(() => {
-    const unsubscribeState = window.kairos.workflow.onStateChanged((payload) => {
-      const store = useWorkflowStore.getState()
-      const existingContext = store.getContext(payload.jobId)
+    const unsubscribeState = window.kairos.workflow.onStateChanged(
+      (payload) => {
+        const store = useWorkflowStore.getState()
+        const existingContext = store.getContext(payload.jobId)
 
-      store.loadWorkflow(
-        payload.jobId,
-        {
-          jobId: payload.jobId,
-          workflowName: payload.workflow.workflowName,
-          taskStates: payload.workflow.taskStates as TaskStateMap,
-          status: payload.workflow.status,
-          error: payload.workflow.error,
-        },
-        existingContext,
-      )
-    })
+        store.loadWorkflow(
+          payload.jobId,
+          {
+            jobId: payload.jobId,
+            workflowName: payload.workflow.workflowName,
+            taskStates: payload.workflow.taskStates as TaskStateMap,
+            status: payload.workflow.status,
+            error: payload.workflow.error,
+          },
+          existingContext,
+        )
+      },
+    )
 
     const unsubscribeTaskCompleted = window.kairos.workflow.onTaskCompleted(
       (payload) => {
         if (payload.provides && payload.result !== undefined) {
-          useWorkflowStore
-            .getState()
-            .updateContext(payload.jobId, {
-              [payload.provides]: payload.result,
-            })
+          useWorkflowStore.getState().updateContext(payload.jobId, {
+            [payload.provides]: payload.result,
+          })
         }
 
         // Invalidate job application query to refetch fresh data

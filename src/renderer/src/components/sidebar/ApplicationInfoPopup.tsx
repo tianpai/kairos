@@ -61,7 +61,9 @@ export function ApplicationInfoPopup({
         </div>
         <div className="flex items-center justify-between gap-8">
           <span className="text-hint">Due</span>
-          <span className={isOverdue(dueDate) ? 'text-error' : 'text-secondary'}>
+          <span
+            className={isOverdue(dueDate) ? 'text-error' : 'text-secondary'}
+          >
             {formatDate(dueDate)}
           </span>
         </div>
@@ -72,7 +74,7 @@ export function ApplicationInfoPopup({
             e.stopPropagation()
             onEdit()
           }}
-          className="mt-2 flex w-full items-center justify-center gap-1 rounded bg-hover px-2 py-1 text-secondary transition-colors hover:bg-active"
+          className="bg-hover text-secondary hover:bg-active mt-2 flex w-full items-center justify-center gap-1 rounded px-2 py-1 transition-colors"
         >
           <Info size={14} />
           <span>Edit Info</span>

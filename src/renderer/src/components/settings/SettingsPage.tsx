@@ -11,7 +11,7 @@ import { AppearanceSection } from './AppearanceSection'
 import { TipsSection } from './TipsSection'
 import { GeneralSection } from './GeneralSection'
 import { AboutSection } from './AboutSection'
-import type {SettingsSection} from './SettingsSidebar';
+import type { SettingsSection } from './SettingsSidebar'
 
 export default function SettingsPage() {
   const navigate = useNavigate()
@@ -34,7 +34,9 @@ export default function SettingsPage() {
                 <PanelLeft size={16} />
               </Button>
               <Button
-                onClick={() => navigate({ to: '/', search: { jobId: undefined } })}
+                onClick={() =>
+                  navigate({ to: '/', search: { jobId: undefined } })
+                }
                 ariaLabel="Back to dashboard"
                 title="Back"
               >

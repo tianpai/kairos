@@ -1,11 +1,11 @@
-import { buildTailoringZodSchema } from '@templates/schema-builder'
-import type { Checklist } from '@type/checklist'
-import type { AIProvider, DeepPartial } from '../provider.interface'
+import { buildTailoringZodSchema } from "@templates/schema-builder";
+import type { Checklist } from "@type/checklist";
+import type { AIProvider, DeepPartial } from "../provider.interface";
 
 interface TailorOptions {
-  streaming?: boolean
-  onPartial?: (partial: DeepPartial<Record<string, unknown>>) => void
-  model: string
+  streaming?: boolean;
+  onPartial?: (partial: DeepPartial<Record<string, unknown>>) => void;
+  model: string;
 }
 
 export async function tailorResume(
@@ -59,7 +59,7 @@ Additional optimization:
 2. QUANTIFY achievements where possible (if data exists)
 3. Make the keyword usage feel natural, not keyword-stuffed
 
-Return the complete resume with needTailoring cleared (empty array []).`
+Return the complete resume with needTailoring cleared (empty array []).`;
 
   const userPrompt = `Job Requirements Analysis (from matching):
 ${JSON.stringify(checklist, null, 2)}
@@ -67,24 +67,24 @@ ${JSON.stringify(checklist, null, 2)}
 Current Resume:
 ${JSON.stringify(resumeStructure, null, 2)}
 
-Tailor this resume to maximize fit for the job requirements. Remember: maintain complete honesty and the exact JSON schema structure.`
+Tailor this resume to maximize fit for the job requirements. Remember: maintain complete honesty and the exact JSON schema structure.`;
 
   // Build Zod schema filtered by existing sections (prevents empty sections)
-  const schema = buildTailoringZodSchema(templateId, resumeStructure)
+  const schema = buildTailoringZodSchema(templateId, resumeStructure);
 
   const params = {
     systemPrompt,
     userPrompt,
     schema,
     model: options.model,
-  }
+  };
 
   if (options.streaming && options.onPartial) {
     return provider.streamStructuredOutput({
       ...params,
       onPartial: options.onPartial,
-    })
+    });
   }
 
-  return provider.generateStructuredOutput(params)
+  return provider.generateStructuredOutput(params);
 }

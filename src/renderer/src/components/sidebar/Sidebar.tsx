@@ -76,7 +76,7 @@ export function Sidebar({
       )}
       <button
         onClick={() => navigate({ to: '/settings' })}
-        className="flex w-full cursor-pointer items-center gap-2 px-3 py-3 text-sm text-secondary transition-colors hover:bg-hover"
+        className="text-secondary hover:bg-hover flex w-full cursor-pointer items-center gap-2 px-3 py-3 text-sm transition-colors"
       >
         <Settings size={16} />
         <span>Settings</span>

@@ -5,22 +5,22 @@
  * Each job has its own WorkflowInstance and WorkflowContext.
  */
 
-import type { TaskName, WorkflowContext } from '@type/task-contracts'
-import type { TaskStatus, WorkflowStatus } from '@type/workflow'
+import type { TaskName, WorkflowContext } from "@type/task-contracts";
+import type { TaskStatus, WorkflowStatus } from "@type/workflow";
 
-export type TaskStateMap = Partial<Record<TaskName, TaskStatus>>
+export type TaskStateMap = Partial<Record<TaskName, TaskStatus>>;
 
 export interface WorkflowInstance {
-  jobId: string
-  workflowName: string
-  taskStates: TaskStateMap
-  status: WorkflowStatus
-  error?: string
+  jobId: string;
+  workflowName: string;
+  taskStates: TaskStateMap;
+  status: WorkflowStatus;
+  error?: string;
 }
 
 export class WorkflowStore {
-  private workflows = new Map<string, WorkflowInstance>()
-  private contexts = new Map<string, WorkflowContext>()
+  private workflows = new Map<string, WorkflowInstance>();
+  private contexts = new Map<string, WorkflowContext>();
 
   initWorkflow(
     jobId: string,
@@ -28,22 +28,22 @@ export class WorkflowStore {
     tasks: Array<TaskName>,
     initialContext: Partial<WorkflowContext>,
   ): void {
-    const taskStates: TaskStateMap = {}
+    const taskStates: TaskStateMap = {};
     tasks.forEach((task) => {
-      taskStates[task] = 'pending'
-    })
+      taskStates[task] = "pending";
+    });
 
     this.workflows.set(jobId, {
       jobId,
       workflowName,
       taskStates,
-      status: 'running',
-    })
+      status: "running",
+    });
 
     this.contexts.set(jobId, {
       jobId,
       ...initialContext,
-    } as WorkflowContext)
+    } as WorkflowContext);
   }
 
   loadWorkflow(
@@ -51,9 +51,9 @@ export class WorkflowStore {
     workflow: WorkflowInstance,
     context?: WorkflowContext,
   ): void {
-    this.workflows.set(jobId, workflow)
+    this.workflows.set(jobId, workflow);
     if (context) {
-      this.contexts.set(jobId, context)
+      this.contexts.set(jobId, context);
     }
   }
 
@@ -63,8 +63,8 @@ export class WorkflowStore {
     status: TaskStatus,
     error?: string,
   ): void {
-    const workflow = this.workflows.get(jobId)
-    if (!workflow) return
+    const workflow = this.workflows.get(jobId);
+    if (!workflow) return;
 
     this.workflows.set(jobId, {
       ...workflow,
@@ -73,69 +73,69 @@ export class WorkflowStore {
         [task]: status,
       },
       error: error ?? workflow.error,
-    })
+    });
   }
 
   updateContext(jobId: string, updates: Partial<WorkflowContext>): void {
-    const context = this.contexts.get(jobId)
-    if (!context) return
+    const context = this.contexts.get(jobId);
+    if (!context) return;
 
     this.contexts.set(jobId, {
       ...context,
       ...updates,
-    })
+    });
   }
 
   completeWorkflow(jobId: string): void {
-    const workflow = this.workflows.get(jobId)
-    if (!workflow) return
+    const workflow = this.workflows.get(jobId);
+    if (!workflow) return;
 
     this.workflows.set(jobId, {
       ...workflow,
-      status: 'completed',
-    })
+      status: "completed",
+    });
   }
 
   failWorkflow(jobId: string, error: string): void {
-    const workflow = this.workflows.get(jobId)
-    if (!workflow) return
+    const workflow = this.workflows.get(jobId);
+    if (!workflow) return;
 
     this.workflows.set(jobId, {
       ...workflow,
-      status: 'failed',
+      status: "failed",
       error,
-    })
+    });
   }
 
   clearWorkflow(jobId: string): void {
-    this.workflows.delete(jobId)
-    this.contexts.delete(jobId)
+    this.workflows.delete(jobId);
+    this.contexts.delete(jobId);
   }
 
   getWorkflow(jobId: string): WorkflowInstance | undefined {
-    return this.workflows.get(jobId)
+    return this.workflows.get(jobId);
   }
 
   getContext(jobId: string): WorkflowContext | undefined {
-    return this.contexts.get(jobId)
+    return this.contexts.get(jobId);
   }
 
   getTaskStatus(jobId: string, task: TaskName): TaskStatus | undefined {
-    return this.workflows.get(jobId)?.taskStates[task]
+    return this.workflows.get(jobId)?.taskStates[task];
   }
 
   isTaskRunning(jobId: string, task: TaskName): boolean {
-    return this.getTaskStatus(jobId, task) === 'running'
+    return this.getTaskStatus(jobId, task) === "running";
   }
 
   isWorkflowRunning(jobId: string): boolean {
-    return this.workflows.get(jobId)?.status === 'running'
+    return this.workflows.get(jobId)?.status === "running";
   }
 
   hasFailedTask(jobId: string): boolean {
-    const workflow = this.workflows.get(jobId)
+    const workflow = this.workflows.get(jobId);
     return workflow
-      ? Object.values(workflow.taskStates).some((s) => s === 'failed')
-      : false
+      ? Object.values(workflow.taskStates).some((s) => s === "failed")
+      : false;
   }
 }

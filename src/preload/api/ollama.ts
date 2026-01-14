@@ -23,10 +23,8 @@ export const ollama = {
   setBaseUrl: (url: string): Promise<void> =>
     ipcRenderer.invoke("ollama:setBaseUrl", url),
   onPullProgress: (callback: (data: OllamaPullProgressEvent) => void) => {
-    const handler = (
-      _: unknown,
-      data: OllamaPullProgressEvent,
-    ) => callback(data);
+    const handler = (_: unknown, data: OllamaPullProgressEvent) =>
+      callback(data);
     ipcRenderer.on("ollama:pullProgress", handler);
     return () => ipcRenderer.removeListener("ollama:pullProgress", handler);
   },

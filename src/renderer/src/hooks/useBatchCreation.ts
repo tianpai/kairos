@@ -129,7 +129,8 @@ export function useBatchCreation() {
           errorMessage: 'Resume parsing failed',
         })
         toast.error('Resume parsing failed', {
-          description: 'Could not parse resume to create remaining applications',
+          description:
+            'Could not parse resume to create remaining applications',
         })
         return
       }
@@ -154,7 +155,8 @@ export function useBatchCreation() {
       showBatchResultToast(totalSucceeded, entries.length)
     } catch (err) {
       console.error('[Batch] Upload failed:', err)
-      const message = err instanceof Error ? err.message : 'Failed to create applications'
+      const message =
+        err instanceof Error ? err.message : 'Failed to create applications'
       setBatchProgress({
         status: 'failed',
         errorMessage: message,
@@ -209,7 +211,8 @@ export function useBatchCreation() {
       showBatchResultToast(succeeded, entries.length)
     } catch (err) {
       console.error('[Batch] Existing failed:', err)
-      const message = err instanceof Error ? err.message : 'Failed to create applications'
+      const message =
+        err instanceof Error ? err.message : 'Failed to create applications'
       setBatchProgress({
         status: 'failed',
         errorMessage: message,
