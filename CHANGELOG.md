@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.7](https://github.com/tianpai/kairos/compare/v0.1.6...v0.1.7) (2026-01-14)
+
+
+### Bug Fixes
+
+* drop from-scratch application creation ([4da7628](https://github.com/tianpai/kairos/commit/4da76283244a36e842ad17fb306ee566314891f6))
+
 ### [0.1.6](https://github.com/tianpai/kairos/compare/v0.1.5...v0.1.6) (2026-01-13)
 
 

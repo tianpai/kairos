@@ -108,7 +108,6 @@ interface KairosAPI {
   jobs: {
     // CRUD
     create: (data: unknown) => Promise<{ id: string }>;
-    createFromScratch: (data: unknown) => Promise<{ id: string }>;
     createFromExisting: (data: unknown) => Promise<{ id: string }>;
     getAll: () => Promise<unknown[]>;
     get: (id: string) => Promise<unknown>;

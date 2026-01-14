@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 
-export type ResumeSource = 'upload' | 'existing' | 'scratch'
+export type ResumeSource = 'upload' | 'existing'
 export type BatchStatus = 'idle' | 'processing' | 'completed' | 'failed'
 
 export interface JdEntry {
@@ -58,7 +58,6 @@ interface NewApplicationState {
   selectedSourceId: string | null
   entries: Array<JdEntry>
   isSubmitting: boolean
-  submissionError: string | null
   batchProgress: BatchProgress
 }
 
@@ -77,7 +76,6 @@ interface NewApplicationActions {
 
   // Submission
   setSubmitting: (isSubmitting: boolean) => void
-  setSubmissionError: (error: string | null) => void
   setBatchProgress: (update: Partial<BatchProgress>) => void
   reset: () => void
 
@@ -95,7 +93,6 @@ const initialState: NewApplicationState = {
   selectedSourceId: null,
   entries: [createEmptyEntry()],
   isSubmitting: false,
-  submissionError: null,
   batchProgress: { status: 'idle', current: 0, total: 0, errorMessage: null },
 }
 
@@ -139,8 +136,6 @@ export const useNewApplicationStore = create<NewApplicationStore>()((set, get) =
 
   setSubmitting: (isSubmitting) => set({ isSubmitting }),
 
-  setSubmissionError: (error) => set({ submissionError: error }),
-
   setBatchProgress: (update) =>
     set((s) => ({ batchProgress: { ...s.batchProgress, ...update } })),
 
@@ -153,13 +148,9 @@ export const useNewApplicationStore = create<NewApplicationStore>()((set, get) =
     if (isSubmitting || batchProgress.status === 'processing') return false
 
     const filledEntries = getFilledEntries(entries)
-    const isBatch = filledEntries.length > 1
-    if (resumeSource === 'scratch' && isBatch) return false
     if (resumeSource === 'upload' && !selectedFile) return false
     if (resumeSource === 'existing' && !selectedSourceId) return false
 
-    // Scratch mode doesn't require JD, all other modes require JD for AI extraction
-    if (resumeSource === 'scratch') return true
     return filledEntries.length > 0
   },
 
@@ -169,13 +160,12 @@ export const useNewApplicationStore = create<NewApplicationStore>()((set, get) =
 
     const { resumeSource, selectedFile, selectedSourceId, entries } = state
     const filledEntries = getFilledEntries(entries)
-    const payloadEntries = filledEntries.length > 0 ? filledEntries : entries.slice(0, 1)
 
     return {
       resumeSource,
       resumeFile: resumeSource === 'upload' ? selectedFile ?? undefined : undefined,
       sourceJobId: resumeSource === 'existing' ? selectedSourceId ?? undefined : undefined,
-      entries: payloadEntries.map((e) => ({
+      entries: filledEntries.map((e) => ({
         jobDescription: e.jobDescription.trim(),
         jobUrl: normalizeUrl(e.jobUrl),
       })),

@@ -16,11 +16,6 @@ export function ExistingApplicationSelect({
     queryFn: getAllJobApplications,
   })
 
-  // Filter to only show applications with parsed resumes
-  const applicationsWithResume = applications.filter(
-    (app) => app.originalResume !== null,
-  )
-
   const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedId = e.target.value
     onChange(selectedId || null)
@@ -36,15 +31,15 @@ export function ExistingApplicationSelect({
         className="w-full"
       >
         <option value="">Select an application...</option>
-        {applicationsWithResume.map((app) => (
+        {applications.map((app) => (
           <option key={app.id} value={app.id}>
             {app.companyName} - {app.position}
           </option>
         ))}
       </Select>
-      {applicationsWithResume.length === 0 && !isLoading && (
+      {applications.length === 0 && !isLoading && (
         <p className="text-xs text-hint">
-          No applications with resumes found. Upload a resume first.
+          No applications found. Create one first.
         </p>
       )}
     </div>

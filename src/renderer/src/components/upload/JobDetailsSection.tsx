@@ -88,13 +88,7 @@ function JdEntryCard({
   )
 }
 
-export interface JobDetailsSectionProps {
-  requireJobDescription?: boolean
-}
-
-export default function JobDetailsSection({
-  requireJobDescription = true,
-}: JobDetailsSectionProps) {
+export default function JobDetailsSection() {
   const entries = useNewApplicationStore((s) => s.entries)
   const addEntry = useNewApplicationStore((s) => s.addEntry)
 
@@ -110,12 +104,7 @@ export default function JobDetailsSection({
   return (
     <section className="flex min-w-0 flex-col">
       <div className="mt-2 flex flex-col space-y-3">
-        <span className="text-sm font-medium text-secondary">
-          Job Descriptions{' '}
-          {!requireJobDescription && (
-            <span className="font-normal text-hint">(optional)</span>
-          )}
-        </span>
+        <span className="text-sm font-medium text-secondary">Job Descriptions</span>
 
         <div className="flex flex-col gap-4">
           {entries.map((entry, index) => (

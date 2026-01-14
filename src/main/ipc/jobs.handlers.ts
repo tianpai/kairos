@@ -3,7 +3,6 @@ import log from "electron-log/main";
 import { JobNotFoundError } from "../services/job-application.service";
 import {
   CreateFromExistingSchema,
-  CreateFromScratchSchema,
   CreateJobApplicationSchema,
   SaveChecklistSchema,
   SaveMatchScoreSchema,
@@ -27,18 +26,6 @@ export function registerJobsHandlers(service: JobApplicationService): void {
       return result;
     } catch (error) {
       log.error("jobs:create failed", error);
-      throw error;
-    }
-  });
-
-  ipcMain.handle("jobs:createFromScratch", async (_, data: unknown) => {
-    try {
-      const validated = CreateFromScratchSchema.parse(data);
-      const result = await service.createFromScratch(validated);
-      log.info(`Job created from scratch: ${result.id}`);
-      return result;
-    } catch (error) {
-      log.error("jobs:createFromScratch failed", error);
       throw error;
     }
   });

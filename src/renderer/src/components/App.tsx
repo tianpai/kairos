@@ -73,10 +73,6 @@ export default function App() {
     })
   }
 
-  function handleUploadSuccess(newJobId: string) {
-    selectApplication(newJobId)
-  }
-
   const hasApplications = applications.length > 0
   const hasActiveJob = !!jobId && !!jobApplication
 
@@ -88,7 +84,6 @@ export default function App() {
             hasActiveJob={hasActiveJob}
             jobId={jobId}
             jobApplication={jobApplication}
-            onUploadSuccess={handleUploadSuccess}
           />
         }
         sidebar={
