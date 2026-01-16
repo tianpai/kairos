@@ -3,14 +3,10 @@ import { CircleX, UploadCloud } from 'lucide-react'
 import { useFileUpload } from '@/hooks/useFileUpload'
 import { INPUT_BASE } from '@/components/resumeForm/fieldStyles'
 
-const ACCEPTED_FILE_TYPES = '.pdf,.docx,.tex'
+const ACCEPTED_FILE_TYPES = '.pdf,.docx,.tex,.md,.txt'
 
 interface FileDropzoneProps {
-  onFileSelect: () => void
-  onDrop: (event: React.DragEvent<HTMLDivElement>) => void
-  onDragOver: (event: React.DragEvent<HTMLDivElement>) => void
-  onDragLeave: (event: React.DragEvent<HTMLDivElement>) => void
-  isDragActive: boolean
+  fileUpload: ReturnType<typeof useFileUpload>
   acceptedFileTypes: string
 }
 
@@ -45,24 +41,17 @@ function SelectedFile({
   )
 }
 
-function FileDropzone({
-  onFileSelect,
-  onDrop,
-  onDragOver,
-  onDragLeave,
-  isDragActive,
-  acceptedFileTypes,
-}: FileDropzoneProps) {
+function FileDropzone({ fileUpload, acceptedFileTypes }: FileDropzoneProps) {
   return (
     <div
       role="button"
       tabIndex={0}
-      onClick={onFileSelect}
-      onDrop={onDrop}
-      onDragOver={onDragOver}
-      onDragLeave={onDragLeave}
+      onClick={fileUpload.triggerFileDialog}
+      onDrop={fileUpload.handleDrop}
+      onDragOver={fileUpload.handleDragOver}
+      onDragLeave={fileUpload.handleDragLeave}
       className={`mt-2 flex cursor-pointer items-center gap-2 rounded-md border border-dashed px-3 py-2 text-sm transition ${
-        isDragActive
+        fileUpload.isDragActive
           ? 'border-hint bg-hover'
           : 'border-default hover:border-hint'
       }`}
@@ -121,11 +110,7 @@ export default function ResumeUploadSection({
         />
       ) : (
         <FileDropzone
-          onFileSelect={fileUpload.triggerFileDialog}
-          onDrop={fileUpload.handleDrop}
-          onDragOver={fileUpload.handleDragOver}
-          onDragLeave={fileUpload.handleDragLeave}
-          isDragActive={fileUpload.isDragActive}
+          fileUpload={fileUpload}
           acceptedFileTypes={ACCEPTED_FILE_TYPES}
         />
       )}
