@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.8](https://github.com/tianpai/kairos/compare/v0.1.7...v0.1.8) (2026-01-16)
+
+
+### Features
+
+* add job URL link to sidebar popup ([20b3988](https://github.com/tianpai/kairos/commit/20b3988c2eee5d61d36e82b2e540997e2ba1730e))
+* support md and text format when uploading resume ([bd97c2d](https://github.com/tianpai/kairos/commit/bd97c2d58201f085f9ba8f0ad5b760850c7d452c))
+
 ### [0.1.7](https://github.com/tianpai/kairos/compare/v0.1.6...v0.1.7) (2026-01-14)
 
 ### Bug Fixes
