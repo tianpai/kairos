@@ -64,16 +64,15 @@ export const tips: Array<Tip> = [
     id: 'action-verbs',
     category: 'phrasing',
     message: 'Start bullets with action verbs: Led, Built, Reduced, Launched.',
-    conditions: [
-      { type: 'event', event: 'tailoring.complete' },
-    ],
+    conditions: [{ type: 'event', event: 'tailoring.complete' }],
   },
 
   // Consistency
   {
     id: 'date-format',
     category: 'consistency',
-    message: 'Keep date formats consistent. "Jan 2024" and "01/2024" looks sloppy.',
+    message:
+      'Keep date formats consistent. "Jan 2024" and "01/2024" looks sloppy.',
     conditions: [
       { type: 'event', event: 'tailoring.complete' },
       { type: 'firstTime', action: 'tailoring' },
@@ -83,9 +82,7 @@ export const tips: Array<Tip> = [
     id: 'tense-consistency',
     category: 'consistency',
     message: 'Current role = present tense. Past roles = past tense.',
-    conditions: [
-      { type: 'event', event: 'tailoring.complete' },
-    ],
+    conditions: [{ type: 'event', event: 'tailoring.complete' }],
   },
 
   // Position
@@ -102,9 +99,7 @@ export const tips: Array<Tip> = [
     id: 'skills-placement',
     category: 'position',
     message: 'Skills section works best near the top for ATS scanning.',
-    conditions: [
-      { type: 'event', event: 'checklist.parsed' },
-    ],
+    conditions: [{ type: 'event', event: 'checklist.parsed' }],
   },
 ]
 

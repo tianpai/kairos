@@ -10,7 +10,9 @@ import { TemplateBuilder } from './builder'
  * Build a Zod schema for resume parsing (includes all template sections)
  * Used when we don't have existing resume data yet
  */
-export function buildResumeZodSchema(templateId: string): z.ZodObject<Record<string, z.ZodTypeAny>> {
+export function buildResumeZodSchema(
+  templateId: string,
+): z.ZodObject<Record<string, z.ZodTypeAny>> {
   const builder = new TemplateBuilder(templateId)
   const sectionSchemas = builder.getDataSchemas()
   const uiSchemas = builder.getUISchemas()

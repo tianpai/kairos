@@ -22,7 +22,10 @@ export const jobs = {
   ): Promise<{ success: boolean }> =>
     ipcRenderer.invoke("jobs:updateJobDescription", id, data),
   // Workflow data
-  saveParsedResume: (id: string, data: unknown): Promise<{ success: boolean }> =>
+  saveParsedResume: (
+    id: string,
+    data: unknown,
+  ): Promise<{ success: boolean }> =>
     ipcRenderer.invoke("jobs:saveParsedResume", id, data),
   saveTailoredResume: (
     id: string,

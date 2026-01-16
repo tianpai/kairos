@@ -1,5 +1,6 @@
 import type { Checklist } from '@type/checklist'
 import type { TaskName } from '../workflow'
+import type { WorkflowStatus, WorkflowStepsData } from '@type/workflow'
 
 // Failed tasks map: task name -> ISO timestamp when it failed
 export type FailedTasksMap = Partial<Record<TaskName, string>>
@@ -42,15 +43,6 @@ export interface JobApplication {
   originalResume: string
   createdAt: string
   updatedAt: string
-}
-
-export type WorkflowStatus = 'idle' | 'running' | 'completed' | 'failed'
-
-export interface WorkflowStepsData {
-  workflowName: string
-  taskStates: Record<string, string>
-  status: WorkflowStatus
-  error?: string
 }
 
 export interface JobApplicationDetails extends JobApplication {
@@ -116,51 +108,6 @@ export async function saveResume(
   templateId: string,
 ): Promise<GeneralAPIResponse> {
   return window.kairos.jobs.saveResume(jobId, { resumeStructure, templateId })
-}
-
-// Workflow data operations
-
-export async function saveParsedResume(
-  jobId: string,
-  parsedResume: Record<string, unknown>,
-  tailoredResume: Record<string, unknown>,
-): Promise<GeneralAPIResponse> {
-  return window.kairos.jobs.saveParsedResume(jobId, {
-    parsedResume,
-    tailoredResume,
-  })
-}
-
-export async function saveTailoredResume(
-  jobId: string,
-  tailoredResume: Record<string, unknown>,
-): Promise<GeneralAPIResponse> {
-  return window.kairos.jobs.saveTailoredResume(jobId, { tailoredResume })
-}
-
-export async function saveChecklist(
-  jobId: string,
-  checklist: Checklist,
-): Promise<GeneralAPIResponse> {
-  return window.kairos.jobs.saveChecklist(jobId, { checklist })
-}
-
-export async function saveMatchScore(
-  jobId: string,
-  matchPercentage: number,
-): Promise<GeneralAPIResponse> {
-  return window.kairos.jobs.saveMatchScore(jobId, { matchPercentage })
-}
-
-export async function saveWorkflow(
-  jobId: string,
-  workflowSteps: WorkflowStepsData,
-  workflowStatus: string,
-): Promise<GeneralAPIResponse> {
-  return window.kairos.jobs.saveWorkflowState(jobId, {
-    workflowSteps,
-    workflowStatus,
-  })
 }
 
 export function updateJobDescription(

@@ -3,14 +3,10 @@ import { CircleX, UploadCloud } from 'lucide-react'
 import { useFileUpload } from '@/hooks/useFileUpload'
 import { INPUT_BASE } from '@/components/resumeForm/fieldStyles'
 
-const ACCEPTED_FILE_TYPES = '.pdf,.docx,.tex'
+const ACCEPTED_FILE_TYPES = '.pdf,.docx,.tex,.md,.txt'
 
 interface FileDropzoneProps {
-  onFileSelect: () => void
-  onDrop: (event: React.DragEvent<HTMLDivElement>) => void
-  onDragOver: (event: React.DragEvent<HTMLDivElement>) => void
-  onDragLeave: (event: React.DragEvent<HTMLDivElement>) => void
-  isDragActive: boolean
+  fileUpload: ReturnType<typeof useFileUpload>
   acceptedFileTypes: string
 }
 
@@ -39,38 +35,28 @@ function SelectedFile({
         onClick={onRemoveFile}
         className="absolute top-1/2 right-2 -translate-y-1/2 p-0.5 opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100"
       >
-        <CircleX
-          size={14}
-          className="text-hint hover:text-secondary"
-        />
+        <CircleX size={14} className="text-hint hover:text-secondary" />
       </button>
     </div>
   )
 }
 
-function FileDropzone({
-  onFileSelect,
-  onDrop,
-  onDragOver,
-  onDragLeave,
-  isDragActive,
-  acceptedFileTypes,
-}: FileDropzoneProps) {
+function FileDropzone({ fileUpload, acceptedFileTypes }: FileDropzoneProps) {
   return (
     <div
       role="button"
       tabIndex={0}
-      onClick={onFileSelect}
-      onDrop={onDrop}
-      onDragOver={onDragOver}
-      onDragLeave={onDragLeave}
+      onClick={fileUpload.triggerFileDialog}
+      onDrop={fileUpload.handleDrop}
+      onDragOver={fileUpload.handleDragOver}
+      onDragLeave={fileUpload.handleDragLeave}
       className={`mt-2 flex cursor-pointer items-center gap-2 rounded-md border border-dashed px-3 py-2 text-sm transition ${
-        isDragActive
+        fileUpload.isDragActive
           ? 'border-hint bg-hover'
           : 'border-default hover:border-hint'
       }`}
     >
-      <UploadCloud className="h-4 w-4 text-hint" />
+      <UploadCloud className="text-hint h-4 w-4" />
       <span className="text-hint">
         Drop or click to upload ({acceptedFileTypes})
       </span>
@@ -124,11 +110,7 @@ export default function ResumeUploadSection({
         />
       ) : (
         <FileDropzone
-          onFileSelect={fileUpload.triggerFileDialog}
-          onDrop={fileUpload.handleDrop}
-          onDragOver={fileUpload.handleDragOver}
-          onDragLeave={fileUpload.handleDragLeave}
-          isDragActive={fileUpload.isDragActive}
+          fileUpload={fileUpload}
           acceptedFileTypes={ACCEPTED_FILE_TYPES}
         />
       )}

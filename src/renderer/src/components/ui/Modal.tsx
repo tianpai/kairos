@@ -56,12 +56,12 @@ export function Modal({
         onClick={closeOnBackdropClick ? onClose : undefined}
       >
         <div
-          className={`flex max-h-[85vh] w-[90%] ${maxWidthClasses[maxWidth]} flex-col rounded-lg bg-surface shadow-xl`}
+          className={`flex max-h-[85vh] w-[90%] ${maxWidthClasses[maxWidth]} bg-surface flex-col rounded-lg shadow-xl`}
           onClick={(e) => e.stopPropagation()}
         >
           <div className="flex-1 overflow-y-auto p-6">{children}</div>
           {(actions || leftActions) && (
-            <div className="flex justify-between border-t border-default p-4">
+            <div className="border-default flex justify-between border-t p-4">
               <div>{leftActions}</div>
               <div>{actions}</div>
             </div>
@@ -72,10 +72,10 @@ export function Modal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex h-screen flex-col bg-surface">
+    <div className="bg-surface fixed inset-0 z-50 flex h-screen flex-col">
       <div className="flex-1 overflow-y-auto p-8">{children}</div>
       {(actions || leftActions) && (
-        <div className="flex justify-between border-t border-default p-4">
+        <div className="border-default flex justify-between border-t p-4">
           <div>{leftActions}</div>
           <div>{actions}</div>
         </div>

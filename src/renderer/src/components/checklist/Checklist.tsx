@@ -110,10 +110,10 @@ export default function Checklist({ jobId }: ChecklistProps) {
   if (!hasJobDescription) {
     return (
       <div className="flex h-full flex-col p-4">
-        <h3 className="text-sm font-medium text-primary">
+        <h3 className="text-primary text-sm font-medium">
           Add Job Description
         </h3>
-        <p className="mt-1 text-xs text-hint">
+        <p className="text-hint mt-1 text-xs">
           Paste the job description to enable AI-powered tailoring and generate
           a requirements checklist.
         </p>
@@ -121,7 +121,7 @@ export default function Checklist({ jobId }: ChecklistProps) {
           value={jdInput}
           onChange={(e) => setJdInput(e.target.value)}
           placeholder="Paste the job description here..."
-          className="mt-3 flex-1 resize-none rounded-lg border border-default bg-transparent p-3 text-sm leading-relaxed text-primary outline-none focus:border-primary placeholder:text-hint"
+          className="border-default text-primary focus:border-primary placeholder:text-hint mt-3 flex-1 resize-none rounded-lg border bg-transparent p-3 text-sm leading-relaxed outline-none"
         />
         <div className="mt-3">
           <Button
@@ -141,7 +141,7 @@ export default function Checklist({ jobId }: ChecklistProps) {
       {checklist ? (
         <>
           {/* Tab Navigation */}
-          <div className="bg-app-header my-2 ml-1 mr-2 flex flex-wrap justify-center gap-1 rounded-lg p-2">
+          <div className="bg-app-header my-2 mr-2 ml-1 flex flex-wrap justify-center gap-1 rounded-lg p-2">
             {tabs.map((tab) => {
               const Icon = tab.icon
               return (
@@ -159,7 +159,7 @@ export default function Checklist({ jobId }: ChecklistProps) {
           </div>
 
           {/* Active Section Content */}
-          <div className="flex-1 overflow-y-auto py-4 pl-1 pr-4">
+          <div className="flex-1 overflow-y-auto py-4 pr-4 pl-1">
             {activeTab === 'hard' && (
               <ChecklistSection
                 requirements={checklist.hardRequirements}
@@ -185,19 +185,17 @@ export default function Checklist({ jobId }: ChecklistProps) {
         </>
       ) : (
         <div className="flex h-full flex-col p-4">
-          <p className="text-sm text-hint">
+          <p className="text-hint text-sm">
             Checklist will appear here once job description is processed.
           </p>
           <div className="mt-4 flex flex-1 flex-col overflow-hidden">
             <div className="flex items-center justify-between">
-              <h4 className="text-xs font-medium text-hint">
-                Job Description
-              </h4>
+              <h4 className="text-hint text-xs font-medium">Job Description</h4>
               {!isEditingJd && (
                 <div className="flex items-center gap-1">
                   <button
                     onClick={handleEditJd}
-                    className="rounded p-1 text-hint hover:bg-hover hover:text-secondary"
+                    className="text-hint hover:bg-hover hover:text-secondary rounded p-1"
                     title="Edit job description"
                   >
                     <SquarePen size={14} />
@@ -205,7 +203,7 @@ export default function Checklist({ jobId }: ChecklistProps) {
                   <button
                     onClick={handleParseChecklist}
                     disabled={isParsingChecklist}
-                    className="rounded p-1 text-hint hover:bg-hover hover:text-secondary disabled:cursor-not-allowed disabled:opacity-50"
+                    className="text-hint hover:bg-hover hover:text-secondary rounded p-1 disabled:cursor-not-allowed disabled:opacity-50"
                     title="Parse into checklist"
                   >
                     <ListTodo size={14} />
@@ -218,7 +216,7 @@ export default function Checklist({ jobId }: ChecklistProps) {
                 <textarea
                   value={jdInput}
                   onChange={(e) => setJdInput(e.target.value)}
-                  className="flex-1 resize-none rounded-lg border border-default bg-transparent p-3 text-sm leading-relaxed text-primary outline-none focus:border-primary placeholder:text-hint"
+                  className="border-default text-primary focus:border-primary placeholder:text-hint flex-1 resize-none rounded-lg border bg-transparent p-3 text-sm leading-relaxed outline-none"
                 />
                 <div className="mt-3 flex gap-2">
                   <Button
@@ -237,7 +235,7 @@ export default function Checklist({ jobId }: ChecklistProps) {
                 </div>
               </div>
             ) : (
-              <div className="mt-2 flex-1 overflow-y-auto rounded-lg bg-hover p-3 text-sm whitespace-pre-wrap text-secondary">
+              <div className="bg-hover text-secondary mt-2 flex-1 overflow-y-auto rounded-lg p-3 text-sm whitespace-pre-wrap">
                 {jobApplication?.jobDescription}
               </div>
             )}

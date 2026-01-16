@@ -12,7 +12,9 @@ export function useShortcutListener() {
   )
   const requestSave = useShortcutStore((state) => state.requestSave)
   const requestExportPdf = useShortcutStore((state) => state.requestExportPdf)
-  const requestBatchExport = useShortcutStore((state) => state.requestBatchExport)
+  const requestBatchExport = useShortcutStore(
+    (state) => state.requestBatchExport,
+  )
   const requestDocumentSettings = useShortcutStore(
     (state) => state.requestDocumentSettings,
   )
@@ -46,11 +48,9 @@ export function useShortcutListener() {
     })
 
     // Document Settings - store flag
-    const unsubDocSettings = window.kairos.shortcuts.onDocumentSettings(
-      () => {
-        requestDocumentSettings()
-      },
-    )
+    const unsubDocSettings = window.kairos.shortcuts.onDocumentSettings(() => {
+      requestDocumentSettings()
+    })
 
     // Tailor - store flag
     const unsubTailor = window.kairos.shortcuts.onTailor(() => {

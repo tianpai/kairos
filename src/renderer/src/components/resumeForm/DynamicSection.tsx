@@ -29,7 +29,7 @@ interface DynamicSectionProps {
 }
 
 function SectionWrapper({ children }: { children: React.ReactNode }) {
-  return <div className="mb-4 py-2 pl-2 pr-1">{children}</div>
+  return <div className="mb-4 py-2 pr-1 pl-2">{children}</div>
 }
 
 interface FieldListProps {
@@ -90,13 +90,18 @@ function EntryItem({
   }
 
   return (
-    <div ref={setNodeRef} style={style} {...attributes} className="group mb-2 p-2">
+    <div
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      className="group mb-2 p-2"
+    >
       <div className="mb-2 flex items-center justify-between">
         <div className="flex items-center gap-1">
           <button
             type="button"
             {...listeners}
-            className="cursor-grab text-hint opacity-0 transition-opacity group-hover:opacity-100 active:cursor-grabbing"
+            className="text-hint cursor-grab opacity-0 transition-opacity group-hover:opacity-100 active:cursor-grabbing"
           >
             <GripVertical size={14} />
           </button>
@@ -201,14 +206,14 @@ function MultipleEntrySection({ schema, entries }: MultipleEntrySectionProps) {
       <button
         type="button"
         onClick={handleAdd}
-        className="flex w-full cursor-pointer items-center justify-center gap-1 rounded-md py-2 text-sm text-secondary transition-colors hover:bg-hover"
+        className="text-secondary hover:bg-hover flex w-full cursor-pointer items-center justify-center gap-1 rounded-md py-2 text-sm transition-colors"
       >
         <Plus size={14} />
         <span>New</span>
       </button>
 
       {entries.length === 0 && (
-        <p className="mb-2 text-xs text-hint italic">
+        <p className="text-hint mb-2 text-xs italic">
           No {schema.label.toLowerCase()} added yet.
         </p>
       )}

@@ -60,7 +60,7 @@ export function DocumentConfigModal({
       actions={<Button onClick={onClose}>Done</Button>}
     >
       <div className="mb-6">
-        <h2 className="text-xl text-primary">Document Settings</h2>
+        <h2 className="text-primary text-xl">Document Settings</h2>
       </div>
 
       <div className="grid grid-cols-2 gap-8">
@@ -70,7 +70,7 @@ export function DocumentConfigModal({
         {/* Right: Document Config */}
         <div>
           <div className="mb-4">
-            <h3 className="text-lg font-medium text-primary">Layout</h3>
+            <h3 className="text-primary text-lg font-medium">Layout</h3>
           </div>
 
           <div className="space-y-4">

@@ -88,7 +88,6 @@ export default function NewApplicationModal({
 
         <JobDetailsSection />
       </div>
-
     </Modal>
   )
 }

@@ -104,7 +104,7 @@ function SortableTextItem({
       <button
         type="button"
         {...listeners}
-        className="mt-2.5 cursor-grab text-hint opacity-0 transition-opacity group-hover:opacity-100 active:cursor-grabbing"
+        className="text-hint mt-2.5 cursor-grab opacity-0 transition-opacity group-hover:opacity-100 active:cursor-grabbing"
       >
         <GripVertical size={12} />
       </button>
@@ -121,12 +121,9 @@ function SortableTextItem({
         <button
           type="button"
           onClick={onRemove}
-          className="absolute right-2 top-2 p-0.5 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100"
+          className="absolute top-2 right-2 p-0.5 opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100"
         >
-          <CircleX
-            size={14}
-            className="text-hint hover:text-secondary"
-          />
+          <CircleX size={14} className="text-hint hover:text-secondary" />
         </button>
       </div>
     </div>

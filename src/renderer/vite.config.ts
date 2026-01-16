@@ -30,7 +30,7 @@ export default defineConfig({
       '@components/': `${__dirname}/src/components/`,
       '@editor/': `${__dirname}/src/components/editor/`,
       '@checklist/': `${__dirname}/src/components/checklist/`,
-      '@type/': `${__dirname}/src/type/`,
+      '@type/': resolve(__dirname, '../shared/type') + '/',
       '@api/': `${__dirname}/src/api/`,
       '@ui/': `${__dirname}/src/components/ui/`,
       '@resumeForm/': `${__dirname}/src/components/resumeForm/`,

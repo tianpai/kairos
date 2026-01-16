@@ -2,7 +2,9 @@ import { ipcRenderer } from "electron";
 import type { ProviderType } from "../../shared/providers";
 
 export const models = {
-  fetch: (provider: ProviderType): Promise<Array<{ id: string; name: string }>> =>
+  fetch: (
+    provider: ProviderType,
+  ): Promise<Array<{ id: string; name: string }>> =>
     ipcRenderer.invoke("models:fetch", provider),
   getCachedIds: (provider: ProviderType): Promise<Array<string>> =>
     ipcRenderer.invoke("models:getCachedIds", provider),

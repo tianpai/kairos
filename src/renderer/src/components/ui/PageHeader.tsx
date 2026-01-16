@@ -10,7 +10,7 @@ interface PageHeaderProps {
 export function PageHeader({ left, center, right }: PageHeaderProps) {
   return (
     <header
-      className="bg-surface relative z-20 grid h-12 grid-cols-3 items-center border-b border-default"
+      className="bg-surface border-default relative z-20 grid h-12 grid-cols-3 items-center border-b"
       style={{
         // @ts-expect-error app-region is a valid CSS property in Electron
         appRegion: 'drag',

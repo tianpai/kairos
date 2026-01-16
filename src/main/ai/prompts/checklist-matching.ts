@@ -1,11 +1,11 @@
-import { ChecklistSchema } from '@type/checklist'
-import type { Checklist } from '@type/checklist'
-import type { AIProvider, DeepPartial } from '../provider.interface'
+import { ChecklistSchema } from "@type/checklist";
+import type { Checklist } from "@type/checklist";
+import type { AIProvider, DeepPartial } from "../provider.interface";
 
 interface MatchOptions {
-  streaming?: boolean
-  onPartial?: (partial: DeepPartial<Checklist>) => void
-  model: string
+  streaming?: boolean;
+  onPartial?: (partial: DeepPartial<Checklist>) => void;
+  model: string;
 }
 
 export async function matchChecklist(
@@ -36,7 +36,7 @@ For each requirement:
 
 Keep needTailoring as empty array [] (will be populated by user in frontend).
 
-Return the complete checklist with updated keyword-level and requirement-level fulfilled status.`
+Return the complete checklist with updated keyword-level and requirement-level fulfilled status.`;
 
   const userPrompt = `Job Requirements Checklist:
 ${JSON.stringify(checklist, null, 2)}
@@ -44,21 +44,21 @@ ${JSON.stringify(checklist, null, 2)}
 Candidate Resume:
 ${JSON.stringify(resumeStructure, null, 2)}
 
-Analyze the resume against each requirement and return the updated checklist with fulfilled status.`
+Analyze the resume against each requirement and return the updated checklist with fulfilled status.`;
 
   const params = {
     systemPrompt,
     userPrompt,
     schema: ChecklistSchema,
     model: options.model,
-  }
+  };
 
   if (options.streaming && options.onPartial) {
     return provider.streamStructuredOutput({
       ...params,
       onPartial: options.onPartial,
-    })
+    });
   }
 
-  return provider.generateStructuredOutput(params)
+  return provider.generateStructuredOutput(params);
 }

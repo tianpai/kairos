@@ -21,6 +21,7 @@ kairos/
 ## Setup
 
 Install dependencies:
+
 ```bash
 npm install
 ```
@@ -28,11 +29,13 @@ npm install
 ## Development
 
 Start the Electron app in development mode:
+
 ```bash
 npm run dev
 ```
 
 This single command:
+
 - Builds the main and preload processes
 - Starts the Vite dev server for the renderer (hot reload)
 - Launches the Electron window with DevTools
@@ -72,6 +75,7 @@ rm -rf dist/ out/ ~/Library/Application\ Support/kairos/
 ## Database
 
 The application uses **SQLite** for local storage via Drizzle ORM:
+
 - Development: `drizzle/dev.db`
 - Production: `<user-data>/kairos.db` (automatically created on first run)
 
@@ -86,12 +90,14 @@ The application uses **SQLite** for local storage via Drizzle ORM:
 ## Tech Stack
 
 **Frontend (Renderer):**
+
 - React 19 + TypeScript
 - TanStack Router + Query
 - Tailwind CSS
 - Typst WASM compiler
 
 **Main Process:**
+
 - Electron
 - Drizzle ORM + SQLite
 - electron-vite for build tooling

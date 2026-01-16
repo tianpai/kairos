@@ -6,14 +6,12 @@
  */
 
 import { create } from 'zustand'
-import type { TaskName, WorkflowContext } from './task-contracts'
+import type { TaskName, WorkflowContext } from '@type/task-contracts'
+import type { TaskStatus, WorkflowStatus } from '@type/workflow'
 
 // =============================================================================
 // Types
 // =============================================================================
-
-export type TaskStatus = 'pending' | 'running' | 'completed' | 'failed'
-export type WorkflowStatus = 'idle' | 'running' | 'completed' | 'failed'
 
 export type TaskStateMap = Partial<Record<TaskName, TaskStatus>>
 
@@ -24,6 +22,8 @@ export interface WorkflowInstance {
   status: WorkflowStatus
   error?: string
 }
+
+export type { TaskStatus, WorkflowStatus }
 
 // =============================================================================
 // Store Interface
@@ -36,27 +36,12 @@ interface WorkflowState {
   contexts: Record<string, WorkflowContext>
 
   // Actions
-  initWorkflow: (
-    jobId: string,
-    workflowName: string,
-    tasks: Array<TaskName>,
-    initialContext: Partial<WorkflowContext>,
-  ) => void
   loadWorkflow: (
     jobId: string,
     workflow: WorkflowInstance,
     context?: WorkflowContext,
   ) => void
-  setTaskStatus: (
-    jobId: string,
-    task: TaskName,
-    status: TaskStatus,
-    error?: string,
-  ) => void
   updateContext: (jobId: string, updates: Partial<WorkflowContext>) => void
-  completeWorkflow: (jobId: string) => void
-  failWorkflow: (jobId: string, error: string) => void
-  clearWorkflow: (jobId: string) => void
 
   // Selectors
   getWorkflow: (jobId: string) => WorkflowInstance | undefined
@@ -75,32 +60,6 @@ export const useWorkflowStore = create<WorkflowState>()((set, get) => ({
   workflows: {},
   contexts: {},
 
-  initWorkflow: (jobId, workflowName, tasks, initialContext) => {
-    const taskStates: TaskStateMap = {}
-    tasks.forEach((task) => {
-      taskStates[task] = 'pending'
-    })
-
-    set((state) => ({
-      workflows: {
-        ...state.workflows,
-        [jobId]: {
-          jobId,
-          workflowName,
-          taskStates,
-          status: 'running',
-        },
-      },
-      contexts: {
-        ...state.contexts,
-        [jobId]: {
-          jobId,
-          ...initialContext,
-        } as WorkflowContext,
-      },
-    }))
-  },
-
   loadWorkflow: (jobId, workflow, context) => {
     set((state) => ({
       workflows: {
@@ -111,27 +70,6 @@ export const useWorkflowStore = create<WorkflowState>()((set, get) => ({
         ? { ...state.contexts, [jobId]: context }
         : state.contexts,
     }))
-  },
-
-  setTaskStatus: (jobId, task, status, error) => {
-    set((state) => {
-      const workflow = state.workflows[jobId]
-      if (!workflow) return state
-
-      return {
-        workflows: {
-          ...state.workflows,
-          [jobId]: {
-            ...workflow,
-            taskStates: {
-              ...workflow.taskStates,
-              [task]: status,
-            },
-            error: error ?? workflow.error,
-          },
-        },
-      }
-    })
   },
 
   updateContext: (jobId, updates) => {
@@ -147,52 +85,6 @@ export const useWorkflowStore = create<WorkflowState>()((set, get) => ({
             ...updates,
           },
         },
-      }
-    })
-  },
-
-  completeWorkflow: (jobId) => {
-    set((state) => {
-      const workflow = state.workflows[jobId]
-      if (!workflow) return state
-
-      return {
-        workflows: {
-          ...state.workflows,
-          [jobId]: {
-            ...workflow,
-            status: 'completed',
-          },
-        },
-      }
-    })
-  },
-
-  failWorkflow: (jobId, error) => {
-    set((state) => {
-      const workflow = state.workflows[jobId]
-      if (!workflow) return state
-
-      return {
-        workflows: {
-          ...state.workflows,
-          [jobId]: {
-            ...workflow,
-            status: 'failed',
-            error,
-          },
-        },
-      }
-    })
-  },
-
-  clearWorkflow: (jobId) => {
-    set((state) => {
-      const { [jobId]: _removedWorkflow, ...restWorkflows } = state.workflows
-      const { [jobId]: _removedContext, ...restContexts } = state.contexts
-      return {
-        workflows: restWorkflows,
-        contexts: restContexts,
       }
     })
   },

@@ -1,22 +1,22 @@
-import { generateObject, streamObject } from 'ai'
-import { createXai } from '@ai-sdk/xai'
+import { generateObject, streamObject } from "ai";
+import { createXai } from "@ai-sdk/xai";
 import type {
   AIProvider,
   AIProviderConfig,
   GenerateParams,
   StreamParams,
-} from '../provider.interface'
+} from "../provider.interface";
 
 export class XAIProvider implements AIProvider {
-  private readonly client: ReturnType<typeof createXai>
-  private readonly defaultModel: string
+  private readonly client: ReturnType<typeof createXai>;
+  private readonly defaultModel: string;
 
   constructor(config: AIProviderConfig) {
     this.client = createXai({
       apiKey: config.apiKey,
       baseURL: config.baseUrl,
-    })
-    this.defaultModel = config.defaultModel ?? 'grok-3-fast'
+    });
+    this.defaultModel = config.defaultModel ?? "grok-3-fast";
   }
 
   async generateStructuredOutput<T>(params: GenerateParams<T>): Promise<T> {
@@ -25,8 +25,8 @@ export class XAIProvider implements AIProvider {
       schema: params.schema,
       system: params.systemPrompt,
       prompt: params.userPrompt,
-    })
-    return object
+    });
+    return object;
   }
 
   async streamStructuredOutput<T>(params: StreamParams<T>): Promise<T> {
@@ -35,14 +35,14 @@ export class XAIProvider implements AIProvider {
       schema: params.schema,
       system: params.systemPrompt,
       prompt: params.userPrompt,
-    })
+    });
 
     if (params.onPartial) {
       for await (const partial of partialObjectStream) {
-        params.onPartial(partial)
+        params.onPartial(partial);
       }
     }
 
-    return await object
+    return await object;
   }
 }

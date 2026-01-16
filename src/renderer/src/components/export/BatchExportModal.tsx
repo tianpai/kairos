@@ -76,10 +76,8 @@ function FailedExportsList({
 
   return (
     <div className={className}>
-      <div className="text-sm font-medium text-error">
-        {title}
-      </div>
-      <ul className="mt-1 list-inside list-disc text-sm text-secondary">
+      <div className="text-error text-sm font-medium">{title}</div>
+      <ul className="text-secondary mt-1 list-inside list-disc text-sm">
         {failed.map((item, i) => (
           <li key={i}>{item}</li>
         ))}
@@ -91,13 +89,11 @@ function FailedExportsList({
 function ExportProgressView({ progress }: ExportProgressViewProps) {
   return (
     <div className="flex flex-col gap-2">
-      <div className="text-sm text-secondary">
+      <div className="text-secondary text-sm">
         Exporting {progress.current} of {progress.total}...
       </div>
       {progress.currentApp && (
-        <div className="text-sm text-hint">
-          {progress.currentApp}
-        </div>
+        <div className="text-hint text-sm">{progress.currentApp}</div>
       )}
       <FailedExportsList failed={progress.failed} className="mt-2" />
     </div>
@@ -110,24 +106,20 @@ function ApplicationListItem({
   onToggle,
 }: ApplicationListItemProps) {
   return (
-    <label className="flex cursor-pointer items-center gap-3 border-b border-hover px-4 py-3 transition-colors last:border-b-0 hover:bg-hover">
+    <label className="border-hover hover:bg-hover flex cursor-pointer items-center gap-3 border-b px-4 py-3 transition-colors last:border-b-0">
       <input
         type="checkbox"
         checked={checked}
         onChange={() => onToggle(app.id)}
-        className="h-4 w-4 rounded border-default accent-black focus:ring-0 focus:ring-offset-0 dark:accent-white"
+        className="border-default h-4 w-4 rounded accent-black focus:ring-0 focus:ring-offset-0 dark:accent-white"
       />
       <div className="flex min-w-0 flex-1 items-center justify-between gap-3">
         <div className="min-w-0 truncate">
-          <span className="font-medium text-primary">
-            {app.companyName}
-          </span>
-          <span className="mx-2 text-hint">-</span>
-          <span className="text-secondary">
-            {app.position}
-          </span>
+          <span className="text-primary font-medium">{app.companyName}</span>
+          <span className="text-hint mx-2">-</span>
+          <span className="text-secondary">{app.position}</span>
         </div>
-        <span className="shrink-0 text-sm text-hint">
+        <span className="text-hint shrink-0 text-sm">
           {app.dueDate ? `Due ${formatDate(app.dueDate)}` : 'No due date'}
         </span>
       </div>
@@ -141,9 +133,9 @@ function ApplicationList({
   onToggle,
 }: ApplicationListProps) {
   return (
-    <div className="max-h-96 overflow-y-auto rounded border border-default">
+    <div className="border-default max-h-96 overflow-y-auto rounded border">
       {applications.length === 0 ? (
-        <div className="p-4 text-center text-hint">
+        <div className="text-hint p-4 text-center">
           No applications match the current filter
         </div>
       ) : (
@@ -312,14 +304,14 @@ export function BatchExportModal({
           <button
             onClick={handleClose}
             disabled={exporting}
-            className="cursor-pointer rounded px-4 py-2 text-secondary transition-colors hover:bg-hover disabled:cursor-not-allowed disabled:opacity-50"
+            className="text-secondary hover:bg-hover cursor-pointer rounded px-4 py-2 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
           >
             {progress?.failed.length ? 'Close' : 'Cancel'}
           </button>
           <button
             onClick={handleExport}
             disabled={selectedIds.size === 0 || exporting}
-            className="cursor-pointer rounded bg-primary px-4 py-2 text-base transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
+            className="bg-primary hover:bg-primary/90 cursor-pointer rounded px-4 py-2 text-base transition-colors disabled:cursor-not-allowed disabled:opacity-50"
           >
             {exporting
               ? 'Exporting...'
@@ -329,9 +321,7 @@ export function BatchExportModal({
       }
     >
       <div className="flex flex-col gap-4">
-        <h2 className="text-xl font-semibold text-primary">
-          Export PDFs
-        </h2>
+        <h2 className="text-primary text-xl font-semibold">Export PDFs</h2>
 
         {exporting && progress ? (
           <ExportProgressView progress={progress} />

@@ -54,8 +54,7 @@ export function useDeepSeekApiKey() {
 export function useSetDeepSeekApiKey() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (key: string) =>
-      window.kairos.settings.setDeepSeekApiKey(key),
+    mutationFn: (key: string) => window.kairos.settings.setDeepSeekApiKey(key),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['settings'] })
     },
@@ -160,8 +159,7 @@ export function useAnthropicApiKey() {
 export function useSetAnthropicApiKey() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (key: string) =>
-      window.kairos.settings.setAnthropicApiKey(key),
+    mutationFn: (key: string) => window.kairos.settings.setAnthropicApiKey(key),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['settings'] })
     },

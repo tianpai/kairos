@@ -1,6 +1,6 @@
 import { createContext, useContext, useState } from 'react'
 import { ChevronDown } from 'lucide-react'
-import type { ReactNode } from 'react';
+import type { ReactNode } from 'react'
 
 interface AccordionContextType {
   openItem: string | null
@@ -15,7 +15,11 @@ interface AccordionProps {
   className?: string
 }
 
-export function Accordion({ children, defaultValue, className }: AccordionProps) {
+export function Accordion({
+  children,
+  defaultValue,
+  className,
+}: AccordionProps) {
   const [openItem, setOpenItem] = useState<string | null>(defaultValue ?? null)
 
   const toggle = (value: string) => {
@@ -35,7 +39,11 @@ interface AccordionItemProps {
   className?: string
 }
 
-export function AccordionItem({ children, value, className }: AccordionItemProps) {
+export function AccordionItem({
+  children,
+  value,
+  className,
+}: AccordionItemProps) {
   return (
     <div className={className} data-value={value}>
       {children}
@@ -49,9 +57,14 @@ interface AccordionTriggerProps {
   className?: string
 }
 
-export function AccordionTrigger({ children, value, className }: AccordionTriggerProps) {
+export function AccordionTrigger({
+  children,
+  value,
+  className,
+}: AccordionTriggerProps) {
   const context = useContext(AccordionContext)
-  if (!context) throw new Error('AccordionTrigger must be used within Accordion')
+  if (!context)
+    throw new Error('AccordionTrigger must be used within Accordion')
 
   const isOpen = context.openItem === value
 
@@ -76,9 +89,14 @@ interface AccordionContentProps {
   className?: string
 }
 
-export function AccordionContent({ children, value, className }: AccordionContentProps) {
+export function AccordionContent({
+  children,
+  value,
+  className,
+}: AccordionContentProps) {
   const context = useContext(AccordionContext)
-  if (!context) throw new Error('AccordionContent must be used within Accordion')
+  if (!context)
+    throw new Error('AccordionContent must be used within Accordion')
 
   const isOpen = context.openItem === value
 

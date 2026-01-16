@@ -30,7 +30,11 @@ interface ResumeState {
   // entry is within a section
   addEntry: (sectionId: string) => void
   removeEntry: (sectionId: string, index: number) => void
-  reorderEntries: (sectionId: string, oldIndex: number, newIndex: number) => void
+  reorderEntries: (
+    sectionId: string,
+    oldIndex: number,
+    newIndex: number,
+  ) => void
 
   // sections are like work experiences, education
   addSection: (sectionId: string, styleId?: string) => void

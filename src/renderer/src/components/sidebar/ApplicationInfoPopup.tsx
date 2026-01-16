@@ -1,27 +1,10 @@
-import { Info } from 'lucide-react'
+import { ExternalLink, Info } from 'lucide-react'
 import { HoverPopup } from '@ui/HoverPopup'
 import { InfoRow } from '@ui/InfoRow'
+import { formatDate, formatDateTime, normalizeUrl } from '@utils/format'
+import { ActionButton } from './PopupButton'
+import type { Application } from './Sidebar'
 import { getScoreColor } from '@/utils/scoreThresholds'
-
-function formatDateTime(dateStr: string): string {
-  const date = new Date(dateStr)
-  return date.toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
-  })
-}
-
-function formatDate(dateStr: string): string {
-  const date = new Date(dateStr)
-  return date.toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  })
-}
 
 function isOverdue(dateStr: string): boolean {
   const date = new Date(dateStr)
@@ -31,22 +14,18 @@ function isOverdue(dateStr: string): boolean {
 }
 
 interface ApplicationInfoPopupProps {
-  dueDate: string
-  matchPercentage: number
-  createdAt: string
-  updatedAt: string
+  application: Application
   anchorRect: DOMRect | null
   onEdit: () => void
 }
 
 export function ApplicationInfoPopup({
-  dueDate,
-  matchPercentage,
-  createdAt,
-  updatedAt,
+  application,
   anchorRect,
   onEdit,
-}: ApplicationInfoPopupProps): JSX.Element {
+}: ApplicationInfoPopupProps) {
+  const jobUrl = application.jobUrl
+
   return (
     <HoverPopup position="right" anchorRect={anchorRect} width="w-72">
       <div className="space-y-1 text-sm">
@@ -54,29 +33,44 @@ export function ApplicationInfoPopup({
           <span className="text-hint">Score</span>
           <span
             className="font-medium"
-            style={{ color: getScoreColor(matchPercentage) }}
+            style={{ color: getScoreColor(application.matchPercentage) }}
           >
-            {Math.round(matchPercentage)}%
+            {Math.round(application.matchPercentage)}%
           </span>
         </div>
         <div className="flex items-center justify-between gap-8">
           <span className="text-hint">Due</span>
-          <span className={isOverdue(dueDate) ? 'text-error' : 'text-secondary'}>
-            {formatDate(dueDate)}
+          <span
+            className={
+              isOverdue(application.dueDate) ? 'text-error' : 'text-secondary'
+            }
+          >
+            {formatDate(application.dueDate)}
           </span>
         </div>
-        <InfoRow label="Created" value={formatDateTime(createdAt)} />
-        <InfoRow label="Updated" value={formatDateTime(updatedAt)} />
-        <button
-          onClick={(e) => {
-            e.stopPropagation()
-            onEdit()
-          }}
-          className="mt-2 flex w-full items-center justify-center gap-1 rounded bg-hover px-2 py-1 text-secondary transition-colors hover:bg-active"
-        >
-          <Info size={14} />
-          <span>Edit Info</span>
-        </button>
+        <InfoRow
+          label="Created"
+          value={formatDateTime(application.createdAt)}
+        />
+        <InfoRow
+          label="Updated"
+          value={formatDateTime(application.updatedAt)}
+        />
+        {jobUrl && (
+          <ActionButton
+            icon={<ExternalLink size={14} />}
+            label="Submission Site"
+            onClick={() => {
+              const url = normalizeUrl(jobUrl)
+              if (url) window.kairos.shell.openExternal(url)
+            }}
+          />
+        )}
+        <ActionButton
+          icon={<Info size={14} />}
+          label="Edit Info"
+          onClick={onEdit}
+        />
       </div>
     </HoverPopup>
   )

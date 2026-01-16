@@ -1,11 +1,11 @@
-import { ChecklistSchema } from '@type/checklist'
-import type { Checklist } from '@type/checklist'
-import type { AIProvider, DeepPartial } from '../provider.interface'
+import { ChecklistSchema } from "@type/checklist";
+import type { Checklist } from "@type/checklist";
+import type { AIProvider, DeepPartial } from "../provider.interface";
 
 interface ParseOptions {
-  streaming?: boolean
-  onPartial?: (partial: DeepPartial<Checklist>) => void
-  model: string
+  streaming?: boolean;
+  onPartial?: (partial: DeepPartial<Checklist>) => void;
+  model: string;
 }
 
 export async function parseChecklist(
@@ -31,23 +31,23 @@ For each requirement:
 
 Initialize needTailoring as empty array [] (will be populated by user selection).
 
-Return empty arrays if no requirements found in that category.`
+Return empty arrays if no requirements found in that category.`;
 
-  const userPrompt = `Job Description:\n\n${jobDescription}`
+  const userPrompt = `Job Description:\n\n${jobDescription}`;
 
   const params = {
     systemPrompt,
     userPrompt,
     schema: ChecklistSchema,
     model: options.model,
-  }
+  };
 
   if (options.streaming && options.onPartial) {
     return provider.streamStructuredOutput({
       ...params,
       onPartial: options.onPartial,
-    })
+    });
   }
 
-  return provider.generateStructuredOutput(params)
+  return provider.generateStructuredOutput(params);
 }

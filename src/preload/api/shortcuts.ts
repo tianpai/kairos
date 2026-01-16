@@ -3,7 +3,10 @@ import { ipcRenderer } from "electron";
 type ShortcutCallback = () => void;
 type Unsubscribe = () => void;
 
-const onShortcut = (channel: string, callback: ShortcutCallback): Unsubscribe => {
+const onShortcut = (
+  channel: string,
+  callback: ShortcutCallback,
+): Unsubscribe => {
   const handler = () => callback();
   ipcRenderer.on(channel, handler);
   return () => ipcRenderer.removeListener(channel, handler);

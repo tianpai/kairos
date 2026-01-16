@@ -29,9 +29,7 @@ export function Toggle({
   return (
     <div className="flex items-center gap-3">
       {labelOff && (
-        <span
-          className={`text-sm ${!checked ? 'text-primary' : 'text-hint'}`}
-        >
+        <span className={`text-sm ${!checked ? 'text-primary' : 'text-hint'}`}>
           {labelOff}
         </span>
       )}
@@ -42,20 +40,18 @@ export function Toggle({
         disabled={disabled}
         onClick={handleToggle}
         onKeyDown={handleKeyDown}
-        className={`relative inline-flex h-4 w-8 shrink-0 cursor-pointer items-center rounded-full transition-colors duration-200 focus:ring-2 focus:ring-default focus:ring-offset-2 focus:outline-none ${
+        className={`focus:ring-default relative inline-flex h-4 w-8 shrink-0 cursor-pointer items-center rounded-full transition-colors duration-200 focus:ring-2 focus:ring-offset-2 focus:outline-none ${
           disabled ? 'cursor-not-allowed opacity-50' : ''
         } ${checked ? 'bg-active' : 'bg-primary'}`}
       >
         <span
-          className={`inline-block h-3 w-3 transform rounded-full bg-base shadow transition-transform duration-200 ${
+          className={`bg-base inline-block h-3 w-3 transform rounded-full shadow transition-transform duration-200 ${
             checked ? 'translate-x-4' : 'translate-x-1'
           }`}
         />
       </button>
       {labelOn && (
-        <span
-          className={`text-sm ${checked ? 'text-primary' : 'text-hint'}`}
-        >
+        <span className={`text-sm ${checked ? 'text-primary' : 'text-hint'}`}>
           {labelOn}
         </span>
       )}

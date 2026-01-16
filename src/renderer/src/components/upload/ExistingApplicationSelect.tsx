@@ -38,7 +38,7 @@ export function ExistingApplicationSelect({
         ))}
       </Select>
       {applications.length === 0 && !isLoading && (
-        <p className="text-xs text-hint">
+        <p className="text-hint text-xs">
           No applications found. Create one first.
         </p>
       )}

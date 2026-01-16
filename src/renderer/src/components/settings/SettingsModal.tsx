@@ -52,7 +52,7 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
       <div className="space-y-4">
         <h2 className="text-lg font-semibold">Settings</h2>
         <div>
-          <label className="block text-sm font-medium text-secondary">
+          <label className="text-secondary block text-sm font-medium">
             OpenAI API Key
           </label>
           <input
@@ -60,9 +60,9 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
             value={apiKey}
             onChange={(e) => setApiKeyInput(e.target.value)}
             placeholder={currentKey ? '••••••••' : 'sk-...'}
-            className="mt-1 w-full border-2 border-default px-3 py-2 focus:border-primary focus:outline-none"
+            className="border-default focus:border-primary mt-1 w-full border-2 px-3 py-2 focus:outline-none"
           />
-          <p className="mt-1 text-xs text-hint">
+          <p className="text-hint mt-1 text-xs">
             {currentKey
               ? 'Key is set. Enter new key to replace.'
               : 'Enter your OpenAI API key.'}

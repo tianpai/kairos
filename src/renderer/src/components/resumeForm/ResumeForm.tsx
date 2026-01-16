@@ -33,7 +33,7 @@ export default function ResumeForm() {
   return (
     <div className="flex h-full flex-col">
       {/* Section Navigation */}
-      <div className="bg-app-header my-2 ml-2 mr-1 flex flex-wrap justify-center gap-1 rounded-lg p-2">
+      <div className="bg-app-header my-2 mr-1 ml-2 flex flex-wrap justify-center gap-1 rounded-lg p-2">
         {sectionOrder.map((sectionId) => {
           const schema = schemaById[sectionId]
           const Icon = schema.icon

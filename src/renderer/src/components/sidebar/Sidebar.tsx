@@ -6,7 +6,7 @@ import { CollapsibleSidebar } from './CollapsibleSidebar'
 import { SidebarItem } from './SidebarItem'
 import { SettingsHoverPopup } from './SettingsHoverPopup'
 
-interface Application {
+export interface Application {
   id: string
   companyName: string
   position: string
@@ -76,7 +76,7 @@ export function Sidebar({
       )}
       <button
         onClick={() => navigate({ to: '/settings' })}
-        className="flex w-full cursor-pointer items-center gap-2 px-3 py-3 text-sm text-secondary transition-colors hover:bg-hover"
+        className="text-secondary hover:bg-hover flex w-full cursor-pointer items-center gap-2 px-3 py-3 text-sm transition-colors"
       >
         <Settings size={16} />
         <span>Settings</span>
@@ -91,13 +91,8 @@ export function Sidebar({
           {applications.map((app) => (
             <SidebarItem
               key={app.id}
-              companyName={app.companyName}
-              position={app.position}
-              dueDate={app.dueDate}
-              matchPercentage={app.matchPercentage}
+              application={app}
               isSelected={app.id === selectedId}
-              createdAt={app.createdAt}
-              updatedAt={app.updatedAt}
               onClick={() => onSelect(app.id)}
               onEdit={() => setEditingApp(app)}
             />

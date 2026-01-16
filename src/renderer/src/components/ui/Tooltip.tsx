@@ -57,7 +57,7 @@ export function Tooltip({ content, children, delay = 0 }: TooltipProps) {
         createPortal(
           <div
             style={{ top: position.top, left: position.left }}
-            className="pointer-events-none fixed z-[9999] -translate-x-1/2 whitespace-nowrap rounded-md border border-default bg-active px-2.5 py-1.5 text-xs font-medium text-primary shadow-md"
+            className="border-default bg-active text-primary pointer-events-none fixed z-[9999] -translate-x-1/2 rounded-md border px-2.5 py-1.5 text-xs font-medium whitespace-nowrap shadow-md"
           >
             {content}
           </div>,

@@ -154,7 +154,7 @@ function Calendar({
   today.setHours(0, 0, 0, 0)
 
   return (
-    <div className="absolute z-50 mt-1 w-60 border border-default bg-surface p-4">
+    <div className="border-default bg-surface absolute z-50 mt-1 w-60 border p-4">
       <div className="mb-1 flex items-center justify-between">
         <InvertedCircleButton
           onClick={() => navigateMonth('prev')}
@@ -180,7 +180,7 @@ function Calendar({
 
       <div className="grid grid-cols-7 gap-1">
         {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map((day) => (
-          <div key={day} className="text-center text-xs text-secondary">
+          <div key={day} className="text-secondary text-center text-xs">
             {day}
           </div>
         ))}
@@ -204,7 +204,7 @@ function Calendar({
               disabled={isPast}
               className={`py-0 text-center text-sm ${
                 isPast
-                  ? 'cursor-not-allowed text-disabled'
+                  ? 'text-disabled cursor-not-allowed'
                   : isSelected
                     ? 'bg-primary text-base'
                     : 'text-primary hover:bg-active'

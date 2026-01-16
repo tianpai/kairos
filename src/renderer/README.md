@@ -36,6 +36,7 @@ npm run dev
 ```
 
 This starts:
+
 - Vite dev server on port 5173
 - Electron loads the renderer from http://localhost:5173
 

@@ -31,10 +31,8 @@ interface SectionCardProps {
 function SectionCard({ id, label, styleId }: SectionCardProps) {
   return (
     <>
-      <div className="text-sm font-medium text-primary">
-        {label}
-      </div>
-      <div className="text-xs text-hint">
+      <div className="text-primary text-sm font-medium">{label}</div>
+      <div className="text-hint text-xs">
         ID: {id} | Style: {styleId}
       </div>
     </>
@@ -77,20 +75,20 @@ const DraggableSection = memo(function DraggableSection({
   return (
     <div className="relative">
       {showDropIndicator && (
-        <div className="absolute -top-1 right-0 left-0 h-0.5 bg-primary" />
+        <div className="bg-primary absolute -top-1 right-0 left-0 h-0.5" />
       )}
       <div
         ref={setNodeRef}
         style={style}
         {...attributes}
-        className={`group flex items-center rounded-md border border-default p-2 transition-colors ${
+        className={`group border-default flex items-center rounded-md border p-2 transition-colors ${
           showDropIndicator ? 'mt-2' : ''
         } bg-surface`}
       >
         <button
           type="button"
           {...listeners}
-          className="mr-1.5 cursor-grab text-hint opacity-0 transition-opacity group-hover:opacity-100 active:cursor-grabbing"
+          className="text-hint mr-1.5 cursor-grab opacity-0 transition-opacity group-hover:opacity-100 active:cursor-grabbing"
         >
           <GripVertical size={16} />
         </button>
@@ -131,11 +129,11 @@ const SortableZone = memo(function SortableZone<T>({
         <div
           ref={setNodeRef}
           className={`min-h-25 space-y-2 rounded-md transition-colors ${
-            isOver ? 'ring-2 ring-default' : ''
+            isOver ? 'ring-default ring-2' : ''
           }`}
         >
           {isEmpty && !isOver && (
-            <div className="rounded-md border border-dashed border-default p-4 text-center text-sm text-hint">
+            <div className="border-default text-hint rounded-md border border-dashed p-4 text-center text-sm">
               {emptyMessage}
             </div>
           )}
@@ -232,7 +230,7 @@ export function SectionManagerContent() {
     <div>
       <div className="mb-4">
         <div className="text-lg font-medium">Sections</div>
-        <div className="mt-1 text-sm text-secondary">
+        <div className="text-secondary mt-1 text-sm">
           Data will be lost if sections are removed (dragged out)
         </div>
       </div>
@@ -256,8 +254,8 @@ export function SectionManagerContent() {
 
         <DragOverlay>
           {activeId ? (
-            <div className="flex items-center rounded-md border border-default bg-surface p-2 shadow-lg">
-              <div className="mr-1.5 cursor-grabbing text-hint">
+            <div className="border-default bg-surface flex items-center rounded-md border p-2 shadow-lg">
+              <div className="text-hint mr-1.5 cursor-grabbing">
                 <GripVertical size={16} />
               </div>
               <div className="flex-1">

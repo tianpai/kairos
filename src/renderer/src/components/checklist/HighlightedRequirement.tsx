@@ -43,16 +43,22 @@ export function HighlightedRequirement({
           if (isFulfilled) {
             style = 'bg-success-subtle text-success'
           } else if (isSelected) {
-            style = 'bg-selected-subtle text-selected cursor-pointer hover:bg-selected-subtle/80'
+            style =
+              'bg-selected-subtle text-selected cursor-pointer hover:bg-selected-subtle/80'
           } else {
-            style = 'bg-warning-subtle text-warning cursor-pointer hover:bg-warning-subtle/80'
+            style =
+              'bg-warning-subtle text-warning cursor-pointer hover:bg-warning-subtle/80'
           }
 
           return (
             <mark
               key={index}
               className={`rounded px-0.5 transition-colors ${style}`}
-              onClick={isClickable ? () => onToggleKeyword(matchedKeyword.keyword) : undefined}
+              onClick={
+                isClickable
+                  ? () => onToggleKeyword(matchedKeyword.keyword)
+                  : undefined
+              }
             >
               {part}
             </mark>

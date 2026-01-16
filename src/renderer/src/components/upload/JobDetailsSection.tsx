@@ -28,14 +28,14 @@ function JdEntryCard({
       onDrop={fileUpload.handleDrop}
       onDragOver={fileUpload.handleDragOver}
       onDragLeave={fileUpload.handleDragLeave}
-      className={`relative flex flex-col rounded-md border border-default transition-colors ${fileUpload.isDragActive ? 'ring-2 ring-hint' : ''}`}
+      className={`border-default relative flex flex-col rounded-md border transition-colors ${fileUpload.isDragActive ? 'ring-hint ring-2' : ''}`}
     >
       {/* Top bar with upload, URL, and remove */}
-      <div className="flex items-center gap-2 border-b border-default px-2 py-1">
+      <div className="border-default flex items-center gap-2 border-b px-2 py-1">
         <button
           type="button"
           onClick={fileUpload.triggerFileDialog}
-          className="flex shrink-0 items-center gap-1 rounded px-1 py-0.5 text-xs text-hint transition-colors hover:bg-hover hover:text-secondary"
+          className="text-hint hover:bg-hover hover:text-secondary flex shrink-0 items-center gap-1 rounded px-1 py-0.5 text-xs transition-colors"
           title="Upload .md or .txt file"
         >
           <FileUp className="h-3.5 w-3.5" />
@@ -61,13 +61,13 @@ function JdEntryCard({
             })
           }}
           placeholder="Job posting URL (optional)"
-          className="min-w-0 flex-1 bg-transparent px-2 py-0.5 text-xs text-hint focus:outline-none"
+          className="text-hint min-w-0 flex-1 bg-transparent px-2 py-0.5 text-xs focus:outline-none"
         />
         {showRemove && (
           <button
             type="button"
             onClick={() => removeEntry(entry.id)}
-            className="shrink-0 rounded p-1 text-hint transition-colors hover:bg-hover hover:text-secondary"
+            className="text-hint hover:bg-hover hover:text-secondary shrink-0 rounded p-1 transition-colors"
             title="Remove"
           >
             <X className="h-4 w-4" />
@@ -79,7 +79,9 @@ function JdEntryCard({
       <textarea
         id={`jd-${entry.id}`}
         value={entry.jobDescription}
-        onChange={(e) => updateEntry(entry.id, 'jobDescription', e.target.value)}
+        onChange={(e) =>
+          updateEntry(entry.id, 'jobDescription', e.target.value)
+        }
         placeholder="Paste job posting or enter details (company, position, requirements...)"
         rows={6}
         className="w-full resize-none bg-transparent px-3 py-2 text-sm focus:outline-none"
@@ -104,7 +106,9 @@ export default function JobDetailsSection() {
   return (
     <section className="flex min-w-0 flex-col">
       <div className="mt-2 flex flex-col space-y-3">
-        <span className="text-sm font-medium text-secondary">Job Descriptions</span>
+        <span className="text-secondary text-sm font-medium">
+          Job Descriptions
+        </span>
 
         <div className="flex flex-col gap-4">
           {entries.map((entry, index) => (
@@ -117,7 +121,7 @@ export default function JobDetailsSection() {
           ))}
         </div>
 
-        <p className="text-xs text-hint">
+        <p className="text-hint text-xs">
           Each box creates one application. Add up to {MAX_ENTRIES} at once.
         </p>
       </div>
