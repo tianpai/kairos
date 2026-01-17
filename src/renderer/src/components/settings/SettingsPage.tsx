@@ -24,9 +24,7 @@ export default function SettingsPage() {
           left={
             <>
               <Button
-                onClick={() =>
-                  navigate({ to: '/', search: { jobId: undefined } })
-                }
+                onClick={() => navigate({ to: '/' })}
                 ariaLabel="Back to dashboard"
                 title="Back"
               >

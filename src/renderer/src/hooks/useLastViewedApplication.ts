@@ -45,7 +45,7 @@ export function useLastViewedApplication({
         return app.id === lastViewedId
       })
       if (exists) {
-        navigate({ to: '/', search: { jobId: lastViewedId } })
+        navigate({ to: '/editor', search: { jobId: lastViewedId } })
       } else {
         clearLastViewedApplicationId()
       }
@@ -55,7 +55,7 @@ export function useLastViewedApplication({
 
   const selectApplication = useCallback(
     function selectApplication(id: string) {
-      navigate({ to: '/', search: { jobId: id } })
+      navigate({ to: '/editor', search: { jobId: id } })
     },
     [navigate],
   )
@@ -70,10 +70,10 @@ export function useLastViewedApplication({
       })
 
       if (remaining.length > 0) {
-        navigate({ to: '/', search: { jobId: remaining[0].id } })
+        navigate({ to: '/editor', search: { jobId: remaining[0].id } })
       } else {
         clearLastViewedApplicationId()
-        navigate({ to: '/', search: { jobId: undefined } })
+        navigate({ to: '/' })
       }
     },
     [jobId, applications, navigate],

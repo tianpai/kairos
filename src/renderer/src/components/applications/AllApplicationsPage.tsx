@@ -1,18 +1,18 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
-import { ArrowLeft, GalleryVerticalEnd } from 'lucide-react'
+import { GalleryVerticalEnd } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
 import { getAllJobApplications } from '@api/jobs'
 import { AppLayout } from '@layout/AppLayout'
 import { PageHeader } from '@ui/PageHeader'
-import { Button } from '@ui/Button'
 import { useJobApplicationMutations } from '@hooks/useJobApplicationMutations'
 import { ApplicationCard } from './ApplicationCard'
 import type { JobApplication } from '@api/jobs'
 import JobInfoModal from '@/components/applications/JobInfoModal'
 import NewApplicationButton from '@/components/upload/NewApplicationButton'
 import { BatchExportButton } from '@/components/export/BatchExportButton'
+import { SettingsButton } from '@/components/settings/SettingsButton'
 
 interface OpeningApp {
   id: string
@@ -64,36 +64,26 @@ export default function AllApplicationsPage() {
 
   function handleOpenComplete() {
     if (!openingApp) return
-    navigate({ to: '/', search: { jobId: openingApp.id } })
-  }
-
-  function handleBackToEditor() {
-    navigate({ to: '/', search: { jobId: undefined } })
+    navigate({ to: '/editor', search: { jobId: openingApp.id } })
   }
 
   return (
     <AppLayout
       header={
         <PageHeader
-          left={
-            <>
-              <Button
-                onClick={handleBackToEditor}
-                ariaLabel="Back to editor"
-                title="Back"
-              >
-                <ArrowLeft size={16} />
-              </Button>
-              <NewApplicationButton />
-            </>
-          }
+          left={<NewApplicationButton />}
           center={
             <div className="flex items-center justify-center gap-2 text-sm font-medium">
               <GalleryVerticalEnd size={16} />
               <span>All Applications</span>
             </div>
           }
-          right={<BatchExportButton applications={applications} />}
+          right={
+            <>
+              <SettingsButton />
+              <BatchExportButton />
+            </>
+          }
         />
       }
       sidebar={null}

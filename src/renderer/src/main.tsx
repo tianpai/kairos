@@ -10,12 +10,16 @@ import {
 } from '@tanstack/react-router'
 // import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
 
+import { Toaster } from 'sonner'
+import { CircleAlert, CircleCheck, CircleX, Info } from 'lucide-react'
 import reportWebVitals from './reportWebVitals.ts'
-import App from '@/components/App'
 import AllApplicationsPage from '@/components/applications/AllApplicationsPage'
+import EditorPage from '@/components/editor/EditorPage'
+import { BatchExportManager } from '@/components/export/BatchExportManager'
 import SettingsPage from '@/components/settings/SettingsPage'
 import * as TanStackQueryProvider from '@/integrations/tanstack-query/root-provider.tsx'
 import { useShortcutListener } from '@/hooks/useShortcutListener'
+import { useCurrentTheme } from '@hooks/useTheme'
 
 import './styles.css'
 
@@ -41,6 +45,9 @@ function RootLayout() {
   // Initialize keyboard shortcuts listener
   useShortcutListener()
 
+  // Theme for toast notifications
+  const { data: currentTheme } = useCurrentTheme()
+
   useEffect(() => {
     // Hide splash once React has mounted (respects minimum time)
     hideSplash()
@@ -50,6 +57,17 @@ function RootLayout() {
     <>
       <Outlet />
       {/* <TanStackRouterDevtools /> */}
+      <Toaster
+        position="bottom-right"
+        theme={currentTheme}
+        icons={{
+          success: <CircleCheck size={20} className="text-success" />,
+          error: <CircleX size={20} className="text-error" />,
+          warning: <CircleAlert size={20} className="text-warning" />,
+          info: <Info size={20} className="text-info" />,
+        }}
+      />
+      <BatchExportManager />
     </>
   )
 }
@@ -61,7 +79,13 @@ const rootRoute = createRootRoute({
 const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/',
-  component: App,
+  component: AllApplicationsPage,
+})
+
+const editorRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/editor',
+  component: EditorPage,
   validateSearch: (search: Record<string, unknown>) => ({
     jobId: (search.jobId as string) || undefined,
   }),
@@ -73,16 +97,10 @@ const settingsRoute = createRoute({
   component: SettingsPage,
 })
 
-const applicationsRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: '/applications',
-  component: AllApplicationsPage,
-})
-
 const routeTree = rootRoute.addChildren([
   indexRoute,
+  editorRoute,
   settingsRoute,
-  applicationsRoute,
 ])
 
 const TanStackQueryProviderContext = TanStackQueryProvider.getContext()
