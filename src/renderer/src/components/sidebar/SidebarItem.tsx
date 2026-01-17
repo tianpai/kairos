@@ -1,77 +1,55 @@
-import { useRef, useState } from 'react'
-import { ApplicationInfoPopup } from './ApplicationInfoPopup'
-import type { Application } from './Sidebar'
-import { getScoreColor } from '@/utils/scoreThresholds'
-
-const HOVER_DELAY = 120
+import type { ReactNode } from 'react'
+import type { LucideIcon } from 'lucide-react'
 
 interface SidebarItemProps {
-  application: Application
+  label: string
+  sublabel?: string
+  icon?: LucideIcon
   isSelected: boolean
   onClick: () => void
-  onEdit: () => void
+  rightContent?: ReactNode
+  className?: string
 }
 
 export function SidebarItem({
-  application,
+  label,
+  sublabel,
+  icon: Icon,
   isSelected,
   onClick,
-  onEdit,
+  rightContent,
+  className = '',
 }: SidebarItemProps) {
-  const ref = useRef<HTMLDivElement>(null)
-  const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const [isHovered, setIsHovered] = useState(false)
-  const [anchorRect, setAnchorRect] = useState<DOMRect | null>(null)
-
-  const handleMouseEnter = () => {
-    if (ref.current) {
-      setAnchorRect(ref.current.getBoundingClientRect())
-    }
-    hoverTimeoutRef.current = setTimeout(() => {
-      setIsHovered(true)
-    }, HOVER_DELAY)
-  }
-
-  const handleMouseLeave = () => {
-    if (hoverTimeoutRef.current) {
-      clearTimeout(hoverTimeoutRef.current)
-      hoverTimeoutRef.current = null
-    }
-    setIsHovered(false)
-  }
-
-  const handleEdit = () => {
-    setIsHovered(false)
-    onEdit()
-  }
-
   return (
-    <div
-      ref={ref}
-      className={`group relative w-full cursor-pointer py-2 pr-3 pl-4 text-left transition-colors ${
-        isSelected ? 'bg-active' : 'hover:bg-hover'
-      }`}
+    <button
       onClick={onClick}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
+      className={`flex w-full cursor-pointer items-center justify-between px-3 py-2 text-left transition-colors ${
+        isSelected ? 'bg-active' : 'hover:bg-hover'
+      } ${className}`}
     >
-      <div
-        className="absolute top-0 left-0 h-full w-0.5"
-        style={{ backgroundColor: getScoreColor(application.matchPercentage) }}
-      />
-      {isHovered && (
-        <ApplicationInfoPopup
-          application={application}
-          anchorRect={anchorRect}
-          onEdit={handleEdit}
-        />
-      )}
-      <div className="text-primary truncate text-xs font-medium">
-        {application.companyName}
+      <div className="flex min-w-0 flex-1 items-center gap-2">
+        {Icon && (
+          <Icon
+            size={16}
+            className={
+              isSelected ? 'text-primary shrink-0' : 'text-hint shrink-0'
+            }
+          />
+        )}
+        <div className="min-w-0 flex-1">
+          <div
+            className={`truncate text-sm ${
+              isSelected ? 'text-primary font-medium' : 'text-secondary'
+            }`}
+          >
+            {label}
+          </div>
+          {sublabel && (
+            <div className="text-hint truncate text-xs">{sublabel}</div>
+          )}
+        </div>
       </div>
-      <div className="text-secondary truncate text-[11px]">
-        {application.position}
-      </div>
-    </div>
+      {rightContent && <div className="ml-2 shrink-0">{rightContent}</div>}
+    </button>
   )
 }

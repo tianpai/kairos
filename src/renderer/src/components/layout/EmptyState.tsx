@@ -8,7 +8,7 @@ export function EmptyState({ hasApplications }: EmptyStateProps) {
       <div className="text-center">
         <p className="text-hint">
           {hasApplications
-            ? 'Select an application from the sidebar'
+            ? 'Select an application to continue'
             : 'No applications yet. Create your first application to get started.'}
         </p>
       </div>

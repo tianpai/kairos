@@ -12,6 +12,7 @@ import {
 
 import reportWebVitals from './reportWebVitals.ts'
 import App from '@/components/App'
+import AllApplicationsPage from '@/components/applications/AllApplicationsPage'
 import SettingsPage from '@/components/settings/SettingsPage'
 import * as TanStackQueryProvider from '@/integrations/tanstack-query/root-provider.tsx'
 import { useShortcutListener } from '@/hooks/useShortcutListener'
@@ -72,7 +73,17 @@ const settingsRoute = createRoute({
   component: SettingsPage,
 })
 
-const routeTree = rootRoute.addChildren([indexRoute, settingsRoute])
+const applicationsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/applications',
+  component: AllApplicationsPage,
+})
+
+const routeTree = rootRoute.addChildren([
+  indexRoute,
+  settingsRoute,
+  applicationsRoute,
+])
 
 const TanStackQueryProviderContext = TanStackQueryProvider.getContext()
 const hashHistory = createHashHistory()

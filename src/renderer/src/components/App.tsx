@@ -6,14 +6,12 @@ import { getAllJobApplications, getJobApplication } from '@api/jobs'
 import { useWorkflowSync } from '@hooks/useWorkflowSync'
 import { useCurrentTheme } from '@hooks/useTheme'
 import { useSyncJobApplicationToStore } from '@hooks/useSyncJobApplicationToStore'
-import { useJobApplicationMutations } from '@hooks/useJobApplicationMutations'
 import { useAppNavigation } from '@hooks/useAppNavigation'
 import { useLastViewedApplication } from '@hooks/useLastViewedApplication'
 import ResumeRender from '@editor/ResumeRender'
 import ResumeForm from '@resumeForm/ResumeForm'
 import Checklist from '@checklist/Checklist'
 import { EmptyState } from '@layout/EmptyState'
-import { Sidebar } from '@sidebar/Sidebar'
 import { AppLayout } from '@layout/AppLayout'
 import { AppHeader } from '@layout/AppHeader'
 import { useLayoutStore } from '@layout/layout.store'
@@ -23,7 +21,7 @@ export default function App() {
   const { jobId } = useSearch({ from: '/' })
 
   // Layout state from store
-  const { sidebarCollapsed, showChecklist } = useLayoutStore()
+  const { showChecklist } = useLayoutStore()
 
   // Grid layout classes
   const gridClasses = {
@@ -34,7 +32,7 @@ export default function App() {
   // Theme for toast notifications
   const { data: currentTheme } = useCurrentTheme()
 
-  // Fetch all applications for sidebar
+  // Fetch all applications
   const { data: applications = [] } = useQuery({
     queryKey: ['jobApplications'],
     queryFn: getAllJobApplications,
@@ -49,14 +47,8 @@ export default function App() {
     enabled: !!jobId,
   })
 
-  // Mutations for edit and delete
-  const { handleUpdate, handleDelete } = useJobApplicationMutations(jobId)
-
   // Last viewed application persistence and navigation
-  const { selectApplication, navigateAfterDelete } = useLastViewedApplication({
-    jobId,
-    applications,
-  })
+  useLastViewedApplication({ jobId, applications })
 
   // Sync workflow state between DB and store
   useWorkflowSync(jobId, jobApplication)
@@ -66,12 +58,6 @@ export default function App() {
 
   // Handle keyboard shortcuts
   useAppNavigation(applications, jobId)
-
-  function handleDeleteApplication(id: string) {
-    handleDelete(id, function () {
-      navigateAfterDelete(id)
-    })
-  }
 
   const hasApplications = applications.length > 0
   const hasActiveJob = !!jobId && !!jobApplication
@@ -86,16 +72,7 @@ export default function App() {
             jobApplication={jobApplication}
           />
         }
-        sidebar={
-          <Sidebar
-            applications={applications}
-            selectedId={jobId}
-            onSelect={selectApplication}
-            collapsed={sidebarCollapsed}
-            onEdit={handleUpdate}
-            onDelete={handleDeleteApplication}
-          />
-        }
+        sidebar={null}
       >
         {hasActiveJob ? (
           <div className="relative grid h-full grid-cols-8 overflow-hidden">

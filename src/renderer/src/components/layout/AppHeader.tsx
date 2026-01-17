@@ -5,7 +5,8 @@ import DownloadResumeButton from '@editor/DownloadResumeButton'
 import SaveResumeButton from '@editor/SaveResumeButton'
 import { DocumentConfigButton } from '@resumeForm/DocumentConfigButton'
 import { useLayoutStore } from '@layout/layout.store'
-import { Columns2, Columns3, PanelLeft } from 'lucide-react'
+import { useNavigate } from '@tanstack/react-router'
+import { Columns2, Columns3, GalleryVerticalEnd } from 'lucide-react'
 import type { JobApplicationDetails } from '@api/jobs'
 import { getScoreColor } from '@/utils/scoreThresholds'
 import NewApplicationButton from '@/components/upload/NewApplicationButton'
@@ -21,8 +22,8 @@ export function AppHeader({
   jobId,
   jobApplication,
 }: AppHeaderProps) {
-  const { sidebarCollapsed, showChecklist, toggleSidebar, toggleChecklist } =
-    useLayoutStore()
+  const navigate = useNavigate()
+  const { showChecklist, toggleChecklist } = useLayoutStore()
 
   const companyName = jobApplication?.companyName
   const position = jobApplication?.position
@@ -33,11 +34,11 @@ export function AppHeader({
       left={
         <>
           <Button
-            onClick={toggleSidebar}
-            ariaLabel={sidebarCollapsed ? 'Show sidebar' : 'Hide sidebar'}
-            title={sidebarCollapsed ? 'Show sidebar' : 'Hide sidebar'}
+            onClick={() => navigate({ to: '/applications' })}
+            ariaLabel="All applications"
+            title="All applications"
           >
-            <PanelLeft size={16} />
+            <GalleryVerticalEnd size={16} />
           </Button>
           <NewApplicationButton />
         </>
@@ -52,32 +53,38 @@ export function AppHeader({
         ) : undefined
       }
       right={
-        hasActiveJob && (
-          <>
-            <span
-              className="mr-2 text-sm font-medium"
-              style={{ color: getScoreColor(matchPercentage) }}
-            >
-              {Math.round(matchPercentage)}%
-            </span>
-            <TailoringButton />
-            <DocumentConfigButton />
-            <Button
-              onClick={toggleChecklist}
-              ariaLabel={
-                showChecklist ? 'Switch to 2 columns' : 'Switch to 3 columns'
-              }
-              title="Toggle columns"
-            >
-              {showChecklist ? <Columns2 size={16} /> : <Columns3 size={16} />}
-            </Button>
-            <SaveResumeButton jobId={jobId} />
-            <DownloadResumeButton
-              companyName={companyName}
-              position={position}
-            />
-          </>
-        )
+        <>
+          {hasActiveJob && (
+            <>
+              <span
+                className="mr-2 text-sm font-medium"
+                style={{ color: getScoreColor(matchPercentage) }}
+              >
+                {Math.round(matchPercentage)}%
+              </span>
+              <TailoringButton />
+              <DocumentConfigButton />
+              <Button
+                onClick={toggleChecklist}
+                ariaLabel={
+                  showChecklist ? 'Switch to 2 columns' : 'Switch to 3 columns'
+                }
+                title="Toggle columns"
+              >
+                {showChecklist ? (
+                  <Columns2 size={16} />
+                ) : (
+                  <Columns3 size={16} />
+                )}
+              </Button>
+              <SaveResumeButton jobId={jobId} />
+              <DownloadResumeButton
+                companyName={companyName}
+                position={position}
+              />
+            </>
+          )}
+        </>
       }
     />
   )

@@ -38,7 +38,6 @@ interface KairosAPI {
     onLatestApp: (callback: () => void) => () => void;
     onOldestApp: (callback: () => void) => () => void;
     onTailor: (callback: () => void) => () => void;
-    onToggleSidebar: (callback: () => void) => () => void;
     onToggleColumns: (callback: () => void) => () => void;
     onBatchExport: (callback: () => void) => () => void;
   };
