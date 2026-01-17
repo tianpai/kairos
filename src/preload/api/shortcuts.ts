@@ -33,8 +33,6 @@ export const shortcuts = {
     onShortcut("shortcut:oldest-app", callback),
   onTailor: (callback: ShortcutCallback): Unsubscribe =>
     onShortcut("shortcut:tailor", callback),
-  onToggleSidebar: (callback: ShortcutCallback): Unsubscribe =>
-    onShortcut("shortcut:toggle-sidebar", callback),
   onToggleColumns: (callback: ShortcutCallback): Unsubscribe =>
     onShortcut("shortcut:toggle-columns", callback),
   onBatchExport: (callback: ShortcutCallback): Unsubscribe =>

@@ -1,7 +1,7 @@
 import { Cpu, Info, Lightbulb, Palette, Settings } from 'lucide-react'
-import { CollapsibleSidebar } from '@sidebar/CollapsibleSidebar'
-import { GenericSidebarItem } from '@sidebar/GenericSidebarItem'
 import type { LucideIcon } from 'lucide-react'
+import { SidebarItem } from '@/components/sidebar/SidebarItem'
+import { Sidebar } from '@/components/sidebar/Sidebar'
 
 export type SettingsSection =
   | 'providers'
@@ -36,10 +36,10 @@ export function SettingsSidebar({
   onSectionChange,
 }: SettingsSidebarProps) {
   return (
-    <CollapsibleSidebar collapsed={collapsed} width="w-48">
+    <Sidebar collapsed={collapsed} width="w-48">
       <div className="pt-3">
         {NAV_ITEMS.map((item) => (
-          <GenericSidebarItem
+          <SidebarItem
             key={item.id}
             label={item.label}
             icon={item.icon}
@@ -48,6 +48,6 @@ export function SettingsSidebar({
           />
         ))}
       </div>
-    </CollapsibleSidebar>
+    </Sidebar>
   )
 }

@@ -156,13 +156,6 @@ export function createAppMenu(mainWindow: BrowserWindow | null) {
       label: "View",
       submenu: [
         {
-          label: "Toggle Sidebar",
-          accelerator: "CommandOrControl+B",
-          click: () => {
-            mainWindow?.webContents.send("shortcut:toggle-sidebar");
-          },
-        },
-        {
           label: "Toggle Checklist",
           accelerator: "CommandOrControl+\\",
           click: () => {

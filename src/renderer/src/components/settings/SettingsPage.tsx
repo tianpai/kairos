@@ -1,10 +1,9 @@
 import { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
-import { ArrowLeft, PanelLeft } from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
 import { PageHeader } from '@ui/PageHeader'
 import { Button } from '@ui/Button'
 import { AppLayout } from '@layout/AppLayout'
-import { useLayoutStore } from '@layout/layout.store'
 import { SettingsSidebar } from './SettingsSidebar'
 import { ProvidersSection } from './ProvidersSection'
 import { AppearanceSection } from './AppearanceSection'
@@ -18,8 +17,6 @@ export default function SettingsPage() {
   const [activeSection, setActiveSection] =
     useState<SettingsSection>('providers')
 
-  const { sidebarCollapsed, toggleSidebar } = useLayoutStore()
-
   return (
     <AppLayout
       header={
@@ -27,16 +24,7 @@ export default function SettingsPage() {
           left={
             <>
               <Button
-                onClick={toggleSidebar}
-                ariaLabel={sidebarCollapsed ? 'Show sidebar' : 'Hide sidebar'}
-                title={sidebarCollapsed ? 'Show sidebar' : 'Hide sidebar'}
-              >
-                <PanelLeft size={16} />
-              </Button>
-              <Button
-                onClick={() =>
-                  navigate({ to: '/', search: { jobId: undefined } })
-                }
+                onClick={() => navigate({ to: '/' })}
                 ariaLabel="Back to dashboard"
                 title="Back"
               >
@@ -49,7 +37,7 @@ export default function SettingsPage() {
       }
       sidebar={
         <SettingsSidebar
-          collapsed={sidebarCollapsed}
+          collapsed={false}
           activeSection={activeSection}
           onSectionChange={setActiveSection}
         />

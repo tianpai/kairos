@@ -1,6 +1,6 @@
 {
   "name": "kairos",
-  "version": "0.1.8",
+  "version": "0.2.0",
   "description": "AI-powered resume optimization desktop application",
   "main": "./out/main/index.js",
   "author": "",
@@ -52,6 +52,7 @@
     "gsap": "^3.13.0",
     "lucide-react": "^0.544.0",
     "mammoth": "^1.11.0",
+    "motion": "^12.26.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "sonner": "^2.0.7",

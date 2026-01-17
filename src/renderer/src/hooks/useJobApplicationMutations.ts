@@ -6,6 +6,7 @@ interface UpdateData {
   companyName: string
   position: string
   dueDate: string
+  jobUrl?: string | null
 }
 
 export function useJobApplicationMutations(selectedJobId?: string) {

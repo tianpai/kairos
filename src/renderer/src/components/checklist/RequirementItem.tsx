@@ -2,6 +2,28 @@ import { Circle, CircleDot, CircleDotDashed } from 'lucide-react'
 import { HighlightedRequirement } from './HighlightedRequirement'
 import type { ChecklistRequirement } from '@type/checklist'
 
+function RequirementStatusIcon({
+  isFulfilled,
+  hasAnyFulfilledKeywords,
+}: {
+  isFulfilled: boolean
+  hasAnyFulfilledKeywords: boolean
+}) {
+  const isPartiallyFulfilled = !isFulfilled && hasAnyFulfilledKeywords
+  const Icon = isFulfilled
+    ? CircleDot
+    : isPartiallyFulfilled
+      ? CircleDotDashed
+      : Circle
+  const colorClass = isFulfilled
+    ? 'text-success'
+    : isPartiallyFulfilled
+      ? 'text-warning'
+      : 'text-disabled'
+
+  return <Icon className={`mt-0.5 h-4 w-4 shrink-0 ${colorClass}`} />
+}
+
 interface RequirementItemProps {
   requirement: ChecklistRequirement
   selectedKeywords: Array<string>
@@ -17,25 +39,15 @@ export function RequirementItem({
   const hasAnyFulfilledKeywords = requirement.keywords.some(
     (k) => k.isFulfilled,
   )
-  const isPartiallyFulfilled = !isFulfilled && hasAnyFulfilledKeywords
   const hasWarning = requirement.reason && requirement.reason.trim() !== ''
-
-  // Determine which icon and color to use
-  const StatusIcon = isFulfilled
-    ? CircleDot
-    : isPartiallyFulfilled
-      ? CircleDotDashed
-      : Circle
-  const iconColor = isFulfilled
-    ? 'text-success'
-    : isPartiallyFulfilled
-      ? 'text-warning'
-      : 'text-disabled'
 
   return (
     <div className="mb-2">
-      <div className="bg-hover flex items-start gap-2 rounded-lg p-3">
-        <StatusIcon className={`mt-0.5 h-4 w-4 shrink-0 ${iconColor}`} />
+      <div className="flex items-start gap-2 p-2">
+        <RequirementStatusIcon
+          isFulfilled={isFulfilled}
+          hasAnyFulfilledKeywords={hasAnyFulfilledKeywords}
+        />
         <div className="flex-1">
           <p className="text-secondary text-sm">
             <HighlightedRequirement

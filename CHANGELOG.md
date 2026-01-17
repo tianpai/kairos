@@ -2,6 +2,36 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.2.0](https://github.com/tianpai/kairos/compare/v0.1.8...v0.2.0) (2026-01-17)
+
+
+### Features
+
+* add All Applications page with interactive cards ([01952d5](https://github.com/tianpai/kairos/commit/01952d5085ca49bf780d88614dbb77a6fc56e5d3))
+* add animations ([759008d](https://github.com/tianpai/kairos/commit/759008d585e8d5a4db5e65d2b9aaf5986a31ac92))
+* add batch export button in all application header ([02fef8a](https://github.com/tianpai/kairos/commit/02fef8a53b3751298fcc8a677741d4a37c53f7cb))
+* hide empty checklist section ([6236509](https://github.com/tianpai/kairos/commit/6236509596b2e4734b85b18b86638bfeee81596c))
+
+
+### Bug Fixes
+
+* make All Applications the default landing page ([750297f](https://github.com/tianpai/kairos/commit/750297f89fcaf3e68a28cdff5ca695b7d144e7b8))
+
+## [0.2.0](https://github.com/tianpai/kairos/compare/v0.1.8...v0.2.0) (2026-01-17)
+
+
+### Features
+
+* add All Applications page with interactive cards ([01952d5](https://github.com/tianpai/kairos/commit/01952d5085ca49bf780d88614dbb77a6fc56e5d3))
+* add animations ([759008d](https://github.com/tianpai/kairos/commit/759008d585e8d5a4db5e65d2b9aaf5986a31ac92))
+* add batch export button in all application header ([02fef8a](https://github.com/tianpai/kairos/commit/02fef8a53b3751298fcc8a677741d4a37c53f7cb))
+* hide empty checklist section ([6236509](https://github.com/tianpai/kairos/commit/6236509596b2e4734b85b18b86638bfeee81596c))
+
+
+### Bug Fixes
+
+* make All Applications the default landing page ([750297f](https://github.com/tianpai/kairos/commit/750297f89fcaf3e68a28cdff5ca695b7d144e7b8))
+
 ### [0.1.8](https://github.com/tianpai/kairos/compare/v0.1.7...v0.1.8) (2026-01-16)
 
 

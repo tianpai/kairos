@@ -74,11 +74,6 @@ export function useShortcutListener() {
       requestNavigation('oldest')
     })
 
-    // Toggle Sidebar - direct store call
-    const unsubToggleSidebar = window.kairos.shortcuts.onToggleSidebar(() => {
-      useLayoutStore.getState().toggleSidebar()
-    })
-
     // Toggle Columns - direct store call
     const unsubToggleColumns = window.kairos.shortcuts.onToggleColumns(() => {
       useLayoutStore.getState().toggleChecklist()
@@ -96,7 +91,6 @@ export function useShortcutListener() {
       unsubNextApp()
       unsubLatestApp()
       unsubOldestApp()
-      unsubToggleSidebar()
       unsubToggleColumns()
     }
   }, [

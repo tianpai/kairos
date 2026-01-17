@@ -1,3 +1,5 @@
+import { useNavigate } from '@tanstack/react-router'
+import { Columns2, Columns3, GalleryVerticalEnd } from 'lucide-react'
 import { TailoringButton } from '@editor/TailoringButton'
 import { PageHeader } from '@ui/PageHeader'
 import { Button } from '@ui/Button'
@@ -5,36 +7,30 @@ import DownloadResumeButton from '@editor/DownloadResumeButton'
 import SaveResumeButton from '@editor/SaveResumeButton'
 import { DocumentConfigButton } from '@resumeForm/DocumentConfigButton'
 import { useLayoutStore } from '@layout/layout.store'
-import { useNavigate } from '@tanstack/react-router'
-import { Columns2, Columns3, GalleryVerticalEnd } from 'lucide-react'
-import type { JobApplicationDetails } from '@api/jobs'
 import { getScoreColor } from '@/utils/scoreThresholds'
 import NewApplicationButton from '@/components/upload/NewApplicationButton'
+import type { JobApplicationDetails } from '@api/jobs'
 
-interface AppHeaderProps {
-  hasActiveJob: boolean
+interface EditorHeaderProps {
   jobId?: string
   jobApplication?: JobApplicationDetails
 }
 
-export function AppHeader({
-  hasActiveJob,
-  jobId,
-  jobApplication,
-}: AppHeaderProps) {
+export function EditorHeader({ jobId, jobApplication }: EditorHeaderProps) {
   const navigate = useNavigate()
   const { showChecklist, toggleChecklist } = useLayoutStore()
 
   const companyName = jobApplication?.companyName
   const position = jobApplication?.position
   const matchPercentage = jobApplication?.matchPercentage ?? 0
+  const hasActiveJob = !!jobId && !!jobApplication
 
   return (
     <PageHeader
       left={
         <>
           <Button
-            onClick={() => navigate({ to: '/applications' })}
+            onClick={() => navigate({ to: '/' })}
             ariaLabel="All applications"
             title="All applications"
           >

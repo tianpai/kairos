@@ -18,16 +18,14 @@ export function ChecklistSection({
 
   return (
     <div>
-      <div>
-        {requirements.map((requirement, index) => (
-          <RequirementItem
-            key={index}
-            requirement={requirement}
-            selectedKeywords={selectedKeywords}
-            onToggleKeyword={onToggleKeyword}
-          />
-        ))}
-      </div>
+      {requirements.map((requirement, index) => (
+        <RequirementItem
+          key={index}
+          requirement={requirement}
+          selectedKeywords={selectedKeywords}
+          onToggleKeyword={onToggleKeyword}
+        />
+      ))}
     </div>
   )
 }

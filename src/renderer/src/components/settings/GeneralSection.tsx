@@ -25,7 +25,7 @@ export function GeneralSection() {
       toast.success('All data deleted')
 
       // Navigate to home
-      navigate({ to: '/', search: { jobId: undefined } })
+      navigate({ to: '/' })
     } catch (error) {
       console.error('Failed to delete all data:', error)
       toast.error('Failed to delete data')

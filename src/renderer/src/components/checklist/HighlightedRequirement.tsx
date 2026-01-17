@@ -37,7 +37,6 @@ export function HighlightedRequirement({
         if (matchedKeyword) {
           const isFulfilled = matchedKeyword.isFulfilled
           const isSelected = selectedKeywords.includes(matchedKeyword.keyword)
-          const isClickable = !isFulfilled
 
           let style: string
           if (isFulfilled) {
@@ -55,7 +54,7 @@ export function HighlightedRequirement({
               key={index}
               className={`rounded px-0.5 transition-colors ${style}`}
               onClick={
-                isClickable
+                !isFulfilled
                   ? () => onToggleKeyword(matchedKeyword.keyword)
                   : undefined
               }

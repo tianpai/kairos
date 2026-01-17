@@ -57,7 +57,7 @@ export function useAppNavigation(
     }
 
     if (targetId && targetId !== currentJobId) {
-      navigate({ to: '/', search: { jobId: targetId } })
+      navigate({ to: '/editor', search: { jobId: targetId } })
     }
 
     clearNavigationRequest()
