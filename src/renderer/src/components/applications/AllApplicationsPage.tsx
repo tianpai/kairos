@@ -12,6 +12,7 @@ import { ApplicationCard } from './ApplicationCard'
 import type { JobApplication } from '@api/jobs'
 import JobInfoModal from '@/components/applications/JobInfoModal'
 import NewApplicationButton from '@/components/upload/NewApplicationButton'
+import { BatchExportButton } from '@/components/export/BatchExportButton'
 
 interface OpeningApp {
   id: string
@@ -92,6 +93,7 @@ export default function AllApplicationsPage() {
               <span>All Applications</span>
             </div>
           }
+          right={<BatchExportButton applications={applications} />}
         />
       }
       sidebar={null}

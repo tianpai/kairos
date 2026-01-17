@@ -1,5 +1,7 @@
 import { useEffect } from 'react'
+import { FileDown } from 'lucide-react'
 import { useShortcutStore } from '@layout/shortcut.store'
+import { Button } from '@ui/Button'
 import { BatchExportModal } from './BatchExportModal'
 import { useBatchExportStore } from './batchExport.store'
 import type { JobApplication } from '@api/jobs'
@@ -28,10 +30,15 @@ export function BatchExportButton({ applications }: BatchExportButtonProps) {
   }, [batchExportRequested, clearBatchExportRequest, open])
 
   return (
-    <BatchExportModal
-      open={isOpen}
-      onClose={close}
-      applications={applications}
-    />
+    <>
+      <Button onClick={open} ariaLabel="Export all resumes" title="Export All">
+        <FileDown size={16} />
+      </Button>
+      <BatchExportModal
+        open={isOpen}
+        onClose={close}
+        applications={applications}
+      />
+    </>
   )
 }
