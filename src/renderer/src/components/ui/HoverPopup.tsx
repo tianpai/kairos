@@ -1,8 +1,16 @@
 import { createPortal } from 'react-dom'
 import type { CSSProperties, ReactNode } from 'react'
+import { motion } from 'motion/react'
 import { cn } from '@/utils/cn'
 
 type Position = 'top' | 'bottom' | 'left' | 'right'
+
+const positionAnimations: Record<Position, { initial: object; animate: object }> = {
+  top: { initial: { opacity: 0, y: 4 }, animate: { opacity: 1, y: 0 } },
+  bottom: { initial: { opacity: 0, y: -4 }, animate: { opacity: 1, y: 0 } },
+  left: { initial: { opacity: 0, x: 4 }, animate: { opacity: 1, x: 0 } },
+  right: { initial: { opacity: 0, x: -4 }, animate: { opacity: 1, x: 0 } },
+}
 
 interface HoverPopupProps {
   children: ReactNode
@@ -53,27 +61,38 @@ export function HoverPopup({
   width = 'w-64',
   anchorRect,
 }: HoverPopupProps): JSX.Element {
+  const animation = positionAnimations[position]
+
   if ((position === 'left' || position === 'right') && anchorRect) {
     const style = computePortalStyle(position, anchorRect)
 
     return createPortal(
-      <div style={style} className={cn(width, baseClasses)}>
+      <motion.div
+        style={style}
+        className={cn(width, baseClasses)}
+        initial={animation.initial}
+        animate={animation.animate}
+        transition={{ duration: 0.12 }}
+      >
         {children}
-      </div>,
+      </motion.div>,
       document.body,
     )
   }
 
   return (
-    <div
+    <motion.div
       className={cn(
         'absolute z-50',
         positionClasses[position as 'top' | 'bottom'],
         width,
         baseClasses,
       )}
+      initial={animation.initial}
+      animate={animation.animate}
+      transition={{ duration: 0.12 }}
     >
       {children}
-    </div>
+    </motion.div>
   )
 }

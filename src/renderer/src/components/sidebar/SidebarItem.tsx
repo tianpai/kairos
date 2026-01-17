@@ -3,6 +3,8 @@ import { ApplicationInfoPopup } from './ApplicationInfoPopup'
 import type { Application } from './Sidebar'
 import { getScoreColor } from '@/utils/scoreThresholds'
 
+const HOVER_DELAY = 120
+
 interface SidebarItemProps {
   application: Application
   isSelected: boolean
@@ -17,14 +19,25 @@ export function SidebarItem({
   onEdit,
 }: SidebarItemProps) {
   const ref = useRef<HTMLDivElement>(null)
+  const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [isHovered, setIsHovered] = useState(false)
   const [anchorRect, setAnchorRect] = useState<DOMRect | null>(null)
 
   const handleMouseEnter = () => {
-    setIsHovered(true)
     if (ref.current) {
       setAnchorRect(ref.current.getBoundingClientRect())
     }
+    hoverTimeoutRef.current = setTimeout(() => {
+      setIsHovered(true)
+    }, HOVER_DELAY)
+  }
+
+  const handleMouseLeave = () => {
+    if (hoverTimeoutRef.current) {
+      clearTimeout(hoverTimeoutRef.current)
+      hoverTimeoutRef.current = null
+    }
+    setIsHovered(false)
   }
 
   const handleEdit = () => {
@@ -40,7 +53,7 @@ export function SidebarItem({
       }`}
       onClick={onClick}
       onMouseEnter={handleMouseEnter}
-      onMouseLeave={() => setIsHovered(false)}
+      onMouseLeave={handleMouseLeave}
     >
       <div
         className="absolute top-0 left-0 h-full w-0.5"

@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import type { ReactNode } from 'react'
+import { AnimatePresence, motion } from 'motion/react'
 
 interface ModalProps {
   open: boolean
@@ -47,39 +48,59 @@ export function Modal({
     }
   }, [open, onClose])
 
-  if (!open) return null
-
   if (variant === 'popup') {
     return (
-      <div
-        className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
-        onClick={closeOnBackdropClick ? onClose : undefined}
-      >
-        <div
-          className={`flex max-h-[85vh] w-[90%] ${maxWidthClasses[maxWidth]} bg-surface flex-col rounded-lg shadow-xl`}
-          onClick={(e) => e.stopPropagation()}
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+            onClick={closeOnBackdropClick ? onClose : undefined}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
+          >
+            <motion.div
+              className={`flex max-h-[85vh] w-[90%] ${maxWidthClasses[maxWidth]} bg-surface flex-col rounded-lg shadow-xl`}
+              onClick={(e) => e.stopPropagation()}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.15 }}
+            >
+              <div className="flex-1 overflow-y-auto p-6">{children}</div>
+              {(actions || leftActions) && (
+                <div className="border-default flex justify-between border-t p-4">
+                  <div>{leftActions}</div>
+                  <div>{actions}</div>
+                </div>
+              )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    )
+  }
+
+  return (
+    <AnimatePresence>
+      {open && (
+        <motion.div
+          className="bg-surface fixed inset-0 z-50 flex h-screen flex-col"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.15 }}
         >
-          <div className="flex-1 overflow-y-auto p-6">{children}</div>
+          <div className="flex-1 overflow-y-auto p-8">{children}</div>
           {(actions || leftActions) && (
             <div className="border-default flex justify-between border-t p-4">
               <div>{leftActions}</div>
               <div>{actions}</div>
             </div>
           )}
-        </div>
-      </div>
-    )
-  }
-
-  return (
-    <div className="bg-surface fixed inset-0 z-50 flex h-screen flex-col">
-      <div className="flex-1 overflow-y-auto p-8">{children}</div>
-      {(actions || leftActions) && (
-        <div className="border-default flex justify-between border-t p-4">
-          <div>{leftActions}</div>
-          <div>{actions}</div>
-        </div>
+        </motion.div>
       )}
-    </div>
+    </AnimatePresence>
   )
 }
