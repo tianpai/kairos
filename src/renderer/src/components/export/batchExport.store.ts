@@ -7,7 +7,6 @@ interface BatchExportState {
 interface BatchExportActions {
   open: () => void
   close: () => void
-  toggle: () => void
 }
 
 type BatchExportStore = BatchExportState & BatchExportActions
@@ -18,10 +17,6 @@ const initialState: BatchExportState = {
 
 export const useBatchExportStore = create<BatchExportStore>()((set) => ({
   ...initialState,
-
   open: () => set({ isOpen: true }),
-
   close: () => set({ isOpen: false }),
-
-  toggle: () => set((state) => ({ isOpen: !state.isOpen })),
 }))

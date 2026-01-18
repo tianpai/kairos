@@ -12,14 +12,14 @@ import {
 
 import { Toaster } from 'sonner'
 import { CircleAlert, CircleCheck, CircleX, Info } from 'lucide-react'
+import { useCurrentTheme } from '@hooks/useTheme'
 import reportWebVitals from './reportWebVitals.ts'
 import AllApplicationsPage from '@/components/applications/AllApplicationsPage'
 import EditorPage from '@/components/editor/EditorPage'
-import { BatchExportManager } from '@/components/export/BatchExportManager'
+import { BatchExportModalController } from '@/components/export/BatchExportModalController'
 import SettingsPage from '@/components/settings/SettingsPage'
 import * as TanStackQueryProvider from '@/integrations/tanstack-query/root-provider.tsx'
 import { useShortcutListener } from '@/hooks/useShortcutListener'
-import { useCurrentTheme } from '@hooks/useTheme'
 
 import './styles.css'
 
@@ -67,7 +67,7 @@ function RootLayout() {
           info: <Info size={20} className="text-info" />,
         }}
       />
-      <BatchExportManager />
+      <BatchExportModalController />
     </>
   )
 }
