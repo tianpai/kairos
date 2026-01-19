@@ -32,6 +32,7 @@ export default function AllApplicationsPage() {
 
   const [openingApp, setOpeningApp] = useState<OpeningApp | null>(null)
   const [editingApp, setEditingApp] = useState<JobApplication | null>(null)
+  const [expandedAppId, setExpandedAppId] = useState<string | null>(null)
 
   const isOpening = !!openingApp
 
@@ -88,7 +89,7 @@ export default function AllApplicationsPage() {
       }
       sidebar={null}
     >
-      <div className="relative h-full overflow-auto px-15 py-5">
+      <div className="relative h-full overflow-auto px-10 py-10">
         {applications.length === 0 ? (
           <div className="flex h-full items-center justify-center">
             <div className="text-hint text-center text-sm">
@@ -97,12 +98,17 @@ export default function AllApplicationsPage() {
           </div>
         ) : (
           <div
-            className={`grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 ${isOpening ? 'pointer-events-none' : ''}`}
+            style={{ gridTemplateColumns: 'repeat(auto-fill, 220px)' }}
+            className={`grid justify-center gap-5 ${isOpening ? 'pointer-events-none' : ''}`}
           >
             {applications.map((app) => (
               <ApplicationCard
                 key={app.id}
                 application={app}
+                isExpanded={expandedAppId === app.id}
+                onToggleExpand={() =>
+                  setExpandedAppId(expandedAppId === app.id ? null : app.id)
+                }
                 onOpen={handleOpenCard}
                 onEdit={setEditingApp}
                 disabled={isOpening}
