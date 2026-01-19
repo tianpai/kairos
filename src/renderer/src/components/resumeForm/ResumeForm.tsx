@@ -31,14 +31,14 @@ export default function ResumeForm() {
   const activeSectionSchema = schemaById[activeTab]
 
   return (
-    <div className="flex h-full flex-col">
-      {/* Section Navigation */}
-      <div className="bg-app-header my-2 mr-1 ml-2 flex flex-wrap justify-center gap-1 rounded-lg p-2">
+    <div className="flex h-full">
+      {/* Section Navigation - Vertical on left */}
+      <div className="bg-app-header my-2 ml-2 flex flex-col gap-1 rounded-lg p-2">
         {sectionOrder.map((sectionId) => {
           const schema = schemaById[sectionId]
           const Icon = schema.icon
           return (
-            <Tooltip key={sectionId} content={schema.label}>
+            <Tooltip key={sectionId} content={schema.label} side="right">
               <Button
                 variant="icon"
                 active={activeTab === sectionId}
