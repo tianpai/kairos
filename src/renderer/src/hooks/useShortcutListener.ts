@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { useShortcutStore } from '@/components/layout/shortcut.store'
 import { useLayoutStore } from '@/components/layout/layout.store'
-import { useBatchExportStore } from '@/components/export/batchExport.store'
+import { useBatchExportModal } from '@/components/export/BatchExportModal'
 
 export function useShortcutListener() {
   const navigate = useNavigate()
@@ -18,7 +18,7 @@ export function useShortcutListener() {
   )
   const requestTailor = useShortcutStore((state) => state.requestTailor)
   const requestNavigation = useShortcutStore((state) => state.requestNavigation)
-  const openBatchExport = useBatchExportStore((state) => state.open)
+  const { open: openBatchExport } = useBatchExportModal()
 
   useEffect(() => {
     // Settings - direct navigation

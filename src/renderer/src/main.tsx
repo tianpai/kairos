@@ -16,7 +16,7 @@ import { useCurrentTheme } from '@hooks/useTheme'
 import reportWebVitals from './reportWebVitals.ts'
 import AllApplicationsPage from '@/components/applications/AllApplicationsPage'
 import EditorPage from '@/components/editor/EditorPage'
-import { BatchExportModalController } from '@/components/export/BatchExportModalController'
+import { useBatchExportModal } from '@/components/export/BatchExportModal'
 import SettingsPage from '@/components/settings/SettingsPage'
 import * as TanStackQueryProvider from '@/integrations/tanstack-query/root-provider.tsx'
 import { useShortcutListener } from '@/hooks/useShortcutListener'
@@ -47,6 +47,7 @@ function RootLayout() {
 
   // Theme for toast notifications
   const { data: currentTheme } = useCurrentTheme()
+  const { Modal: BatchExportModal } = useBatchExportModal()
 
   useEffect(() => {
     // Hide splash once React has mounted (respects minimum time)
@@ -67,7 +68,7 @@ function RootLayout() {
           info: <Info size={20} className="text-info" />,
         }}
       />
-      <BatchExportModalController />
+      <BatchExportModal />
     </>
   )
 }
