@@ -45,6 +45,7 @@ win:
     - nsis
     - portable
   icon: build/icon.ico
+  artifactName: ${productName}-${version}.${ext}
 
 linux:
   target:
@@ -57,6 +58,7 @@ nsis:
   oneClick: false
   allowToChangeInstallationDirectory: true
   deleteAppDataOnUninstall: false
+  artifactName: ${productName}-Setup-${version}.${ext}
 
 publish:
   provider: github

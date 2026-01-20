@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useSearch } from '@tanstack/react-router'
 import changelogRaw from '@root/CHANGELOG.md?raw'
 import pkg from '@root/package.json'
 import {
@@ -126,14 +127,33 @@ export const currentVersionEntry = changelogEntries.find(
 )
 
 export function AboutSection() {
+  const { update, version } = useSearch({ from: '/settings' })
   const [updateState, setUpdateState] = useState<UpdateState>({
     status: 'idle',
   })
   const [isPackaged, setIsPackaged] = useState<boolean | null>(null)
 
   useEffect(() => {
-    window.kairos.updater.isPackaged().then(setIsPackaged)
+    window.kairos.updater.isPackaged().then(setIsPackaged).catch(() => {})
+    // Hydrate from current updater state (in case auto-check already ran)
+    window.kairos.updater.getState().then(setUpdateState).catch(() => {})
   }, [])
+
+  useEffect(() => {
+    if (update !== 'available') return
+
+    setUpdateState((prev) => {
+      if (prev.status === 'downloading' || prev.status === 'downloaded') {
+        return prev
+      }
+
+      return {
+        status: 'available',
+        version: version ?? prev.version,
+        releaseNotes: prev.releaseNotes,
+      }
+    })
+  }, [update, version])
 
   const checkForUpdates = async () => {
     setUpdateState({ status: 'checking' })

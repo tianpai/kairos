@@ -20,6 +20,7 @@ import { useBatchExportModal } from '@/components/export/BatchExportModal'
 import SettingsPage from '@/components/settings/SettingsPage'
 import * as TanStackQueryProvider from '@/integrations/tanstack-query/root-provider.tsx'
 import { useShortcutListener } from '@/hooks/useShortcutListener'
+import { useUpdateNotification } from '@/hooks/useUpdateNotification'
 
 import './styles.css'
 
@@ -44,6 +45,9 @@ function hideSplash() {
 function RootLayout() {
   // Initialize keyboard shortcuts listener
   useShortcutListener()
+
+  // Check for updates and show toast if available
+  useUpdateNotification()
 
   // Theme for toast notifications
   const { data: currentTheme } = useCurrentTheme()
@@ -96,6 +100,11 @@ const settingsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/settings',
   component: SettingsPage,
+  validateSearch: (search: Record<string, unknown>) => ({
+    section: (search.section as string) || undefined,
+    update: (search.update as string) || undefined,
+    version: (search.version as string) || undefined,
+  }),
 })
 
 const routeTree = rootRoute.addChildren([
