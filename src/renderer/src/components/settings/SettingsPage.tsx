@@ -1,5 +1,4 @@
-import { useState } from 'react'
-import { useNavigate } from '@tanstack/react-router'
+import { useNavigate, useSearch } from '@tanstack/react-router'
 import { ArrowLeft } from 'lucide-react'
 import { PageHeader } from '@ui/PageHeader'
 import { Button } from '@ui/Button'
@@ -12,10 +11,27 @@ import { GeneralSection } from './GeneralSection'
 import { AboutSection } from './AboutSection'
 import type { SettingsSection } from './SettingsSidebar'
 
+const validSections: SettingsSection[] = [
+  'providers',
+  'appearance',
+  'tips',
+  'general',
+  'about',
+]
+
 export default function SettingsPage() {
   const navigate = useNavigate()
-  const [activeSection, setActiveSection] =
-    useState<SettingsSection>('providers')
+  const { section } = useSearch({ from: '/settings' })
+
+  // Derive active section from URL (source of truth)
+  const activeSection: SettingsSection =
+    section && validSections.includes(section as SettingsSection)
+      ? (section as SettingsSection)
+      : 'providers'
+
+  const handleSectionChange = (newSection: SettingsSection) => {
+    navigate({ to: '/settings', search: { section: newSection }, replace: true })
+  }
 
   return (
     <AppLayout
@@ -39,7 +55,7 @@ export default function SettingsPage() {
         <SettingsSidebar
           collapsed={false}
           activeSection={activeSection}
-          onSectionChange={setActiveSection}
+          onSectionChange={handleSectionChange}
         />
       }
     >

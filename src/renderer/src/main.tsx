@@ -12,14 +12,15 @@ import {
 
 import { Toaster } from 'sonner'
 import { CircleAlert, CircleCheck, CircleX, Info } from 'lucide-react'
+import { useCurrentTheme } from '@hooks/useTheme'
 import reportWebVitals from './reportWebVitals.ts'
 import AllApplicationsPage from '@/components/applications/AllApplicationsPage'
 import EditorPage from '@/components/editor/EditorPage'
-import { BatchExportManager } from '@/components/export/BatchExportManager'
+import { useBatchExportModal } from '@/components/export/BatchExportModal'
 import SettingsPage from '@/components/settings/SettingsPage'
 import * as TanStackQueryProvider from '@/integrations/tanstack-query/root-provider.tsx'
 import { useShortcutListener } from '@/hooks/useShortcutListener'
-import { useCurrentTheme } from '@hooks/useTheme'
+import { useUpdateNotification } from '@/hooks/useUpdateNotification'
 
 import './styles.css'
 
@@ -45,8 +46,12 @@ function RootLayout() {
   // Initialize keyboard shortcuts listener
   useShortcutListener()
 
+  // Check for updates and show toast if available
+  useUpdateNotification()
+
   // Theme for toast notifications
   const { data: currentTheme } = useCurrentTheme()
+  const { Modal: BatchExportModal } = useBatchExportModal()
 
   useEffect(() => {
     // Hide splash once React has mounted (respects minimum time)
@@ -67,7 +72,7 @@ function RootLayout() {
           info: <Info size={20} className="text-info" />,
         }}
       />
-      <BatchExportManager />
+      <BatchExportModal />
     </>
   )
 }
@@ -95,6 +100,11 @@ const settingsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/settings',
   component: SettingsPage,
+  validateSearch: (search: Record<string, unknown>) => ({
+    section: (search.section as string) || undefined,
+    update: (search.update as string) || undefined,
+    version: (search.version as string) || undefined,
+  }),
 })
 
 const routeTree = rootRoute.addChildren([

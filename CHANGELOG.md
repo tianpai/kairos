@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.2.1](https://github.com/tianpai/kairos/compare/v0.2.0...v0.2.1) (2026-01-21)
+
+
+### Features
+
+* expandable application cards with quick actions ([6d4ac92](https://github.com/tianpai/kairos/commit/6d4ac92855efea981fd9d3a0fc12ea8af702bec0))
+* toast notification when update is available ([2d35a45](https://github.com/tianpai/kairos/commit/2d35a45521d279b3679512ce1aba6ee688fa5ddb))
+* vertical resume form tabs on left side ([2eab0e5](https://github.com/tianpai/kairos/commit/2eab0e559435535c88eeead62da647422fce58fc))
+
 ## [0.2.0](https://github.com/tianpai/kairos/compare/v0.1.8...v0.2.0) (2026-01-17)
 
 
