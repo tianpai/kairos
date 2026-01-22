@@ -8,8 +8,8 @@ import ResumeRender from '@editor/ResumeRender'
 import ResumeForm from '@resumeForm/ResumeForm'
 import Checklist from '@checklist/Checklist'
 import { AppLayout } from '@layout/AppLayout'
-import { EditorHeader } from './EditorHeader'
 import { useLayoutStore } from '@layout/layout.store'
+import { EditorHeader } from './EditorHeader'
 
 export default function EditorPage() {
   const { jobId } = useSearch({ from: '/editor' })
@@ -49,12 +49,7 @@ export default function EditorPage() {
 
   return (
     <AppLayout
-      header={
-        <EditorHeader
-          jobId={jobId}
-          jobApplication={jobApplication}
-        />
-      }
+      header={<EditorHeader jobId={jobId} jobApplication={jobApplication} />}
       sidebar={null}
     >
       <div className="relative grid h-full grid-cols-8 overflow-hidden">

@@ -7,7 +7,12 @@ export function SettingsButton() {
 
   return (
     <Button
-      onClick={() => navigate({ to: '/settings' })}
+      onClick={() =>
+        navigate({
+          to: '/settings',
+          search: { section: undefined, update: undefined, version: undefined },
+        })
+      }
       ariaLabel="Settings"
       title="Settings"
     >

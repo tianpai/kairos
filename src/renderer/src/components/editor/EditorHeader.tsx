@@ -1,5 +1,4 @@
-import { useNavigate } from '@tanstack/react-router'
-import { Columns2, Columns3, GalleryVerticalEnd } from 'lucide-react'
+import { Columns2, Columns3 } from 'lucide-react'
 import { TailoringButton } from '@editor/TailoringButton'
 import { PageHeader } from '@ui/PageHeader'
 import { Button } from '@ui/Button'
@@ -7,9 +6,10 @@ import DownloadResumeButton from '@editor/DownloadResumeButton'
 import SaveResumeButton from '@editor/SaveResumeButton'
 import { DocumentConfigButton } from '@resumeForm/DocumentConfigButton'
 import { useLayoutStore } from '@layout/layout.store'
+import type { JobApplicationDetails } from '@api/jobs'
 import { getScoreColor } from '@/utils/scoreThresholds'
 import NewApplicationButton from '@/components/upload/NewApplicationButton'
-import type { JobApplicationDetails } from '@api/jobs'
+import { ApplicationsButton } from '@/components/applications/ApplicationsButton'
 
 interface EditorHeaderProps {
   jobId?: string
@@ -17,7 +17,6 @@ interface EditorHeaderProps {
 }
 
 export function EditorHeader({ jobId, jobApplication }: EditorHeaderProps) {
-  const navigate = useNavigate()
   const { showChecklist, toggleChecklist } = useLayoutStore()
 
   const companyName = jobApplication?.companyName
@@ -29,13 +28,7 @@ export function EditorHeader({ jobId, jobApplication }: EditorHeaderProps) {
     <PageHeader
       left={
         <>
-          <Button
-            onClick={() => navigate({ to: '/' })}
-            ariaLabel="All applications"
-            title="All applications"
-          >
-            <GalleryVerticalEnd size={16} />
-          </Button>
+          <ApplicationsButton />
           <NewApplicationButton />
         </>
       }

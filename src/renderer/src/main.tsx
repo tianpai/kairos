@@ -18,6 +18,7 @@ import AllApplicationsPage from '@/components/applications/AllApplicationsPage'
 import EditorPage from '@/components/editor/EditorPage'
 import { useBatchExportModal } from '@/components/export/BatchExportModal'
 import SettingsPage from '@/components/settings/SettingsPage'
+import MasterResume from '@/components/master-resume/MasterResume'
 import * as TanStackQueryProvider from '@/integrations/tanstack-query/root-provider.tsx'
 import { useShortcutListener } from '@/hooks/useShortcutListener'
 import { useUpdateNotification } from '@/hooks/useUpdateNotification'
@@ -43,10 +44,7 @@ function hideSplash() {
 }
 
 function RootLayout() {
-  // Initialize keyboard shortcuts listener
   useShortcutListener()
-
-  // Check for updates and show toast if available
   useUpdateNotification()
 
   // Theme for toast notifications
@@ -54,14 +52,12 @@ function RootLayout() {
   const { Modal: BatchExportModal } = useBatchExportModal()
 
   useEffect(() => {
-    // Hide splash once React has mounted (respects minimum time)
     hideSplash()
   }, [])
 
   return (
     <>
       <Outlet />
-      {/* <TanStackRouterDevtools /> */}
       <Toaster
         position="bottom-right"
         theme={currentTheme}
@@ -107,10 +103,17 @@ const settingsRoute = createRoute({
   }),
 })
 
+const masterResumeRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/master-resume',
+  component: MasterResume,
+})
+
 const routeTree = rootRoute.addChildren([
   indexRoute,
   editorRoute,
   settingsRoute,
+  masterResumeRoute,
 ])
 
 const TanStackQueryProviderContext = TanStackQueryProvider.getContext()
