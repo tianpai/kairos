@@ -1,10 +1,10 @@
-import type { TaskName, WorkflowContext } from "@type/task-contracts";
-import type { WorkflowStepsData } from "@type/workflow";
 import { AITaskClient } from "../ai/ai-task-client";
-import type { SettingsService } from "../config/settings.service";
-import type { JobApplicationService } from "../services/job-application.service";
 import { WorkflowEngine } from "./workflow-engine";
 import { registerWorkflowTasks } from "./tasks";
+import type { TaskName, WorkflowContext } from "@type/task-contracts";
+import type { WorkflowStepsData } from "@type/workflow";
+import type { SettingsService } from "../config/settings.service";
+import type { JobApplicationService } from "../services/job-application.service";
 import "./workflows";
 
 export class WorkflowService {

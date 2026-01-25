@@ -1,10 +1,10 @@
-import log from "electron-log/main";
 import { randomUUID } from "node:crypto";
+import log from "electron-log/main";
 import { WebSocket } from "ws";
-import type { ProviderType } from "../../shared/providers";
-import type { TaskName } from "@type/task-contracts";
 import { aiServerService } from "../services/ai-server.service";
 import { getDefaultModel } from "../services/ai-models.service";
+import type { ProviderType } from "../../shared/providers";
+import type { TaskName } from "@type/task-contracts";
 import type { SettingsService } from "../config/settings.service";
 
 type PendingTask = {

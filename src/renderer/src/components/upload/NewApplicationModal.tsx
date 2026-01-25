@@ -32,12 +32,6 @@ export default function NewApplicationModal({
   )
   const canSubmit = useNewApplicationStore((s) => s.canSubmit)
   const buildPayload = useNewApplicationStore((s) => s.buildPayload)
-  const entries = useNewApplicationStore((s) => s.entries)
-
-  const filledEntryCount = entries.filter(
-    (entry) => entry.jobDescription.trim().length > 0,
-  ).length
-  const entryCount = Math.max(1, filledEntryCount)
 
   function handleSubmit() {
     if (isSubmitting || !hasApiKey) return
@@ -45,15 +39,11 @@ export default function NewApplicationModal({
     if (payload) onSubmit(payload)
   }
 
-  const buttonText =
-    entryCount > 1 ? `Create ${entryCount} applications` : 'Create application'
-
   return (
     <Modal
       open={isOpen}
       onClose={onClose}
-      variant="popup"
-      maxWidth="2xl"
+      size="2xl"
       actions={
         <>
           <Button onClick={onClose}>Cancel</Button>
@@ -62,7 +52,7 @@ export default function NewApplicationModal({
             disabled={!hasApiKey || !canSubmit()}
             loading={isSubmitting}
           >
-            {buttonText}
+            Create
           </Button>
         </>
       }

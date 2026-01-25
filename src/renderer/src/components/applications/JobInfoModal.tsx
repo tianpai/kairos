@@ -48,8 +48,7 @@ export default function JobInfoModal({
     <Modal
       open={open}
       onClose={onClose}
-      variant="popup"
-      maxWidth="md"
+      size="md"
       leftActions={
         <HoldButton
           onComplete={() => {

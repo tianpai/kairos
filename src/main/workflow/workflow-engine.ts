@@ -12,9 +12,6 @@
  */
 
 import log from "electron-log/main";
-import type { TaskName, WorkflowContext } from "@type/task-contracts";
-import type { TaskStatus, WorkflowStepsData } from "@type/workflow";
-import type { JobApplicationService } from "../services/job-application.service";
 import { getMissingInputs, getTask, resolveTaskInput } from "./define-task";
 import {
   arePrerequisitesSatisfied,
@@ -23,6 +20,9 @@ import {
 } from "./define-workflow";
 import { emitWorkflowEvent } from "./workflow-events";
 import { WorkflowStore } from "./workflow-store";
+import type { JobApplicationService } from "../services/job-application.service";
+import type { TaskStatus, WorkflowStepsData } from "@type/workflow";
+import type { TaskName, WorkflowContext } from "@type/task-contracts";
 import type { Task, TaskExecutionMeta } from "./define-task";
 import type { Workflow } from "./define-workflow";
 import type { TaskStateMap, WorkflowInstance } from "./workflow-store";

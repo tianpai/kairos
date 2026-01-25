@@ -1,5 +1,6 @@
 import { JobApplicationService } from "../services/job-application.service";
 import { getDatabase } from "../services/database.service";
+import { WorkflowService } from "../workflow/workflow.service";
 import { registerJobsHandlers } from "./jobs.handlers";
 import { registerDialogHandlers } from "./dialog.handlers";
 import { registerFsHandlers } from "./fs.handlers";
@@ -13,7 +14,6 @@ import { registerThemeHandlers } from "./theme.handlers";
 import { registerShellHandlers } from "./shell.handlers";
 import { registerWorkflowHandlers } from "./workflow.handlers";
 import type { SettingsService } from "../config/settings.service";
-import { WorkflowService } from "../workflow/workflow.service";
 
 export interface IpcDependencies {
   settingsService: SettingsService;

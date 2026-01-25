@@ -1,11 +1,11 @@
 import { BrowserWindow, ipcMain } from "electron";
 import log from "electron-log/main";
+import { onWorkflowEvent } from "../workflow/workflow-events";
 import type {
   WorkflowGetStatePayload,
   WorkflowRetryPayload,
   WorkflowStartPayload,
 } from "@type/workflow-ipc";
-import { onWorkflowEvent } from "../workflow/workflow-events";
 import type { WorkflowService } from "../workflow/workflow.service";
 
 function broadcast<T>(channel: string, payload: T): void {

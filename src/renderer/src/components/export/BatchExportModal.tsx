@@ -388,8 +388,7 @@ export function BatchExportModal() {
     <Modal
       open={isOpen}
       onClose={handleClose}
-      variant="popup"
-      maxWidth="2xl"
+      size="2xl"
       closeOnBackdropClick={!exporting}
       actions={
         <BatchExportActions

@@ -2,14 +2,15 @@ import { useEffect } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import type { ReactNode } from 'react'
 
+type ModalSize = 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | 'fullscreen'
+
 interface ModalProps {
   open: boolean
   onClose?: () => void
   children: ReactNode
   actions?: ReactNode
   leftActions?: ReactNode
-  variant?: 'fullscreen' | 'popup'
-  maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl'
+  size?: ModalSize
   closeOnBackdropClick?: boolean
 }
 
@@ -41,7 +42,7 @@ function PopupModal({
   children,
   actions,
   leftActions,
-  maxWidth = 'lg',
+  size = 'lg',
   closeOnBackdropClick = true,
 }: ModalProps) {
   return (
@@ -56,7 +57,7 @@ function PopupModal({
           transition={{ duration: 0.15 }}
         >
           <motion.div
-            className={`flex max-h-[85vh] w-[90%] ${maxWidthClasses[maxWidth]} bg-surface flex-col rounded-lg shadow-xl`}
+            className={`flex max-h-[85vh] w-[90%] ${maxWidthClasses[size as keyof typeof maxWidthClasses]} bg-surface flex-col rounded-lg shadow-xl`}
             onClick={(e) => e.stopPropagation()}
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -92,7 +93,7 @@ function FullscreenModal({ open, children, actions, leftActions }: ModalProps) {
 }
 
 export function Modal(props: ModalProps) {
-  const { open, onClose, variant = 'fullscreen' } = props
+  const { open, onClose, size = 'fullscreen' } = props
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -110,7 +111,7 @@ export function Modal(props: ModalProps) {
     }
   }, [open, onClose])
 
-  if (variant === 'popup') {
+  if (size !== 'fullscreen') {
     return <PopupModal {...props} />
   }
 

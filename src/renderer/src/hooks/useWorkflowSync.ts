@@ -5,10 +5,10 @@ import { useResumeStore } from '@typst-compiler/resumeState'
 import { tip } from '@tips/tips.service'
 import { useTipsStore } from '@tips/tips.store'
 import {
-  getWorkflowState,
   RESUME_PARSING,
   RESUME_TAILORING,
   SCORE_UPDATING,
+  getWorkflowState,
   useWorkflowStore,
 } from '../workflow'
 import type { JobApplicationDetails } from '@api/jobs'
