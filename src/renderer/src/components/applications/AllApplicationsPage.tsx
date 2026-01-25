@@ -73,12 +73,7 @@ export default function AllApplicationsPage() {
       header={
         <PageHeader
           left={<NewApplicationButton />}
-          center={
-            <div className="flex items-center justify-center gap-2 text-sm font-medium">
-              <GalleryVerticalEnd size={16} />
-              <span>All Applications</span>
-            </div>
-          }
+          center={<span>All Applications</span>}
           right={
             <>
               <SettingsButton />

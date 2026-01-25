@@ -56,7 +56,6 @@ export function DocumentConfigModal({
     <Modal
       open={isOpen}
       onClose={onClose}
-      maxWidth="xl"
       actions={<Button onClick={onClose}>Done</Button>}
     >
       <div className="mb-6">
@@ -93,7 +92,7 @@ export function DocumentConfigModal({
             {/* Font Size Selection */}
             <DiscreteSlider
               values={FONT_SIZE_VALUES}
-              value={currentFontSizeValue}
+              currentValue={currentFontSizeValue}
               onChange={handleFontSizeChange}
               label="Font Size"
               unit="pt"
@@ -109,7 +108,7 @@ export function DocumentConfigModal({
             {/* Margin Selection */}
             <DiscreteSlider
               values={MARGIN_VALUES}
-              value={currentMarginValue}
+              currentValue={currentMarginValue}
               onChange={handleMarginChange}
               label="Page Margin"
               unit="inch"

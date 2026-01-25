@@ -2,7 +2,7 @@ import { cn } from '@/utils/cn'
 
 interface DiscreteSliderProps {
   values: Array<number>
-  value: number
+  currentValue: number
   onChange: (value: number) => void
   label?: string
   unit?: string
@@ -10,11 +10,11 @@ interface DiscreteSliderProps {
 
 export function DiscreteSlider({
   values,
-  value,
+  currentValue,
   onChange,
   label,
   unit,
-}: DiscreteSliderProps): JSX.Element {
+}: DiscreteSliderProps) {
   return (
     <div className="w-full space-y-1">
       {label && (
@@ -25,7 +25,7 @@ export function DiscreteSlider({
       )}
       <div className="border-default inline-flex rounded-md border">
         {values.map((v, index) => {
-          const isSelected = Math.abs(v - value) < 0.0001
+          const isSelected = v === currentValue
           const isFirst = index === 0
           const isLast = index === values.length - 1
 

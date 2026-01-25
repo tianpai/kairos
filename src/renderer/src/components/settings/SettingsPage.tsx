@@ -1,8 +1,7 @@
 import { useNavigate, useSearch } from '@tanstack/react-router'
-import { ArrowLeft } from 'lucide-react'
 import { PageHeader } from '@ui/PageHeader'
-import { Button } from '@ui/Button'
 import { AppLayout } from '@layout/AppLayout'
+import { AllApplicationBtn } from '../ui/BtnBack'
 import { SettingsSidebar } from './SettingsSidebar'
 import { ProvidersSection } from './ProvidersSection'
 import { AppearanceSection } from './AppearanceSection'
@@ -11,7 +10,7 @@ import { GeneralSection } from './GeneralSection'
 import { AboutSection } from './AboutSection'
 import type { SettingsSection } from './SettingsSidebar'
 
-const validSections: SettingsSection[] = [
+const validSections: Array<SettingsSection> = [
   'providers',
   'appearance',
   'tips',
@@ -23,33 +22,22 @@ export default function SettingsPage() {
   const navigate = useNavigate()
   const { section } = useSearch({ from: '/settings' })
 
-  // Derive active section from URL (source of truth)
   const activeSection: SettingsSection =
     section && validSections.includes(section as SettingsSection)
       ? (section as SettingsSection)
       : 'providers'
 
   const handleSectionChange = (newSection: SettingsSection) => {
-    navigate({ to: '/settings', search: { section: newSection }, replace: true })
+    navigate({
+      to: '/settings',
+      search: { section: newSection, update: undefined, version: undefined },
+      replace: true,
+    })
   }
-
   return (
     <AppLayout
       header={
-        <PageHeader
-          left={
-            <>
-              <Button
-                onClick={() => navigate({ to: '/' })}
-                ariaLabel="Back to dashboard"
-                title="Back"
-              >
-                <ArrowLeft size={16} />
-              </Button>
-            </>
-          }
-          center={<div className="text-sm font-medium">Settings</div>}
-        />
+        <PageHeader left={<AllApplicationBtn />} center={<div>Settings</div>} />
       }
       sidebar={
         <SettingsSidebar
