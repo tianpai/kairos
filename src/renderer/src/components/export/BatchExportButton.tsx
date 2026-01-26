@@ -1,4 +1,4 @@
-import { FileDown } from 'lucide-react'
+import { Download } from 'lucide-react'
 import { Button } from '@ui/Button'
 import { useBatchExportModal } from './BatchExportModal'
 
@@ -7,7 +7,7 @@ export function BatchExportButton() {
 
   return (
     <Button onClick={open} ariaLabel="Export all resumes" title="Export All">
-      <FileDown size={16} />
+      <Download size={16} />
     </Button>
   )
 }

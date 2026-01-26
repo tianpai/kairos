@@ -22,14 +22,8 @@ export function ExistingApplicationSelect({
   }
 
   return (
-    <div className="flex flex-col gap-1">
-      <label className="block text-xs font-medium">Source Resume</label>
-      <Select
-        value={value ?? ''}
-        onChange={handleChange}
-        disabled={isLoading}
-        className="w-full"
-      >
+    <div className="flex flex-col">
+      <Select value={value ?? ''} onChange={handleChange} disabled={isLoading}>
         <option value="">Select an application...</option>
         {applications.map((app) => (
           <option key={app.id} value={app.id}>
