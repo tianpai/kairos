@@ -70,6 +70,8 @@ export const tip = {
    */
   appendToSuccess: (event: string, context: TipContext = {}): string | null => {
     const store = useTipsStore.getState()
+    if (!store.tipsEnabled) return null
+
     const matchingTips = getTipsByEvent(event)
 
     // Build list of first-time actions from matching tips
@@ -148,17 +150,4 @@ export const tip = {
     return true
   },
 
-  /**
-   * Dismiss the currently shown tip (with cooldown)
-   */
-  dismiss: (): void => {
-    useTipsStore.getState().dismiss()
-  },
-
-  /**
-   * Permanently dismiss the currently shown tip
-   */
-  neverShow: (): void => {
-    useTipsStore.getState().neverShow()
-  },
 }

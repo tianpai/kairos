@@ -32,25 +32,22 @@ export interface Tip {
 export interface TipState {
   // Tracking
   shownCount: Record<TipId, number>
-  dismissedAt: Record<TipId, number>
-  neverShowAgain: Array<string> // Array for JSON serialization (Set doesn't serialize well)
   completedActions: Array<string> // Actions user has done at least once
 
   // Config
-  cooldownMs: number
+  tipsEnabled: boolean
 
   // Toast tip tracking
   activeToastTip: TipId | null
   lastShownInToastAt: Record<TipId, number>
 
   // Actions
-  dismiss: () => void
-  neverShow: () => void
   canShow: (tipId: TipId) => boolean
   incrementShownCount: (tipId: TipId) => void
   markActionCompleted: (action: string) => void
   isFirstTime: (action: string) => boolean
   reset: () => void
+  setTipsEnabled: (enabled: boolean) => void
   setToastTip: (tipId: TipId | null) => void
   isToastTipShowing: (tipId: TipId) => boolean
   getActiveToastTip: () => Tip | null

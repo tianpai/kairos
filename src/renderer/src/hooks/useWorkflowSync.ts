@@ -158,9 +158,9 @@ export function useWorkflowSync(
           ...(tipMessage && {
             description: tipMessage,
             action: {
-              label: 'Never show',
+              label: 'Disable tips',
               onClick: () => {
-                useTipsStore.getState().neverShow()
+                useTipsStore.getState().setTipsEnabled(false)
               },
             },
           }),

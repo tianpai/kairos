@@ -4,17 +4,13 @@ import { AppLayout } from '@layout/AppLayout'
 import { AllApplicationBtn } from '../ui/BtnBack'
 import { SettingsSidebar } from './SettingsSidebar'
 import { ProvidersSection } from './ProvidersSection'
-import { AppearanceSection } from './AppearanceSection'
-import { TipsSection } from './TipsSection'
 import { GeneralSection } from './GeneralSection'
 import { AboutSection } from './AboutSection'
 import type { SettingsSection } from './SettingsSidebar'
 
 const validSections: Array<SettingsSection> = [
-  'providers',
-  'appearance',
-  'tips',
   'general',
+  'providers',
   'about',
 ]
 
@@ -25,7 +21,7 @@ export default function SettingsPage() {
   const activeSection: SettingsSection =
     section && validSections.includes(section as SettingsSection)
       ? (section as SettingsSection)
-      : 'providers'
+      : 'general'
 
   const handleSectionChange = (newSection: SettingsSection) => {
     navigate({
@@ -49,8 +45,6 @@ export default function SettingsPage() {
     >
       <main className="flex-1 overflow-auto p-8">
         {activeSection === 'providers' && <ProvidersSection />}
-        {activeSection === 'appearance' && <AppearanceSection />}
-        {activeSection === 'tips' && <TipsSection />}
         {activeSection === 'general' && <GeneralSection />}
         {activeSection === 'about' && <AboutSection />}
       </main>
