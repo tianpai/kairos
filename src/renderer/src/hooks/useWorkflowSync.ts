@@ -2,8 +2,6 @@ import { useEffect } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { useResumeStore } from '@typst-compiler/resumeState'
-import { tip } from '@tips/tips.service'
-import { useTipsStore } from '@tips/tips.store'
 import {
   RESUME_PARSING,
   RESUME_TAILORING,
@@ -13,8 +11,8 @@ import {
 } from '../workflow'
 import type { JobApplicationDetails } from '@api/jobs'
 import type { TemplateData } from '@templates/template.types'
-import type { TaskStateMap } from '../workflow'
 import { friendlyError } from '@/utils/error'
+import type { TaskStateMap } from '../workflow'
 
 /**
  * Syncs workflow state between main process, Zustand store, and React Query cache
@@ -150,21 +148,7 @@ export function useWorkflowSync(
             ? 'Tailoring complete'
             : 'Processing complete'
 
-        const tipMessage = payload.tipEvent
-          ? tip.appendToSuccess(payload.tipEvent, payload.tipData ?? {})
-          : null
-
-        toast.success(workflowLabel, {
-          ...(tipMessage && {
-            description: tipMessage,
-            action: {
-              label: 'Disable tips',
-              onClick: () => {
-                useTipsStore.getState().setTipsEnabled(false)
-              },
-            },
-          }),
-        })
+        toast.success(workflowLabel)
       },
     )
 

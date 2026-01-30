@@ -4,9 +4,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { Monitor, Moon, Sun } from 'lucide-react'
 import { HoldButton } from '@ui/HoldButton'
-import { Button } from '@ui/Button'
 import { useSetTheme, useTheme } from '@hooks/useTheme'
-import { useTipsStore } from '@tips/tips.store'
 
 type ThemeSource = 'system' | 'light' | 'dark'
 
@@ -25,7 +23,6 @@ export function GeneralSection() {
   const queryClient = useQueryClient()
   const { data: currentTheme } = useTheme()
   const setTheme = useSetTheme()
-  const { tipsEnabled, setTipsEnabled, reset: resetTips } = useTipsStore()
   const [isDeleting, setIsDeleting] = useState(false)
   const [isResetting, setIsResetting] = useState(false)
 
@@ -117,23 +114,6 @@ export function GeneralSection() {
           </div>
         </div>
 
-        <div className="space-y-3">
-          <h3 className="text-secondary text-sm font-medium">Tips</h3>
-          <p className="text-hint text-sm">
-            Show contextual tips in success toasts.
-          </p>
-          <div className="flex flex-wrap items-center gap-2">
-            <Button
-              onClick={() => setTipsEnabled(!tipsEnabled)}
-              variant="outline"
-            >
-              {tipsEnabled ? 'Disable tips' : 'Enable tips'}
-            </Button>
-            <Button onClick={resetTips} variant="outline">
-              Reset tips
-            </Button>
-          </div>
-        </div>
       </div>
 
       <div className="space-y-4">

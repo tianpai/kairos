@@ -324,8 +324,6 @@ export class WorkflowEngine {
         taskName,
         provides: task.provides,
         result: task.provides ? (result as unknown) : undefined,
-        tipEvent: task.tipEvent,
-        tipData: task.getTipData ? task.getTipData(result as never) : undefined,
       });
       this.emitStateChanged(jobId);
 
@@ -398,13 +396,10 @@ export class WorkflowEngine {
           `[WorkflowEngine] Workflow '${workflowInstance.workflowName}' completed`,
         );
 
-        const tipPayload = this.getTipPayload(jobId, completedWorkflow);
-
         emitWorkflowEvent("workflow:completed", {
           jobId,
           workflowName: workflowInstance.workflowName,
           status: "completed",
-          ...tipPayload,
         });
         this.emitStateChanged(jobId);
         this.store.clearWorkflow(jobId);
@@ -424,32 +419,6 @@ export class WorkflowEngine {
         );
       });
     }
-  }
-
-  private getTipPayload(
-    jobId: string,
-    workflowInstance: WorkflowInstance,
-  ): { tipEvent?: string; tipData?: Record<string, unknown> } {
-    const context = this.store.getContext(jobId);
-    if (!context) return {};
-
-    for (const [taskName, status] of Object.entries(
-      workflowInstance.taskStates,
-    )) {
-      if (status !== "completed") continue;
-      const task = getTask(taskName as TaskName);
-      if (task?.tipEvent) {
-        const tipData =
-          task.provides && task.getTipData
-            ? task.getTipData(
-                context[task.provides as keyof typeof context] as never,
-              )
-            : {};
-        return { tipEvent: task.tipEvent, tipData };
-      }
-    }
-
-    return {};
   }
 
   /**

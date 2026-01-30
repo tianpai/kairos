@@ -25,8 +25,6 @@ export interface WorkflowTaskCompleted {
   taskName: TaskName;
   provides?: string;
   result?: unknown;
-  tipEvent?: string;
-  tipData?: Record<string, unknown>;
 }
 
 export interface WorkflowTaskFailed {
@@ -39,8 +37,6 @@ export interface WorkflowCompleted {
   jobId: string;
   workflowName: string;
   status: WorkflowStatus;
-  tipEvent?: string;
-  tipData?: Record<string, unknown>;
 }
 
 export interface WorkflowAiPartial {
