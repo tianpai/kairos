@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react'
-import { ExternalLink, Pencil } from 'lucide-react'
+import { Dot, ExternalLink, Pencil } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
 import { formatDate, normalizeUrl } from '@utils/format'
 import type { KeyboardEvent } from 'react'
@@ -18,15 +18,32 @@ const CARD_WIDTH = 220
 const CARD_HEIGHT = 120
 const EXPANDED_WIDTH = 280
 const EXPANDED_HEIGHT = 180
-const MAX_TEXT_LENGTH = 18
-const MAX_TEXT_LENGTH_EXPANDED = 30
+const MAX_TEXT_LENGTH = 22
+const MAX_TEXT_LENGTH_EXPANDED = 50
 
-function truncateText(
-  text: string,
-  maxLength: number = MAX_TEXT_LENGTH,
-): string {
-  if (text.length <= maxLength) return text
-  return text.slice(0, maxLength) + '...'
+function TruncateText({
+  children,
+  expanded,
+  noWrap,
+  className,
+}: {
+  children: string
+  expanded: boolean
+  noWrap: boolean
+  className?: string
+}) {
+  const max = expanded ? MAX_TEXT_LENGTH_EXPANDED : MAX_TEXT_LENGTH
+  const text =
+    children.length <= max ? children : children.slice(0, max) + '...'
+
+  return (
+    <motion.div
+      {...fade}
+      className={`${className} ${noWrap ? 'overflow-hidden text-ellipsis whitespace-nowrap' : ''}`}
+    >
+      {text}
+    </motion.div>
+  )
 }
 
 const fade = {
@@ -86,6 +103,28 @@ interface ApplicationCardProps {
   disabled?: boolean
 }
 
+function CardScore({
+  isExpanded,
+  score,
+}: {
+  isExpanded: boolean
+  score: number
+}) {
+  const scoreColor = getScoreColor(score)
+
+  if (!isExpanded) {
+    return (
+      <motion.div
+        {...fade}
+        className="absolute top-1 right-1 text-sm font-semibold"
+        style={{ color: scoreColor }}
+      >
+        <Dot className="size-10" />
+      </motion.div>
+    )
+  }
+}
+
 export function ApplicationCard({
   application,
   isExpanded,
@@ -96,6 +135,7 @@ export function ApplicationCard({
 }: ApplicationCardProps) {
   const cardRef = useRef<HTMLDivElement>(null)
   const [isHovered, setIsHovered] = useState(false)
+  const [isAnimating, setIsAnimating] = useState(false)
 
   function handleBackdropClick() {
     if (isExpanded) onToggleExpand()
@@ -131,7 +171,6 @@ export function ApplicationCard({
     if (url) window.kairos.shell.openExternal(url)
   }
 
-  const scoreColor = getScoreColor(application.matchPercentage)
   const overdue = isOverdue(application.dueDate)
 
   return (
@@ -148,6 +187,8 @@ export function ApplicationCard({
           aria-label={`${isExpanded ? 'Collapse' : 'Expand'} ${application.companyName} application`}
           onClick={handleClick}
           onKeyDown={handleKeyDown}
+          onAnimationStart={() => setIsAnimating(true)}
+          onAnimationComplete={() => setIsAnimating(false)}
           onHoverStart={() => setIsHovered(true)}
           onHoverEnd={() => setIsHovered(false)}
           animate={{
@@ -174,26 +215,39 @@ export function ApplicationCard({
           }}
         >
           <div className="text-left">
-            <div className="text-primary text-sm font-semibold">
-              {truncateText(
-                application.companyName,
-                isExpanded ? MAX_TEXT_LENGTH_EXPANDED : MAX_TEXT_LENGTH,
-              )}
-            </div>
-            <div className="text-secondary text-xs">
-              {truncateText(
-                application.position,
-                isExpanded ? MAX_TEXT_LENGTH_EXPANDED : MAX_TEXT_LENGTH,
-              )}
-            </div>
+            <TruncateText
+              expanded={isExpanded}
+              noWrap={isAnimating}
+              className="text-primary text-sm font-semibold"
+            >
+              {application.companyName}
+            </TruncateText>
+            <TruncateText
+              expanded={isExpanded}
+              noWrap={isAnimating}
+              className="text-secondary text-xs"
+            >
+              {application.position}
+            </TruncateText>
             <AnimatePresence>
               {isExpanded && (
-                <motion.div
-                  {...fade}
-                  className={`mt-1 text-xs ${overdue ? 'text-error' : 'text-hint'}`}
-                >
-                  Due {formatDate(application.dueDate)}
-                </motion.div>
+                <>
+                  <motion.div
+                    {...fade}
+                    className={`mt-1 text-xs ${overdue ? 'text-error' : 'text-hint'}`}
+                  >
+                    Due {formatDate(application.dueDate)}
+                  </motion.div>
+                  <motion.div
+                    {...fade}
+                    className="text-sm font-semibold"
+                    style={{
+                      color: getScoreColor(application.matchPercentage),
+                    }}
+                  >
+                    {Math.round(application.matchPercentage)}%
+                  </motion.div>
+                </>
               )}
             </AnimatePresence>
           </div>
@@ -214,15 +268,10 @@ export function ApplicationCard({
 
           {/* Score - shows on hover or expanded */}
           <AnimatePresence>
-            {(isExpanded || isHovered) && (
-              <motion.div
-                {...fade}
-                className="absolute top-3 right-3 text-sm font-semibold"
-                style={{ color: scoreColor }}
-              >
-                {Math.round(application.matchPercentage)}%
-              </motion.div>
-            )}
+            <CardScore
+              isExpanded={isExpanded}
+              score={application.matchPercentage}
+            />
           </AnimatePresence>
 
           {/* Action buttons - expanded state */}
