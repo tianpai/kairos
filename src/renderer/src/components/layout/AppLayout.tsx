@@ -1,6 +1,6 @@
 interface AppLayoutProps {
   header: React.ReactNode
-  sidebar: React.ReactNode
+  sidebar?: React.ReactNode
   children: React.ReactNode
 }
 

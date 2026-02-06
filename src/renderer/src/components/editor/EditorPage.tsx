@@ -50,7 +50,6 @@ export default function EditorPage() {
   return (
     <AppLayout
       header={<EditorHeader jobId={jobId} jobApplication={jobApplication} />}
-      sidebar={null}
     >
       <div className="relative grid h-full grid-cols-8 overflow-hidden">
         <div className={`h-full overflow-hidden ${gridClasses.form}`}>

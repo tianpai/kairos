@@ -37,12 +37,11 @@ function TruncateText({
     children.length <= max ? children : children.slice(0, max) + '...'
 
   return (
-    <motion.div
-      {...fade}
+    <div
       className={`${className} ${noWrap ? 'overflow-hidden text-ellipsis whitespace-nowrap' : ''}`}
     >
       {text}
-    </motion.div>
+    </div>
   )
 }
 
