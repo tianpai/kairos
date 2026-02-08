@@ -58,6 +58,11 @@ function createTables(): void {
       status TEXT NOT NULL DEFAULT 'active',
       application_status TEXT,
       job_url TEXT,
+      archived INTEGER NOT NULL DEFAULT 0,
+      status_updated_at TEXT,
+      interview_date TEXT,
+      pinned INTEGER NOT NULL DEFAULT 0,
+      pinned_at TEXT,
       created_at TEXT NOT NULL,
       updated_at TEXT NOT NULL,
       FOREIGN KEY (company_id) REFERENCES companies(id) ON DELETE CASCADE
@@ -100,8 +105,22 @@ export async function disconnectDatabase(): Promise<void> {
   }
 }
 
+function addColumnIfNotExists(table: string, column: string, definition: string): void {
+  if (!sqlite) throw new Error("Database not initialized");
+  const columns = sqlite.pragma(`table_info(${table})`) as Array<{ name: string }>;
+  if (!columns.some((col) => col.name === column)) {
+    sqlite.exec(`ALTER TABLE ${table} ADD COLUMN ${column} ${definition}`);
+    log.info(`Migration: added column ${table}.${column}`);
+  }
+}
+
 export async function runMigrations(): Promise<void> {
-  // Tables are created in connectDatabase via createTables()
-  // Future migrations can be added here with ALTER TABLE statements
+  // v0.2.2 — status, archive, pin fields
+  addColumnIfNotExists("job_applications", "archived", "INTEGER NOT NULL DEFAULT 0");
+  addColumnIfNotExists("job_applications", "status_updated_at", "TEXT");
+  addColumnIfNotExists("job_applications", "interview_date", "TEXT");
+  addColumnIfNotExists("job_applications", "pinned", "INTEGER NOT NULL DEFAULT 0");
+  addColumnIfNotExists("job_applications", "pinned_at", "TEXT");
+
   log.info("Migrations complete");
 }

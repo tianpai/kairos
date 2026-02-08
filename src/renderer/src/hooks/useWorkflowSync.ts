@@ -11,8 +11,8 @@ import {
 } from '../workflow'
 import type { JobApplicationDetails } from '@api/jobs'
 import type { TemplateData } from '@templates/template.types'
-import { friendlyError } from '@/utils/error'
 import type { TaskStateMap } from '../workflow'
+import { friendlyError } from '@/utils/error'
 
 /**
  * Syncs workflow state between main process, Zustand store, and React Query cache
