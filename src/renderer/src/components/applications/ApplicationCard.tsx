@@ -6,20 +6,33 @@ import type { KeyboardEvent } from 'react'
 import type { JobApplication } from '@api/jobs'
 import { getScoreColor } from '@/utils/scoreThresholds'
 
-function isOverdue(dateStr: string): boolean {
-  const date = new Date(dateStr)
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
-  return date < today
-}
-
-// Card dimensions
 const CARD_WIDTH = 220
 const CARD_HEIGHT = 120
 const EXPANDED_WIDTH = 280
 const EXPANDED_HEIGHT = 180
 const MAX_TEXT_LENGTH = 22
 const MAX_TEXT_LENGTH_EXPANDED = 50
+
+// --- Animation variants ---
+
+const fade = {
+  initial: { opacity: 0 },
+  animate: { opacity: 1 },
+  exit: { opacity: 0 },
+}
+
+const fadeScale = {
+  initial: { opacity: 0, scale: 0.9 },
+  animate: { opacity: 1, scale: 1 },
+  exit: { opacity: 0, scale: 0.5 },
+}
+
+function isOverdue(dateStr: string): boolean {
+  const date = new Date(dateStr)
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  return date < today
+}
 
 function TruncateText({
   children,
@@ -45,25 +58,15 @@ function TruncateText({
   )
 }
 
-const fade = {
-  initial: { opacity: 0 },
-  animate: { opacity: 1 },
-  exit: { opacity: 0 },
-}
-
-const fadeScale = {
-  initial: { opacity: 0, scale: 0.9 },
-  animate: { opacity: 1, scale: 1 },
-  exit: { opacity: 0, scale: 0.5 },
-}
-
-interface IconButtonProps {
+function IconButton({
+  icon,
+  onClick,
+  ariaLabel,
+}: {
   icon: React.ReactNode
   onClick: (e: React.MouseEvent) => void
   ariaLabel: string
-}
-
-function IconButton({ icon, onClick, ariaLabel }: IconButtonProps) {
+}) {
   return (
     <motion.button
       {...fadeScale}
@@ -76,12 +79,13 @@ function IconButton({ icon, onClick, ariaLabel }: IconButtonProps) {
   )
 }
 
-interface TextButtonProps {
+function TextButton({
+  label,
+  onClick,
+}: {
   label: string
   onClick: (e: React.MouseEvent) => void
-}
-
-function TextButton({ label, onClick }: TextButtonProps) {
+}) {
   return (
     <motion.button
       {...fadeScale}
@@ -93,6 +97,83 @@ function TextButton({ label, onClick }: TextButtonProps) {
   )
 }
 
+function CollapsedContent({
+  dueDate,
+  matchPercentage,
+}: {
+  dueDate: string
+  matchPercentage: number
+}) {
+  const overdue = isOverdue(dueDate)
+  const scoreColor = getScoreColor(matchPercentage)
+
+  return (
+    <motion.div key="collapsed" {...fade}>
+      {/* Bottom-left: due date */}
+      <div
+        className={`absolute bottom-3 left-3 text-xs ${overdue ? 'text-error' : 'text-hint'}`}
+        style={{ opacity: 0.8 }}
+      >
+        Due {formatDate(dueDate)}
+      </div>
+
+      {/* Top-right: score dot */}
+      <div
+        className="absolute top-1 right-1 text-sm font-semibold"
+        style={{ color: scoreColor }}
+      >
+        <Dot className="size-10" />
+      </div>
+    </motion.div>
+  )
+}
+
+function ExpandedContent({
+  application,
+  onSubmit,
+  onEdit,
+  onOpen,
+}: {
+  application: JobApplication
+  onSubmit: (e: React.MouseEvent) => void
+  onEdit: (e: React.MouseEvent) => void
+  onOpen: (e: React.MouseEvent) => void
+}) {
+  const overdue = isOverdue(application.dueDate)
+
+  return (
+    <motion.div key="expanded" {...fade}>
+      {/* Inline: due date + score */}
+      <div className={`mt-1 text-xs ${overdue ? 'text-error' : 'text-hint'}`}>
+        Due {formatDate(application.dueDate)}
+      </div>
+      <div
+        className="text-sm font-semibold"
+        style={{ color: getScoreColor(application.matchPercentage) }}
+      >
+        {Math.round(application.matchPercentage)}%
+      </div>
+
+      {/* Bottom-right: action buttons */}
+      <div className="absolute right-3 bottom-3 flex items-center gap-2">
+        {application.jobUrl && (
+          <IconButton
+            icon={<ExternalLink size={14} />}
+            onClick={onSubmit}
+            ariaLabel="Open job posting"
+          />
+        )}
+        <IconButton
+          icon={<Pencil size={14} />}
+          onClick={onEdit}
+          ariaLabel="Edit application"
+        />
+        <TextButton label="Open" onClick={onOpen} />
+      </div>
+    </motion.div>
+  )
+}
+
 interface ApplicationCardProps {
   application: JobApplication
   isExpanded: boolean
@@ -100,28 +181,6 @@ interface ApplicationCardProps {
   onOpen: (app: JobApplication, element: HTMLElement) => void
   onEdit: (app: JobApplication) => void
   disabled?: boolean
-}
-
-function CardScore({
-  isExpanded,
-  score,
-}: {
-  isExpanded: boolean
-  score: number
-}) {
-  const scoreColor = getScoreColor(score)
-
-  if (!isExpanded) {
-    return (
-      <motion.div
-        {...fade}
-        className="absolute top-1 right-1 text-sm font-semibold"
-        style={{ color: scoreColor }}
-      >
-        <Dot className="size-10" />
-      </motion.div>
-    )
-  }
 }
 
 export function ApplicationCard({
@@ -170,11 +229,8 @@ export function ApplicationCard({
     if (url) window.kairos.shell.openExternal(url)
   }
 
-  const overdue = isOverdue(application.dueDate)
-
   return (
     <>
-      {/* Wrapper to preserve layout space */}
       <div
         className="relative"
         style={{ width: CARD_WIDTH, height: CARD_HEIGHT }}
@@ -213,6 +269,7 @@ export function ApplicationCard({
             transition: 'box-shadow 0.15s ease-out',
           }}
         >
+          {/* Always visible */}
           <div className="text-left">
             <TruncateText
               expanded={isExpanded}
@@ -228,72 +285,22 @@ export function ApplicationCard({
             >
               {application.position}
             </TruncateText>
-            <AnimatePresence>
-              {isExpanded && (
-                <>
-                  <motion.div
-                    {...fade}
-                    className={`mt-1 text-xs ${overdue ? 'text-error' : 'text-hint'}`}
-                  >
-                    Due {formatDate(application.dueDate)}
-                  </motion.div>
-                  <motion.div
-                    {...fade}
-                    className="text-sm font-semibold"
-                    style={{
-                      color: getScoreColor(application.matchPercentage),
-                    }}
-                  >
-                    {Math.round(application.matchPercentage)}%
-                  </motion.div>
-                </>
-              )}
-            </AnimatePresence>
           </div>
 
-          {/* Due date - collapsed state */}
+          {/* State-dependent content */}
           <AnimatePresence>
-            {!isExpanded && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 0.8 }}
-                exit={{ opacity: 0 }}
-                className={`absolute bottom-3 left-3 text-xs ${overdue ? 'text-error' : 'text-hint'}`}
-              >
-                Due {formatDate(application.dueDate)}
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {/* Score - shows on hover or expanded */}
-          <AnimatePresence>
-            <CardScore
-              isExpanded={isExpanded}
-              score={application.matchPercentage}
-            />
-          </AnimatePresence>
-
-          {/* Action buttons - expanded state */}
-          <AnimatePresence>
-            {isExpanded && (
-              <motion.div
-                {...fade}
-                className="absolute right-3 bottom-3 flex items-center gap-2"
-              >
-                {application.jobUrl && (
-                  <IconButton
-                    icon={<ExternalLink size={14} />}
-                    onClick={handleSubmit}
-                    ariaLabel="Open job posting"
-                  />
-                )}
-                <IconButton
-                  icon={<Pencil size={14} />}
-                  onClick={handleEdit}
-                  ariaLabel="Edit application"
-                />
-                <TextButton label="Open" onClick={handleOpen} />
-              </motion.div>
+            {isExpanded ? (
+              <ExpandedContent
+                application={application}
+                onSubmit={handleSubmit}
+                onEdit={handleEdit}
+                onOpen={handleOpen}
+              />
+            ) : (
+              <CollapsedContent
+                dueDate={application.dueDate}
+                matchPercentage={application.matchPercentage}
+              />
             )}
           </AnimatePresence>
         </motion.div>
