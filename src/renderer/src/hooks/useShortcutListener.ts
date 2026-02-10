@@ -17,7 +17,6 @@ export function useShortcutListener() {
     (state) => state.requestDocumentSettings,
   )
   const requestTailor = useShortcutStore((state) => state.requestTailor)
-  const requestNavigation = useShortcutStore((state) => state.requestNavigation)
   const { open: openBatchExport } = useBatchExportModal()
 
   useEffect(() => {
@@ -56,23 +55,6 @@ export function useShortcutListener() {
       requestTailor()
     })
 
-    // Navigation - store flags with direction
-    const unsubPrevApp = window.kairos.shortcuts.onPrevApp(() => {
-      requestNavigation('prev')
-    })
-
-    const unsubNextApp = window.kairos.shortcuts.onNextApp(() => {
-      requestNavigation('next')
-    })
-
-    const unsubLatestApp = window.kairos.shortcuts.onLatestApp(() => {
-      requestNavigation('latest')
-    })
-
-    const unsubOldestApp = window.kairos.shortcuts.onOldestApp(() => {
-      requestNavigation('oldest')
-    })
-
     // Toggle Columns - direct store call
     const unsubToggleColumns = window.kairos.shortcuts.onToggleColumns(() => {
       useLayoutStore.getState().toggleChecklist()
@@ -86,10 +68,6 @@ export function useShortcutListener() {
       unsubBatchExport()
       unsubDocSettings()
       unsubTailor()
-      unsubPrevApp()
-      unsubNextApp()
-      unsubLatestApp()
-      unsubOldestApp()
       unsubToggleColumns()
     }
   }, [
@@ -99,7 +77,6 @@ export function useShortcutListener() {
     requestExportPdf,
     requestDocumentSettings,
     requestTailor,
-    requestNavigation,
     openBatchExport,
   ])
 }

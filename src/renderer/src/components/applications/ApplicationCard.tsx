@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react'
-import { Dot, ExternalLink, Pencil, Pin, PinOff } from 'lucide-react'
+import { ArchiveRestore, ArchiveX, Dot, ExternalLink, Pencil, Pin, PinOff } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
 import { formatDate, normalizeUrl } from '@utils/format'
 import type { KeyboardEvent } from 'react'
@@ -160,14 +160,18 @@ function CollapsedContent({
 
 function ExpandedContent({
   application,
+  isArchived,
   onSubmit,
   onEdit,
   onOpen,
+  onArchive,
 }: {
   application: JobApplication
+  isArchived: boolean
   onSubmit: (e: React.MouseEvent) => void
   onEdit: (e: React.MouseEvent) => void
   onOpen: (e: React.MouseEvent) => void
+  onArchive: (e: React.MouseEvent) => void
 }) {
   const overdue = isOverdue(application.dueDate)
 
@@ -184,21 +188,30 @@ function ExpandedContent({
         {Math.round(application.matchPercentage)}%
       </div>
 
-      {/* Bottom-right: action buttons */}
-      <div className="absolute right-3 bottom-3 flex items-center gap-2">
-        {application.jobUrl && (
-          <IconButton
-            icon={<ExternalLink size={14} />}
-            onClick={onSubmit}
-            ariaLabel="Open job posting"
-          />
-        )}
+      {/* Bottom action row */}
+      <div className="absolute right-3 bottom-3 left-3 flex items-center justify-between">
+        {/* Left: archive / unarchive */}
         <IconButton
-          icon={<Pencil size={14} />}
-          onClick={onEdit}
-          ariaLabel="Edit application"
+          icon={isArchived ? <ArchiveRestore size={14} /> : <ArchiveX size={14} />}
+          onClick={onArchive}
+          ariaLabel={isArchived ? 'Unarchive application' : 'Archive application'}
         />
-        <TextButton label="Open" onClick={onOpen} />
+        {/* Right: url + edit + open */}
+        <div className="flex items-center gap-2">
+          {application.jobUrl && (
+            <IconButton
+              icon={<ExternalLink size={14} />}
+              onClick={onSubmit}
+              ariaLabel="Open job posting"
+            />
+          )}
+          <IconButton
+            icon={<Pencil size={14} />}
+            onClick={onEdit}
+            ariaLabel="Edit application"
+          />
+          <TextButton label="Open" onClick={onOpen} />
+        </div>
       </div>
     </motion.div>
   )
@@ -207,10 +220,12 @@ function ExpandedContent({
 interface ApplicationCardProps {
   application: JobApplication
   isExpanded: boolean
+  isArchived: boolean
   onToggleExpand: () => void
   onOpen: (app: JobApplication, element: HTMLElement) => void
   onEdit: (app: JobApplication) => void
   onPin: (id: string) => void
+  onArchive: (id: string) => void
   disabled?: boolean
 }
 
@@ -286,23 +301,27 @@ function CardSurface({
 interface CardBodyProps {
   application: JobApplication
   isExpanded: boolean
+  isArchived: boolean
   isHovered: boolean
   isAnimating: boolean
   onSubmit: (e: React.MouseEvent) => void
   onEdit: (e: React.MouseEvent) => void
   onOpen: (e: React.MouseEvent) => void
   onPin: (e: React.MouseEvent) => void
+  onArchive: (e: React.MouseEvent) => void
 }
 
 function CardBody({
   application,
   isExpanded,
+  isArchived,
   isHovered,
   isAnimating,
   onSubmit,
   onEdit,
   onOpen,
   onPin,
+  onArchive,
 }: CardBodyProps) {
   return (
     <>
@@ -329,9 +348,11 @@ function CardBody({
         {isExpanded ? (
           <ExpandedContent
             application={application}
+            isArchived={isArchived}
             onSubmit={onSubmit}
             onEdit={onEdit}
             onOpen={onOpen}
+            onArchive={onArchive}
           />
         ) : (
           <CollapsedContent
@@ -370,10 +391,12 @@ function CardBackdrop({
 export function ApplicationCard({
   application,
   isExpanded,
+  isArchived,
   onToggleExpand,
   onOpen,
   onEdit,
   onPin,
+  onArchive,
   disabled,
 }: ApplicationCardProps) {
   const cardRef = useRef<HTMLDivElement>(null)
@@ -419,6 +442,11 @@ export function ApplicationCard({
     onPin(application.id)
   }
 
+  function handleArchive(e: React.MouseEvent) {
+    e.stopPropagation()
+    onArchive(application.id)
+  }
+
   return (
     <>
       <div
@@ -440,12 +468,14 @@ export function ApplicationCard({
           <CardBody
             application={application}
             isExpanded={isExpanded}
+            isArchived={isArchived}
             isHovered={isHovered}
             isAnimating={isAnimating}
             onSubmit={handleSubmit}
             onEdit={handleEdit}
             onOpen={handleOpen}
             onPin={handlePin}
+            onArchive={handleArchive}
           />
         </CardSurface>
       </div>

@@ -7,6 +7,7 @@ export const jobs = {
   createFromExisting: (data: unknown): Promise<{ id: string }> =>
     ipcRenderer.invoke("jobs:createFromExisting", data),
   getAll: (): Promise<Array<unknown>> => ipcRenderer.invoke("jobs:getAll"),
+  getArchived: (): Promise<Array<unknown>> => ipcRenderer.invoke("jobs:getArchived"),
   get: (id: string): Promise<unknown> => ipcRenderer.invoke("jobs:get", id),
   update: (id: string, data: unknown): Promise<unknown> =>
     ipcRenderer.invoke("jobs:update", id, data),
@@ -43,4 +44,6 @@ export const jobs = {
     ipcRenderer.invoke("jobs:saveWorkflowState", id, data),
   togglePin: (id: string, data: unknown): Promise<{ success: boolean }> =>
     ipcRenderer.invoke("jobs:togglePin", id, data),
+  toggleArchive: (id: string, data: unknown): Promise<{ success: boolean }> =>
+    ipcRenderer.invoke("jobs:toggleArchive", id, data),
 };

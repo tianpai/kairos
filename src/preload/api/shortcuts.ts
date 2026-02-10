@@ -23,14 +23,6 @@ export const shortcuts = {
     onShortcut("shortcut:export-pdf", callback),
   onDocumentSettings: (callback: ShortcutCallback): Unsubscribe =>
     onShortcut("shortcut:document-settings", callback),
-  onPrevApp: (callback: ShortcutCallback): Unsubscribe =>
-    onShortcut("shortcut:prev-app", callback),
-  onNextApp: (callback: ShortcutCallback): Unsubscribe =>
-    onShortcut("shortcut:next-app", callback),
-  onLatestApp: (callback: ShortcutCallback): Unsubscribe =>
-    onShortcut("shortcut:latest-app", callback),
-  onOldestApp: (callback: ShortcutCallback): Unsubscribe =>
-    onShortcut("shortcut:oldest-app", callback),
   onTailor: (callback: ShortcutCallback): Unsubscribe =>
     onShortcut("shortcut:tailor", callback),
   onToggleColumns: (callback: ShortcutCallback): Unsubscribe =>

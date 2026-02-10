@@ -1,7 +1,5 @@
 import { create } from 'zustand'
 
-export type NavigationDirection = 'prev' | 'next' | 'oldest' | 'latest'
-
 interface ShortcutState {
   // Flags
   newApplicationRequested: boolean
@@ -9,7 +7,6 @@ interface ShortcutState {
   exportPdfRequested: boolean
   documentSettingsRequested: boolean
   tailorRequested: boolean
-  navigationRequested: NavigationDirection | null
 
   // Actions
   requestNewApplication: () => void
@@ -26,9 +23,6 @@ interface ShortcutState {
 
   requestTailor: () => void
   clearTailorRequest: () => void
-
-  requestNavigation: (direction: NavigationDirection) => void
-  clearNavigationRequest: () => void
 }
 
 export const useShortcutStore = create<ShortcutState>()((set) => ({
@@ -38,7 +32,6 @@ export const useShortcutStore = create<ShortcutState>()((set) => ({
   exportPdfRequested: false,
   documentSettingsRequested: false,
   tailorRequested: false,
-  navigationRequested: null,
 
   // Actions
   requestNewApplication: () => set({ newApplicationRequested: true }),
@@ -55,7 +48,4 @@ export const useShortcutStore = create<ShortcutState>()((set) => ({
 
   requestTailor: () => set({ tailorRequested: true }),
   clearTailorRequest: () => set({ tailorRequested: false }),
-
-  requestNavigation: (direction) => set({ navigationRequested: direction }),
-  clearNavigationRequest: () => set({ navigationRequested: null }),
 }))

@@ -1,9 +1,8 @@
 import { useSearch } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
-import { getAllJobApplications, getJobApplication } from '@api/jobs'
+import { getJobApplication } from '@api/jobs'
 import { useWorkflowSync } from '@hooks/useWorkflowSync'
 import { useSyncJobApplicationToStore } from '@hooks/useSyncJobApplicationToStore'
-import { useAppNavigation } from '@hooks/useAppNavigation'
 import ResumeRender from '@editor/ResumeRender'
 import ResumeForm from '@resumeForm/ResumeForm'
 import Checklist from '@checklist/Checklist'
@@ -23,12 +22,6 @@ export default function EditorPage() {
     preview: showChecklist ? 'col-span-4' : 'col-span-5',
   }
 
-  // Fetch all applications
-  const { data: applications = [] } = useQuery({
-    queryKey: ['jobApplications'],
-    queryFn: getAllJobApplications,
-  })
-
   // Fetch selected application details
   const { data: jobApplication } = useQuery({
     queryKey: ['jobApplication', jobId],
@@ -43,9 +36,6 @@ export default function EditorPage() {
 
   // Sync job application data to store (templateId + tailored resume)
   useSyncJobApplicationToStore(jobApplication)
-
-  // Handle keyboard shortcuts
-  useAppNavigation(applications, jobId)
 
   return (
     <AppLayout

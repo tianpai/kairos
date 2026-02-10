@@ -10,6 +10,7 @@ import {
   SaveResumeSchema,
   SaveTailoredResumeSchema,
   SaveWorkflowStateSchema,
+  ToggleArchiveSchema,
   TogglePinSchema,
   UpdateJobApplicationSchema,
   UpdateJobDescriptionSchema,
@@ -51,6 +52,10 @@ export function registerJobsHandlers(service: JobApplicationService): void {
 
   ipcMain.handle("jobs:getAll", async () => {
     return service.getAllJobApplications();
+  });
+
+  ipcMain.handle("jobs:getArchived", async () => {
+    return service.getArchivedJobApplications();
   });
 
   ipcMain.handle("jobs:get", async (_, id: string) => {
@@ -159,5 +164,10 @@ export function registerJobsHandlers(service: JobApplicationService): void {
   ipcMain.handle("jobs:togglePin", async (_, id: string, data: unknown) => {
     const validated = TogglePinSchema.parse(data);
     return service.togglePin(id, validated.pinned);
+  });
+
+  ipcMain.handle("jobs:toggleArchive", async (_, id: string, data: unknown) => {
+    const validated = ToggleArchiveSchema.parse(data);
+    return service.toggleArchive(id, validated.archived);
   });
 }

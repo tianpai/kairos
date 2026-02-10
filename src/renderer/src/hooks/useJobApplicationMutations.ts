@@ -18,6 +18,7 @@ export function useJobApplicationMutations(selectedJobId?: string) {
     },
     onSuccess: function () {
       queryClient.invalidateQueries({ queryKey: ['jobApplications'] })
+      queryClient.invalidateQueries({ queryKey: ['archivedJobApplications'] })
       queryClient.invalidateQueries({
         queryKey: ['jobApplication', selectedJobId],
       })
@@ -31,6 +32,7 @@ export function useJobApplicationMutations(selectedJobId?: string) {
     mutationFn: deleteJobApplication,
     onSuccess: function () {
       queryClient.invalidateQueries({ queryKey: ['jobApplications'] })
+      queryClient.invalidateQueries({ queryKey: ['archivedJobApplications'] })
     },
     onError: function () {
       toast.error('Failed to delete application')

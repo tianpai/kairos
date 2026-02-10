@@ -58,6 +58,10 @@ export const TogglePinSchema = z.object({
   pinned: z.boolean(),
 });
 
+export const ToggleArchiveSchema = z.object({
+  archived: z.boolean(),
+});
+
 export const SaveWorkflowStateSchema = z.object({
   workflowSteps: z.record(z.string(), z.unknown()).optional(),
   workflowStatus: z.string().optional(),

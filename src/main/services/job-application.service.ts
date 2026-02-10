@@ -138,6 +138,47 @@ export class JobApplicationService {
       .select()
       .from(jobApplications)
       .innerJoin(companies, eq(jobApplications.companyId, companies.id))
+      .where(eq(jobApplications.archived, 0))
+      .orderBy(desc(jobApplications.createdAt))
+      .all();
+
+    return results.map((row) => ({
+      id: row.job_applications.id,
+      companyName: row.companies.name,
+      position: row.job_applications.position,
+      dueDate: row.job_applications.dueDate.split("T")[0],
+      matchPercentage: row.job_applications.matchPercentage,
+      applicationStatus: row.job_applications.applicationStatus,
+      jobUrl: row.job_applications.jobUrl,
+      originalResume: row.job_applications.originalResume,
+      pinned: row.job_applications.pinned,
+      pinnedAt: row.job_applications.pinnedAt,
+      createdAt: row.job_applications.createdAt,
+      updatedAt: row.job_applications.updatedAt,
+    }));
+  }
+
+  async getArchivedJobApplications(): Promise<
+    Array<{
+      id: string;
+      companyName: string;
+      position: string;
+      dueDate: string;
+      matchPercentage: number;
+      applicationStatus: string | null;
+      jobUrl: string | null;
+      originalResume: string;
+      pinned: number;
+      pinnedAt: string | null;
+      createdAt: string;
+      updatedAt: string;
+    }>
+  > {
+    const results = this.db
+      .select()
+      .from(jobApplications)
+      .innerJoin(companies, eq(jobApplications.companyId, companies.id))
+      .where(eq(jobApplications.archived, 1))
       .orderBy(desc(jobApplications.createdAt))
       .all();
 
@@ -426,6 +467,23 @@ export class JobApplicationService {
       .set({
         pinned: pinned ? 1 : 0,
         pinnedAt: pinned ? nowISO() : null,
+        updatedAt: nowISO(),
+      })
+      .where(eq(jobApplications.id, jobId))
+      .run();
+    return { success: true };
+  }
+
+  async toggleArchive(
+    jobId: string,
+    archived: boolean,
+  ): Promise<{ success: boolean }> {
+    this.requireJobApplication(jobId);
+
+    this.db
+      .update(jobApplications)
+      .set({
+        archived: archived ? 1 : 0,
         updatedAt: nowISO(),
       })
       .where(eq(jobApplications.id, jobId))

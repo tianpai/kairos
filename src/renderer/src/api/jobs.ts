@@ -87,6 +87,10 @@ export async function getAllJobApplications(): Promise<Array<JobApplication>> {
   return window.kairos.jobs.getAll() as Promise<Array<JobApplication>>
 }
 
+export async function getArchivedJobApplications(): Promise<Array<JobApplication>> {
+  return window.kairos.jobs.getArchived() as Promise<Array<JobApplication>>
+}
+
 export async function getJobApplication(
   id: string,
 ): Promise<JobApplicationDetails> {
@@ -124,4 +128,11 @@ export function togglePin(
   pinned: boolean,
 ): Promise<GeneralAPIResponse> {
   return window.kairos.jobs.togglePin(id, { pinned })
+}
+
+export function toggleArchive(
+  id: string,
+  archived: boolean,
+): Promise<GeneralAPIResponse> {
+  return window.kairos.jobs.toggleArchive(id, { archived })
 }

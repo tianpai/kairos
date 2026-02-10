@@ -2,14 +2,20 @@ import { useEffect, useRef, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
 import { AnimatePresence, motion } from 'motion/react'
-import { getAllJobApplications, togglePin } from '@api/jobs'
+import {
+  getAllJobApplications,
+  getArchivedJobApplications,
+  toggleArchive,
+  togglePin,
+} from '@api/jobs'
 import { AppLayout } from '@layout/AppLayout'
 import { PageHeader } from '@ui/PageHeader'
 import { useJobApplicationMutations } from '@hooks/useJobApplicationMutations'
-import { Search, X } from 'lucide-react'
+import { Archive, Search, X } from 'lucide-react'
 import { ApplicationCard } from './ApplicationCard'
 import type { JobApplication } from '@api/jobs'
 import JobInfoModal from '@/components/applications/JobInfoModal'
+import { useBatchExportModal } from '@/components/export/BatchExportModal'
 import NewApplicationButton from '@/components/upload/NewApplicationButton'
 import { BatchExportButton } from '@/components/export/BatchExportButton'
 import { SettingsButton } from '@/components/settings/SettingsButton'
@@ -20,7 +26,7 @@ interface OpeningApp {
   originY: number
 }
 
-function ApplicationPageHeader() {
+function ApplicationPageHeader({ showArchived }: { showArchived: boolean }) {
   return (
     <PageHeader
       left={<NewApplicationButton />}
@@ -28,7 +34,7 @@ function ApplicationPageHeader() {
       right={
         <>
           <SettingsButton />
-          <BatchExportButton />
+          <BatchExportButton showArchived={showArchived} />
         </>
       }
     />
@@ -89,14 +95,121 @@ function SearchInput({
   )
 }
 
+function ApplicationsGrid({
+  pinnedApplications,
+  otherApplications,
+  hasPinnedApplications,
+  expandedAppId,
+  isArchived,
+  onToggleExpand,
+  onOpen,
+  onEdit,
+  onPin,
+  onArchive,
+  disabled,
+}: {
+  pinnedApplications: Array<JobApplication>
+  otherApplications: Array<JobApplication>
+  hasPinnedApplications: boolean
+  expandedAppId: string | null
+  isArchived: boolean
+  onToggleExpand: (id: string) => void
+  onOpen: (app: JobApplication, element: HTMLElement) => void
+  onEdit: (app: JobApplication) => void
+  onPin: (args: { id: string; pinned: boolean }) => void
+  onArchive: (id: string) => void
+  disabled: boolean
+}) {
+  return (
+    <div className="flex flex-col gap-5">
+      <ApplicationsSection
+        title={hasPinnedApplications ? 'Pinned' : undefined}
+        applications={pinnedApplications}
+        expandedAppId={expandedAppId}
+        isArchived={isArchived}
+        onToggleExpand={onToggleExpand}
+        onOpen={onOpen}
+        onEdit={onEdit}
+        onPin={(id) => onPin({ id, pinned: false })}
+        onArchive={onArchive}
+        disabled={disabled}
+      />
+      <ApplicationsSection
+        title={hasPinnedApplications ? 'Others' : undefined}
+        applications={otherApplications}
+        expandedAppId={expandedAppId}
+        isArchived={isArchived}
+        onToggleExpand={onToggleExpand}
+        onOpen={onOpen}
+        onEdit={onEdit}
+        onPin={(id) => onPin({ id, pinned: true })}
+        onArchive={onArchive}
+        disabled={disabled}
+      />
+    </div>
+  )
+}
+
+function ApplicationToolbar({
+  search,
+  onSearchChange,
+  onSearchClear,
+  showArchived,
+  onArchiveToggle,
+}: {
+  search: string
+  onSearchChange: (e: React.ChangeEvent<HTMLInputElement>) => void
+  onSearchClear: () => void
+  showArchived: boolean
+  onArchiveToggle: () => void
+}) {
+  return (
+    <div className="flex items-center justify-center gap-3">
+      <SearchInput
+        value={search}
+        onChange={onSearchChange}
+        onClear={onSearchClear}
+      />
+      <ArchiveToggle active={showArchived} onClick={onArchiveToggle} />
+    </div>
+  )
+}
+
+function ArchiveToggle({
+  active,
+  onClick,
+}: {
+  active: boolean
+  onClick: () => void
+}) {
+  return (
+    <button
+      onClick={onClick}
+      aria-label={
+        active ? 'Show active applications' : 'Show archived applications'
+      }
+      className={`flex items-center gap-1.5 rounded-xl border px-2.5 py-2 transition-colors ${
+        active
+          ? 'border-primary bg-hover text-primary'
+          : 'border-default text-hint hover:text-primary'
+      }`}
+    >
+      <Archive size={14} />
+      <span className="text-xs">Archive</span>
+    </button>
+  )
+}
+
 interface ApplicationsSectionProps {
   title?: string
   applications: Array<JobApplication>
   expandedAppId: string | null
+  isArchived: boolean
   onToggleExpand: (id: string) => void
   onOpen: (app: JobApplication, element: HTMLElement) => void
   onEdit: (app: JobApplication) => void
   onPin: (id: string) => void
+  onArchive: (id: string) => void
   disabled: boolean
 }
 
@@ -104,10 +217,12 @@ function ApplicationsSection({
   title,
   applications,
   expandedAppId,
+  isArchived,
   onToggleExpand,
   onOpen,
   onEdit,
   onPin,
+  onArchive,
   disabled,
 }: ApplicationsSectionProps) {
   if (applications.length === 0) return null
@@ -130,10 +245,12 @@ function ApplicationsSection({
           key={app.id}
           application={app}
           isExpanded={expandedAppId === app.id}
+          isArchived={isArchived}
           onToggleExpand={() => onToggleExpand(app.id)}
           onOpen={onOpen}
           onEdit={onEdit}
           onPin={onPin}
+          onArchive={onArchive}
           disabled={disabled}
         />
       ))}
@@ -143,20 +260,51 @@ function ApplicationsSection({
 
 export default function AllApplicationsPage() {
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
+  const { handleUpdate, handleDelete } = useJobApplicationMutations()
+  const { setShowArchivedMode } = useBatchExportModal()
+
+  const [showArchived, setShowArchived] = useState(false)
+
+  useEffect(() => {
+    setShowArchivedMode(showArchived)
+  }, [showArchived, setShowArchivedMode])
 
   const { data: applications = [] } = useQuery({
     queryKey: ['jobApplications'],
     queryFn: getAllJobApplications,
+    enabled: !showArchived,
   })
 
-  const queryClient = useQueryClient()
-  const { handleUpdate, handleDelete } = useJobApplicationMutations()
+  const { data: archivedApplications = [] } = useQuery({
+    queryKey: ['archivedJobApplications'],
+    queryFn: getArchivedJobApplications,
+    enabled: showArchived,
+  })
+
+  const displayedApplications = showArchived
+    ? archivedApplications
+    : applications
 
   const pinMutation = useMutation({
     mutationFn: ({ id, pinned }: { id: string; pinned: boolean }) =>
       togglePin(id, pinned),
-    onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: ['jobApplications'] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['jobApplications'] })
+      queryClient.invalidateQueries({
+        queryKey: ['archivedJobApplications'],
+      })
+    },
+  })
+
+  const archiveMutation = useMutation({
+    mutationFn: (id: string) => toggleArchive(id, !showArchived),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['jobApplications'] })
+      queryClient.invalidateQueries({
+        queryKey: ['archivedJobApplications'],
+      })
+    },
   })
 
   const [openingApp, setOpeningApp] = useState<OpeningApp | null>(null)
@@ -166,7 +314,7 @@ export default function AllApplicationsPage() {
 
   // searching
   const [search, setSearch] = useState('')
-  const filtered = applications.filter((app) => {
+  const filtered = displayedApplications.filter((app) => {
     if (!search) return true
     const q = search.toLowerCase()
     return (
@@ -214,51 +362,42 @@ export default function AllApplicationsPage() {
     setExpandedAppId((current) => (current === id ? null : id))
   }
 
-  if (applications.length === 0) {
-    return (
-      <AppLayout header={<ApplicationPageHeader />}>
-        <EmptyStage />
-      </AppLayout>
-    )
-  }
-
   return (
-    <AppLayout header={<ApplicationPageHeader />}>
+    <AppLayout header={<ApplicationPageHeader showArchived={showArchived} />}>
       <div className="relative flex h-full flex-col gap-5 overflow-auto px-10 py-5">
-        <div className="flex justify-center">
-          <SearchInput
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            onClear={() => setSearch('')}
-          />
-        </div>
-        {search && filtered.length == 0 ? (
+        <ApplicationToolbar
+          search={search}
+          onSearchChange={(e) => setSearch(e.target.value)}
+          onSearchClear={() => setSearch('')}
+          showArchived={showArchived}
+          onArchiveToggle={() => {
+            setShowArchived((prev) => !prev)
+            setSearch('')
+            setExpandedAppId(null)
+          }}
+        />
+        {!showArchived && applications.length === 0 ? (
+          <EmptyStage />
+        ) : showArchived && displayedApplications.length === 0 ? (
+          <div className="text-hint text-center">No archived applications</div>
+        ) : search && filtered.length === 0 ? (
           <div className="text-hint text-center">
             You didn't apply there... yet
           </div>
         ) : (
-          <div className="flex flex-col gap-5">
-            <ApplicationsSection
-              title={hasPinnedApplications ? 'Pinned' : undefined}
-              applications={pinnedApplications}
-              expandedAppId={expandedAppId}
-              onToggleExpand={handleToggleExpand}
-              onOpen={handleOpenCard}
-              onEdit={setEditingApp}
-              onPin={(id) => pinMutation.mutate({ id, pinned: false })}
-              disabled={isOpening}
-            />
-            <ApplicationsSection
-              title={hasPinnedApplications ? 'Others' : undefined}
-              applications={otherApplications}
-              expandedAppId={expandedAppId}
-              onToggleExpand={handleToggleExpand}
-              onOpen={handleOpenCard}
-              onEdit={setEditingApp}
-              onPin={(id) => pinMutation.mutate({ id, pinned: true })}
-              disabled={isOpening}
-            />
-          </div>
+          <ApplicationsGrid
+            pinnedApplications={pinnedApplications}
+            otherApplications={otherApplications}
+            hasPinnedApplications={hasPinnedApplications}
+            expandedAppId={expandedAppId}
+            isArchived={showArchived}
+            onToggleExpand={handleToggleExpand}
+            onOpen={handleOpenCard}
+            onEdit={setEditingApp}
+            onPin={pinMutation.mutate}
+            onArchive={(id: string) => archiveMutation.mutate(id)}
+            disabled={isOpening}
+          />
         )}
       </div>
 
