@@ -46,4 +46,6 @@ export const jobs = {
     ipcRenderer.invoke("jobs:togglePin", id, data),
   toggleArchive: (id: string, data: unknown): Promise<{ success: boolean }> =>
     ipcRenderer.invoke("jobs:toggleArchive", id, data),
+  updateStatus: (id: string, data: unknown): Promise<{ success: boolean }> =>
+    ipcRenderer.invoke("jobs:updateStatus", id, data),
 };

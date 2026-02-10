@@ -10,6 +10,8 @@ import { formatDate } from '@utils/format'
 import { fade } from './constants'
 import { IconButton } from './ui/IconButton'
 import { PinToggleButton } from './ui/PinToggleButton'
+import { StatusBadge } from './ui/StatusBadge'
+import { StatusDropdown } from './ui/StatusDropdown'
 import { TextButton } from './ui/TextButton'
 import { TruncateText } from './ui/TruncateText'
 import { isOverdue } from './utils'
@@ -27,11 +29,13 @@ interface ContentProps {
   onOpen: (e: React.MouseEvent) => void
   onPin: (e: React.MouseEvent) => void
   onArchive: (e: React.MouseEvent) => void
+  onStatusChange: (status: string | null) => void
 }
 
 interface CollapsedContentProps {
   dueDate: string
   matchPercentage: number
+  applicationStatus: string | null
   isPinned: boolean
   isHovered: boolean
   onPin: (e: React.MouseEvent) => void
@@ -40,6 +44,7 @@ interface CollapsedContentProps {
 function CollapsedContent({
   dueDate,
   matchPercentage,
+  applicationStatus,
   isPinned,
   isHovered,
   onPin,
@@ -60,6 +65,8 @@ function CollapsedContent({
         <Dot className="-ml-2 size-8 shrink-0" style={{ color: scoreColor }} />
         Due {formatDate(dueDate)}
       </div>
+
+      <StatusBadge status={applicationStatus} />
     </motion.div>
   )
 }
@@ -71,6 +78,7 @@ interface ExpandedContentProps {
   onEdit: (e: React.MouseEvent) => void
   onOpen: (e: React.MouseEvent) => void
   onArchive: (e: React.MouseEvent) => void
+  onStatusChange: (status: string | null) => void
 }
 
 function ExpandedContent({
@@ -80,6 +88,7 @@ function ExpandedContent({
   onEdit,
   onOpen,
   onArchive,
+  onStatusChange,
 }: ExpandedContentProps) {
   const overdue = isOverdue(application.dueDate)
 
@@ -88,11 +97,17 @@ function ExpandedContent({
       <div className={`mt-1 text-xs ${overdue ? 'text-error' : 'text-hint'}`}>
         Due {formatDate(application.dueDate)}
       </div>
-      <div
-        className="text-sm font-semibold"
-        style={{ color: getScoreColor(application.matchPercentage) }}
-      >
-        {Math.round(application.matchPercentage)}%
+      <div className="flex items-center gap-2">
+        <div
+          className="text-sm font-semibold"
+          style={{ color: getScoreColor(application.matchPercentage) }}
+        >
+          {Math.round(application.matchPercentage)}%
+        </div>
+        <StatusDropdown
+          status={application.applicationStatus}
+          onStatusChange={onStatusChange}
+        />
       </div>
 
       <div className="absolute right-3 bottom-3 left-3 flex items-center justify-between">
@@ -136,6 +151,7 @@ export function Content({
   onOpen,
   onPin,
   onArchive,
+  onStatusChange,
 }: ContentProps) {
   return (
     <>
@@ -165,11 +181,13 @@ export function Content({
             onEdit={onEdit}
             onOpen={onOpen}
             onArchive={onArchive}
+            onStatusChange={onStatusChange}
           />
         ) : (
           <CollapsedContent
             dueDate={application.dueDate}
             matchPercentage={application.matchPercentage}
+            applicationStatus={application.applicationStatus}
             isPinned={application.pinned === 1}
             isHovered={isHovered}
             onPin={onPin}

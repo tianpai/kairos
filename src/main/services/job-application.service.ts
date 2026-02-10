@@ -490,4 +490,22 @@ export class JobApplicationService {
       .run();
     return { success: true };
   }
+
+  async updateStatus(
+    jobId: string,
+    status: string | null,
+  ): Promise<{ success: boolean }> {
+    this.requireJobApplication(jobId);
+
+    this.db
+      .update(jobApplications)
+      .set({
+        applicationStatus: status,
+        statusUpdatedAt: status ? nowISO() : null,
+        updatedAt: nowISO(),
+      })
+      .where(eq(jobApplications.id, jobId))
+      .run();
+    return { success: true };
+  }
 }

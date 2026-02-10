@@ -12,6 +12,7 @@ import {
   SaveWorkflowStateSchema,
   ToggleArchiveSchema,
   TogglePinSchema,
+  UpdateStatusSchema,
   UpdateJobApplicationSchema,
   UpdateJobDescriptionSchema,
 } from "../schemas/job-application.schemas";
@@ -169,5 +170,10 @@ export function registerJobsHandlers(service: JobApplicationService): void {
   ipcMain.handle("jobs:toggleArchive", async (_, id: string, data: unknown) => {
     const validated = ToggleArchiveSchema.parse(data);
     return service.toggleArchive(id, validated.archived);
+  });
+
+  ipcMain.handle("jobs:updateStatus", async (_, id: string, data: unknown) => {
+    const validated = UpdateStatusSchema.parse(data);
+    return service.updateStatus(id, validated.status);
   });
 }

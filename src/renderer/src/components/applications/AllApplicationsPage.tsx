@@ -7,6 +7,7 @@ import {
   getArchivedJobApplications,
   toggleArchive,
   togglePin,
+  updateStatus,
 } from '@api/jobs'
 import { AppLayout } from '@layout/AppLayout'
 import { PageHeader } from '@ui/PageHeader'
@@ -106,6 +107,7 @@ function ApplicationsGrid({
   onEdit,
   onPin,
   onArchive,
+  onStatusChange,
   disabled,
 }: {
   pinnedApplications: Array<JobApplication>
@@ -118,6 +120,7 @@ function ApplicationsGrid({
   onEdit: (app: JobApplication) => void
   onPin: (args: { id: string; pinned: boolean }) => void
   onArchive: (id: string) => void
+  onStatusChange: (id: string, status: string | null) => void
   disabled: boolean
 }) {
   return (
@@ -132,6 +135,7 @@ function ApplicationsGrid({
         onEdit={onEdit}
         onPin={(id) => onPin({ id, pinned: false })}
         onArchive={onArchive}
+        onStatusChange={onStatusChange}
         disabled={disabled}
       />
       <ApplicationsSection
@@ -144,6 +148,7 @@ function ApplicationsGrid({
         onEdit={onEdit}
         onPin={(id) => onPin({ id, pinned: true })}
         onArchive={onArchive}
+        onStatusChange={onStatusChange}
         disabled={disabled}
       />
     </div>
@@ -210,6 +215,7 @@ interface ApplicationsSectionProps {
   onEdit: (app: JobApplication) => void
   onPin: (id: string) => void
   onArchive: (id: string) => void
+  onStatusChange: (id: string, status: string | null) => void
   disabled: boolean
 }
 
@@ -223,6 +229,7 @@ function ApplicationsSection({
   onEdit,
   onPin,
   onArchive,
+  onStatusChange,
   disabled,
 }: ApplicationsSectionProps) {
   if (applications.length === 0) return null
@@ -251,6 +258,7 @@ function ApplicationsSection({
           onEdit={onEdit}
           onPin={onPin}
           onArchive={onArchive}
+          onStatusChange={onStatusChange}
           disabled={disabled}
         />
       ))}
@@ -299,6 +307,17 @@ export default function AllApplicationsPage() {
 
   const archiveMutation = useMutation({
     mutationFn: (id: string) => toggleArchive(id, !showArchived),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['jobApplications'] })
+      queryClient.invalidateQueries({
+        queryKey: ['archivedJobApplications'],
+      })
+    },
+  })
+
+  const statusMutation = useMutation({
+    mutationFn: ({ id, status }: { id: string; status: string | null }) =>
+      updateStatus(id, status),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['jobApplications'] })
       queryClient.invalidateQueries({
@@ -396,6 +415,9 @@ export default function AllApplicationsPage() {
             onEdit={setEditingApp}
             onPin={pinMutation.mutate}
             onArchive={(id: string) => archiveMutation.mutate(id)}
+            onStatusChange={(id: string, status: string | null) =>
+              statusMutation.mutate({ id, status })
+            }
             disabled={isOpening}
           />
         )}

@@ -152,6 +152,7 @@ interface KairosAPI {
     ) => Promise<{ success: boolean }>;
     togglePin: (id: string, data: unknown) => Promise<{ success: boolean }>;
     toggleArchive: (id: string, data: unknown) => Promise<{ success: boolean }>;
+    updateStatus: (id: string, data: unknown) => Promise<{ success: boolean }>;
   };
   workflow: {
     start: (payload: WorkflowStartPayload) => Promise<{ success: boolean }>;

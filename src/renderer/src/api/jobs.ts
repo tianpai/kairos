@@ -136,3 +136,10 @@ export function toggleArchive(
 ): Promise<GeneralAPIResponse> {
   return window.kairos.jobs.toggleArchive(id, { archived })
 }
+
+export function updateStatus(
+  id: string,
+  status: string | null,
+): Promise<GeneralAPIResponse> {
+  return window.kairos.jobs.updateStatus(id, { status })
+}

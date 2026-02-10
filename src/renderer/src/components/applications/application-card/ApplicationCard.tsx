@@ -16,6 +16,7 @@ interface ApplicationCardProps {
   onEdit: (app: JobApplication) => void
   onPin: (id: string) => void
   onArchive: (id: string) => void
+  onStatusChange: (id: string, status: string | null) => void
   disabled?: boolean
 }
 
@@ -28,6 +29,7 @@ export function ApplicationCard({
   onEdit,
   onPin,
   onArchive,
+  onStatusChange,
   disabled,
 }: ApplicationCardProps) {
   const cardRef = useRef<HTMLDivElement>(null)
@@ -78,6 +80,10 @@ export function ApplicationCard({
     onArchive(application.id)
   }
 
+  function handleStatusChange(status: string | null) {
+    onStatusChange(application.id, status)
+  }
+
   return (
     <>
       <div
@@ -107,6 +113,7 @@ export function ApplicationCard({
             onOpen={handleOpen}
             onPin={handlePin}
             onArchive={handleArchive}
+            onStatusChange={handleStatusChange}
           />
         </Surface>
       </div>
