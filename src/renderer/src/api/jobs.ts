@@ -41,6 +41,8 @@ export interface JobApplication {
   applicationStatus: string | null
   jobUrl: string | null
   originalResume: string
+  pinned: number
+  pinnedAt: string | null
   createdAt: string
   updatedAt: string
 }
@@ -115,4 +117,11 @@ export function updateJobDescription(
   jobDescription: string,
 ): Promise<GeneralAPIResponse> {
   return window.kairos.jobs.updateJobDescription(jobId, { jobDescription })
+}
+
+export function togglePin(
+  id: string,
+  pinned: boolean,
+): Promise<GeneralAPIResponse> {
+  return window.kairos.jobs.togglePin(id, { pinned })
 }

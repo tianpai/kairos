@@ -54,6 +54,10 @@ export const SaveMatchScoreSchema = z.object({
   matchPercentage: z.number().min(0).max(100),
 });
 
+export const TogglePinSchema = z.object({
+  pinned: z.boolean(),
+});
+
 export const SaveWorkflowStateSchema = z.object({
   workflowSteps: z.record(z.string(), z.unknown()).optional(),
   workflowStatus: z.string().optional(),

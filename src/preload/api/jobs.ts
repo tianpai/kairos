@@ -41,4 +41,6 @@ export const jobs = {
     data: unknown,
   ): Promise<{ success: boolean }> =>
     ipcRenderer.invoke("jobs:saveWorkflowState", id, data),
+  togglePin: (id: string, data: unknown): Promise<{ success: boolean }> =>
+    ipcRenderer.invoke("jobs:togglePin", id, data),
 };

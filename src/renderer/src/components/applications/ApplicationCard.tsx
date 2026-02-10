@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react'
-import { Dot, ExternalLink, Pencil } from 'lucide-react'
+import { Dot, ExternalLink, Pencil, Pin, PinOff } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
 import { formatDate, normalizeUrl } from '@utils/format'
 import type { KeyboardEvent } from 'react'
@@ -46,8 +46,11 @@ function TruncateText({
   className?: string
 }) {
   const max = expanded ? MAX_TEXT_LENGTH_EXPANDED : MAX_TEXT_LENGTH
-  const text =
-    children.length <= max ? children : children.slice(0, max) + '...'
+  let text = children
+  if (children.length > max) {
+    const half = Math.floor((max - 1) / 2)
+    text = children.slice(0, half) + '…' + children.slice(-half)
+  }
 
   return (
     <div
@@ -97,32 +100,59 @@ function TextButton({
   )
 }
 
+function PinButton({
+  isPinned,
+  onPin,
+}: {
+  isPinned: boolean
+  onPin: (e: React.MouseEvent) => void
+}) {
+  return (
+    <motion.button
+      {...fadeScale}
+      onClick={onPin}
+      aria-label={isPinned ? 'Unpin application' : 'Pin application'}
+      className={`absolute top-3 right-3 transition-colors ${
+        isPinned
+          ? 'text-primary hover:text-hint'
+          : 'text-hint hover:text-primary'
+      }`}
+    >
+      {isPinned ? <PinOff size={14} /> : <Pin size={14} />}
+    </motion.button>
+  )
+}
+
 function CollapsedContent({
   dueDate,
   matchPercentage,
+  isPinned,
+  isHovered,
+  onPin,
 }: {
   dueDate: string
   matchPercentage: number
+  isPinned: boolean
+  isHovered: boolean
+  onPin: (e: React.MouseEvent) => void
 }) {
   const overdue = isOverdue(dueDate)
   const scoreColor = getScoreColor(matchPercentage)
 
   return (
     <motion.div key="collapsed" {...fade}>
-      {/* Bottom-left: due date */}
+      {/* Top-right: pin toggle (hover only) */}
+      <AnimatePresence>
+        {isHovered && <PinButton isPinned={isPinned} onPin={onPin} />}
+      </AnimatePresence>
+
+      {/* Bottom-left: score dot + due date */}
       <div
-        className={`absolute bottom-3 left-3 text-xs ${overdue ? 'text-error' : 'text-hint'}`}
+        className={`-gap-1 absolute bottom-0 left-2 flex items-center text-xs ${overdue ? 'text-error' : 'text-hint'}`}
         style={{ opacity: 0.8 }}
       >
+        <Dot className="-ml-2 size-8 shrink-0" style={{ color: scoreColor }} />
         Due {formatDate(dueDate)}
-      </div>
-
-      {/* Top-right: score dot */}
-      <div
-        className="absolute top-1 right-1 text-sm font-semibold"
-        style={{ color: scoreColor }}
-      >
-        <Dot className="size-10" />
       </div>
     </motion.div>
   )
@@ -180,7 +210,161 @@ interface ApplicationCardProps {
   onToggleExpand: () => void
   onOpen: (app: JobApplication, element: HTMLElement) => void
   onEdit: (app: JobApplication) => void
+  onPin: (id: string) => void
   disabled?: boolean
+}
+
+interface CardSurfaceProps {
+  cardRef: React.RefObject<HTMLDivElement | null>
+  companyName: string
+  isExpanded: boolean
+  isHovered: boolean
+  onClick: () => void
+  onKeyDown: (event: KeyboardEvent<HTMLDivElement>) => void
+  onAnimationStart: () => void
+  onAnimationComplete: () => void
+  onHoverStart: () => void
+  onHoverEnd: () => void
+  children: React.ReactNode
+}
+
+function CardSurface({
+  cardRef,
+  companyName,
+  isExpanded,
+  isHovered,
+  onClick,
+  onKeyDown,
+  onAnimationStart,
+  onAnimationComplete,
+  onHoverStart,
+  onHoverEnd,
+  children,
+}: CardSurfaceProps) {
+  const boxShadow = isExpanded
+    ? '0 25px 60px -12px rgba(0,0,0,0.5)'
+    : isHovered
+      ? '0 15px 40px -8px rgba(0,0,0,0.3)'
+      : '0 0 0 0 rgba(0,0,0,0)'
+
+  return (
+    <motion.div
+      ref={cardRef}
+      role="button"
+      tabIndex={0}
+      aria-label={`${isExpanded ? 'Collapse' : 'Expand'} ${companyName} application`}
+      onClick={onClick}
+      onKeyDown={onKeyDown}
+      onAnimationStart={onAnimationStart}
+      onAnimationComplete={onAnimationComplete}
+      onHoverStart={onHoverStart}
+      onHoverEnd={onHoverEnd}
+      animate={{
+        width: isExpanded ? EXPANDED_WIDTH : CARD_WIDTH,
+        height: isExpanded ? EXPANDED_HEIGHT : CARD_HEIGHT,
+        y: isExpanded ? -(EXPANDED_HEIGHT - CARD_HEIGHT) / 2 : 0,
+        x: isExpanded ? -(EXPANDED_WIDTH - CARD_WIDTH) / 2 : 0,
+      }}
+      whileHover={!isExpanded ? { scale: 1.03 } : {}}
+      transition={{
+        type: 'spring',
+        damping: 20,
+        stiffness: 300,
+        scale: { type: 'tween', duration: 0.15 },
+      }}
+      className={`border-default bg-surface absolute cursor-pointer rounded-2xl border p-3 will-change-transform focus:outline-none ${isExpanded ? 'z-20' : 'z-10'}`}
+      style={{
+        boxShadow,
+        transition: 'box-shadow 0.15s ease-out',
+      }}
+    >
+      {children}
+    </motion.div>
+  )
+}
+
+interface CardBodyProps {
+  application: JobApplication
+  isExpanded: boolean
+  isHovered: boolean
+  isAnimating: boolean
+  onSubmit: (e: React.MouseEvent) => void
+  onEdit: (e: React.MouseEvent) => void
+  onOpen: (e: React.MouseEvent) => void
+  onPin: (e: React.MouseEvent) => void
+}
+
+function CardBody({
+  application,
+  isExpanded,
+  isHovered,
+  isAnimating,
+  onSubmit,
+  onEdit,
+  onOpen,
+  onPin,
+}: CardBodyProps) {
+  return (
+    <>
+      {/* Always visible */}
+      <div className="text-left">
+        <TruncateText
+          expanded={isExpanded}
+          noWrap={isAnimating}
+          className="text-primary text-sm font-semibold"
+        >
+          {application.companyName}
+        </TruncateText>
+        <TruncateText
+          expanded={isExpanded}
+          noWrap={isAnimating}
+          className="text-secondary text-xs"
+        >
+          {application.position}
+        </TruncateText>
+      </div>
+
+      {/* State-dependent content */}
+      <AnimatePresence>
+        {isExpanded ? (
+          <ExpandedContent
+            application={application}
+            onSubmit={onSubmit}
+            onEdit={onEdit}
+            onOpen={onOpen}
+          />
+        ) : (
+          <CollapsedContent
+            dueDate={application.dueDate}
+            matchPercentage={application.matchPercentage}
+            isPinned={application.pinned === 1}
+            isHovered={isHovered}
+            onPin={onPin}
+          />
+        )}
+      </AnimatePresence>
+    </>
+  )
+}
+
+function CardBackdrop({
+  isExpanded,
+  onClick,
+}: {
+  isExpanded: boolean
+  onClick: () => void
+}) {
+  return (
+    <AnimatePresence>
+      {isExpanded && (
+        <motion.div
+          {...fade}
+          onClick={onClick}
+          className="fixed inset-0 z-10"
+        />
+      )}
+    </AnimatePresence>
+  )
 }
 
 export function ApplicationCard({
@@ -189,6 +373,7 @@ export function ApplicationCard({
   onToggleExpand,
   onOpen,
   onEdit,
+  onPin,
   disabled,
 }: ApplicationCardProps) {
   const cardRef = useRef<HTMLDivElement>(null)
@@ -229,93 +414,43 @@ export function ApplicationCard({
     if (url) window.kairos.shell.openExternal(url)
   }
 
+  function handlePin(e: React.MouseEvent) {
+    e.stopPropagation()
+    onPin(application.id)
+  }
+
   return (
     <>
       <div
         className="relative"
         style={{ width: CARD_WIDTH, height: CARD_HEIGHT }}
       >
-        <motion.div
-          ref={cardRef}
-          role="button"
-          tabIndex={0}
-          aria-label={`${isExpanded ? 'Collapse' : 'Expand'} ${application.companyName} application`}
+        <CardSurface
+          cardRef={cardRef}
+          companyName={application.companyName}
+          isExpanded={isExpanded}
+          isHovered={isHovered}
           onClick={handleClick}
           onKeyDown={handleKeyDown}
           onAnimationStart={() => setIsAnimating(true)}
           onAnimationComplete={() => setIsAnimating(false)}
           onHoverStart={() => setIsHovered(true)}
           onHoverEnd={() => setIsHovered(false)}
-          animate={{
-            width: isExpanded ? EXPANDED_WIDTH : CARD_WIDTH,
-            height: isExpanded ? EXPANDED_HEIGHT : CARD_HEIGHT,
-            y: isExpanded ? -(EXPANDED_HEIGHT - CARD_HEIGHT) / 2 : 0,
-            x: isExpanded ? -(EXPANDED_WIDTH - CARD_WIDTH) / 2 : 0,
-          }}
-          whileHover={!isExpanded ? { scale: 1.03 } : {}}
-          transition={{
-            type: 'spring',
-            damping: 20,
-            stiffness: 300,
-            scale: { type: 'tween', duration: 0.15 },
-          }}
-          className={`border-default bg-surface absolute cursor-pointer rounded-2xl border p-3 will-change-transform focus:outline-none ${isExpanded ? 'z-20' : 'z-10'}`}
-          style={{
-            boxShadow: isExpanded
-              ? '0 25px 60px -12px rgba(0,0,0,0.5)'
-              : isHovered
-                ? '0 15px 40px -8px rgba(0,0,0,0.3)'
-                : '0 0 0 0 rgba(0,0,0,0)',
-            transition: 'box-shadow 0.15s ease-out',
-          }}
         >
-          {/* Always visible */}
-          <div className="text-left">
-            <TruncateText
-              expanded={isExpanded}
-              noWrap={isAnimating}
-              className="text-primary text-sm font-semibold"
-            >
-              {application.companyName}
-            </TruncateText>
-            <TruncateText
-              expanded={isExpanded}
-              noWrap={isAnimating}
-              className="text-secondary text-xs"
-            >
-              {application.position}
-            </TruncateText>
-          </div>
-
-          {/* State-dependent content */}
-          <AnimatePresence>
-            {isExpanded ? (
-              <ExpandedContent
-                application={application}
-                onSubmit={handleSubmit}
-                onEdit={handleEdit}
-                onOpen={handleOpen}
-              />
-            ) : (
-              <CollapsedContent
-                dueDate={application.dueDate}
-                matchPercentage={application.matchPercentage}
-              />
-            )}
-          </AnimatePresence>
-        </motion.div>
+          <CardBody
+            application={application}
+            isExpanded={isExpanded}
+            isHovered={isHovered}
+            isAnimating={isAnimating}
+            onSubmit={handleSubmit}
+            onEdit={handleEdit}
+            onOpen={handleOpen}
+            onPin={handlePin}
+          />
+        </CardSurface>
       </div>
 
-      {/* Backdrop */}
-      <AnimatePresence>
-        {isExpanded && (
-          <motion.div
-            {...fade}
-            onClick={handleBackdropClick}
-            className="fixed inset-0 z-10"
-          />
-        )}
-      </AnimatePresence>
+      <CardBackdrop isExpanded={isExpanded} onClick={handleBackdropClick} />
     </>
   )
 }

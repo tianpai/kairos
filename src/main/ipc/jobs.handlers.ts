@@ -10,6 +10,7 @@ import {
   SaveResumeSchema,
   SaveTailoredResumeSchema,
   SaveWorkflowStateSchema,
+  TogglePinSchema,
   UpdateJobApplicationSchema,
   UpdateJobDescriptionSchema,
 } from "../schemas/job-application.schemas";
@@ -154,4 +155,9 @@ export function registerJobsHandlers(service: JobApplicationService): void {
       return service.updateJobDescription(id, validated);
     },
   );
+
+  ipcMain.handle("jobs:togglePin", async (_, id: string, data: unknown) => {
+    const validated = TogglePinSchema.parse(data);
+    return service.togglePin(id, validated.pinned);
+  });
 }

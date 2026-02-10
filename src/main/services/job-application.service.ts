@@ -128,6 +128,8 @@ export class JobApplicationService {
       applicationStatus: string | null;
       jobUrl: string | null;
       originalResume: string;
+      pinned: number;
+      pinnedAt: string | null;
       createdAt: string;
       updatedAt: string;
     }>
@@ -148,6 +150,8 @@ export class JobApplicationService {
       applicationStatus: row.job_applications.applicationStatus,
       jobUrl: row.job_applications.jobUrl,
       originalResume: row.job_applications.originalResume,
+      pinned: row.job_applications.pinned,
+      pinnedAt: row.job_applications.pinnedAt,
       createdAt: row.job_applications.createdAt,
       updatedAt: row.job_applications.updatedAt,
     }));
@@ -404,6 +408,24 @@ export class JobApplicationService {
       .update(jobApplications)
       .set({
         jobDescription: dto.jobDescription,
+        updatedAt: nowISO(),
+      })
+      .where(eq(jobApplications.id, jobId))
+      .run();
+    return { success: true };
+  }
+
+  async togglePin(
+    jobId: string,
+    pinned: boolean,
+  ): Promise<{ success: boolean }> {
+    this.requireJobApplication(jobId);
+
+    this.db
+      .update(jobApplications)
+      .set({
+        pinned: pinned ? 1 : 0,
+        pinnedAt: pinned ? nowISO() : null,
         updatedAt: nowISO(),
       })
       .where(eq(jobApplications.id, jobId))

@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
 import { AnimatePresence, motion } from 'motion/react'
-import { getAllJobApplications } from '@api/jobs'
+import { getAllJobApplications, togglePin } from '@api/jobs'
 import { AppLayout } from '@layout/AppLayout'
 import { PageHeader } from '@ui/PageHeader'
 import { useJobApplicationMutations } from '@hooks/useJobApplicationMutations'
@@ -89,6 +89,58 @@ function SearchInput({
   )
 }
 
+interface ApplicationsSectionProps {
+  title?: string
+  applications: Array<JobApplication>
+  expandedAppId: string | null
+  onToggleExpand: (id: string) => void
+  onOpen: (app: JobApplication, element: HTMLElement) => void
+  onEdit: (app: JobApplication) => void
+  onPin: (id: string) => void
+  disabled: boolean
+}
+
+function ApplicationsSection({
+  title,
+  applications,
+  expandedAppId,
+  onToggleExpand,
+  onOpen,
+  onEdit,
+  onPin,
+  disabled,
+}: ApplicationsSectionProps) {
+  if (applications.length === 0) return null
+
+  return (
+    <div
+      style={{ gridTemplateColumns: 'repeat(auto-fill, 220px)' }}
+      className={`grid justify-center gap-5 ${disabled ? 'pointer-events-none' : ''}`}
+    >
+      {title && (
+        <div
+          style={{ gridColumn: '1 / -1' }}
+          className="text-hint text-xs font-medium tracking-wide uppercase"
+        >
+          {title}
+        </div>
+      )}
+      {applications.map((app) => (
+        <ApplicationCard
+          key={app.id}
+          application={app}
+          isExpanded={expandedAppId === app.id}
+          onToggleExpand={() => onToggleExpand(app.id)}
+          onOpen={onOpen}
+          onEdit={onEdit}
+          onPin={onPin}
+          disabled={disabled}
+        />
+      ))}
+    </div>
+  )
+}
+
 export default function AllApplicationsPage() {
   const navigate = useNavigate()
 
@@ -97,7 +149,15 @@ export default function AllApplicationsPage() {
     queryFn: getAllJobApplications,
   })
 
+  const queryClient = useQueryClient()
   const { handleUpdate, handleDelete } = useJobApplicationMutations()
+
+  const pinMutation = useMutation({
+    mutationFn: ({ id, pinned }: { id: string; pinned: boolean }) =>
+      togglePin(id, pinned),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: ['jobApplications'] }),
+  })
 
   const [openingApp, setOpeningApp] = useState<OpeningApp | null>(null)
   const [editingApp, setEditingApp] = useState<JobApplication | null>(null)
@@ -114,6 +174,9 @@ export default function AllApplicationsPage() {
       app.position.toLowerCase().includes(q)
     )
   })
+  const pinnedApplications = filtered.filter((app) => app.pinned === 1)
+  const otherApplications = filtered.filter((app) => app.pinned !== 1)
+  const hasPinnedApplications = pinnedApplications.length > 0
 
   function handleOpenCard(app: JobApplication, element: HTMLElement) {
     if (openingApp) return
@@ -147,6 +210,10 @@ export default function AllApplicationsPage() {
     navigate({ to: '/editor', search: { jobId: openingApp.id } })
   }
 
+  function handleToggleExpand(id: string) {
+    setExpandedAppId((current) => (current === id ? null : id))
+  }
+
   if (applications.length === 0) {
     return (
       <AppLayout header={<ApplicationPageHeader />}>
@@ -170,23 +237,27 @@ export default function AllApplicationsPage() {
             You didn't apply there... yet
           </div>
         ) : (
-          <div
-            style={{ gridTemplateColumns: 'repeat(auto-fill, 220px)' }}
-            className={`grid justify-center gap-5 ${isOpening ? 'pointer-events-none' : ''}`}
-          >
-            {filtered.map((app) => (
-              <ApplicationCard
-                key={app.id}
-                application={app}
-                isExpanded={expandedAppId === app.id}
-                onToggleExpand={() =>
-                  setExpandedAppId(expandedAppId === app.id ? null : app.id)
-                }
-                onOpen={handleOpenCard}
-                onEdit={setEditingApp}
-                disabled={isOpening}
-              />
-            ))}
+          <div className="flex flex-col gap-5">
+            <ApplicationsSection
+              title={hasPinnedApplications ? 'Pinned' : undefined}
+              applications={pinnedApplications}
+              expandedAppId={expandedAppId}
+              onToggleExpand={handleToggleExpand}
+              onOpen={handleOpenCard}
+              onEdit={setEditingApp}
+              onPin={(id) => pinMutation.mutate({ id, pinned: false })}
+              disabled={isOpening}
+            />
+            <ApplicationsSection
+              title={hasPinnedApplications ? 'Others' : undefined}
+              applications={otherApplications}
+              expandedAppId={expandedAppId}
+              onToggleExpand={handleToggleExpand}
+              onOpen={handleOpenCard}
+              onEdit={setEditingApp}
+              onPin={(id) => pinMutation.mutate({ id, pinned: true })}
+              disabled={isOpening}
+            />
           </div>
         )}
       </div>
