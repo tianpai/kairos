@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
 import { AnimatePresence, motion } from 'motion/react'
@@ -14,6 +14,10 @@ import { PageHeader } from '@ui/PageHeader'
 import { useJobApplicationMutations } from '@hooks/useJobApplicationMutations'
 import { Archive, Search, X } from 'lucide-react'
 import { ApplicationCard } from './application-card'
+import { isOverdue } from './application-card/utils'
+import { SortDropdown } from './SortDropdown'
+import { FilterPopover } from './FilterPopover'
+import type { SortOption } from './SortDropdown'
 import type { JobApplication } from '@api/jobs'
 import JobInfoModal from '@/components/applications/JobInfoModal'
 import { useBatchExportModal } from '@/components/export/BatchExportModal'
@@ -161,12 +165,26 @@ function ApplicationToolbar({
   onSearchClear,
   showArchived,
   onArchiveToggle,
+  sortBy,
+  onSortChange,
+  hideOverdue,
+  onHideOverdueChange,
+  statusFilter,
+  onStatusFilterChange,
+  onFilterClear,
 }: {
   search: string
   onSearchChange: (e: React.ChangeEvent<HTMLInputElement>) => void
   onSearchClear: () => void
   showArchived: boolean
   onArchiveToggle: () => void
+  sortBy: SortOption
+  onSortChange: (sort: SortOption) => void
+  hideOverdue: boolean
+  onHideOverdueChange: (hide: boolean) => void
+  statusFilter: Set<string>
+  onStatusFilterChange: (statuses: Set<string>) => void
+  onFilterClear: () => void
 }) {
   return (
     <div className="flex items-center justify-center gap-3">
@@ -174,6 +192,14 @@ function ApplicationToolbar({
         value={search}
         onChange={onSearchChange}
         onClear={onSearchClear}
+      />
+      <SortDropdown sortBy={sortBy} onSortChange={onSortChange} />
+      <FilterPopover
+        hideOverdue={hideOverdue}
+        onHideOverdueChange={onHideOverdueChange}
+        statusFilter={statusFilter}
+        onStatusFilterChange={onStatusFilterChange}
+        onClear={onFilterClear}
       />
       <ArchiveToggle active={showArchived} onClick={onArchiveToggle} />
     </div>
@@ -331,19 +357,56 @@ export default function AllApplicationsPage() {
   const [expandedAppId, setExpandedAppId] = useState<string | null>(null)
   const isOpening = !!openingApp
 
-  // searching
+  // searching, sorting, filtering
   const [search, setSearch] = useState('')
-  const filtered = displayedApplications.filter((app) => {
-    if (!search) return true
-    const q = search.toLowerCase()
-    return (
-      app.companyName.toLowerCase().includes(q) ||
-      app.position.toLowerCase().includes(q)
-    )
-  })
-  const pinnedApplications = filtered.filter((app) => app.pinned === 1)
-  const otherApplications = filtered.filter((app) => app.pinned !== 1)
+  const [sortBy, setSortBy] = useState<SortOption>('default')
+  const [hideOverdue, setHideOverdue] = useState(false)
+  const [statusFilter, setStatusFilter] = useState<Set<string>>(new Set())
+
+  const filtered = useMemo(
+    () =>
+      displayedApplications.filter((app) => {
+        if (!search) return true
+        const q = search.toLowerCase()
+        return (
+          app.companyName.toLowerCase().includes(q) ||
+          app.position.toLowerCase().includes(q)
+        )
+      }),
+    [displayedApplications, search]
+  )
+
+  const processed = useMemo(() => {
+    let result = filtered
+
+    if (hideOverdue) {
+      result = result.filter((app) => !isOverdue(app.dueDate))
+    }
+
+    if (statusFilter.size > 0) {
+      result = result.filter((app) => {
+        if (app.applicationStatus === null) return statusFilter.has('none')
+        return statusFilter.has(app.applicationStatus)
+      })
+    }
+
+    if (sortBy === 'dueDate') {
+      result = [...result].sort(
+        (a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime()
+      )
+    } else if (sortBy === 'score') {
+      result = [...result].sort(
+        (a, b) => b.matchPercentage - a.matchPercentage
+      )
+    }
+
+    return result
+  }, [filtered, hideOverdue, statusFilter, sortBy])
+
+  const pinnedApplications = processed.filter((app) => app.pinned === 1)
+  const otherApplications = processed.filter((app) => app.pinned !== 1)
   const hasPinnedApplications = pinnedApplications.length > 0
+  const hasActiveFilters = hideOverdue || statusFilter.size > 0
 
   function handleOpenCard(app: JobApplication, element: HTMLElement) {
     if (openingApp) return
@@ -394,6 +457,16 @@ export default function AllApplicationsPage() {
             setSearch('')
             setExpandedAppId(null)
           }}
+          sortBy={sortBy}
+          onSortChange={setSortBy}
+          hideOverdue={hideOverdue}
+          onHideOverdueChange={setHideOverdue}
+          statusFilter={statusFilter}
+          onStatusFilterChange={setStatusFilter}
+          onFilterClear={() => {
+            setHideOverdue(false)
+            setStatusFilter(new Set())
+          }}
         />
         {!showArchived && applications.length === 0 ? (
           <EmptyStage />
@@ -402,6 +475,10 @@ export default function AllApplicationsPage() {
         ) : search && filtered.length === 0 ? (
           <div className="text-hint text-center">
             You didn't apply there... yet
+          </div>
+        ) : hasActiveFilters && processed.length === 0 ? (
+          <div className="text-hint text-center">
+            No applications match your filters
           </div>
         ) : (
           <ApplicationsGrid
