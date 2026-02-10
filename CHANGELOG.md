@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.2.2](https://github.com/tianpai/kairos/compare/v0.2.1...v0.2.2) (2026-02-10)
+
+
+### Features
+
+* add archive mode for applications with matching batch export scope ([9fbacb8](https://github.com/tianpai/kairos/commit/9fbacb8770ff887ed460e70557a9d7bd99666520))
+* add color-coded dot indicators to application cards ([3fa97f5](https://github.com/tianpai/kairos/commit/3fa97f5a9f3a38ed970be1b951140807773dc902))
+* add search bar to filter by company name and position ([344801e](https://github.com/tianpai/kairos/commit/344801eb2eb8fac404b07670d4eb901ec036260c))
+* filter and sort applications ([a2fb350](https://github.com/tianpai/kairos/commit/a2fb3507b44e7099e478737e58155d43bd16122b))
+* manage theme and tips from General settings ([e6d1c6a](https://github.com/tianpai/kairos/commit/e6d1c6a1ed2f52d2342d13c0161363a5979f612d))
+* pin and unpin applications ([4829aa1](https://github.com/tianpai/kairos/commit/4829aa12ec0864ffafd1c87243190f1c9c0011e6))
+* track application status on cards ([8d0030e](https://github.com/tianpai/kairos/commit/8d0030e3883ba65d3542145ead88e801aaeee341))
+
 ### [0.2.1](https://github.com/tianpai/kairos/compare/v0.2.0...v0.2.1) (2026-01-21)
 
 
