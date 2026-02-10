@@ -76,7 +76,6 @@ export function registerScoreUpdatingTask({
     name: "score.updating",
     inputKeys: ["checklist"],
     // No 'provides' - score is saved directly to DB, not added to context
-    tipEvent: "score.updated",
 
     async execute({ checklist }, _meta) {
       if (!checklist?.hardRequirements) {
@@ -92,10 +91,6 @@ export function registerScoreUpdatingTask({
     async onSuccess(jobId, matchPercentage) {
       await jobService.saveMatchScore(jobId, matchPercentage);
       log.info(`Score saved: ${matchPercentage}% for job ${jobId}`);
-    },
-
-    getTipData(score) {
-      return { score };
     },
   });
 }

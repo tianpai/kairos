@@ -4,7 +4,11 @@ import { create } from 'zustand'
 import { toast } from 'sonner'
 import { Modal } from '@ui/Modal'
 import { Toggle } from '@ui/Toggle'
-import { getAllJobApplications, getJobApplication } from '@api/jobs'
+import {
+  getAllJobApplications,
+  getArchivedJobApplications,
+  getJobApplication,
+} from '@api/jobs'
 import { compileToPDF } from '@typst-compiler/compile'
 import type { JobApplication } from '@api/jobs'
 import type { TemplateData } from '@templates/template.types'
@@ -50,19 +54,31 @@ interface BatchExportContentProps {
 
 interface BatchExportState {
   isOpen: boolean
+  showArchived: boolean
+}
+
+interface BatchExportOpenOptions {
+  showArchived?: boolean
 }
 
 interface BatchExportActions {
-  open: () => void
+  open: (options?: BatchExportOpenOptions) => void
   close: () => void
+  setShowArchivedMode: (showArchived: boolean) => void
 }
 
 type BatchExportStore = BatchExportState & BatchExportActions
 
 const useBatchExportStore = create<BatchExportStore>()((set) => ({
   isOpen: false,
-  open: () => set({ isOpen: true }),
+  showArchived: false,
+  open: (options) =>
+    set((state) => ({
+      isOpen: true,
+      showArchived: options?.showArchived ?? state.showArchived,
+    })),
   close: () => set({ isOpen: false }),
+  setShowArchivedMode: (showArchived) => set({ showArchived }),
 }))
 
 type TemplateSchemas = ReturnType<TemplateBuilder['getSchemas']>
@@ -298,9 +314,11 @@ function BatchExportContent({
 }
 
 export function BatchExportModal() {
+  const showArchived = useBatchExportStore((state) => state.showArchived)
+
   const { data: applications = [] } = useQuery({
-    queryKey: ['jobApplications'],
-    queryFn: getAllJobApplications,
+    queryKey: showArchived ? ['archivedJobApplications'] : ['jobApplications'],
+    queryFn: showArchived ? getArchivedJobApplications : getAllJobApplications,
   })
 
   const isOpen = useBatchExportStore((state) => state.isOpen)
@@ -388,8 +406,7 @@ export function BatchExportModal() {
     <Modal
       open={isOpen}
       onClose={handleClose}
-      variant="popup"
-      maxWidth="2xl"
+      size="2xl"
       closeOnBackdropClick={!exporting}
       actions={
         <BatchExportActions
@@ -416,5 +433,8 @@ export function BatchExportModal() {
 
 export function useBatchExportModal() {
   const open = useBatchExportStore((state) => state.open)
-  return { open, Modal: BatchExportModal }
+  const setShowArchivedMode = useBatchExportStore(
+    (state) => state.setShowArchivedMode,
+  )
+  return { open, setShowArchivedMode, Modal: BatchExportModal }
 }

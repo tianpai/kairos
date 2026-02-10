@@ -73,35 +73,6 @@ export function createAppMenu(mainWindow: BrowserWindow | null) {
           },
         },
         { type: "separator" },
-        {
-          label: "Previous Application",
-          accelerator: "CommandOrControl+[",
-          click: () => {
-            mainWindow?.webContents.send("shortcut:prev-app");
-          },
-        },
-        {
-          label: "Next Application",
-          accelerator: "CommandOrControl+]",
-          click: () => {
-            mainWindow?.webContents.send("shortcut:next-app");
-          },
-        },
-        {
-          label: "Jump to First",
-          accelerator: "CommandOrControl+Shift+[",
-          click: () => {
-            mainWindow?.webContents.send("shortcut:latest-app");
-          },
-        },
-        {
-          label: "Jump to Last",
-          accelerator: "CommandOrControl+Shift+]",
-          click: () => {
-            mainWindow?.webContents.send("shortcut:oldest-app");
-          },
-        },
-        { type: "separator" },
         isMac ? { role: "close" } : { role: "quit" },
       ],
     },

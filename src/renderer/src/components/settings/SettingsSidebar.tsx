@@ -1,12 +1,10 @@
-import { Cpu, Info, Lightbulb, Palette, Settings } from 'lucide-react'
+import { Cpu, Info, Settings } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { SidebarItem } from '@/components/sidebar/SidebarItem'
 import { Sidebar } from '@/components/sidebar/Sidebar'
 
 export type SettingsSection =
   | 'providers'
-  | 'appearance'
-  | 'tips'
   | 'general'
   | 'about'
 
@@ -19,8 +17,6 @@ interface NavItem {
 const NAV_ITEMS: Array<NavItem> = [
   { id: 'general', label: 'General', icon: Settings },
   { id: 'providers', label: 'Providers', icon: Cpu },
-  { id: 'appearance', label: 'Appearance', icon: Palette },
-  { id: 'tips', label: 'Tips', icon: Lightbulb },
   { id: 'about', label: 'About', icon: Info },
 ]
 

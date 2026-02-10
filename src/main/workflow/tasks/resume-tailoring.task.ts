@@ -16,7 +16,6 @@ export function registerResumeTailoringTask({
     name: "resume.tailoring",
     inputKeys: ["checklist", "resumeStructure", "templateId"],
     provides: "resumeStructure",
-    tipEvent: "tailoring.complete",
     streaming: true,
 
     async execute({ checklist, resumeStructure, templateId }, meta) {

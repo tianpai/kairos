@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { FilePlus } from 'lucide-react'
+import { Plus } from 'lucide-react'
 import { useNewApplicationStore } from './newApplication.store'
 import type { SubmitPayload } from './newApplication.store'
 import { Button } from '@/components/ui/Button'
@@ -61,7 +61,7 @@ export default function NewApplicationButton() {
           hasApiKey ? 'New application' : 'Configure API key in Settings first'
         }
       >
-        <FilePlus size={16} />
+        <Plus size={16} />
       </Button>
 
       <NewApplicationModal

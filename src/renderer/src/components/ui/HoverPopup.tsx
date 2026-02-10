@@ -1,6 +1,6 @@
 import { createPortal } from 'react-dom'
-import type { CSSProperties, ReactNode } from 'react'
 import { motion } from 'motion/react'
+import type { CSSProperties, ReactNode } from 'react'
 import { cn } from '@/utils/cn'
 
 type Position = 'top' | 'bottom' | 'left' | 'right'

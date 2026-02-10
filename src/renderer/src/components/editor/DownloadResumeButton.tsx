@@ -1,7 +1,7 @@
 import { memo, useCallback, useEffect, useState } from 'react'
 import { useResumeStore } from '@typst-compiler/resumeState'
 import { compileToPDF } from '@typst-compiler/compile'
-import { FileDown } from 'lucide-react'
+import { Download } from 'lucide-react'
 import { Button } from '@ui/Button'
 import type { TemplateData } from '@templates/template.types'
 import { TemplateBuilder } from '@/templates/builder'
@@ -98,7 +98,7 @@ const DownloadResumeButton = memo(function DownloadResumeButton({
       ariaLabel="Download resume as PDF"
       title="Download"
     >
-      <FileDown size={16} />
+      <Download size={16} />
     </Button>
   )
 })

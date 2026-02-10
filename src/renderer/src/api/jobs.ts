@@ -41,6 +41,8 @@ export interface JobApplication {
   applicationStatus: string | null
   jobUrl: string | null
   originalResume: string
+  pinned: number
+  pinnedAt: string | null
   createdAt: string
   updatedAt: string
 }
@@ -85,6 +87,10 @@ export async function getAllJobApplications(): Promise<Array<JobApplication>> {
   return window.kairos.jobs.getAll() as Promise<Array<JobApplication>>
 }
 
+export async function getArchivedJobApplications(): Promise<Array<JobApplication>> {
+  return window.kairos.jobs.getArchived() as Promise<Array<JobApplication>>
+}
+
 export async function getJobApplication(
   id: string,
 ): Promise<JobApplicationDetails> {
@@ -115,4 +121,25 @@ export function updateJobDescription(
   jobDescription: string,
 ): Promise<GeneralAPIResponse> {
   return window.kairos.jobs.updateJobDescription(jobId, { jobDescription })
+}
+
+export function togglePin(
+  id: string,
+  pinned: boolean,
+): Promise<GeneralAPIResponse> {
+  return window.kairos.jobs.togglePin(id, { pinned })
+}
+
+export function toggleArchive(
+  id: string,
+  archived: boolean,
+): Promise<GeneralAPIResponse> {
+  return window.kairos.jobs.toggleArchive(id, { archived })
+}
+
+export function updateStatus(
+  id: string,
+  status: string | null,
+): Promise<GeneralAPIResponse> {
+  return window.kairos.jobs.updateStatus(id, { status })
 }

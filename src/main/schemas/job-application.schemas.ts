@@ -54,6 +54,18 @@ export const SaveMatchScoreSchema = z.object({
   matchPercentage: z.number().min(0).max(100),
 });
 
+export const TogglePinSchema = z.object({
+  pinned: z.boolean(),
+});
+
+export const ToggleArchiveSchema = z.object({
+  archived: z.boolean(),
+});
+
+export const UpdateStatusSchema = z.object({
+  status: z.string().nullable(),
+});
+
 export const SaveWorkflowStateSchema = z.object({
   workflowSteps: z.record(z.string(), z.unknown()).optional(),
   workflowStatus: z.string().optional(),
@@ -80,3 +92,4 @@ export type SaveTailoredResumeInput = z.infer<typeof SaveTailoredResumeSchema>;
 export type SaveChecklistInput = z.infer<typeof SaveChecklistSchema>;
 export type SaveMatchScoreInput = z.infer<typeof SaveMatchScoreSchema>;
 export type SaveWorkflowStateInput = z.infer<typeof SaveWorkflowStateSchema>;
+export type UpdateStatusInput = z.infer<typeof UpdateStatusSchema>;

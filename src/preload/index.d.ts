@@ -33,10 +33,6 @@ interface KairosAPI {
     onSave: (callback: () => void) => () => void;
     onExportPdf: (callback: () => void) => () => void;
     onDocumentSettings: (callback: () => void) => () => void;
-    onPrevApp: (callback: () => void) => () => void;
-    onNextApp: (callback: () => void) => () => void;
-    onLatestApp: (callback: () => void) => () => void;
-    onOldestApp: (callback: () => void) => () => void;
     onTailor: (callback: () => void) => () => void;
     onToggleColumns: (callback: () => void) => () => void;
     onBatchExport: (callback: () => void) => () => void;
@@ -126,6 +122,7 @@ interface KairosAPI {
     create: (data: unknown) => Promise<{ id: string }>;
     createFromExisting: (data: unknown) => Promise<{ id: string }>;
     getAll: () => Promise<unknown[]>;
+    getArchived: () => Promise<unknown[]>;
     get: (id: string) => Promise<unknown>;
     update: (id: string, data: unknown) => Promise<unknown>;
     delete: (id: string) => Promise<{ success: boolean }>;
@@ -153,6 +150,9 @@ interface KairosAPI {
       id: string,
       data: unknown,
     ) => Promise<{ success: boolean }>;
+    togglePin: (id: string, data: unknown) => Promise<{ success: boolean }>;
+    toggleArchive: (id: string, data: unknown) => Promise<{ success: boolean }>;
+    updateStatus: (id: string, data: unknown) => Promise<{ success: boolean }>;
   };
   workflow: {
     start: (payload: WorkflowStartPayload) => Promise<{ success: boolean }>;

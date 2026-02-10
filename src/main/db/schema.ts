@@ -39,6 +39,11 @@ export const jobApplications = sqliteTable("job_applications", {
   status: text("status").notNull().default("active"),
   applicationStatus: text("application_status"),
   jobUrl: text("job_url"),
+  archived: integer("archived").notNull().default(0),
+  statusUpdatedAt: text("status_updated_at"),
+  interviewDate: text("interview_date"),
+  pinned: integer("pinned").notNull().default(0),
+  pinnedAt: text("pinned_at"),
   createdAt: text("created_at").notNull(),
   updatedAt: text("updated_at").notNull(),
 });

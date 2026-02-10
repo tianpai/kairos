@@ -39,9 +39,6 @@ export interface TaskConfig<T extends TaskName> {
    */
   provides?: TaskProvides<T>;
 
-  /** Optional tip event to trigger after success */
-  tipEvent?: string;
-
   /** Execute the task */
   execute: (
     input: TaskInput<T>,
@@ -50,9 +47,6 @@ export interface TaskConfig<T extends TaskName> {
 
   /** Handle successful completion (persist to DB) */
   onSuccess: (jobId: string, result: TaskOutput<T>) => Promise<void>;
-
-  /** Optional: get data to pass to tip.trigger() */
-  getTipData?: (result: TaskOutput<T>) => Record<string, unknown>;
 }
 
 /**
@@ -62,14 +56,12 @@ export interface Task<T extends TaskName = TaskName> {
   readonly name: T;
   readonly inputKeys: ValidInputKeys<T>;
   readonly provides?: string;
-  readonly tipEvent?: string;
   readonly streaming?: boolean;
   execute: (
     input: TaskInput<T>,
     meta: TaskExecutionMeta,
   ) => Promise<TaskOutput<T>>;
   onSuccess: (jobId: string, result: TaskOutput<T>) => Promise<void>;
-  getTipData?: (result: TaskOutput<T>) => Record<string, unknown>;
 }
 
 export interface TaskExecutionMeta {
@@ -91,11 +83,9 @@ export function defineTask<T extends TaskName>(config: TaskConfig<T>): Task<T> {
     name: config.name,
     inputKeys: config.inputKeys,
     provides: config.provides as string | undefined,
-    tipEvent: config.tipEvent,
     streaming: config.streaming,
     execute: config.execute,
     onSuccess: config.onSuccess,
-    getTipData: config.getTipData,
   };
 
   // Auto-register

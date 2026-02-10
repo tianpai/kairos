@@ -30,7 +30,7 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
     <Modal
       open={open}
       onClose={onClose}
-      maxWidth="sm"
+      size="sm"
       actions={
         <Button onClick={handleSave} disabled={!apiKey.trim()}>
           Save

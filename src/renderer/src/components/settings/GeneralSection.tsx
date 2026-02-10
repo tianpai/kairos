@@ -2,11 +2,27 @@ import { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
+import { Monitor, Moon, Sun } from 'lucide-react'
 import { HoldButton } from '@ui/HoldButton'
+import { useSetTheme, useTheme } from '@hooks/useTheme'
+
+type ThemeSource = 'system' | 'light' | 'dark'
+
+const THEME_OPTIONS: Array<{
+  value: ThemeSource
+  label: string
+  icon: typeof Monitor
+}> = [
+  { value: 'system', label: 'System', icon: Monitor },
+  { value: 'light', label: 'Light', icon: Sun },
+  { value: 'dark', label: 'Dark', icon: Moon },
+]
 
 export function GeneralSection() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
+  const { data: currentTheme } = useTheme()
+  const setTheme = useSetTheme()
   const [isDeleting, setIsDeleting] = useState(false)
   const [isResetting, setIsResetting] = useState(false)
 
@@ -51,11 +67,53 @@ export function GeneralSection() {
     }
   }
 
+  const handleThemeChange = (theme: ThemeSource) => {
+    setTheme.mutate(theme)
+  }
+
   return (
     <div className="space-y-6">
       <div>
         <h2 className="text-lg font-semibold">General</h2>
-        <p className="text-hint mt-1 text-sm">Manage your application data.</p>
+        <p className="text-hint mt-1 text-sm">
+          Manage app preferences and data.
+        </p>
+      </div>
+
+      <div className="space-y-6">
+        <div className="space-y-3">
+          <h3 className="text-secondary text-sm font-medium">Appearance</h3>
+          <div>
+            <label className="text-secondary mb-3 block text-sm font-medium">
+              Theme
+            </label>
+            <div className="flex flex-wrap gap-2">
+              {THEME_OPTIONS.map((option) => {
+                const Icon = option.icon
+                const isSelected = currentTheme === option.value
+                return (
+                  <button
+                    key={option.value}
+                    onClick={() => handleThemeChange(option.value)}
+                    className={`flex items-center gap-2 rounded-md border-2 px-4 py-2 text-sm transition-colors ${
+                      isSelected
+                        ? 'border-primary bg-primary text-base'
+                        : 'border-default bg-base text-secondary hover:border-hint'
+                    }`}
+                  >
+                    <Icon size={16} />
+                    {option.label}
+                  </button>
+                )
+              })}
+            </div>
+            <p className="text-hint mt-2 text-xs">
+              In dark mode, the resume preview adapts for readability.
+              Downloaded PDFs remain unchanged.
+            </p>
+          </div>
+        </div>
+
       </div>
 
       <div className="space-y-4">

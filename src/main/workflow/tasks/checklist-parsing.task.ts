@@ -16,7 +16,6 @@ export function registerChecklistParsingTask({
     name: "checklist.parsing",
     inputKeys: ["jobDescription"],
     provides: "checklist",
-    tipEvent: "checklist.parsed",
     streaming: true,
 
     async execute({ jobDescription }, meta) {

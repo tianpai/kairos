@@ -17,7 +17,6 @@ export function PageHeader({ left, center, right }: PageHeaderProps) {
         WebkitAppRegion: 'drag',
       }}
     >
-      {/* Left section: 80px padding for macOS traffic lights, no-drag for buttons */}
       <div
         className="flex items-center justify-self-start pl-20"
         style={{
@@ -29,9 +28,8 @@ export function PageHeader({ left, center, right }: PageHeaderProps) {
         {left}
       </div>
       <div className="justify-self-center overflow-hidden text-center">
-        <div className="truncate">{center}</div>
+        <div className="truncate text-sm font-medium">{center}</div>
       </div>
-      {/* Right section: buttons need to be clickable (no-drag) */}
       <div
         className="flex items-center justify-self-end pr-4"
         style={{

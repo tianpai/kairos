@@ -1,5 +1,5 @@
 import { useNavigate } from '@tanstack/react-router'
-import { Settings } from 'lucide-react'
+import { Settings2 } from 'lucide-react'
 import { Button } from '@ui/Button'
 
 export function SettingsButton() {
@@ -7,11 +7,16 @@ export function SettingsButton() {
 
   return (
     <Button
-      onClick={() => navigate({ to: '/settings' })}
+      onClick={() =>
+        navigate({
+          to: '/settings',
+          search: { section: undefined, update: undefined, version: undefined },
+        })
+      }
       ariaLabel="Settings"
       title="Settings"
     >
-      <Settings size={16} />
+      <Settings2 size={16} />
     </Button>
   )
 }

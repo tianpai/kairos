@@ -2,13 +2,11 @@ import { useEffect } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { useResumeStore } from '@typst-compiler/resumeState'
-import { tip } from '@tips/tips.service'
-import { useTipsStore } from '@tips/tips.store'
 import {
-  getWorkflowState,
   RESUME_PARSING,
   RESUME_TAILORING,
   SCORE_UPDATING,
+  getWorkflowState,
   useWorkflowStore,
 } from '../workflow'
 import type { JobApplicationDetails } from '@api/jobs'
@@ -150,21 +148,7 @@ export function useWorkflowSync(
             ? 'Tailoring complete'
             : 'Processing complete'
 
-        const tipMessage = payload.tipEvent
-          ? tip.appendToSuccess(payload.tipEvent, payload.tipData ?? {})
-          : null
-
-        toast.success(workflowLabel, {
-          ...(tipMessage && {
-            description: tipMessage,
-            action: {
-              label: 'Never show',
-              onClick: () => {
-                useTipsStore.getState().neverShow()
-              },
-            },
-          }),
-        })
+        toast.success(workflowLabel)
       },
     )
 

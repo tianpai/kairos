@@ -43,10 +43,7 @@ function hideSplash() {
 }
 
 function RootLayout() {
-  // Initialize keyboard shortcuts listener
   useShortcutListener()
-
-  // Check for updates and show toast if available
   useUpdateNotification()
 
   // Theme for toast notifications
@@ -54,14 +51,12 @@ function RootLayout() {
   const { Modal: BatchExportModal } = useBatchExportModal()
 
   useEffect(() => {
-    // Hide splash once React has mounted (respects minimum time)
     hideSplash()
   }, [])
 
   return (
     <>
       <Outlet />
-      {/* <TanStackRouterDevtools /> */}
       <Toaster
         position="bottom-right"
         theme={currentTheme}
