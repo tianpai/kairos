@@ -1,4 +1,3 @@
-import { ipcMain } from "electron";
 import log from "electron-log/main";
 import { JobNotFoundError } from "../services/job-application.service";
 import {
@@ -12,16 +11,17 @@ import {
   SaveWorkflowStateSchema,
   ToggleArchiveSchema,
   TogglePinSchema,
-  UpdateStatusSchema,
   UpdateJobApplicationSchema,
   UpdateJobDescriptionSchema,
+  UpdateStatusSchema,
 } from "../schemas/job-application.schemas";
+import { guardedHandle as handle } from "./guarded-handler";
 import type { JobApplicationService } from "../services/job-application.service";
 
 export function registerJobsHandlers(service: JobApplicationService): void {
   // CRUD handlers
 
-  ipcMain.handle("jobs:create", async (_, data: unknown) => {
+  handle("jobs:create", async (_, data: unknown) => {
     try {
       const validated = CreateJobApplicationSchema.parse(data);
       const result = await service.createJobApplication(validated);
@@ -33,7 +33,7 @@ export function registerJobsHandlers(service: JobApplicationService): void {
     }
   });
 
-  ipcMain.handle("jobs:createFromExisting", async (_, data: unknown) => {
+  handle("jobs:createFromExisting", async (_, data: unknown) => {
     try {
       const validated = CreateFromExistingSchema.parse(data);
       const result = await service.createFromExisting(validated);
@@ -51,15 +51,15 @@ export function registerJobsHandlers(service: JobApplicationService): void {
     }
   });
 
-  ipcMain.handle("jobs:getAll", async () => {
+  handle("jobs:getAll", async () => {
     return service.getAllJobApplications();
   });
 
-  ipcMain.handle("jobs:getArchived", async () => {
+  handle("jobs:getArchived", async () => {
     return service.getArchivedJobApplications();
   });
 
-  ipcMain.handle("jobs:get", async (_, id: string) => {
+  handle("jobs:get", async (_, id: string) => {
     try {
       return await service.getJobApplication(id);
     } catch (error) {
@@ -72,7 +72,7 @@ export function registerJobsHandlers(service: JobApplicationService): void {
     }
   });
 
-  ipcMain.handle("jobs:update", async (_, id: string, data: unknown) => {
+  handle("jobs:update", async (_, id: string, data: unknown) => {
     const validated = UpdateJobApplicationSchema.parse(data);
     try {
       return await service.updateJobApplication(id, validated);
@@ -84,7 +84,7 @@ export function registerJobsHandlers(service: JobApplicationService): void {
     }
   });
 
-  ipcMain.handle("jobs:delete", async (_, id: string) => {
+  handle("jobs:delete", async (_, id: string) => {
     try {
       const result = await service.deleteJobApplication(id);
       log.info(`Job deleted: ${id}`);
@@ -99,7 +99,7 @@ export function registerJobsHandlers(service: JobApplicationService): void {
     }
   });
 
-  ipcMain.handle("jobs:deleteAll", async () => {
+  handle("jobs:deleteAll", async () => {
     try {
       const result = await service.deleteAllJobApplications();
       log.info("All job applications deleted");
@@ -110,69 +110,54 @@ export function registerJobsHandlers(service: JobApplicationService): void {
     }
   });
 
-  ipcMain.handle("jobs:saveResume", async (_, id: string, data: unknown) => {
+  handle("jobs:saveResume", async (_, id: string, data: unknown) => {
     const validated = SaveResumeSchema.parse(data);
     return service.saveResume(id, validated);
   });
 
   // Workflow data handlers
 
-  ipcMain.handle(
-    "jobs:saveParsedResume",
-    async (_, id: string, data: unknown) => {
-      const validated = SaveParsedResumeSchema.parse(data);
-      return service.saveParsedResume(id, validated);
-    },
-  );
+  handle("jobs:saveParsedResume", async (_, id: string, data: unknown) => {
+    const validated = SaveParsedResumeSchema.parse(data);
+    return service.saveParsedResume(id, validated);
+  });
 
-  ipcMain.handle(
-    "jobs:saveTailoredResume",
-    async (_, id: string, data: unknown) => {
-      const validated = SaveTailoredResumeSchema.parse(data);
-      return service.saveTailoredResume(id, validated);
-    },
-  );
+  handle("jobs:saveTailoredResume", async (_, id: string, data: unknown) => {
+    const validated = SaveTailoredResumeSchema.parse(data);
+    return service.saveTailoredResume(id, validated);
+  });
 
-  ipcMain.handle("jobs:saveChecklist", async (_, id: string, data: unknown) => {
+  handle("jobs:saveChecklist", async (_, id: string, data: unknown) => {
     const validated = SaveChecklistSchema.parse(data);
     return service.saveChecklist(id, validated);
   });
 
-  ipcMain.handle(
-    "jobs:saveMatchScore",
-    async (_, id: string, data: unknown) => {
-      const validated = SaveMatchScoreSchema.parse(data);
-      return service.saveMatchScore(id, validated.matchPercentage);
-    },
-  );
+  handle("jobs:saveMatchScore", async (_, id: string, data: unknown) => {
+    const validated = SaveMatchScoreSchema.parse(data);
+    return service.saveMatchScore(id, validated.matchPercentage);
+  });
 
-  ipcMain.handle(
-    "jobs:saveWorkflowState",
-    async (_, id: string, data: unknown) => {
-      const validated = SaveWorkflowStateSchema.parse(data);
-      return service.saveWorkflowState(id, validated);
-    },
-  );
+  handle("jobs:saveWorkflowState", async (_, id: string, data: unknown) => {
+    const validated = SaveWorkflowStateSchema.parse(data);
+    return service.saveWorkflowState(id, validated);
+  });
 
-  ipcMain.handle(
-    "jobs:updateJobDescription",
-    async (_, id: string, data: unknown) => {
-      const validated = UpdateJobDescriptionSchema.parse(data);
-      return service.updateJobDescription(id, validated);
-    },
-  );
+  handle("jobs:updateJobDescription", async (_, id: string, data: unknown) => {
+    const validated = UpdateJobDescriptionSchema.parse(data);
+    return service.updateJobDescription(id, validated);
+  });
 
-  ipcMain.handle("jobs:togglePin", async (_, id: string, data: unknown) => {
+  handle("jobs:togglePin", async (_, id: string, data: unknown) => {
     const validated = TogglePinSchema.parse(data);
     return service.togglePin(id, validated.pinned);
   });
 
-  ipcMain.handle("jobs:toggleArchive", async (_, id: string, data: unknown) => {
+  handle("jobs:toggleArchive", async (_, id: string, data: unknown) => {
     const validated = ToggleArchiveSchema.parse(data);
     return service.toggleArchive(id, validated.archived);
   });
 
-  ipcMain.handle("jobs:updateStatus", async (_, id: string, data: unknown) => {
+  handle("jobs:updateStatus", async (_, id: string, data: unknown) => {
     const validated = UpdateStatusSchema.parse(data);
     return service.updateStatus(id, validated.status);
   });

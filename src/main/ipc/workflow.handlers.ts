@@ -1,6 +1,7 @@
-import { BrowserWindow, ipcMain } from "electron";
+import { BrowserWindow } from "electron";
 import log from "electron-log/main";
 import { onWorkflowEvent } from "../workflow/workflow-events";
+import { guardedHandle as handle } from "./guarded-handler";
 import type {
   WorkflowGetStatePayload,
   WorkflowRetryPayload,
@@ -17,39 +18,31 @@ function broadcast<T>(channel: string, payload: T): void {
 export function registerWorkflowHandlers(
   workflowService: WorkflowService,
 ): void {
-  ipcMain.handle(
-    "workflow:start",
-    async (_event, payload: WorkflowStartPayload) => {
-      try {
-        await workflowService.startWorkflow(
-          payload.workflowName,
-          payload.jobId,
-          payload.initialContext,
-        );
-        return { success: true };
-      } catch (error) {
-        log.error("workflow:start failed", error);
-        throw error;
-      }
-    },
-  );
+  handle("workflow:start", async (_event, payload: WorkflowStartPayload) => {
+    try {
+      await workflowService.startWorkflow(
+        payload.workflowName,
+        payload.jobId,
+        payload.initialContext,
+      );
+      return { success: true };
+    } catch (error) {
+      log.error("workflow:start failed", error);
+      throw error;
+    }
+  });
 
-  ipcMain.handle(
-    "workflow:retry",
-    async (_event, payload: WorkflowRetryPayload) => {
-      try {
-        const failedTasks = await workflowService.retryFailedTasks(
-          payload.jobId,
-        );
-        return { success: true, failedTasks };
-      } catch (error) {
-        log.error("workflow:retry failed", error);
-        throw error;
-      }
-    },
-  );
+  handle("workflow:retry", async (_event, payload: WorkflowRetryPayload) => {
+    try {
+      const failedTasks = await workflowService.retryFailedTasks(payload.jobId);
+      return { success: true, failedTasks };
+    } catch (error) {
+      log.error("workflow:retry failed", error);
+      throw error;
+    }
+  });
 
-  ipcMain.handle(
+  handle(
     "workflow:getState",
     async (_event, payload: WorkflowGetStatePayload) => {
       try {
