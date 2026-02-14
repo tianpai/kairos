@@ -1,15 +1,9 @@
 import { Download, Upload } from 'lucide-react'
 import { Button } from '@ui/Button'
-import type {
-  BackupExportProgress,
-  BackupImportProgress,
-} from '../../../../../shared/backup'
 
 interface BackupSectionProps {
   isExportingBackup: boolean
   isImportingBackup: boolean
-  backupProgress: BackupExportProgress | null
-  importProgress: BackupImportProgress | null
   onExportBackup: () => Promise<void>
   onImportBackup: () => Promise<void>
 }
@@ -17,8 +11,6 @@ interface BackupSectionProps {
 export function BackupSection({
   isExportingBackup,
   isImportingBackup,
-  backupProgress,
-  importProgress,
   onExportBackup,
   onImportBackup,
 }: BackupSectionProps) {
@@ -50,34 +42,6 @@ export function BackupSection({
           {isImportingBackup ? 'Importing Backup...' : 'Import Backup'}
         </Button>
       </div>
-
-      {backupProgress && (
-        <div className="space-y-1">
-          <p className="text-hint text-sm">
-            {backupProgress.message} {backupProgress.percent}%
-          </p>
-          <div className="bg-hover h-1.5 w-full max-w-80 overflow-hidden rounded-full">
-            <div
-              className="bg-info h-full transition-all"
-              style={{ width: `${backupProgress.percent}%` }}
-            />
-          </div>
-        </div>
-      )}
-
-      {importProgress && (
-        <div className="space-y-1">
-          <p className="text-hint text-sm">
-            {importProgress.message} {importProgress.percent}%
-          </p>
-          <div className="bg-hover h-1.5 w-full max-w-80 overflow-hidden rounded-full">
-            <div
-              className="bg-warning h-full transition-all"
-              style={{ width: `${importProgress.percent}%` }}
-            />
-          </div>
-        </div>
-      )}
     </div>
   )
 }

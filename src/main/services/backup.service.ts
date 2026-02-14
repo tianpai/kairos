@@ -6,12 +6,10 @@ import Database from "better-sqlite3";
 import JSZip from "jszip";
 import { app } from "electron";
 import log from "electron-log/main";
-import { getSqlite } from "./database.service";
 import { z } from "zod";
+import { getSqlite } from "./database.service";
 import type {
-  BackupExportProgress,
   BackupExportResult,
-  BackupImportProgress,
   BackupImportResult,
   BackupManifest,
 } from "../../shared/backup";
@@ -50,22 +48,6 @@ function ensureZipExtension(filePath: string): string {
   return filePath.toLowerCase().endsWith(".zip") ? filePath : `${filePath}.zip`;
 }
 
-function emitProgress(
-  onProgress: ((progress: BackupExportProgress) => void) | undefined,
-  progress: BackupExportProgress,
-): void {
-  if (!onProgress) return;
-  onProgress(progress);
-}
-
-function emitImportProgress(
-  onProgress: ((progress: BackupImportProgress) => void) | undefined,
-  progress: BackupImportProgress,
-): void {
-  if (!onProgress) return;
-  onProgress(progress);
-}
-
 function quoteIdentifier(identifier: string): string {
   return `"${identifier.replace(/"/g, '""')}"`;
 }
@@ -90,9 +72,7 @@ function getTableColumns(
   tableName: string,
 ): Array<string> {
   const rows = db
-    .prepare(
-      `PRAGMA ${databaseName}.table_info(${quoteIdentifier(tableName)})`,
-    )
+    .prepare(`PRAGMA ${databaseName}.table_info(${quoteIdentifier(tableName)})`)
     .all() as Array<{ name: string }>;
   return rows.map((row) => row.name);
 }
@@ -131,8 +111,8 @@ function validateImportedDbFile(tempDbPath: string): void {
 
 function restoreImportedDb(tempDbPath: string): void {
   const sqlite = getSqlite();
-  const hadForeignKeys = Number(
-    sqlite.pragma("foreign_keys", { simple: true }),
+  const hadForeignKeysEnabled = Boolean(
+    Number(sqlite.pragma("foreign_keys", { simple: true })),
   );
 
   // Cleanup any stale attached DB from prior failed attempts.
@@ -143,6 +123,7 @@ function restoreImportedDb(tempDbPath: string): void {
     throw new Error(`Failed to cleanup previous import state: ${message}`);
   }
 
+  let restoreError: unknown;
   try {
     sqlite.exec(`ATTACH DATABASE ${quoteString(tempDbPath)} AS imported`);
     sqlite.pragma("foreign_keys = OFF");
@@ -154,7 +135,6 @@ function restoreImportedDb(tempDbPath: string): void {
       for (const tableName of REQUIRED_TABLES) {
         const targetColumns = getTableColumns(sqlite, "main", tableName);
         const sourceColumns = getTableColumns(sqlite, "imported", tableName);
-
         const sharedColumns = targetColumns.filter((column) =>
           sourceColumns.includes(column),
         );
@@ -174,16 +154,27 @@ function restoreImportedDb(tempDbPath: string): void {
     });
 
     restoreTransaction();
+  } catch (error) {
+    restoreError = error;
+  }
+
+  let detachError: Error | null = null;
+  try {
+    detachImportedIfAttached(sqlite);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    log.error("[Backup] Failed to detach imported database:", message);
+    detachError = new Error(`Failed to detach imported database: ${message}`);
   } finally {
-    try {
-      detachImportedIfAttached(sqlite);
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      log.error("[Backup] Failed to detach imported database:", message);
-      throw new Error(`Failed to detach imported database: ${message}`);
-    } finally {
-      sqlite.pragma(`foreign_keys = ${hadForeignKeys ? "ON" : "OFF"}`);
-    }
+    sqlite.pragma(`foreign_keys = ${hadForeignKeysEnabled ? "ON" : "OFF"}`);
+  }
+
+  if (detachError) {
+    throw detachError;
+  }
+
+  if (restoreError) {
+    throw restoreError;
   }
 }
 
@@ -213,7 +204,6 @@ export function getDefaultBackupPath(): string {
 
 export async function exportResumeDataBackup(
   destinationPath: string,
-  onProgress?: (progress: BackupExportProgress) => void,
 ): Promise<BackupExportResult> {
   if (importInProgress) {
     return {
@@ -233,34 +223,10 @@ export async function exportResumeDataBackup(
   const tempDir = await mkdtemp(join(tmpdir(), "kairos-backup-"));
   const tempDbPath = join(tempDir, "kairos.db");
 
-  emitProgress(onProgress, {
-    stage: "starting",
-    percent: 0,
-    message: "Preparing backup...",
-  });
-
   try {
     const sqlite = getSqlite();
 
-    emitProgress(onProgress, {
-      stage: "snapshotting",
-      percent: 5,
-      message: "Creating database snapshot...",
-    });
-
-    await sqlite.backup(tempDbPath, {
-      progress: ({ totalPages, remainingPages }) => {
-        if (!totalPages) return 0;
-        const copied = totalPages - remainingPages;
-        const ratio = Math.min(Math.max(copied / totalPages, 0), 1);
-        emitProgress(onProgress, {
-          stage: "snapshotting",
-          percent: 5 + Math.round(ratio * 55),
-          message: "Creating database snapshot...",
-        });
-        return 100;
-      },
-    });
+    await sqlite.backup(tempDbPath);
 
     const dbBuffer = await readFile(tempDbPath);
 
@@ -278,46 +244,18 @@ export async function exportResumeDataBackup(
       ],
     };
 
-    emitProgress(onProgress, {
-      stage: "packaging",
-      percent: 65,
-      message: "Packaging backup zip...",
-    });
-
     const zip = new JSZip();
     zip.file("manifest.json", `${JSON.stringify(manifest, null, 2)}\n`);
     zip.file(DB_ENTRY_PATH, dbBuffer);
 
-    const zipBuffer = await zip.generateAsync(
-      {
-        type: "nodebuffer",
-        compression: "DEFLATE",
-        compressionOptions: { level: 9 },
-      },
-      (metadata) => {
-        const ratio = Math.min(Math.max(metadata.percent / 100, 0), 1);
-        emitProgress(onProgress, {
-          stage: "packaging",
-          percent: 65 + Math.round(ratio * 30),
-          message: "Packaging backup zip...",
-        });
-      },
-    );
-
-    emitProgress(onProgress, {
-      stage: "writing",
-      percent: 96,
-      message: "Writing backup file...",
+    const zipBuffer = await zip.generateAsync({
+      type: "nodebuffer",
+      compression: "DEFLATE",
+      compressionOptions: { level: 9 },
     });
 
     await mkdir(dirname(resolvedDestinationPath), { recursive: true });
     await writeFile(resolvedDestinationPath, zipBuffer);
-
-    emitProgress(onProgress, {
-      stage: "completed",
-      percent: 100,
-      message: "Backup complete",
-    });
 
     return {
       success: true,
@@ -337,7 +275,6 @@ export async function exportResumeDataBackup(
 
 export async function importResumeDataBackup(
   backupZipPath: string,
-  onProgress?: (progress: BackupImportProgress) => void,
 ): Promise<BackupImportResult> {
   if (importInProgress) {
     return {
@@ -356,27 +293,9 @@ export async function importResumeDataBackup(
   const tempDir = await mkdtemp(join(tmpdir(), "kairos-import-"));
   const tempDbPath = join(tempDir, "imported-kairos.db");
 
-  emitImportProgress(onProgress, {
-    stage: "starting",
-    percent: 0,
-    message: "Preparing import...",
-  });
-
   try {
-    emitImportProgress(onProgress, {
-      stage: "reading",
-      percent: 10,
-      message: "Reading backup zip...",
-    });
-
     const zipBuffer = await readFile(normalizedZipPath);
     const zip = await JSZip.loadAsync(zipBuffer);
-
-    emitImportProgress(onProgress, {
-      stage: "validating",
-      percent: 30,
-      message: "Validating manifest and checksum...",
-    });
 
     const manifest = await parseManifest(zip);
     if (manifest.backupFormatVersion !== BACKUP_FORMAT_VERSION) {
@@ -385,7 +304,9 @@ export async function importResumeDataBackup(
       );
     }
 
-    const dbManifest = manifest.files.find((file) => file.path === DB_ENTRY_PATH);
+    const dbManifest = manifest.files.find(
+      (file) => file.path === DB_ENTRY_PATH,
+    );
     if (!dbManifest) {
       throw new Error("Backup manifest is missing data/kairos.db");
     }
@@ -408,19 +329,7 @@ export async function importResumeDataBackup(
     await writeFile(tempDbPath, dbBuffer);
     validateImportedDbFile(tempDbPath);
 
-    emitImportProgress(onProgress, {
-      stage: "restoring",
-      percent: 70,
-      message: "Restoring data...",
-    });
-
     restoreImportedDb(tempDbPath);
-
-    emitImportProgress(onProgress, {
-      stage: "completed",
-      percent: 100,
-      message: "Import complete",
-    });
 
     return { success: true };
   } catch (error) {

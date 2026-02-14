@@ -1,9 +1,9 @@
 import {
-  Send,
-  MessageSquare,
-  Gift,
-  XCircle,
   CheckCircle,
+  Gift,
+  MessageSquare,
+  Send,
+  XCircle,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
@@ -21,7 +21,7 @@ export interface StatusConfig {
   color: string
 }
 
-export const APPLICATION_STATUSES: StatusConfig[] = [
+export const APPLICATION_STATUSES: Array<StatusConfig> = [
   { value: 'submitted', label: 'Submitted', icon: Send, color: 'text-info' },
   { value: 'interviewed', label: 'Interviewed', icon: MessageSquare, color: 'text-warning' },
   { value: 'offered', label: 'Offered', icon: Gift, color: 'text-success' },

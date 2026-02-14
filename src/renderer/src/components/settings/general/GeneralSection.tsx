@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
@@ -8,10 +8,6 @@ import { DangerZoneSection } from './DangerZoneSection'
 import { ImportBackupOverlay } from './ImportBackupOverlay'
 import { ThemeSection } from './ThemeSection'
 import type { ThemeSource } from './ThemeSection'
-import type {
-  BackupExportProgress,
-  BackupImportProgress,
-} from '../../../../../shared/backup'
 
 export function GeneralSection() {
   const navigate = useNavigate()
@@ -22,29 +18,6 @@ export function GeneralSection() {
   const [isResetting, setIsResetting] = useState(false)
   const [isExportingBackup, setIsExportingBackup] = useState(false)
   const [isImportingBackup, setIsImportingBackup] = useState(false)
-  const [backupProgress, setBackupProgress] =
-    useState<BackupExportProgress | null>(null)
-  const [importProgress, setImportProgress] =
-    useState<BackupImportProgress | null>(null)
-
-  useEffect(() => {
-    const unsubscribeExport = window.kairos.backup.onExportProgress(
-      (progress) => {
-        setBackupProgress(progress)
-      },
-    )
-
-    const unsubscribeImport = window.kairos.backup.onImportProgress(
-      (progress) => {
-        setImportProgress(progress)
-      },
-    )
-
-    return () => {
-      unsubscribeExport()
-      unsubscribeImport()
-    }
-  }, [])
 
   const handleImportBackup = async () => {
     const confirmed = window.confirm(
@@ -54,22 +27,15 @@ export function GeneralSection() {
     if (!confirmed) return
 
     setIsImportingBackup(true)
-    setImportProgress({
-      stage: 'starting',
-      percent: 0,
-      message: 'Preparing import...',
-    })
 
     try {
       const result = await window.kairos.backup.importResumeData()
 
       if (result.canceled) {
-        setImportProgress(null)
         return
       }
 
       if (!result.success) {
-        setImportProgress(null)
         toast.error(result.error || 'Failed to import backup')
         return
       }
@@ -80,7 +46,6 @@ export function GeneralSection() {
       toast.success('Backup imported')
     } catch (error) {
       console.error('Failed to import backup:', error)
-      setImportProgress(null)
       toast.error('Failed to import backup')
     } finally {
       setIsImportingBackup(false)
@@ -89,22 +54,15 @@ export function GeneralSection() {
 
   const handleExportBackup = async () => {
     setIsExportingBackup(true)
-    setBackupProgress({
-      stage: 'starting',
-      percent: 0,
-      message: 'Preparing backup...',
-    })
 
     try {
       const result = await window.kairos.backup.exportResumeData()
 
       if (result.canceled) {
-        setBackupProgress(null)
         return
       }
 
       if (!result.success) {
-        setBackupProgress(null)
         toast.error(result.error || 'Failed to export backup')
         return
       }
@@ -112,7 +70,6 @@ export function GeneralSection() {
       toast.success('Backup exported')
     } catch (error) {
       console.error('Failed to export backup:', error)
-      setBackupProgress(null)
       toast.error('Failed to export backup')
     } finally {
       setIsExportingBackup(false)
@@ -175,8 +132,6 @@ export function GeneralSection() {
         <BackupSection
           isExportingBackup={isExportingBackup}
           isImportingBackup={isImportingBackup}
-          backupProgress={backupProgress}
-          importProgress={importProgress}
           onExportBackup={handleExportBackup}
           onImportBackup={handleImportBackup}
         />
@@ -193,7 +148,6 @@ export function GeneralSection() {
 
       <ImportBackupOverlay
         isImportingBackup={isImportingBackup}
-        importProgress={importProgress}
       />
     </div>
   )

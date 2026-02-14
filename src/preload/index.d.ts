@@ -1,9 +1,7 @@
 type ThemeSource = "system" | "light" | "dark";
 type ThemeMode = "light" | "dark";
 type ProviderType = import("../shared/providers").ProviderType;
-type BackupExportProgress = import("../shared/backup").BackupExportProgress;
 type BackupExportResult = import("../shared/backup").BackupExportResult;
-type BackupImportProgress = import("../shared/backup").BackupImportProgress;
 type BackupImportResult = import("../shared/backup").BackupImportResult;
 type UpdateState = import("../shared/updater").UpdateState;
 type OllamaPullProgress = import("../shared/ollama").OllamaPullProgress;
@@ -45,12 +43,6 @@ interface KairosAPI {
   backup: {
     exportResumeData: () => Promise<BackupExportResult>;
     importResumeData: () => Promise<BackupImportResult>;
-    onExportProgress: (
-      callback: (progress: BackupExportProgress) => void,
-    ) => () => void;
-    onImportProgress: (
-      callback: (progress: BackupImportProgress) => void,
-    ) => () => void;
   };
   shell: {
     openExternal: (url: string) => Promise<void>;

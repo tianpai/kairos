@@ -1,34 +1,8 @@
-export type BackupExportStage =
-  | "starting"
-  | "snapshotting"
-  | "packaging"
-  | "writing"
-  | "completed";
-
-export interface BackupExportProgress {
-  stage: BackupExportStage;
-  percent: number;
-  message: string;
-}
-
 export interface BackupExportResult {
   success: boolean;
   canceled?: boolean;
   path?: string;
   error?: string;
-}
-
-export type BackupImportStage =
-  | "starting"
-  | "reading"
-  | "validating"
-  | "restoring"
-  | "completed";
-
-export interface BackupImportProgress {
-  stage: BackupImportStage;
-  percent: number;
-  message: string;
 }
 
 export interface BackupImportResult {

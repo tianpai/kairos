@@ -11,7 +11,7 @@ import type {
 } from "../../shared/backup";
 
 export function registerBackupHandlers(): void {
-  ipcMain.handle("backup:exportResumeData", async (event) => {
+  ipcMain.handle("backup:exportResumeData", async () => {
     try {
       const result = await dialog.showSaveDialog({
         title: "Export Backup",
@@ -24,9 +24,7 @@ export function registerBackupHandlers(): void {
         return { success: false, canceled: true } satisfies BackupExportResult;
       }
 
-      return await exportResumeDataBackup(result.filePath, (progress) => {
-        event.sender.send("backup:exportProgress", progress);
-      });
+      return await exportResumeDataBackup(result.filePath);
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       log.error("[Backup] backup:exportResumeData failed:", message);
@@ -34,7 +32,7 @@ export function registerBackupHandlers(): void {
     }
   });
 
-  ipcMain.handle("backup:importResumeData", async (event) => {
+  ipcMain.handle("backup:importResumeData", async () => {
     try {
       const selection = await dialog.showOpenDialog({
         title: "Import Backup",
@@ -46,12 +44,7 @@ export function registerBackupHandlers(): void {
         return { success: false, canceled: true } satisfies BackupImportResult;
       }
 
-      return await importResumeDataBackup(
-        selection.filePaths[0],
-        (progress) => {
-          event.sender.send("backup:importProgress", progress);
-        },
-      );
+      return await importResumeDataBackup(selection.filePaths[0]);
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       log.error("[Backup] backup:importResumeData failed:", message);
