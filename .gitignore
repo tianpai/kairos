@@ -63,24 +63,6 @@ coverage/
 ehthumbs.db
 Thumbs.db
 
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-env/
-venv/
-.venv/
-ENV/
-env.bak/
-venv.bak/
-.pytest_cache/
-*.egg-info/
-
-# Python virtual environments (uv)
-.uv/
-
 # Temporary files
 *.tmp
 *.temp
@@ -105,4 +87,5 @@ count.txt
 /services/ai/__pycache__
 
 misc/icons
+notes/
 docs
