@@ -10,6 +10,7 @@ import {
   getJobApplication,
 } from '@api/jobs'
 import { compileToPDF } from '@typst-compiler/compile'
+import { formatDate } from '@utils/format'
 import type { JobApplication } from '@api/jobs'
 import type { TemplateData } from '@templates/template.types'
 import { TemplateBuilder } from '@/templates/builder'
@@ -24,12 +25,6 @@ export interface ExportSummary {
   total: number
   succeeded: number
   failed: Array<string>
-}
-
-interface FailedExportsListProps {
-  failed: Array<string>
-  title?: string
-  className?: string
 }
 
 interface ApplicationListItemProps {
@@ -48,7 +43,6 @@ interface ApplicationListProps {
 
 interface ExportActionsProps {
   exporting: boolean
-  hasFailures: boolean
   selectedCount: number
   onClose: () => void
   onExport: () => void
@@ -59,7 +53,6 @@ interface ExportContentProps {
   applications: Array<JobApplication>
   allSelected: boolean
   selectedIds: Set<string>
-  failed: Array<string>
   onToggleSelectAll: () => void
   onToggle: (id: string) => void
 }
@@ -93,9 +86,7 @@ const useExportStore = create<ExportStore>()((set) => ({
   setShowArchivedMode: (showArchived) => set({ showArchived }),
 }))
 
-type TemplateSchemas = ReturnType<TemplateBuilder['getSchemas']>
-
-function sanitizeForFilename(str: string): string {
+function sanitizeText(str: string): string {
   return str
     .replace(/[^a-zA-Z0-9\s-]/g, '')
     .replace(/\s+/g, '_')
@@ -107,17 +98,13 @@ function generateFilename(
   companyName: string,
   position: string,
 ): string {
-  const sanitizedName = sanitizeForFilename(name || 'resume')
-  const sanitizedCompany = sanitizeForFilename(companyName)
-  const sanitizedPosition = sanitizeForFilename(position)
+  const sanitizedName = sanitizeText(name || 'resume')
+  const sanitizedCompany = sanitizeText(companyName)
+  const sanitizedPosition = sanitizeText(position)
   return `${sanitizedName}_${sanitizedCompany}_${sanitizedPosition}.pdf`
 }
 
-function formatDate(dateStr: string): string {
-  if (!dateStr) return '-'
-  const date = new Date(dateStr)
-  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-}
+type TemplateSchemas = ReturnType<TemplateBuilder['getSchemas']>
 
 function applySchemaDefaults(
   resumeData: TemplateData,
@@ -139,10 +126,7 @@ function applySchemaDefaults(
   return dataWithDefaults
 }
 
-function getApplicationLabel(
-  companyName: string,
-  position: string,
-): string {
+function getApplicationLabel(companyName: string, position: string): string {
   return `${companyName} - ${position}`
 }
 
@@ -172,7 +156,11 @@ async function exportApplication(
       | { name?: string }
       | undefined
     const name = personalInfo?.name?.trim() || 'resume'
-    const filename = generateFilename(name, details.companyName, details.position)
+    const filename = generateFilename(
+      name,
+      details.companyName,
+      details.position,
+    )
 
     await window.kairos.fs.writeFile(
       folderPath,
@@ -208,7 +196,9 @@ export async function exportApplicationsToFolder(
 
 export function showExportToast(summary: ExportSummary): void {
   if (summary.succeeded === summary.total) {
-    toast.success(`Exported ${summary.succeeded} PDF${summary.succeeded > 1 ? 's' : ''}`)
+    toast.success(
+      `Exported ${summary.succeeded} PDF${summary.succeeded > 1 ? 's' : ''}`,
+    )
     return
   }
 
@@ -218,8 +208,9 @@ export function showExportToast(summary: ExportSummary): void {
     })
     return
   }
-
-  toast.error(summary.total === 1 ? 'Failed to export PDF' : 'Failed to export PDFs')
+  toast.error(
+    summary.total > 1 ? 'Failed to export PDFs' : 'Failed to export PDF',
+  )
 }
 
 export async function exportWithDestinationPicker(
@@ -231,25 +222,6 @@ export async function exportWithDestinationPicker(
   if (!folderPath) return null
 
   return exportApplicationsToFolder(targets, folderPath)
-}
-
-function FailedExportsList({
-  failed,
-  title = 'Failed exports:',
-  className = '',
-}: FailedExportsListProps) {
-  if (failed.length === 0) return null
-
-  return (
-    <div className={className}>
-      <div className="text-error text-sm font-medium">{title}</div>
-      <ul className="text-secondary mt-1 list-inside list-disc text-sm">
-        {failed.map((item, i) => (
-          <li key={i}>{item}</li>
-        ))}
-      </ul>
-    </div>
-  )
 }
 
 function ApplicationListItem({
@@ -280,7 +252,11 @@ function ApplicationListItem({
           <span className="text-secondary">{app.position}</span>
         </div>
         <span className="text-hint shrink-0 text-sm">
-          {app.dueDate ? `Due ${formatDate(app.dueDate)}` : 'No due date'}
+          {app.dueDate
+            ? `Due ${formatDate(app.dueDate, {
+                format: { month: 'short', day: 'numeric' },
+              })}`
+            : 'No due date'}
         </span>
       </div>
     </label>
@@ -316,7 +292,6 @@ function ApplicationList({
 
 function ExportActions({
   exporting,
-  hasFailures,
   selectedCount,
   onClose,
   onExport,
@@ -328,7 +303,7 @@ function ExportActions({
         disabled={exporting}
         className="text-secondary hover:bg-hover cursor-pointer rounded px-4 py-2 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
       >
-        {hasFailures ? 'Close' : 'Cancel'}
+        Cancel
       </button>
       <button
         onClick={onExport}
@@ -348,7 +323,6 @@ function ExportContent({
   applications,
   allSelected,
   selectedIds,
-  failed,
   onToggleSelectAll,
   onToggle,
 }: ExportContentProps) {
@@ -369,13 +343,6 @@ function ExportContent({
         onToggle={onToggle}
         disabled={exporting}
       />
-      {failed.length ? (
-        <FailedExportsList
-          failed={failed}
-          title="Some exports failed:"
-          className="mt-2"
-        />
-      ) : null}
     </div>
   )
 }
@@ -394,11 +361,9 @@ export function ExportModal() {
 
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [exporting, setExporting] = useState(false)
-  const [failed, setFailed] = useState<Array<string>>([])
 
   const resetState = useCallback(() => {
     setSelectedIds(new Set())
-    setFailed([])
   }, [])
 
   const allSelected = useMemo(() => {
@@ -432,7 +397,6 @@ export function ExportModal() {
     if (selectedIds.size === 0) return
 
     setExporting(true)
-    setFailed([])
     try {
       const selectedTargets = applications
         .filter((app) => selectedIds.has(app.id))
@@ -444,7 +408,6 @@ export function ExportModal() {
       const summary = await exportWithDestinationPicker(selectedTargets)
       if (!summary) return
 
-      setFailed(summary.failed)
       showExportToast(summary)
 
       if (summary.succeeded === summary.total) {
@@ -475,7 +438,6 @@ export function ExportModal() {
       actions={
         <ExportActions
           exporting={exporting}
-          hasFailures={failed.length > 0}
           selectedCount={selectedIds.size}
           onClose={handleClose}
           onExport={handleExport}
@@ -487,7 +449,6 @@ export function ExportModal() {
         applications={applications}
         allSelected={allSelected}
         selectedIds={selectedIds}
-        failed={failed}
         onToggleSelectAll={handleToggleSelectAll}
         onToggle={handleToggle}
       />

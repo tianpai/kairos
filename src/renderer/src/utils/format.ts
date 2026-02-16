@@ -5,22 +5,23 @@ export function normalizeUrl(url: string): string | null {
   return `https://${trimmed}`
 }
 
-export function formatDateTime(dateStr: string): string {
-  const date = new Date(dateStr)
-  return date.toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
-  })
+interface FormatDateOptions {
+  locale?: string
+  format?: Intl.DateTimeFormatOptions
 }
 
-export function formatDate(dateStr: string): string {
+const DEFAULT_LOCALE = 'en-US'
+const DEFAULT_FORMAT: Intl.DateTimeFormatOptions = {
+  month: 'short',
+  day: 'numeric',
+  year: 'numeric',
+}
+
+export function formatDate(
+  dateStr: string,
+  options?: FormatDateOptions,
+): string {
+  const { locale = DEFAULT_LOCALE, format = DEFAULT_FORMAT } = options ?? {}
   const date = new Date(dateStr)
-  return date.toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  })
+  return date.toLocaleDateString(locale, format)
 }
