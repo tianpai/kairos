@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { useShortcutStore } from '@/components/layout/shortcut.store'
 import { useLayoutStore } from '@/components/layout/layout.store'
-import { useBatchExportModal } from '@/components/export/BatchExportModal'
+import { useExportModal } from '@/components/export/ExportModal'
 
 export function useShortcutListener() {
   const navigate = useNavigate()
@@ -17,7 +17,7 @@ export function useShortcutListener() {
     (state) => state.requestDocumentSettings,
   )
   const requestTailor = useShortcutStore((state) => state.requestTailor)
-  const { open: openBatchExport } = useBatchExportModal()
+  const { open: openExport } = useExportModal()
 
   useEffect(() => {
     // Settings - direct navigation
@@ -40,9 +40,9 @@ export function useShortcutListener() {
       requestExportPdf()
     })
 
-    // Batch Export - open modal
-    const unsubBatchExport = window.kairos.shortcuts.onBatchExport(() => {
-      openBatchExport()
+    // Export list - open modal
+    const unsubExportPicker = window.kairos.shortcuts.onBatchExport(() => {
+      openExport()
     })
 
     // Document Settings - store flag
@@ -65,7 +65,7 @@ export function useShortcutListener() {
       unsubNewApp()
       unsubSave()
       unsubExportPdf()
-      unsubBatchExport()
+      unsubExportPicker()
       unsubDocSettings()
       unsubTailor()
       unsubToggleColumns()
@@ -77,6 +77,6 @@ export function useShortcutListener() {
     requestExportPdf,
     requestDocumentSettings,
     requestTailor,
-    openBatchExport,
+    openExport,
   ])
 }

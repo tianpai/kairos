@@ -1,13 +1,13 @@
 import { TailoringButton } from '@editor/TailoringButton'
 import { PageHeader } from '@ui/PageHeader'
 import { Button } from '@ui/Button'
-import DownloadResumeButton from '@editor/DownloadResumeButton'
 import SaveResumeButton from '@editor/SaveResumeButton'
 import { DocumentConfigButton } from '@resumeForm/DocumentConfigButton'
 import { useLayoutStore } from '@layout/layout.store'
 import { useNavigate } from '@tanstack/react-router'
 import { Columns2, Columns3, GalleryVerticalEnd } from 'lucide-react'
 import type { JobApplicationDetails } from '@api/jobs'
+import { ExportButton } from '@/components/export/ExportButton'
 import { getScoreColor } from '@/utils/scoreThresholds'
 import NewApplicationButton from '@/components/upload/NewApplicationButton'
 
@@ -25,8 +25,6 @@ export function AppHeader({
   const navigate = useNavigate()
   const { showChecklist, toggleChecklist } = useLayoutStore()
 
-  const companyName = jobApplication?.companyName
-  const position = jobApplication?.position
   const matchPercentage = jobApplication?.matchPercentage ?? 0
 
   return (
@@ -78,9 +76,18 @@ export function AppHeader({
                 )}
               </Button>
               <SaveResumeButton jobId={jobId} />
-              <DownloadResumeButton
-                companyName={companyName}
-                position={position}
+              <ExportButton
+                targets={
+                  jobApplication
+                    ? [
+                        {
+                          id: jobApplication.id,
+                          companyName: jobApplication.companyName,
+                          position: jobApplication.position,
+                        },
+                      ]
+                    : undefined
+                }
               />
             </>
           )}

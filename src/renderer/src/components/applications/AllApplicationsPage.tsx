@@ -20,9 +20,9 @@ import { FilterPopover } from './FilterPopover'
 import type { SortOption } from './SortDropdown'
 import type { JobApplication } from '@api/jobs'
 import JobInfoModal from '@/components/applications/JobInfoModal'
-import { useBatchExportModal } from '@/components/export/BatchExportModal'
+import { useExportModal } from '@/components/export/ExportModal'
 import NewApplicationButton from '@/components/upload/NewApplicationButton'
-import { BatchExportButton } from '@/components/export/BatchExportButton'
+import { ExportButton } from '@/components/export/ExportButton'
 import { SettingsButton } from '@/components/settings/SettingsButton'
 
 interface OpeningApp {
@@ -39,7 +39,7 @@ function ApplicationPageHeader({ showArchived }: { showArchived: boolean }) {
       right={
         <>
           <SettingsButton />
-          <BatchExportButton showArchived={showArchived} />
+          <ExportButton showArchived={showArchived} />
         </>
       }
     />
@@ -296,7 +296,7 @@ export default function AllApplicationsPage() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const { handleUpdate, handleDelete } = useJobApplicationMutations()
-  const { setShowArchivedMode } = useBatchExportModal()
+  const { setShowArchivedMode } = useExportModal()
 
   const [showArchived, setShowArchived] = useState(false)
 

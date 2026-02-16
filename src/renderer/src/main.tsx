@@ -16,7 +16,7 @@ import { useCurrentTheme } from '@hooks/useTheme'
 import reportWebVitals from './reportWebVitals.ts'
 import AllApplicationsPage from '@/components/applications/AllApplicationsPage'
 import EditorPage from '@/components/editor/EditorPage'
-import { useBatchExportModal } from '@/components/export/BatchExportModal'
+import { useExportModal } from '@/components/export/ExportModal'
 import SettingsPage from '@/components/settings/SettingsPage'
 import * as TanStackQueryProvider from '@/integrations/tanstack-query/root-provider.tsx'
 import { useShortcutListener } from '@/hooks/useShortcutListener'
@@ -48,7 +48,7 @@ function RootLayout() {
 
   // Theme for toast notifications
   const { data: currentTheme } = useCurrentTheme()
-  const { Modal: BatchExportModal } = useBatchExportModal()
+  const { Modal: ExportModal } = useExportModal()
 
   useEffect(() => {
     hideSplash()
@@ -67,7 +67,7 @@ function RootLayout() {
           info: <Info size={20} className="text-info" />,
         }}
       />
-      <BatchExportModal />
+      <ExportModal />
     </>
   )
 }
