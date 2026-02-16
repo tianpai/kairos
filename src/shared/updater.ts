@@ -1,4 +1,4 @@
-export type UpdateStatus =
+type UpdateStatus =
   | "idle"
   | "checking"
   | "available"
@@ -7,7 +7,7 @@ export type UpdateStatus =
   | "downloaded"
   | "error";
 
-export interface UpdateProgress {
+interface UpdateProgress {
   percent: number;
   bytesPerSecond: number;
   transferred: number;
