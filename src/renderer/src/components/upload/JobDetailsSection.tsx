@@ -1,8 +1,8 @@
 import { useEffect } from 'react'
 import { FileUp, X } from 'lucide-react'
 import { MAX_ENTRIES, useNewApplicationStore } from './newApplication.store'
+import { useUpload } from './useUpload'
 import type { JdEntry } from './newApplication.store'
-import { useTextFileUpload } from '@/hooks/useTextFileUpload'
 
 // Unified JD entry box with textarea, file upload, and URL
 function JdEntryCard({
@@ -19,15 +19,17 @@ function JdEntryCard({
   const hasContent = entry.jobDescription.trim().length > 0
   // Show X if: can remove AND (has content OR not the last empty one)
   const showRemove = canRemove && (hasContent || !isLast)
-  const fileUpload = useTextFileUpload({
-    onTextRead: (text) => updateEntry(entry.id, 'jobDescription', text),
+  const fileUpload = useUpload({
+    purpose: 'jobDescription',
+    onText: (text) => updateEntry(entry.id, 'jobDescription', text),
   })
+  const { dropzoneProps, inputProps } = fileUpload
 
   return (
     <div
-      onDrop={fileUpload.handleDrop}
-      onDragOver={fileUpload.handleDragOver}
-      onDragLeave={fileUpload.handleDragLeave}
+      onDrop={dropzoneProps.onDrop}
+      onDragOver={dropzoneProps.onDragOver}
+      onDragLeave={dropzoneProps.onDragLeave}
       className={`border-default relative flex flex-col rounded-md border transition-colors ${fileUpload.isDragActive ? 'ring-hint ring-2' : ''}`}
     >
       {/* Top bar with upload, URL, and remove */}
@@ -41,13 +43,7 @@ function JdEntryCard({
           <FileUp className="h-3.5 w-3.5" />
           <span>Upload</span>
         </button>
-        <input
-          ref={fileUpload.fileInputRef}
-          type="file"
-          accept={fileUpload.acceptedFileTypes}
-          onChange={fileUpload.handleInputChange}
-          className="sr-only"
-        />
+        <input {...inputProps} className="sr-only" />
         <input
           id={`url-${entry.id}`}
           type="text"

@@ -24,8 +24,10 @@ export default function NewApplicationModal({
 }: NewApplicationModalProps) {
   const resumeSource = useNewApplicationStore((s) => s.resumeSource)
   const setResumeSource = useNewApplicationStore((s) => s.setResumeSource)
-  const selectedFile = useNewApplicationStore((s) => s.selectedFile)
-  const setSelectedFile = useNewApplicationStore((s) => s.setSelectedFile)
+  const rawResumeContent = useNewApplicationStore((s) => s.rawResumeContent)
+  const setRawResumeContent = useNewApplicationStore(
+    (s) => s.setRawResumeContent,
+  )
   const selectedSourceId = useNewApplicationStore((s) => s.selectedSourceId)
   const setSelectedSourceId = useNewApplicationStore(
     (s) => s.setSelectedSourceId,
@@ -64,8 +66,8 @@ export default function NewApplicationModal({
 
         {resumeSource === 'upload' && (
           <ResumeUploadSection
-            selectedFile={selectedFile}
-            onFileChange={setSelectedFile}
+            rawResumeContent={rawResumeContent}
+            onRawResumeContentChange={setRawResumeContent}
           />
         )}
 

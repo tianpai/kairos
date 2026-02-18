@@ -11,7 +11,6 @@ import {
   createJobApplication,
   getJobApplication,
 } from '@/api/jobs'
-import { extractResumeText } from '@/utils/resumeTextExtractor'
 import {
   EXTRACTING_PLACEHOLDER,
   getDefaultDueDate,
@@ -81,7 +80,7 @@ export function useBatchCreation() {
     })
 
   async function handleBatchUpload(
-    resumeFile: File,
+    rawResumeContent: string,
     entries: Array<BatchEntry>,
   ) {
     closeModal()
@@ -93,7 +92,6 @@ export function useBatchCreation() {
     })
 
     try {
-      const rawResumeContent = await extractResumeText(resumeFile)
       const [firstEntry, ...restEntries] = entries
 
       const defaultConfig = premadeTemplates[DEFAULT_TEMPLATE_NAME]
