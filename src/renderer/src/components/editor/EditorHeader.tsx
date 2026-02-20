@@ -1,12 +1,12 @@
 import { TailoringButton } from '@editor/TailoringButton'
 import { PageHeader } from '@ui/PageHeader'
-import DownloadResumeButton from '@editor/DownloadResumeButton'
 import SaveResumeButton from '@editor/SaveResumeButton'
 import { DocumentConfigButton } from '@resumeForm/DocumentConfigButton'
 import { useLayoutStore } from '@layout/layout.store'
 import { BtnToggleChecklist } from '../ui/BtnToggleChecklist'
 import { Score } from '../ui/Score'
 import type { JobApplicationDetails } from '@api/jobs'
+import { ExportButton } from '@/components/export/ExportButton'
 import NewApplicationButton from '@/components/upload/NewApplicationButton'
 import { ApplicationsButton } from '@/components/applications/ApplicationsButton'
 
@@ -18,8 +18,6 @@ interface EditorHeaderProps {
 export function EditorHeader({ jobId, jobApplication }: EditorHeaderProps) {
   const { showChecklist, toggleChecklist } = useLayoutStore()
 
-  const companyName = jobApplication?.companyName
-  const position = jobApplication?.position
   const matchPercentage = jobApplication?.matchPercentage ?? 0
   const hasActiveJob = !!jobId && !!jobApplication
 
@@ -52,9 +50,19 @@ export function EditorHeader({ jobId, jobApplication }: EditorHeaderProps) {
                 action={toggleChecklist}
               />
               <SaveResumeButton jobId={jobId} />
-              <DownloadResumeButton
-                companyName={companyName}
-                position={position}
+              <ExportButton
+                targets={
+                  jobApplication
+                    ? [
+                        {
+                          id: jobApplication.id,
+                          companyName: jobApplication.companyName,
+                          position: jobApplication.position,
+                        },
+                      ]
+                    : undefined
+                }
+                useExportShortcut
               />
             </>
           )}

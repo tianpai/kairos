@@ -4,7 +4,7 @@ import { AppLayout } from '@layout/AppLayout'
 import { AllApplicationBtn } from '../ui/BtnBack'
 import { SettingsSidebar } from './SettingsSidebar'
 import { ProvidersSection } from './ProvidersSection'
-import { GeneralSection } from './GeneralSection'
+import { GeneralSection } from './general'
 import { AboutSection } from './AboutSection'
 import type { SettingsSection } from './SettingsSidebar'
 

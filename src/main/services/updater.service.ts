@@ -2,7 +2,7 @@ import { app, shell } from "electron";
 import { autoUpdater } from "electron-updater";
 import log from "electron-log/main";
 import type { UpdateInfo } from "electron-updater";
-import type { UpdateState, UpdateStatus } from "../../shared/updater";
+import type { UpdateState } from "../../shared/updater";
 
 class UpdaterService {
   private currentState: UpdateState = { status: "idle" };

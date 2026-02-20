@@ -1,6 +1,8 @@
 type ThemeSource = "system" | "light" | "dark";
 type ThemeMode = "light" | "dark";
 type ProviderType = import("../shared/providers").ProviderType;
+type BackupExportResult = import("../shared/backup").BackupExportResult;
+type BackupImportResult = import("../shared/backup").BackupImportResult;
 type UpdateState = import("../shared/updater").UpdateState;
 type OllamaPullProgress = import("../shared/ollama").OllamaPullProgress;
 type WorkflowStartPayload =
@@ -38,6 +40,10 @@ interface KairosAPI {
     onBatchExport: (callback: () => void) => () => void;
   };
   platform: NodeJS.Platform;
+  backup: {
+    exportResumeData: () => Promise<BackupExportResult>;
+    importResumeData: () => Promise<BackupImportResult>;
+  };
   shell: {
     openExternal: (url: string) => Promise<void>;
   };

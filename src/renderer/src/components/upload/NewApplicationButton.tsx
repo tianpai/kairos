@@ -45,8 +45,8 @@ export default function NewApplicationButton() {
 
   async function handleSubmit(payload: SubmitPayload) {
     if (!hasApiKey) return
-    if (payload.resumeSource === 'upload' && payload.resumeFile) {
-      await handleBatchUpload(payload.resumeFile, payload.entries)
+    if (payload.resumeSource === 'upload' && payload.rawResumeContent) {
+      await handleBatchUpload(payload.rawResumeContent, payload.entries)
     } else if (payload.resumeSource === 'existing' && payload.sourceJobId) {
       await handleBatchExisting(payload.sourceJobId, payload.entries)
     }

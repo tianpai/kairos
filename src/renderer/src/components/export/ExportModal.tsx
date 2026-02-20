@@ -10,14 +10,21 @@ import {
   getJobApplication,
 } from '@api/jobs'
 import { compileToPDF } from '@typst-compiler/compile'
+import { formatDate } from '@utils/format'
 import type { JobApplication } from '@api/jobs'
 import type { TemplateData } from '@templates/template.types'
 import { TemplateBuilder } from '@/templates/builder'
 
-interface FailedExportsListProps {
+export interface ExportTarget {
+  id: string
+  companyName: string
+  position: string
+}
+
+export interface ExportSummary {
+  total: number
+  succeeded: number
   failed: Array<string>
-  title?: string
-  className?: string
 }
 
 interface ApplicationListItemProps {
@@ -34,42 +41,40 @@ interface ApplicationListProps {
   disabled?: boolean
 }
 
-interface BatchExportActionsProps {
+interface ExportActionsProps {
   exporting: boolean
-  hasFailures: boolean
   selectedCount: number
   onClose: () => void
   onExport: () => void
 }
 
-interface BatchExportContentProps {
+interface ExportContentProps {
   exporting: boolean
   applications: Array<JobApplication>
   allSelected: boolean
   selectedIds: Set<string>
-  failed: Array<string>
   onToggleSelectAll: () => void
   onToggle: (id: string) => void
 }
 
-interface BatchExportState {
+interface ExportState {
   isOpen: boolean
   showArchived: boolean
 }
 
-interface BatchExportOpenOptions {
+interface ExportOpenOptions {
   showArchived?: boolean
 }
 
-interface BatchExportActions {
-  open: (options?: BatchExportOpenOptions) => void
+interface ExportStoreActions {
+  open: (options?: ExportOpenOptions) => void
   close: () => void
   setShowArchivedMode: (showArchived: boolean) => void
 }
 
-type BatchExportStore = BatchExportState & BatchExportActions
+type ExportStore = ExportState & ExportStoreActions
 
-const useBatchExportStore = create<BatchExportStore>()((set) => ({
+const useExportStore = create<ExportStore>()((set) => ({
   isOpen: false,
   showArchived: false,
   open: (options) =>
@@ -81,9 +86,7 @@ const useBatchExportStore = create<BatchExportStore>()((set) => ({
   setShowArchivedMode: (showArchived) => set({ showArchived }),
 }))
 
-type TemplateSchemas = ReturnType<TemplateBuilder['getSchemas']>
-
-function sanitizeForFilename(str: string): string {
+function sanitizeText(str: string): string {
   return str
     .replace(/[^a-zA-Z0-9\s-]/g, '')
     .replace(/\s+/g, '_')
@@ -95,17 +98,13 @@ function generateFilename(
   companyName: string,
   position: string,
 ): string {
-  const sanitizedName = sanitizeForFilename(name || 'resume')
-  const sanitizedCompany = sanitizeForFilename(companyName)
-  const sanitizedPosition = sanitizeForFilename(position)
+  const sanitizedName = sanitizeText(name || 'resume')
+  const sanitizedCompany = sanitizeText(companyName)
+  const sanitizedPosition = sanitizeText(position)
   return `${sanitizedName}_${sanitizedCompany}_${sanitizedPosition}.pdf`
 }
 
-function formatDate(dateStr: string): string {
-  if (!dateStr) return '-'
-  const date = new Date(dateStr)
-  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-}
+type TemplateSchemas = ReturnType<TemplateBuilder['getSchemas']>
 
 function applySchemaDefaults(
   resumeData: TemplateData,
@@ -127,15 +126,21 @@ function applySchemaDefaults(
   return dataWithDefaults
 }
 
+function getApplicationLabel(companyName: string, position: string): string {
+  return `${companyName} - ${position}`
+}
+
 async function exportApplication(
-  app: JobApplication,
+  target: ExportTarget,
   folderPath: string,
 ): Promise<string | null> {
+  const label = getApplicationLabel(target.companyName, target.position)
+
   try {
-    const details = await getJobApplication(app.id)
+    const details = await getJobApplication(target.id)
     const resumeData = details.tailoredResume || details.parsedResume
     if (!resumeData) {
-      return `${app.companyName} - ${app.position} (no resume data)`
+      return `${label} (no resume data)`
     }
 
     const builder = new TemplateBuilder(details.templateId)
@@ -151,38 +156,72 @@ async function exportApplication(
       | { name?: string }
       | undefined
     const name = personalInfo?.name?.trim() || 'resume'
-    const filename = generateFilename(name, app.companyName, app.position)
+    const filename = generateFilename(
+      name,
+      details.companyName,
+      details.position,
+    )
 
     await window.kairos.fs.writeFile(
       folderPath,
       filename,
       new Uint8Array(pdfBinary).buffer,
     )
-
     return null
   } catch (error) {
-    console.error(`Failed to export ${app.companyName}`, error)
-    return `${app.companyName} - ${app.position}`
+    console.error(`Failed to export ${label}`, error)
+    return label
   }
 }
 
-function FailedExportsList({
-  failed,
-  title = 'Failed exports:',
-  className = '',
-}: FailedExportsListProps) {
-  if (failed.length === 0) return null
+export async function exportApplicationsToFolder(
+  targets: Array<ExportTarget>,
+  folderPath: string,
+): Promise<ExportSummary> {
+  const failedExports: Array<string> = []
 
-  return (
-    <div className={className}>
-      <div className="text-error text-sm font-medium">{title}</div>
-      <ul className="text-secondary mt-1 list-inside list-disc text-sm">
-        {failed.map((item, i) => (
-          <li key={i}>{item}</li>
-        ))}
-      </ul>
-    </div>
+  for (const target of targets) {
+    const failure = await exportApplication(target, folderPath)
+    if (failure) {
+      failedExports.push(failure)
+    }
+  }
+
+  return {
+    total: targets.length,
+    succeeded: targets.length - failedExports.length,
+    failed: failedExports,
+  }
+}
+
+export function showExportToast(summary: ExportSummary): void {
+  if (summary.succeeded === summary.total) {
+    toast.success(
+      `Exported ${summary.succeeded} PDF${summary.succeeded > 1 ? 's' : ''}`,
+    )
+    return
+  }
+
+  if (summary.succeeded > 0) {
+    toast.warning(`Exported ${summary.succeeded} of ${summary.total} PDFs`, {
+      description: `${summary.failed.length} failed to export`,
+    })
+    return
+  }
+  toast.error(
+    summary.total > 1 ? 'Failed to export PDFs' : 'Failed to export PDF',
   )
+}
+
+export async function exportWithDestinationPicker(
+  targets: Array<ExportTarget>,
+): Promise<ExportSummary | null> {
+  if (targets.length === 0) return null
+
+  const folderPath = await window.kairos.dialog.selectFolder()
+  if (!folderPath) return null
+
+  return exportApplicationsToFolder(targets, folderPath)
 }
 
 function ApplicationListItem({
@@ -213,7 +252,11 @@ function ApplicationListItem({
           <span className="text-secondary">{app.position}</span>
         </div>
         <span className="text-hint shrink-0 text-sm">
-          {app.dueDate ? `Due ${formatDate(app.dueDate)}` : 'No due date'}
+          {app.dueDate
+            ? `Due ${formatDate(app.dueDate, {
+                format: { month: 'short', day: 'numeric' },
+              })}`
+            : 'No due date'}
         </span>
       </div>
     </label>
@@ -247,13 +290,12 @@ function ApplicationList({
   )
 }
 
-function BatchExportActions({
+function ExportActions({
   exporting,
-  hasFailures,
   selectedCount,
   onClose,
   onExport,
-}: BatchExportActionsProps) {
+}: ExportActionsProps) {
   return (
     <div className="flex gap-2">
       <button
@@ -261,7 +303,7 @@ function BatchExportActions({
         disabled={exporting}
         className="text-secondary hover:bg-hover cursor-pointer rounded px-4 py-2 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
       >
-        {hasFailures ? 'Close' : 'Cancel'}
+        Cancel
       </button>
       <button
         onClick={onExport}
@@ -276,15 +318,14 @@ function BatchExportActions({
   )
 }
 
-function BatchExportContent({
+function ExportContent({
   exporting,
   applications,
   allSelected,
   selectedIds,
-  failed,
   onToggleSelectAll,
   onToggle,
-}: BatchExportContentProps) {
+}: ExportContentProps) {
   return (
     <div className="flex flex-col gap-4">
       <h2 className="text-primary text-xl font-semibold">Export PDFs</h2>
@@ -302,35 +343,27 @@ function BatchExportContent({
         onToggle={onToggle}
         disabled={exporting}
       />
-      {failed.length ? (
-        <FailedExportsList
-          failed={failed}
-          title="Some exports failed:"
-          className="mt-2"
-        />
-      ) : null}
     </div>
   )
 }
 
-export function BatchExportModal() {
-  const showArchived = useBatchExportStore((state) => state.showArchived)
+export function ExportModal() {
+  const isOpen = useExportStore((state) => state.isOpen)
+  const showArchived = useExportStore((state) => state.showArchived)
 
   const { data: applications = [] } = useQuery({
     queryKey: showArchived ? ['archivedJobApplications'] : ['jobApplications'],
     queryFn: showArchived ? getArchivedJobApplications : getAllJobApplications,
+    enabled: isOpen,
   })
 
-  const isOpen = useBatchExportStore((state) => state.isOpen)
-  const close = useBatchExportStore((state) => state.close)
+  const close = useExportStore((state) => state.close)
 
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [exporting, setExporting] = useState(false)
-  const [failed, setFailed] = useState<Array<string>>([])
 
   const resetState = useCallback(() => {
     setSelectedIds(new Set())
-    setFailed([])
   }, [])
 
   const allSelected = useMemo(() => {
@@ -363,35 +396,29 @@ export function BatchExportModal() {
   const handleExport = useCallback(async () => {
     if (selectedIds.size === 0) return
 
-    const folderPath = await window.kairos.dialog.selectFolder()
-    if (!folderPath) return
-
     setExporting(true)
-    setFailed([])
-    const selectedApps = applications.filter((app) => selectedIds.has(app.id))
-    const failedExports: Array<string> = []
+    try {
+      const selectedTargets = applications
+        .filter((app) => selectedIds.has(app.id))
+        .map((app) => ({
+          id: app.id,
+          companyName: app.companyName,
+          position: app.position,
+        }))
+      const summary = await exportWithDestinationPicker(selectedTargets)
+      if (!summary) return
 
-    for (const app of selectedApps) {
-      const failure = await exportApplication(app, folderPath)
-      if (failure) {
-        failedExports.push(failure)
+      showExportToast(summary)
+
+      if (summary.succeeded === summary.total) {
+        resetState()
+        close()
       }
-    }
-
-    setExporting(false)
-    setFailed(failedExports)
-
-    const succeeded = selectedApps.length - failedExports.length
-    if (succeeded === selectedApps.length) {
-      toast.success(`Exported ${succeeded} PDF${succeeded > 1 ? 's' : ''}`)
-      resetState()
-      close()
-    } else if (succeeded > 0) {
-      toast.warning(`Exported ${succeeded} of ${selectedApps.length} PDFs`, {
-        description: `${failedExports.length} failed to export`,
-      })
-    } else {
+    } catch (error) {
+      console.error('Failed to export PDFs', error)
       toast.error('Failed to export PDFs')
+    } finally {
+      setExporting(false)
     }
   }, [selectedIds, applications, close, resetState])
 
@@ -409,21 +436,19 @@ export function BatchExportModal() {
       size="2xl"
       closeOnBackdropClick={!exporting}
       actions={
-        <BatchExportActions
+        <ExportActions
           exporting={exporting}
-          hasFailures={failed.length > 0}
           selectedCount={selectedIds.size}
           onClose={handleClose}
           onExport={handleExport}
         />
       }
     >
-      <BatchExportContent
+      <ExportContent
         exporting={exporting}
         applications={applications}
         allSelected={allSelected}
         selectedIds={selectedIds}
-        failed={failed}
         onToggleSelectAll={handleToggleSelectAll}
         onToggle={handleToggle}
       />
@@ -431,10 +456,10 @@ export function BatchExportModal() {
   )
 }
 
-export function useBatchExportModal() {
-  const open = useBatchExportStore((state) => state.open)
-  const setShowArchivedMode = useBatchExportStore(
+export function useExportModal() {
+  const open = useExportStore((state) => state.open)
+  const setShowArchivedMode = useExportStore(
     (state) => state.setShowArchivedMode,
   )
-  return { open, setShowArchivedMode, Modal: BatchExportModal }
+  return { open, setShowArchivedMode, Modal: ExportModal }
 }

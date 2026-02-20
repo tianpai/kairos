@@ -1,5 +1,6 @@
 import { contextBridge } from "electron";
 import { aiServer } from "./api/ai-server";
+import { backup } from "./api/backup";
 import { dialog } from "./api/dialog";
 import { fs } from "./api/fs";
 import { jobs } from "./api/jobs";
@@ -17,6 +18,7 @@ import { workflow } from "./api/workflow";
 contextBridge.exposeInMainWorld("kairos", {
   shortcuts,
   platform,
+  backup,
   shell,
   dialog,
   fs,

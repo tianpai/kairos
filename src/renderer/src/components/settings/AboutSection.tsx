@@ -8,7 +8,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@ui/Accordion'
-import type { UpdateState, UpdateStatus } from '../../../../shared/updater'
+import type { UpdateState } from '../../../../shared/updater'
 import { versionQuotes } from '@/data/versionQuotes'
 
 function GitHubIcon({ size = 24 }: { size?: number }) {
@@ -134,9 +134,15 @@ export function AboutSection() {
   const [isPackaged, setIsPackaged] = useState<boolean | null>(null)
 
   useEffect(() => {
-    window.kairos.updater.isPackaged().then(setIsPackaged).catch(() => {})
+    window.kairos.updater
+      .isPackaged()
+      .then(setIsPackaged)
+      .catch(() => {})
     // Hydrate from current updater state (in case auto-check already ran)
-    window.kairos.updater.getState().then(setUpdateState).catch(() => {})
+    window.kairos.updater
+      .getState()
+      .then(setUpdateState)
+      .catch(() => {})
   }, [])
 
   useEffect(() => {

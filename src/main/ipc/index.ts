@@ -13,6 +13,7 @@ import { registerProviderHandlers } from "./provider.handlers";
 import { registerThemeHandlers } from "./theme.handlers";
 import { registerShellHandlers } from "./shell.handlers";
 import { registerWorkflowHandlers } from "./workflow.handlers";
+import { registerBackupHandlers } from "./backup.handlers";
 import type { SettingsService } from "../config/settings.service";
 
 export interface IpcDependencies {
@@ -35,4 +36,5 @@ export function registerAllHandlers(deps: IpcDependencies): void {
   registerThemeHandlers(deps);
   registerShellHandlers();
   registerWorkflowHandlers(workflowService);
+  registerBackupHandlers();
 }

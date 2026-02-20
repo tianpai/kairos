@@ -20,9 +20,9 @@ import { FilterPopover } from './FilterPopover'
 import type { SortOption } from './SortDropdown'
 import type { JobApplication } from '@api/jobs'
 import JobInfoModal from '@/components/applications/JobInfoModal'
-import { useBatchExportModal } from '@/components/export/BatchExportModal'
+import { useExportModal } from '@/components/export/ExportModal'
 import NewApplicationButton from '@/components/upload/NewApplicationButton'
-import { BatchExportButton } from '@/components/export/BatchExportButton'
+import { ExportButton } from '@/components/export/ExportButton'
 import { SettingsButton } from '@/components/settings/SettingsButton'
 
 interface OpeningApp {
@@ -39,7 +39,7 @@ function ApplicationPageHeader({ showArchived }: { showArchived: boolean }) {
       right={
         <>
           <SettingsButton />
-          <BatchExportButton showArchived={showArchived} />
+          <ExportButton showArchived={showArchived} />
         </>
       }
     />
@@ -67,9 +67,16 @@ function SearchInput({
 }) {
   const inputRef = useRef<HTMLInputElement>(null)
   useEffect(() => {
+    function isEditableTarget(target: EventTarget | null): boolean {
+      if (!(target instanceof HTMLElement)) return false
+      return !!target.closest(
+        'input, textarea, select, [contenteditable], [role="textbox"]',
+      )
+    }
+
     function handleKeyDown(e: KeyboardEvent) {
-      // ignore if user is already in an input, or pressing modifier keys
-      if (e.target instanceof HTMLInputElement) return
+      // ignore if user is typing in editable fields, or pressing modifier keys
+      if (isEditableTarget(e.target)) return
       if (e.metaKey || e.ctrlKey || e.altKey) return
       if (e.key.length !== 1) return // filters out Enter, Escape, arrows, etc.
 
@@ -296,7 +303,7 @@ export default function AllApplicationsPage() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const { handleUpdate, handleDelete } = useJobApplicationMutations()
-  const { setShowArchivedMode } = useBatchExportModal()
+  const { setShowArchivedMode } = useExportModal()
 
   const [showArchived, setShowArchived] = useState(false)
 

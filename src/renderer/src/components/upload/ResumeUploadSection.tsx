@@ -1,12 +1,11 @@
 import { useEffect, useRef } from 'react'
 import { CircleX, UploadCloud } from 'lucide-react'
-import { useFileUpload } from '@/hooks/useFileUpload'
+import { useUpload } from './useUpload'
 import { INPUT_BASE } from '@/components/resumeForm/fieldStyles'
 
-const ACCEPTED_FILE_TYPES = '.pdf,.docx,.tex,.md,.txt'
-
 interface FileDropzoneProps {
-  fileUpload: ReturnType<typeof useFileUpload>
+  dropzoneProps: ReturnType<typeof useUpload>['dropzoneProps']
+  isDragActive: boolean
   acceptedFileTypes: string
 }
 
@@ -41,19 +40,16 @@ function SelectedFile({
   )
 }
 
-function FileDropzone({ fileUpload, acceptedFileTypes }: FileDropzoneProps) {
+function FileDropzone({
+  dropzoneProps,
+  isDragActive,
+  acceptedFileTypes,
+}: FileDropzoneProps) {
   return (
     <div
-      role="button"
-      tabIndex={0}
-      onClick={fileUpload.triggerFileDialog}
-      onDrop={fileUpload.handleDrop}
-      onDragOver={fileUpload.handleDragOver}
-      onDragLeave={fileUpload.handleDragLeave}
+      {...dropzoneProps}
       className={`mt-2 flex cursor-pointer items-center gap-2 rounded-md border border-dashed px-3 py-2 text-sm transition ${
-        fileUpload.isDragActive
-          ? 'border-hint bg-hover'
-          : 'border-default hover:border-hint'
+        isDragActive ? 'border-hint bg-hover' : 'border-default hover:border-hint'
       }`}
     >
       <UploadCloud className="text-hint h-4 w-4" />
@@ -65,54 +61,59 @@ function FileDropzone({ fileUpload, acceptedFileTypes }: FileDropzoneProps) {
 }
 
 export interface ResumeUploadSectionProps {
-  selectedFile: File | null
-  onFileChange: (file: File | null) => void
+  rawResumeContent: string | null
+  onRawResumeContentChange: (content: string | null) => void
 }
 
 export default function ResumeUploadSection({
-  selectedFile,
-  onFileChange,
+  rawResumeContent,
+  onRawResumeContentChange,
 }: ResumeUploadSectionProps) {
-  const fileUpload = useFileUpload()
-  const hasFile = Boolean(fileUpload.selectedFile)
-  const prevSelectedFileRef = useRef<File | null>(null)
+  const fileUpload = useUpload({ purpose: 'resume' })
+  const hasFile = Boolean(fileUpload.fileName)
+  const prevRawResumeContentRef = useRef<string | null>(null)
+  const {
+    clear,
+    error,
+    fileName,
+    inputProps,
+    isDragActive,
+    text,
+    triggerFileDialog,
+  } = fileUpload
 
   useEffect(() => {
-    if (prevSelectedFileRef.current !== null && selectedFile === null) {
-      if (fileUpload.selectedFile !== null) {
-        fileUpload.resetFileUpload()
-      }
+    if (prevRawResumeContentRef.current !== null && rawResumeContent === null) {
+      clear()
     }
-    prevSelectedFileRef.current = selectedFile
-  }, [selectedFile])
+    prevRawResumeContentRef.current = rawResumeContent
+  }, [clear, rawResumeContent])
 
   useEffect(() => {
-    if (fileUpload.selectedFile !== selectedFile) {
-      onFileChange(fileUpload.selectedFile)
-    }
-  }, [fileUpload.selectedFile, selectedFile, onFileChange])
+    onRawResumeContentChange(text)
+  }, [onRawResumeContentChange, text])
 
   return (
     <section className="flex min-w-0 flex-col">
-      <input
-        ref={fileUpload.fileInputRef}
-        type="file"
-        accept={ACCEPTED_FILE_TYPES}
-        onChange={fileUpload.handleInputChange}
-        className="sr-only"
-      />
+      <input {...inputProps} className="sr-only" />
 
       {hasFile ? (
         <SelectedFile
-          fileName={fileUpload.selectedFile?.name ?? ''}
-          onChangeFile={fileUpload.triggerFileDialog}
-          onRemoveFile={fileUpload.removeSelectedFile}
+          fileName={fileName ?? ''}
+          onChangeFile={triggerFileDialog}
+          onRemoveFile={clear}
         />
       ) : (
         <FileDropzone
-          fileUpload={fileUpload}
-          acceptedFileTypes={ACCEPTED_FILE_TYPES}
+          dropzoneProps={fileUpload.dropzoneProps}
+          isDragActive={isDragActive}
+          acceptedFileTypes={inputProps.accept}
         />
+      )}
+
+      {error && <p className="text-error mt-2 text-xs">{error}</p>}
+      {fileUpload.isProcessing && !text && (
+        <p className="text-hint mt-2 text-xs">Extracting text...</p>
       )}
     </section>
   )
