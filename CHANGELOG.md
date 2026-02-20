@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.2.3](https://github.com/tianpai/kairos/compare/v0.2.2...v0.2.3) (2026-02-20)
+
+
+### Features
+
+* add backup import and export for applications and resumes ([4f57bc1](https://github.com/tianpai/kairos/commit/4f57bc1f6b80cef066f506618d6d4c78b9d92b2c))
+
+
+### Bug Fixes
+
+* remove backup export/import progress bars and simplify status UI ([bcdb765](https://github.com/tianpai/kairos/commit/bcdb7650b679e443a2ed17296e67f21e18e714fa))
+* typing in job description no longer triggers search ([02cc251](https://github.com/tianpai/kairos/commit/02cc25157b48a12dac949db564f16e04666a612d))
+
 ### [0.2.2](https://github.com/tianpai/kairos/compare/v0.2.1...v0.2.2) (2026-02-10)
 
 
