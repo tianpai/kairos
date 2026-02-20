@@ -67,9 +67,16 @@ function SearchInput({
 }) {
   const inputRef = useRef<HTMLInputElement>(null)
   useEffect(() => {
+    function isEditableTarget(target: EventTarget | null): boolean {
+      if (!(target instanceof HTMLElement)) return false
+      return !!target.closest(
+        'input, textarea, select, [contenteditable], [role="textbox"]',
+      )
+    }
+
     function handleKeyDown(e: KeyboardEvent) {
-      // ignore if user is already in an input, or pressing modifier keys
-      if (e.target instanceof HTMLInputElement) return
+      // ignore if user is typing in editable fields, or pressing modifier keys
+      if (isEditableTarget(e.target)) return
       if (e.metaKey || e.ctrlKey || e.altKey) return
       if (e.key.length !== 1) return // filters out Enter, Escape, arrows, etc.
 
