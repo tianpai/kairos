@@ -4,7 +4,7 @@ import type { OllamaPullProgress } from "../../shared/ollama";
 const OLLAMA_DEFAULT_BASE_URL = "http://localhost:11434";
 
 // Curated models known to work well with structured output
-export const OLLAMA_CURATED_MODELS: Array<ModelInfo> = [
+export const OLLAMA_CURATED_MODELS: ModelInfo[] = [
   { id: "llama3.2:3b", name: "Llama 3.2 3B (Recommended)" },
   { id: "llama3.1:8b", name: "Llama 3.1 8B" },
   { id: "qwen2.5:7b", name: "Qwen 2.5 7B" },
@@ -24,12 +24,12 @@ interface OllamaVersionResponse {
 }
 
 interface OllamaTagsResponse {
-  models: Array<{
+  models: {
     name: string;
     size: number;
     digest: string;
     modified_at: string;
-  }>;
+  }[];
 }
 
 let baseUrl = OLLAMA_DEFAULT_BASE_URL;
@@ -66,7 +66,7 @@ export async function getOllamaVersion(): Promise<string | null> {
   }
 }
 
-export async function listOllamaModels(): Promise<Array<OllamaModel>> {
+export async function listOllamaModels(): Promise<OllamaModel[]> {
   try {
     const response = await fetch(`${baseUrl}/api/tags`);
     if (!response.ok) {
@@ -81,9 +81,9 @@ export async function listOllamaModels(): Promise<Array<OllamaModel>> {
   }
 }
 
-export async function getInstalledCuratedModels(): Promise<Array<ModelInfo>> {
+export async function getInstalledCuratedModels(): Promise<ModelInfo[]> {
   const installed = await listOllamaModels();
-  const result: Array<ModelInfo> = [];
+  const result: ModelInfo[] = [];
 
   for (const curated of OLLAMA_CURATED_MODELS) {
     const baseName = curated.id.split(":")[0];
@@ -111,7 +111,7 @@ export async function getInstalledCuratedModels(): Promise<Array<ModelInfo>> {
   return result;
 }
 
-export function getOllamaCuratedModels(): Array<ModelInfo> {
+export function getOllamaCuratedModels(): ModelInfo[] {
   return OLLAMA_CURATED_MODELS;
 }
 

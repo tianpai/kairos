@@ -43,7 +43,7 @@ export type FieldType =
  * - Most field types hold a string
  * - text-array holds an array of strings
  */
-export type FieldValue = string | Array<string>
+export type FieldValue = string | string[]
 
 /**
  * A single entry in a section (object with field keys mapping to values).
@@ -55,7 +55,7 @@ export type SectionEntry = Record<string, FieldValue>
  * - Single sections: one SectionEntry
  * - Multiple sections: array of SectionEntry
  */
-export type SectionValue = SectionEntry | Array<SectionEntry>
+export type SectionValue = SectionEntry | SectionEntry[]
 
 /**
  * Complete template data structure.
@@ -80,7 +80,7 @@ export interface FieldSchema {
   /** Optional placeholder text */
   placeholder?: string
   /** Options for select type only */
-  options?: Array<string>
+  options?: string[]
 }
 
 /**
@@ -104,7 +104,7 @@ export interface SectionUISchema {
   /** combined with multiple → 4 cardinality cases */
   required: boolean
   /** Fields in this section */
-  fields: Array<FieldSchema>
+  fields: FieldSchema[]
 }
 
 // ============================================================================
@@ -148,5 +148,5 @@ export interface Section<T = any> {
    * Generate Typst content by calling the style function
    * with the provided data
    */
-  generateContent: (data: Array<T>) => string
+  generateContent: (data: T[]) => string
 }

@@ -20,7 +20,7 @@ export interface ExportTarget {
 export interface ExportSummary {
   total: number
   succeeded: number
-  failed: Array<string>
+  failed: string[]
 }
 
 interface ApplicationListItemProps {
@@ -31,7 +31,7 @@ interface ApplicationListItemProps {
 }
 
 interface ApplicationListProps {
-  applications: Array<JobApplication>
+  applications: JobApplication[]
   selectedIds: Set<string>
   onToggle: (id: string) => void
   disabled?: boolean
@@ -46,7 +46,7 @@ interface ExportActionsProps {
 
 interface ExportContentProps {
   exporting: boolean
-  applications: Array<JobApplication>
+  applications: JobApplication[]
   allSelected: boolean
   selectedIds: Set<string>
   onToggleSelectAll: () => void
@@ -171,10 +171,10 @@ async function exportApplication(
 }
 
 export async function exportApplicationsToFolder(
-  targets: Array<ExportTarget>,
+  targets: ExportTarget[],
   folderPath: string,
 ): Promise<ExportSummary> {
-  const failedExports: Array<string> = []
+  const failedExports: string[] = []
 
   for (const target of targets) {
     const failure = await exportApplication(target, folderPath)
@@ -210,7 +210,7 @@ export function showExportToast(summary: ExportSummary): void {
 }
 
 export async function exportWithDestinationPicker(
-  targets: Array<ExportTarget>,
+  targets: ExportTarget[],
 ): Promise<ExportSummary | null> {
   if (targets.length === 0) return null
 

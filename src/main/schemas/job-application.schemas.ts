@@ -90,4 +90,6 @@ export type SaveChecklistInput = z.infer<typeof SaveChecklistSchema>;
 export type SaveMatchScoreInput = z.infer<typeof SaveMatchScoreSchema>;
 export type SaveWorkflowStateInput = z.infer<typeof SaveWorkflowStateSchema>;
 export type ListJobsInput = z.infer<typeof ListJobsSchema>;
-export type PatchJobApplicationInput = z.infer<typeof PatchJobApplicationSchema>;
+export type PatchJobApplicationInput = z.infer<
+  typeof PatchJobApplicationSchema
+>;

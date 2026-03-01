@@ -25,16 +25,16 @@ export type WorkflowCreateApplicationsPayload =
       resumeSource: "upload";
       rawResumeContent: string;
       templateId: string;
-      entries: Array<WorkflowBatchEntry>;
+      entries: WorkflowBatchEntry[];
     }
   | {
       resumeSource: "existing";
       sourceJobId: string;
-      entries: Array<WorkflowBatchEntry>;
+      entries: WorkflowBatchEntry[];
     };
 
 export interface WorkflowCreateApplicationsResult {
-  createdIds: Array<string>;
+  createdIds: string[];
   succeeded: number;
   total: number;
 }

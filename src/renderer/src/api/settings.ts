@@ -73,11 +73,13 @@ export function resetAllProviderSettings(): Promise<{ success: boolean }> {
   return window.kairos.settings.resetAllProviders()
 }
 
-export function fetchModels(provider: ProviderType): Promise<Array<ModelInfo>> {
+export function fetchModels(provider: ProviderType): Promise<ModelInfo[]> {
   return window.kairos.models.fetch(provider)
 }
 
-export function getSelectedModel(provider: ProviderType): Promise<string | null> {
+export function getSelectedModel(
+  provider: ProviderType,
+): Promise<string | null> {
   return window.kairos.models.getSelected(provider)
 }
 
@@ -100,17 +102,21 @@ export function setActiveProvider(provider: ProviderType): Promise<void> {
   return window.kairos.provider.setActive(provider)
 }
 
-export function getOllamaStatus(): Promise<{ running: boolean; version: string | null }> {
-  return Promise.all([window.kairos.ollama.isRunning(), window.kairos.ollama.getVersion()]).then(
-    ([running, version]) => ({ running, version }),
-  )
+export function getOllamaStatus(): Promise<{
+  running: boolean
+  version: string | null
+}> {
+  return Promise.all([
+    window.kairos.ollama.isRunning(),
+    window.kairos.ollama.getVersion(),
+  ]).then(([running, version]) => ({ running, version }))
 }
 
-export function getOllamaInstalledModels(): Promise<Array<ModelInfo>> {
+export function getOllamaInstalledModels(): Promise<ModelInfo[]> {
   return window.kairos.ollama.getInstalledModels()
 }
 
-export function getOllamaCuratedModels(): Promise<Array<ModelInfo>> {
+export function getOllamaCuratedModels(): Promise<ModelInfo[]> {
   return window.kairos.ollama.getCuratedModels()
 }
 
@@ -137,4 +143,3 @@ export function onOllamaPullProgress(
 ): () => void {
   return window.kairos.ollama.onPullProgress(callback)
 }
-

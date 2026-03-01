@@ -5,7 +5,7 @@ interface ResumeSourceSelectorProps {
   onChange: (source: ResumeSource) => void
 }
 
-const options: Array<{ value: ResumeSource; label: string }> = [
+const options: { value: ResumeSource; label: string }[] = [
   { value: 'upload', label: 'Upload resume' },
   { value: 'existing', label: 'Use existing' },
 ]

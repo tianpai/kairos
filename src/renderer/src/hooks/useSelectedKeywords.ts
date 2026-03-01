@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 
-export function useSelectedKeywords(initialKeywords?: Array<string>) {
+export function useSelectedKeywords(initialKeywords?: string[]) {
   const [selectedKeywords, setSelectedKeywords] = useState<Set<string>>(
     new Set(),
   )

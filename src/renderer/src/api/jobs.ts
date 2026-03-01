@@ -32,7 +32,7 @@ export function createFromExisting(
 
 export async function listJobApplications(
   query: JobsListQuery = {},
-): Promise<Array<JobApplication>> {
+): Promise<JobApplication[]> {
   return window.kairos.jobs.list(query)
 }
 

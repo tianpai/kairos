@@ -12,4 +12,3 @@ export function setTheme(theme: ThemeSource): Promise<void> {
 export function getCurrentTheme(): Promise<ThemeMode> {
   return window.kairos.theme.getCurrent()
 }
-

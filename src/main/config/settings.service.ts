@@ -7,33 +7,33 @@ interface SettingsSchema {
     openai: {
       apiKey: string | null;
       selectedModel: string | null;
-      cachedModels: Array<string>;
+      cachedModels: string[];
     };
     deepseek: {
       apiKey: string | null;
       selectedModel: string | null;
-      cachedModels: Array<string>;
+      cachedModels: string[];
     };
     ollama: {
       // No apiKey - Ollama runs locally
       baseUrl: string;
       selectedModel: string | null;
-      cachedModels: Array<string>;
+      cachedModels: string[];
     };
     xai: {
       apiKey: string | null;
       selectedModel: string | null;
-      cachedModels: Array<string>;
+      cachedModels: string[];
     };
     gemini: {
       apiKey: string | null;
       selectedModel: string | null;
-      cachedModels: Array<string>;
+      cachedModels: string[];
     };
     anthropic: {
       apiKey: string | null;
       selectedModel: string | null;
-      cachedModels: Array<string>;
+      cachedModels: string[];
     };
   };
   activeProvider:
@@ -122,11 +122,11 @@ export class SettingsService {
     this.store.set("aiProviders.openai.selectedModel", model);
   }
 
-  getOpenAICachedModels(): Array<string> {
+  getOpenAICachedModels(): string[] {
     return this.store.get("aiProviders.openai.cachedModels");
   }
 
-  setOpenAICachedModels(models: Array<string>): void {
+  setOpenAICachedModels(models: string[]): void {
     this.store.set("aiProviders.openai.cachedModels", models);
   }
 
@@ -155,11 +155,11 @@ export class SettingsService {
     this.store.set("aiProviders.deepseek.selectedModel", model);
   }
 
-  getDeepSeekCachedModels(): Array<string> {
+  getDeepSeekCachedModels(): string[] {
     return this.store.get("aiProviders.deepseek.cachedModels");
   }
 
-  setDeepSeekCachedModels(models: Array<string>): void {
+  setDeepSeekCachedModels(models: string[]): void {
     this.store.set("aiProviders.deepseek.cachedModels", models);
   }
 
@@ -180,11 +180,11 @@ export class SettingsService {
     this.store.set("aiProviders.ollama.selectedModel", model);
   }
 
-  getOllamaCachedModels(): Array<string> {
+  getOllamaCachedModels(): string[] {
     return this.store.get("aiProviders.ollama.cachedModels");
   }
 
-  setOllamaCachedModels(models: Array<string>): void {
+  setOllamaCachedModels(models: string[]): void {
     this.store.set("aiProviders.ollama.cachedModels", models);
   }
 
@@ -213,11 +213,11 @@ export class SettingsService {
     this.store.set("aiProviders.xai.selectedModel", model);
   }
 
-  getXAICachedModels(): Array<string> {
+  getXAICachedModels(): string[] {
     return this.store.get("aiProviders.xai.cachedModels");
   }
 
-  setXAICachedModels(models: Array<string>): void {
+  setXAICachedModels(models: string[]): void {
     this.store.set("aiProviders.xai.cachedModels", models);
   }
 
@@ -246,11 +246,11 @@ export class SettingsService {
     this.store.set("aiProviders.gemini.selectedModel", model);
   }
 
-  getGeminiCachedModels(): Array<string> {
+  getGeminiCachedModels(): string[] {
     return this.store.get("aiProviders.gemini.cachedModels");
   }
 
-  setGeminiCachedModels(models: Array<string>): void {
+  setGeminiCachedModels(models: string[]): void {
     this.store.set("aiProviders.gemini.cachedModels", models);
   }
 
@@ -279,11 +279,11 @@ export class SettingsService {
     this.store.set("aiProviders.anthropic.selectedModel", model);
   }
 
-  getAnthropicCachedModels(): Array<string> {
+  getAnthropicCachedModels(): string[] {
     return this.store.get("aiProviders.anthropic.cachedModels");
   }
 
-  setAnthropicCachedModels(models: Array<string>): void {
+  setAnthropicCachedModels(models: string[]): void {
     this.store.set("aiProviders.anthropic.cachedModels", models);
   }
 

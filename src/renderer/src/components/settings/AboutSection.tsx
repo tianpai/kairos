@@ -43,13 +43,13 @@ const GITHUB_URL = 'https://github.com/tianpai/kairos'
 interface ChangelogEntry {
   version: string
   quote?: string
-  sections: Array<{ title: string; items: Array<string> }>
+  sections: { title: string; items: string[] }[]
 }
 
 interface GroupedChangelog {
   minorVersion: string
   quote?: string
-  entries: Array<ChangelogEntry>
+  entries: ChangelogEntry[]
 }
 
 function stripCommitLink(text: string): string {
@@ -62,11 +62,11 @@ function getMinorVersion(version: string): string {
   return `${major}.${minor}`
 }
 
-function parseChangelog(raw: string): Array<ChangelogEntry> {
-  const entries: Array<ChangelogEntry> = []
+function parseChangelog(raw: string): ChangelogEntry[] {
+  const entries: ChangelogEntry[] = []
   const lines = raw.split('\n')
   let current: ChangelogEntry | null = null
-  let currentSection: { title: string; items: Array<string> } | null = null
+  let currentSection: { title: string; items: string[] } | null = null
 
   for (const line of lines) {
     // Match both formats:
@@ -104,9 +104,7 @@ function parseChangelog(raw: string): Array<ChangelogEntry> {
   return entries
 }
 
-function groupByMinorVersion(
-  entries: Array<ChangelogEntry>,
-): Array<GroupedChangelog> {
+function groupByMinorVersion(entries: ChangelogEntry[]): GroupedChangelog[] {
   const groups = new Map<string, GroupedChangelog>()
 
   for (const entry of entries) {
@@ -142,9 +140,13 @@ export function AboutSection() {
   const [isPackaged, setIsPackaged] = useState<boolean | null>(null)
 
   useEffect(() => {
-    isUpdaterPackaged().then(setIsPackaged).catch(() => {})
+    isUpdaterPackaged()
+      .then(setIsPackaged)
+      .catch(() => {})
     // Hydrate from current updater state (in case auto-check already ran)
-    getUpdaterState().then(setUpdateState).catch(() => {})
+    getUpdaterState()
+      .then(setUpdateState)
+      .catch(() => {})
   }, [])
 
   useEffect(() => {

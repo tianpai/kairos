@@ -2,10 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
 import { AnimatePresence, motion } from 'motion/react'
-import {
-  listJobApplications,
-  patchJobApplication,
-} from '@api/jobs'
+import { listJobApplications, patchJobApplication } from '@api/jobs'
 import { AppLayout } from '@layout/AppLayout'
 import { PageHeader } from '@ui/PageHeader'
 import { useJobApplicationMutations } from '@hooks/useJobApplicationMutations'
@@ -119,8 +116,8 @@ function ApplicationsGrid({
   onStatusChange,
   disabled,
 }: {
-  pinnedApplications: Array<JobApplication>
-  otherApplications: Array<JobApplication>
+  pinnedApplications: JobApplication[]
+  otherApplications: JobApplication[]
   hasPinnedApplications: boolean
   expandedAppId: string | null
   isArchived: boolean
@@ -238,7 +235,7 @@ function ArchiveToggle({
 
 interface ApplicationsSectionProps {
   title?: string
-  applications: Array<JobApplication>
+  applications: JobApplication[]
   expandedAppId: string | null
   isArchived: boolean
   onToggleExpand: (id: string) => void
@@ -343,7 +340,7 @@ export default function AllApplicationsPage() {
           app.position.toLowerCase().includes(q)
         )
       }),
-    [applications, search]
+    [applications, search],
   )
 
   const processed = useMemo(() => {
@@ -362,12 +359,10 @@ export default function AllApplicationsPage() {
 
     if (sortBy === 'dueDate') {
       result = [...result].sort(
-        (a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime()
+        (a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime(),
       )
     } else if (sortBy === 'score') {
-      result = [...result].sort(
-        (a, b) => b.matchPercentage - a.matchPercentage
-      )
+      result = [...result].sort((a, b) => b.matchPercentage - a.matchPercentage)
     }
 
     return result

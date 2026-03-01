@@ -22,5 +22,5 @@ export interface BackupManifest {
   appVersion: string;
   dbSchemaVersion: number;
   createdAt: string;
-  files: Array<BackupManifestFile>;
+  files: BackupManifestFile[];
 }

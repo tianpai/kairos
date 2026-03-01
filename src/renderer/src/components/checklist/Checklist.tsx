@@ -13,7 +13,7 @@ interface ChecklistProps {
   jobId: string | undefined
 }
 
-const tabs: Array<{ key: TabType; label: string; icon: LucideIcon }> = [
+const tabs: { key: TabType; label: string; icon: LucideIcon }[] = [
   { key: 'hard', label: 'Must Have', icon: ShieldCheck },
   { key: 'soft', label: 'Soft Skills', icon: Users },
   { key: 'preferred', label: 'Preferred', icon: Star },

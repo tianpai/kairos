@@ -49,7 +49,9 @@ function FileDropzone({
     <div
       {...dropzoneProps}
       className={`mt-2 flex cursor-pointer items-center gap-2 rounded-md border border-dashed px-3 py-2 text-sm transition ${
-        isDragActive ? 'border-hint bg-hover' : 'border-default hover:border-hint'
+        isDragActive
+          ? 'border-hint bg-hover'
+          : 'border-default hover:border-hint'
       }`}
     >
       <UploadCloud className="text-hint h-4 w-4" />

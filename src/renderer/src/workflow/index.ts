@@ -44,9 +44,7 @@ export async function startWorkflow(
   await startWorkflowApi({ workflowName, jobId, initialContext })
 }
 
-export async function retryFailedTasks(
-  jobId: string,
-): Promise<Array<TaskName>> {
+export async function retryFailedTasks(jobId: string): Promise<TaskName[]> {
   return retryWorkflowApi({ jobId })
 }
 

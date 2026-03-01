@@ -33,7 +33,7 @@ function SectionWrapper({ children }: { children: React.ReactNode }) {
 }
 
 interface FieldListProps {
-  fields: Array<FieldSchema>
+  fields: FieldSchema[]
   data: SectionEntry
   onFieldChange: (fieldKey: string, value: FieldValue) => void
 }
@@ -57,7 +57,7 @@ interface EntryItemProps {
   id: string
   label: string
   index: number
-  fields: Array<FieldSchema>
+  fields: FieldSchema[]
   data: SectionEntry
   canRemove: boolean
   onFieldChange: (fieldKey: string, value: FieldValue) => void
@@ -151,7 +151,7 @@ function SingleEntrySection({ schema, data }: SingleEntrySectionProps) {
 
 interface MultipleEntrySectionProps {
   schema: SectionUISchema
-  entries: Array<SectionEntry>
+  entries: SectionEntry[]
 }
 
 function MultipleEntrySection({ schema, entries }: MultipleEntrySectionProps) {
@@ -260,9 +260,6 @@ export function DynamicSection({ schema }: DynamicSectionProps) {
   }
 
   return (
-    <MultipleEntrySection
-      schema={schema}
-      entries={data as Array<SectionEntry>}
-    />
+    <MultipleEntrySection schema={schema} entries={data as SectionEntry[]} />
   )
 }

@@ -2,6 +2,7 @@
 //  @ts-check
 
 import { tanstackConfig } from "@tanstack/eslint-config";
+import tseslint from "typescript-eslint";
 
 export default [
   {
@@ -9,7 +10,16 @@ export default [
   },
   ...tanstackConfig,
   {
+    files: ["**/*.{ts,tsx}"],
+    plugins: {
+      "@typescript-eslint": tseslint.plugin,
+    },
     rules: {
+      // Prefer `T[]` over `Array<T>`
+      "@typescript-eslint/array-type": [
+        "error",
+        { default: "array", readonly: "array" },
+      ],
       // Async methods without await are often intentional for API consistency
       "@typescript-eslint/require-await": "off",
       // Defensive coding with null checks is valid even if types say otherwise

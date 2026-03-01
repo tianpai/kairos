@@ -3,10 +3,7 @@ import type { LucideIcon } from 'lucide-react'
 import { SidebarItem } from '@/components/sidebar/SidebarItem'
 import { Sidebar } from '@/components/sidebar/Sidebar'
 
-export type SettingsSection =
-  | 'providers'
-  | 'general'
-  | 'about'
+export type SettingsSection = 'providers' | 'general' | 'about'
 
 interface NavItem {
   id: SettingsSection
@@ -14,7 +11,7 @@ interface NavItem {
   icon: LucideIcon
 }
 
-const NAV_ITEMS: Array<NavItem> = [
+const NAV_ITEMS: NavItem[] = [
   { id: 'general', label: 'General', icon: Settings },
   { id: 'providers', label: 'Providers', icon: Cpu },
   { id: 'about', label: 'About', icon: Info },

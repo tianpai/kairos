@@ -8,7 +8,7 @@ import { GeneralSection } from './general'
 import { AboutSection } from './AboutSection'
 import type { SettingsSection } from './SettingsSidebar'
 
-const validSections: Array<SettingsSection> = ['general', 'providers', 'about']
+const validSections: SettingsSection[] = ['general', 'providers', 'about']
 
 export default function SettingsPage() {
   const navigate = useNavigate()

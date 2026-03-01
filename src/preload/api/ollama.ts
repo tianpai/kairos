@@ -10,9 +10,9 @@ export const ollama = {
   isRunning: (): Promise<boolean> => ipcRenderer.invoke("ollama:isRunning"),
   getVersion: (): Promise<string | null> =>
     ipcRenderer.invoke("ollama:getVersion"),
-  getInstalledModels: (): Promise<Array<{ id: string; name: string }>> =>
+  getInstalledModels: (): Promise<{ id: string; name: string }[]> =>
     ipcRenderer.invoke("ollama:getInstalledModels"),
-  getCuratedModels: (): Promise<Array<{ id: string; name: string }>> =>
+  getCuratedModels: (): Promise<{ id: string; name: string }[]> =>
     ipcRenderer.invoke("ollama:getCuratedModels"),
   pullModel: (
     modelName: string,

@@ -26,7 +26,7 @@ function RequirementStatusIcon({
 
 interface RequirementItemProps {
   requirement: ChecklistRequirement
-  selectedKeywords: Array<string>
+  selectedKeywords: string[]
   onToggleKeyword: (keyword: string) => void
 }
 

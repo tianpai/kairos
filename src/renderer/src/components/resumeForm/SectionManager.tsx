@@ -103,7 +103,7 @@ const DraggableSection = memo(function DraggableSection({
 interface SortableZoneProps<T> {
   id: string
   title: string
-  items: Array<T>
+  items: T[]
   getItemId: (item: T) => string
   renderItem: (item: T) => ReactNode
   emptyMessage?: string
@@ -151,7 +151,7 @@ function CurrentSectionsZone({
   sections,
   schemaById,
 }: {
-  sections: Array<{ id: string; styleId: string }>
+  sections: { id: string; styleId: string }[]
   schemaById: Record<string, { label: string }>
 }) {
   return (
@@ -174,7 +174,7 @@ function CurrentSectionsZone({
 function AvailableSectionsZone({
   availableSections,
 }: {
-  availableSections: ReadonlyArray<string>
+  availableSections: readonly string[]
 }) {
   return (
     <SortableZone

@@ -19,7 +19,7 @@ const SOFT_REQUIREMENT_WEIGHT = 1;
 const PREFERRED_SKILL_WEIGHT = 1;
 
 function scoreFulfilledRequirements(
-  requirements: Array<ChecklistRequirement>,
+  requirements: ChecklistRequirement[],
   baseWeight: number,
 ): { totalWeight: number; matchedWeight: number } {
   let totalWeight = 0;

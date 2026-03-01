@@ -9,7 +9,12 @@ interface TooltipProps {
   side?: 'bottom' | 'right'
 }
 
-export function Tooltip({ content, children, delay = 0, side = 'bottom' }: TooltipProps) {
+export function Tooltip({
+  content,
+  children,
+  delay = 0,
+  side = 'bottom',
+}: TooltipProps) {
   const [isVisible, setIsVisible] = useState(false)
   const [position, setPosition] = useState({ top: 0, left: 0 })
   const timeoutRef = useRef<NodeJS.Timeout | null>(null)

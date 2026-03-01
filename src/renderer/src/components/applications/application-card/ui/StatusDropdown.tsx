@@ -7,7 +7,10 @@ interface StatusDropdownProps {
   onStatusChange: (status: string | null) => void
 }
 
-export function StatusDropdown({ status, onStatusChange }: StatusDropdownProps) {
+export function StatusDropdown({
+  status,
+  onStatusChange,
+}: StatusDropdownProps) {
   const [isOpen, setIsOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
 

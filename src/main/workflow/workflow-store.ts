@@ -25,7 +25,7 @@ export class WorkflowStore {
   initWorkflow(
     jobId: string,
     workflowName: string,
-    tasks: Array<TaskName>,
+    tasks: TaskName[],
     initialContext: Partial<WorkflowContext>,
   ): void {
     const taskStates: TaskStateMap = {};

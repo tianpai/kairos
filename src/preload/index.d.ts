@@ -159,10 +159,7 @@ interface KairosAPI {
       data: unknown,
     ) => Promise<IpcSuccessResponse>;
     saveChecklist: (id: string, data: unknown) => Promise<IpcSuccessResponse>;
-    saveMatchScore: (
-      id: string,
-      data: unknown,
-    ) => Promise<IpcSuccessResponse>;
+    saveMatchScore: (id: string, data: unknown) => Promise<IpcSuccessResponse>;
     saveWorkflowState: (
       id: string,
       data: unknown,

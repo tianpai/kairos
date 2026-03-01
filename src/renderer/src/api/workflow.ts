@@ -23,9 +23,9 @@ export async function startWorkflow(
 
 export async function retryWorkflow(
   payload: WorkflowRetryPayload,
-): Promise<Array<TaskName>> {
+): Promise<TaskName[]> {
   const result = await window.kairos.workflow.retry(payload)
-  return result.failedTasks as Array<TaskName>
+  return result.failedTasks as TaskName[]
 }
 
 export function createApplications(

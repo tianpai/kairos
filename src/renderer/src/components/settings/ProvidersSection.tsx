@@ -47,7 +47,7 @@ interface ProviderInfo {
   placeholder: string
 }
 
-const PROVIDERS: Array<ProviderInfo> = [
+const PROVIDERS: ProviderInfo[] = [
   {
     id: 'openai',
     name: 'OpenAI',

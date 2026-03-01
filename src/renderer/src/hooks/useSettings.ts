@@ -22,7 +22,10 @@ import type { ProviderType } from '../../../shared/providers'
 
 type ApiKeyProvider = Exclude<ProviderType, 'ollama'>
 
-function useHasProviderApiKey(provider: ApiKeyProvider, queryKeySuffix: string) {
+function useHasProviderApiKey(
+  provider: ApiKeyProvider,
+  queryKeySuffix: string,
+) {
   return useQuery({
     queryKey: ['settings', queryKeySuffix],
     queryFn: () => hasProviderApiKey(provider),

@@ -20,7 +20,7 @@ export const workflow = {
     ipcRenderer.invoke("workflow:start", payload),
   retry: (
     payload: WorkflowRetryPayload,
-  ): Promise<{ success: boolean; failedTasks: Array<string> }> =>
+  ): Promise<{ success: boolean; failedTasks: string[] }> =>
     ipcRenderer.invoke("workflow:retry", payload),
   createApplications: (
     payload: WorkflowCreateApplicationsPayload,

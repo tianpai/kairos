@@ -21,8 +21,8 @@ interface BatchSource {
   sourceJobId: string;
   templateId: string;
   parsedResume: Record<string, unknown>;
-  entriesToClone: Array<WorkflowBatchEntry>;
-  initialCreatedIds: Array<string>;
+  entriesToClone: WorkflowBatchEntry[];
+  initialCreatedIds: string[];
 }
 
 function getDefaultDueDate(): string {
@@ -55,7 +55,7 @@ export class WorkflowService {
     return this.engine.startWorkflow(workflowName, jobId, initialContext);
   }
 
-  retryFailedTasks(jobId: string): Promise<Array<TaskName>> {
+  retryFailedTasks(jobId: string): Promise<TaskName[]> {
     return this.engine.retryFailedTasks(jobId);
   }
 
@@ -91,7 +91,7 @@ export class WorkflowService {
     if (active) return active;
 
     const job = await this.jobService.getJobApplication(jobId);
-    const workflowSteps = job.workflowSteps as WorkflowStepsData | null;
+    const workflowSteps = job.workflowSteps;
     if (!workflowSteps) return null;
 
     const { recovered, wasStale } =
@@ -184,7 +184,7 @@ export class WorkflowService {
     };
   }
 
-  private async createFromSource(source: BatchSource): Promise<Array<string>> {
+  private async createFromSource(source: BatchSource): Promise<string[]> {
     const results = await Promise.all(
       source.entriesToClone.map((entry) =>
         this.createSingleFromSource(entry, source),

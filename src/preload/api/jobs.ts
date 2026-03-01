@@ -18,7 +18,7 @@ export const jobs = {
     data: JobsCreateFromExistingPayload,
   ): Promise<JobsCreateResult> =>
     ipcRenderer.invoke("jobs:createFromExisting", data),
-  list: (query: JobsListQuery = {}): Promise<Array<JobApplication>> =>
+  list: (query: JobsListQuery = {}): Promise<JobApplication[]> =>
     ipcRenderer.invoke("jobs:list", query),
   get: (id: string): Promise<JobApplicationDetails> =>
     ipcRenderer.invoke("jobs:get", id),
@@ -31,10 +31,7 @@ export const jobs = {
   saveResume: (id: string, data: unknown): Promise<IpcSuccessResponse> =>
     ipcRenderer.invoke("jobs:saveResume", id, data),
   // Workflow data
-  saveParsedResume: (
-    id: string,
-    data: unknown,
-  ): Promise<IpcSuccessResponse> =>
+  saveParsedResume: (id: string, data: unknown): Promise<IpcSuccessResponse> =>
     ipcRenderer.invoke("jobs:saveParsedResume", id, data),
   saveTailoredResume: (
     id: string,
@@ -45,9 +42,6 @@ export const jobs = {
     ipcRenderer.invoke("jobs:saveChecklist", id, data),
   saveMatchScore: (id: string, data: unknown): Promise<IpcSuccessResponse> =>
     ipcRenderer.invoke("jobs:saveMatchScore", id, data),
-  saveWorkflowState: (
-    id: string,
-    data: unknown,
-  ): Promise<IpcSuccessResponse> =>
+  saveWorkflowState: (id: string, data: unknown): Promise<IpcSuccessResponse> =>
     ipcRenderer.invoke("jobs:saveWorkflowState", id, data),
 };

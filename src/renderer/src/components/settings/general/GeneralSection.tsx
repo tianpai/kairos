@@ -147,9 +147,7 @@ export function GeneralSection() {
         onResetProviders={handleResetProviders}
       />
 
-      <ImportBackupOverlay
-        isImportingBackup={isImportingBackup}
-      />
+      <ImportBackupOverlay isImportingBackup={isImportingBackup} />
     </div>
   )
 }

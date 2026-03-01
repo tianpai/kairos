@@ -33,14 +33,14 @@ const GEMINI_FALLBACK_MODELS = [
   "gemini-1.5-pro",
 ];
 
-const ANTHROPIC_FALLBACK_MODELS: Array<ModelInfo> = [
+const ANTHROPIC_FALLBACK_MODELS: ModelInfo[] = [
   { id: "claude-haiku-4-5-20251001", name: "Claude Haiku 4.5" },
   { id: "claude-sonnet-4-5-20250929", name: "Claude Sonnet 4.5" },
   { id: "claude-opus-4-5-20251101", name: "Claude Opus 4.5" },
 ];
 
 // Ollama curated models (known good for structured output)
-const OLLAMA_CURATED_MODELS: Array<ModelInfo> = [
+const OLLAMA_CURATED_MODELS: ModelInfo[] = [
   { id: "llama3.2:3b", name: "Llama 3.2 3B (Recommended)" },
   { id: "llama3.1:8b", name: "Llama 3.1 8B" },
   { id: "qwen2.5:7b", name: "Qwen 2.5 7B" },
@@ -64,7 +64,7 @@ function isOpenAIChatModel(modelId: string): boolean {
 export async function fetchOpenAIModels(
   apiKey: string,
   baseUrl = "https://api.openai.com/v1",
-): Promise<Array<ModelInfo>> {
+): Promise<ModelInfo[]> {
   try {
     const response = await fetch(`${baseUrl}/models`, {
       headers: {
@@ -79,7 +79,7 @@ export async function fetchOpenAIModels(
     }
 
     const data = (await response.json()) as {
-      data: Array<{ id: string; owned_by?: string }>;
+      data: { id: string; owned_by?: string }[];
     };
     const chatModels = data.data
       .filter((m) => isOpenAIChatModel(m.id))
@@ -102,7 +102,7 @@ export async function fetchOpenAIModels(
 export async function fetchDeepSeekModels(
   apiKey: string,
   baseUrl = "https://api.deepseek.com/v1",
-): Promise<Array<ModelInfo>> {
+): Promise<ModelInfo[]> {
   try {
     const response = await fetch(`${baseUrl}/models`, {
       headers: {
@@ -117,7 +117,7 @@ export async function fetchDeepSeekModels(
     }
 
     const data = (await response.json()) as {
-      data: Array<{ id: string; owned_by?: string }>;
+      data: { id: string; owned_by?: string }[];
     };
     const models = data.data.map((m) => ({
       id: m.id,
@@ -137,7 +137,7 @@ export async function fetchDeepSeekModels(
 export async function fetchXAIModels(
   apiKey: string,
   baseUrl = "https://api.x.ai/v1",
-): Promise<Array<ModelInfo>> {
+): Promise<ModelInfo[]> {
   try {
     const response = await fetch(`${baseUrl}/models`, {
       headers: {
@@ -152,7 +152,7 @@ export async function fetchXAIModels(
     }
 
     const data = (await response.json()) as {
-      data: Array<{ id: string; owned_by?: string }>;
+      data: { id: string; owned_by?: string }[];
     };
     const models = data.data.map((m) => ({
       id: m.id,
@@ -172,7 +172,7 @@ export async function fetchXAIModels(
 export async function fetchGeminiModels(
   apiKey: string,
   baseUrl = "https://generativelanguage.googleapis.com/v1beta",
-): Promise<Array<ModelInfo>> {
+): Promise<ModelInfo[]> {
   try {
     const response = await fetch(`${baseUrl}/models?key=${apiKey}`, {
       headers: {
@@ -186,7 +186,7 @@ export async function fetchGeminiModels(
     }
 
     const data = (await response.json()) as {
-      models: Array<{ name: string; displayName: string }>;
+      models: { name: string; displayName: string }[];
     };
     // Filter for generative models only (exclude embedding models, etc.)
     const generativeModels = data.models
@@ -209,7 +209,7 @@ export async function fetchGeminiModels(
 export async function fetchAnthropicModels(
   apiKey: string,
   baseUrl = "https://api.anthropic.com/v1",
-): Promise<Array<ModelInfo>> {
+): Promise<ModelInfo[]> {
   try {
     const response = await fetch(`${baseUrl}/models`, {
       headers: {
@@ -224,12 +224,12 @@ export async function fetchAnthropicModels(
     }
 
     const data = (await response.json()) as {
-      data: Array<{
+      data: {
         id: string;
         display_name: string;
         type: string;
         created_at: string;
-      }>;
+      }[];
       has_more: boolean;
     };
     const models = data.data.map((m) => ({
@@ -244,11 +244,11 @@ export async function fetchAnthropicModels(
   }
 }
 
-export function getOllamaCuratedModels(): Array<ModelInfo> {
+export function getOllamaCuratedModels(): ModelInfo[] {
   return OLLAMA_CURATED_MODELS;
 }
 
-export function getFallbackModels(provider: ProviderType): Array<ModelInfo> {
+export function getFallbackModels(provider: ProviderType): ModelInfo[] {
   switch (provider) {
     case "openai":
       return OPENAI_FALLBACK_MODELS.map((id) => ({ id, name: id }));

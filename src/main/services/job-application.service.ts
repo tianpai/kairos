@@ -146,7 +146,7 @@ export class JobApplicationService {
 
   async listJobApplications(
     query: ListJobsInput = {},
-  ): Promise<Array<JobApplication>> {
+  ): Promise<JobApplication[]> {
     const archived = query.archived ?? false;
     const results = this.db
       .select()
@@ -162,7 +162,8 @@ export class JobApplicationService {
   async getJobApplication(id: string): Promise<JobApplicationDetails> {
     const job = this.requireJobApplication(id);
 
-    const workflowSteps = job.workflowSteps as JobApplicationDetails["workflowSteps"];
+    const workflowSteps =
+      job.workflowSteps as JobApplicationDetails["workflowSteps"];
     const failedTasks: JobApplicationDetails["failedTasks"] = {};
 
     if (workflowSteps?.taskStates) {
@@ -191,7 +192,8 @@ export class JobApplicationService {
       tailoredResume: job.tailoredResume,
       originalResume: job.originalResume,
       checklist: job.checklist as JobApplicationDetails["checklist"],
-      workflowStatus: job.workflowStatus as JobApplicationDetails["workflowStatus"],
+      workflowStatus:
+        job.workflowStatus as JobApplicationDetails["workflowStatus"],
       workflowSteps: workflowSteps,
       failedTasks,
     };
@@ -337,7 +339,10 @@ export class JobApplicationService {
       updatedAt: nowISO(),
     };
 
-    if (dto.companyName !== undefined && dto.companyName !== current.company.name) {
+    if (
+      dto.companyName !== undefined &&
+      dto.companyName !== current.company.name
+    ) {
       const company = this.getOrCreateCompany(dto.companyName);
       updateData.companyId = company.id;
     }

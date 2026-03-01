@@ -41,7 +41,7 @@ interface ResumeState {
   insertSectionAt: (sectionId: string, index: number, styleId?: string) => void
   removeSection: (sectionId: string) => void
 
-  reorderSections: (newOrder: Array<string>) => void
+  reorderSections: (newOrder: string[]) => void
 
   updateGlobalConfig: (key: keyof DocumentSetup, value: string) => void
 
@@ -73,7 +73,7 @@ export const useResumeStore = create<ResumeState>()(
             }
           } else {
             // Array section
-            const arrayData = sectionData as Array<SectionEntry>
+            const arrayData = sectionData as SectionEntry[]
             const updatedArray = [...arrayData]
             updatedArray[index] = {
               ...arrayData[index],
@@ -105,7 +105,7 @@ export const useResumeStore = create<ResumeState>()(
             }
           })
           const newData: TemplateData = { ...state.data }
-          const currentArray = newData[sectionId] as Array<SectionEntry>
+          const currentArray = newData[sectionId] as SectionEntry[]
           newData[sectionId] = [emptyEntry, ...currentArray]
           return { data: newData }
         })
@@ -212,7 +212,7 @@ export const useResumeStore = create<ResumeState>()(
           })
       },
 
-      reorderSections: (newOrder: Array<string>) => {
+      reorderSections: (newOrder: string[]) => {
         set((state) => {
           const config = TemplateId.parse(state.templateId)
           const reorderedSections = newOrder

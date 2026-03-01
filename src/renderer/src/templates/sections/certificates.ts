@@ -50,7 +50,7 @@ export class CertificatesSection implements Section<Certificate> {
     return UI_SCHEMA
   }
 
-  generateContent(data: Array<Certificate>): string {
+  generateContent(data: Certificate[]): string {
     if (data.length === 0) return ''
 
     const content = data

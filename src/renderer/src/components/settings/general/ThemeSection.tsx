@@ -2,11 +2,11 @@ import { Monitor, Moon, Sun } from 'lucide-react'
 
 export type ThemeSource = 'system' | 'light' | 'dark'
 
-const THEME_OPTIONS: Array<{
+const THEME_OPTIONS: {
   value: ThemeSource
   label: string
   icon: typeof Monitor
-}> = [
+}[] = [
   { value: 'system', label: 'System', icon: Monitor },
   { value: 'light', label: 'Light', icon: Sun },
   { value: 'dark', label: 'Dark', icon: Moon },

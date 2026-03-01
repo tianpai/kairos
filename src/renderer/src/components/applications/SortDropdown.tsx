@@ -3,7 +3,7 @@ import { ArrowUpDown, Check } from 'lucide-react'
 
 export type SortOption = 'default' | 'dueDate' | 'score'
 
-const SORT_OPTIONS: Array<{ value: SortOption; label: string }> = [
+const SORT_OPTIONS: { value: SortOption; label: string }[] = [
   { value: 'default', label: 'Date created' },
   { value: 'dueDate', label: 'Due date' },
   { value: 'score', label: 'Score' },
@@ -59,7 +59,7 @@ export function SortDropdown({ sortBy, onSortChange }: SortDropdownProps) {
       </button>
 
       {isOpen && (
-        <div className="border-default bg-surface absolute right-0 top-full z-50 mt-1 flex flex-col rounded-lg border py-1 shadow-lg">
+        <div className="border-default bg-surface absolute top-full right-0 z-50 mt-1 flex flex-col rounded-lg border py-1 shadow-lg">
           {SORT_OPTIONS.map((option) => {
             const isSelected = option.value === sortBy
             return (
@@ -69,11 +69,11 @@ export function SortDropdown({ sortBy, onSortChange }: SortDropdownProps) {
                 className="hover:bg-hover flex items-center gap-2 px-3 py-1.5 text-xs whitespace-nowrap transition-colors"
               >
                 <span className="w-3">
-                  {isSelected && (
-                    <Check size={12} className="text-primary" />
-                  )}
+                  {isSelected && <Check size={12} className="text-primary" />}
                 </span>
-                <span className={isSelected ? 'text-primary' : 'text-secondary'}>
+                <span
+                  className={isSelected ? 'text-primary' : 'text-secondary'}
+                >
                   {option.label}
                 </span>
               </button>

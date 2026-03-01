@@ -48,7 +48,7 @@ function createEmptyEntry(): JdEntry {
   return { id: generateId(), jobDescription: '', jobUrl: '' }
 }
 
-function getFilledEntries(entries: Array<JdEntry>): Array<JdEntry> {
+function getFilledEntries(entries: JdEntry[]): JdEntry[] {
   return entries.filter((e) => e.jobDescription.trim().length > 0)
 }
 
@@ -57,7 +57,7 @@ interface NewApplicationState {
   resumeSource: ResumeSource
   rawResumeContent: string | null
   selectedSourceId: string | null
-  entries: Array<JdEntry>
+  entries: JdEntry[]
   isSubmitting: boolean
   batchProgress: BatchProgress
 }

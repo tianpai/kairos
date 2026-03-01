@@ -112,9 +112,8 @@ export type WorkflowContext = {
  * Validate that a task's input keys exist in WorkflowContext
  * This ensures tasks can only require data that exists in the context.
  */
-export type ValidInputKeys<T extends TaskName> = ReadonlyArray<
-  keyof TaskInput<T> & keyof WorkflowContext
->;
+export type ValidInputKeys<T extends TaskName> = readonly (keyof TaskInput<T> &
+  keyof WorkflowContext)[];
 
 /**
  * Get the context keys required by a task

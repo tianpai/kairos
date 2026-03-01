@@ -53,7 +53,7 @@ export class ExtracurricularsSection implements Section<Extracurricular> {
     return UI_SCHEMA
   }
 
-  generateContent(data: Array<Extracurricular>): string {
+  generateContent(data: Extracurricular[]): string {
     if (data.length === 0) return ''
 
     const content = data

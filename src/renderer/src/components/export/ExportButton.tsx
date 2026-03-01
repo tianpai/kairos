@@ -12,7 +12,7 @@ import { useShortcutStore } from '@/components/layout/shortcut.store'
 
 interface ExportButtonProps {
   showArchived?: boolean
-  targets?: Array<ExportTarget>
+  targets?: ExportTarget[]
   useExportShortcut?: boolean
 }
 
@@ -24,7 +24,9 @@ export function ExportButton({
   const { open } = useExportModal()
   const [exporting, setExporting] = useState(false)
 
-  const exportPdfRequested = useShortcutStore((state) => state.exportPdfRequested)
+  const exportPdfRequested = useShortcutStore(
+    (state) => state.exportPdfRequested,
+  )
   const clearExportPdfRequest = useShortcutStore(
     (state) => state.clearExportPdfRequest,
   )
@@ -44,7 +46,9 @@ export function ExportButton({
       }
     } catch (error) {
       console.error('Failed to export PDF', error)
-      toast.error(targets.length > 1 ? 'Failed to export PDFs' : 'Failed to export PDF')
+      toast.error(
+        targets.length > 1 ? 'Failed to export PDFs' : 'Failed to export PDF',
+      )
     } finally {
       setExporting(false)
     }
