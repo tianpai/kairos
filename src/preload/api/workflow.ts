@@ -2,6 +2,8 @@ import { ipcRenderer } from "electron";
 import type {
   WorkflowAiPartial,
   WorkflowCompleted,
+  WorkflowCreateApplicationsPayload,
+  WorkflowCreateApplicationsResult,
   WorkflowGetStatePayload,
   WorkflowRetryPayload,
   WorkflowStartPayload,
@@ -20,6 +22,10 @@ export const workflow = {
     payload: WorkflowRetryPayload,
   ): Promise<{ success: boolean; failedTasks: Array<string> }> =>
     ipcRenderer.invoke("workflow:retry", payload),
+  createApplications: (
+    payload: WorkflowCreateApplicationsPayload,
+  ): Promise<WorkflowCreateApplicationsResult> =>
+    ipcRenderer.invoke("workflow:createApplications", payload),
   getState: (
     payload: WorkflowGetStatePayload,
   ): Promise<{ workflow: WorkflowStepsData | null }> =>

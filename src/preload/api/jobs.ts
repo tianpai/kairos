@@ -1,51 +1,53 @@
 import { ipcRenderer } from "electron";
+import type {
+  JobApplication,
+  JobApplicationDetails,
+  JobsCreateFromExistingPayload,
+  JobsCreatePayload,
+  JobsCreateResult,
+  JobsListQuery,
+  JobsPatchPayload,
+} from "../../shared/type/jobs-ipc";
+import type { IpcSuccessResponse } from "../../shared/type/ipc";
 
 export const jobs = {
   // CRUD
-  create: (data: unknown): Promise<{ id: string }> =>
+  create: (data: JobsCreatePayload): Promise<JobsCreateResult> =>
     ipcRenderer.invoke("jobs:create", data),
-  createFromExisting: (data: unknown): Promise<{ id: string }> =>
+  createFromExisting: (
+    data: JobsCreateFromExistingPayload,
+  ): Promise<JobsCreateResult> =>
     ipcRenderer.invoke("jobs:createFromExisting", data),
-  getAll: (): Promise<Array<unknown>> => ipcRenderer.invoke("jobs:getAll"),
-  getArchived: (): Promise<Array<unknown>> => ipcRenderer.invoke("jobs:getArchived"),
-  get: (id: string): Promise<unknown> => ipcRenderer.invoke("jobs:get", id),
-  update: (id: string, data: unknown): Promise<unknown> =>
-    ipcRenderer.invoke("jobs:update", id, data),
-  delete: (id: string): Promise<{ success: boolean }> =>
+  list: (query: JobsListQuery = {}): Promise<Array<JobApplication>> =>
+    ipcRenderer.invoke("jobs:list", query),
+  get: (id: string): Promise<JobApplicationDetails> =>
+    ipcRenderer.invoke("jobs:get", id),
+  patch: (id: string, data: JobsPatchPayload): Promise<IpcSuccessResponse> =>
+    ipcRenderer.invoke("jobs:patch", id, data),
+  delete: (id: string): Promise<IpcSuccessResponse> =>
     ipcRenderer.invoke("jobs:delete", id),
-  deleteAll: (): Promise<{ success: boolean }> =>
+  deleteAll: (): Promise<IpcSuccessResponse> =>
     ipcRenderer.invoke("jobs:deleteAll"),
-  saveResume: (id: string, data: unknown): Promise<{ success: boolean }> =>
+  saveResume: (id: string, data: unknown): Promise<IpcSuccessResponse> =>
     ipcRenderer.invoke("jobs:saveResume", id, data),
-  updateJobDescription: (
-    id: string,
-    data: unknown,
-  ): Promise<{ success: boolean }> =>
-    ipcRenderer.invoke("jobs:updateJobDescription", id, data),
   // Workflow data
   saveParsedResume: (
     id: string,
     data: unknown,
-  ): Promise<{ success: boolean }> =>
+  ): Promise<IpcSuccessResponse> =>
     ipcRenderer.invoke("jobs:saveParsedResume", id, data),
   saveTailoredResume: (
     id: string,
     data: unknown,
-  ): Promise<{ success: boolean }> =>
+  ): Promise<IpcSuccessResponse> =>
     ipcRenderer.invoke("jobs:saveTailoredResume", id, data),
-  saveChecklist: (id: string, data: unknown): Promise<{ success: boolean }> =>
+  saveChecklist: (id: string, data: unknown): Promise<IpcSuccessResponse> =>
     ipcRenderer.invoke("jobs:saveChecklist", id, data),
-  saveMatchScore: (id: string, data: unknown): Promise<{ success: boolean }> =>
+  saveMatchScore: (id: string, data: unknown): Promise<IpcSuccessResponse> =>
     ipcRenderer.invoke("jobs:saveMatchScore", id, data),
   saveWorkflowState: (
     id: string,
     data: unknown,
-  ): Promise<{ success: boolean }> =>
+  ): Promise<IpcSuccessResponse> =>
     ipcRenderer.invoke("jobs:saveWorkflowState", id, data),
-  togglePin: (id: string, data: unknown): Promise<{ success: boolean }> =>
-    ipcRenderer.invoke("jobs:togglePin", id, data),
-  toggleArchive: (id: string, data: unknown): Promise<{ success: boolean }> =>
-    ipcRenderer.invoke("jobs:toggleArchive", id, data),
-  updateStatus: (id: string, data: unknown): Promise<{ success: boolean }> =>
-    ipcRenderer.invoke("jobs:updateStatus", id, data),
 };

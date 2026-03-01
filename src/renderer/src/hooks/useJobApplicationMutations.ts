@@ -1,24 +1,22 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { deleteJobApplication, updateJobApplication } from '@/api/jobs'
+import type { PatchJobApplicationPayload } from '@/api/jobs'
+import { deleteJobApplication, patchJobApplication } from '@/api/jobs'
 
-interface UpdateData {
-  companyName: string
-  position: string
-  dueDate: string
-  jobUrl?: string | null
-}
+type UpdateData = Pick<
+  PatchJobApplicationPayload,
+  'companyName' | 'position' | 'dueDate' | 'jobUrl'
+>
 
 export function useJobApplicationMutations(selectedJobId?: string) {
   const queryClient = useQueryClient()
 
   const updateMutation = useMutation({
     mutationFn: function ({ id, data }: { id: string; data: UpdateData }) {
-      return updateJobApplication(id, data)
+      return patchJobApplication(id, data)
     },
     onSuccess: function () {
       queryClient.invalidateQueries({ queryKey: ['jobApplications'] })
-      queryClient.invalidateQueries({ queryKey: ['archivedJobApplications'] })
       queryClient.invalidateQueries({
         queryKey: ['jobApplication', selectedJobId],
       })
@@ -32,7 +30,6 @@ export function useJobApplicationMutations(selectedJobId?: string) {
     mutationFn: deleteJobApplication,
     onSuccess: function () {
       queryClient.invalidateQueries({ queryKey: ['jobApplications'] })
-      queryClient.invalidateQueries({ queryKey: ['archivedJobApplications'] })
     },
     onError: function () {
       toast.error('Failed to delete application')

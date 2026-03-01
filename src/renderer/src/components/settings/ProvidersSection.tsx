@@ -37,6 +37,7 @@ import {
   useSetXAIApiKey,
   useXAIApiKey,
 } from '@hooks/useSettings'
+import { onOllamaPullProgress } from '@api/settings'
 import type { ProviderType } from '../../../../shared/providers'
 
 interface ProviderInfo {
@@ -279,7 +280,7 @@ function OllamaConfig({ isActive, onSetActive }: OllamaConfigProps) {
 
   // Listen for pull progress events
   useEffect(() => {
-    const unsubscribe = window.kairos.ollama.onPullProgress((data) => {
+    const unsubscribe = onOllamaPullProgress((data) => {
       if (data.modelName === pullingModel) {
         setPullProgress(data)
         // Check if download is complete

@@ -8,7 +8,15 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@ui/Accordion'
-import type { UpdateState } from '../../../../shared/updater'
+import {
+  checkForUpdates as checkUpdaterForUpdates,
+  downloadUpdate,
+  getUpdaterState,
+  isUpdaterPackaged,
+  openUpdaterReleasesPage,
+  quitAndInstallUpdate,
+} from '@api/updater'
+import type { UpdateState } from '@api/updater'
 import { versionQuotes } from '@/data/versionQuotes'
 
 function GitHubIcon({ size = 24 }: { size?: number }) {
@@ -134,15 +142,9 @@ export function AboutSection() {
   const [isPackaged, setIsPackaged] = useState<boolean | null>(null)
 
   useEffect(() => {
-    window.kairos.updater
-      .isPackaged()
-      .then(setIsPackaged)
-      .catch(() => {})
+    isUpdaterPackaged().then(setIsPackaged).catch(() => {})
     // Hydrate from current updater state (in case auto-check already ran)
-    window.kairos.updater
-      .getState()
-      .then(setUpdateState)
-      .catch(() => {})
+    getUpdaterState().then(setUpdateState).catch(() => {})
   }, [])
 
   useEffect(() => {
@@ -164,7 +166,7 @@ export function AboutSection() {
   const checkForUpdates = async () => {
     setUpdateState({ status: 'checking' })
     try {
-      const state = await window.kairos.updater.check()
+      const state = await checkUpdaterForUpdates()
       setUpdateState(state)
     } catch {
       setUpdateState({ status: 'error', error: 'Failed to check for updates' })
@@ -173,10 +175,10 @@ export function AboutSection() {
 
   const handleDownload = async () => {
     try {
-      await window.kairos.updater.download()
+      await downloadUpdate()
       // Poll for state updates during download
       const pollInterval = setInterval(async () => {
-        const state = await window.kairos.updater.getState()
+        const state = await getUpdaterState()
         setUpdateState(state)
         if (state.status === 'downloaded' || state.status === 'error') {
           clearInterval(pollInterval)
@@ -188,11 +190,11 @@ export function AboutSection() {
   }
 
   const handleInstall = () => {
-    window.kairos.updater.quitAndInstall()
+    void quitAndInstallUpdate()
   }
 
   const openReleasesPage = () => {
-    window.kairos.updater.openReleasesPage()
+    void openUpdaterReleasesPage()
   }
 
   return (

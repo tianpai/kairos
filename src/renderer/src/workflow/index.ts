@@ -1,11 +1,13 @@
+import {
+  getWorkflowState as getWorkflowStateApi,
+  onWorkflowTaskCompleted,
+  onWorkflowTaskFailed,
+  retryWorkflow as retryWorkflowApi,
+  startWorkflow as startWorkflowApi,
+} from '@api/workflow'
 import { useWorkflowStore } from './workflow.store'
 import type { TaskName, WorkflowContext } from '@type/task-contracts'
 import type { WorkflowStepsData } from '@type/workflow'
-import type {
-  WorkflowGetStatePayload,
-  WorkflowRetryPayload,
-  WorkflowStartPayload,
-} from '@type/workflow-ipc'
 
 // Types
 export type {
@@ -39,24 +41,19 @@ export async function startWorkflow(
   jobId: string,
   initialContext: Partial<WorkflowContext>,
 ): Promise<void> {
-  const payload: WorkflowStartPayload = { workflowName, jobId, initialContext }
-  await window.kairos.workflow.start(payload)
+  await startWorkflowApi({ workflowName, jobId, initialContext })
 }
 
 export async function retryFailedTasks(
   jobId: string,
 ): Promise<Array<TaskName>> {
-  const payload: WorkflowRetryPayload = { jobId }
-  const result = await window.kairos.workflow.retry(payload)
-  return result.failedTasks as Array<TaskName>
+  return retryWorkflowApi({ jobId })
 }
 
 export async function getWorkflowState(
   jobId: string,
 ): Promise<WorkflowStepsData | null> {
-  const payload: WorkflowGetStatePayload = { jobId }
-  const result = await window.kairos.workflow.getState(payload)
-  return result.workflow ?? null
+  return getWorkflowStateApi({ jobId })
 }
 
 /**
@@ -79,17 +76,15 @@ export function waitForTask(jobId: string, taskName: TaskName): Promise<void> {
       return
     }
 
-    const unsubscribeCompleted = window.kairos.workflow.onTaskCompleted(
-      (payload) => {
-        if (payload.jobId === jobId && payload.taskName === taskName) {
-          unsubscribeCompleted()
-          unsubscribeFailed()
-          resolve()
-        }
-      },
-    )
+    const unsubscribeCompleted = onWorkflowTaskCompleted((payload) => {
+      if (payload.jobId === jobId && payload.taskName === taskName) {
+        unsubscribeCompleted()
+        unsubscribeFailed()
+        resolve()
+      }
+    })
 
-    const unsubscribeFailed = window.kairos.workflow.onTaskFailed((payload) => {
+    const unsubscribeFailed = onWorkflowTaskFailed((payload) => {
       if (payload.jobId === jobId && payload.taskName === taskName) {
         unsubscribeCompleted()
         unsubscribeFailed()

@@ -15,6 +15,30 @@ export interface WorkflowGetStatePayload {
   jobId: string;
 }
 
+export interface WorkflowBatchEntry {
+  jobDescription: string;
+  jobUrl?: string;
+}
+
+export type WorkflowCreateApplicationsPayload =
+  | {
+      resumeSource: "upload";
+      rawResumeContent: string;
+      templateId: string;
+      entries: Array<WorkflowBatchEntry>;
+    }
+  | {
+      resumeSource: "existing";
+      sourceJobId: string;
+      entries: Array<WorkflowBatchEntry>;
+    };
+
+export interface WorkflowCreateApplicationsResult {
+  createdIds: Array<string>;
+  succeeded: number;
+  total: number;
+}
+
 export interface WorkflowStateChanged {
   jobId: string;
   workflow: WorkflowStepsData;

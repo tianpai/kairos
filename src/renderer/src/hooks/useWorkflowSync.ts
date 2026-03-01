@@ -1,6 +1,12 @@
 import { useEffect } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
+import {
+  onWorkflowCompleted,
+  onWorkflowStateChanged,
+  onWorkflowTaskCompleted,
+  onWorkflowTaskFailed,
+} from '@api/workflow'
 import { useResumeStore } from '@typst-compiler/resumeState'
 import {
   RESUME_PARSING,
@@ -83,74 +89,66 @@ export function useWorkflowSync(
 
   // Effect 2: Subscribe to workflow events from main
   useEffect(() => {
-    const unsubscribeState = window.kairos.workflow.onStateChanged(
-      (payload) => {
-        const store = useWorkflowStore.getState()
-        const existingContext = store.getContext(payload.jobId)
+    const unsubscribeState = onWorkflowStateChanged((payload) => {
+      const store = useWorkflowStore.getState()
+      const existingContext = store.getContext(payload.jobId)
 
-        store.loadWorkflow(
-          payload.jobId,
-          {
-            jobId: payload.jobId,
-            workflowName: payload.workflow.workflowName,
-            taskStates: payload.workflow.taskStates as TaskStateMap,
-            status: payload.workflow.status,
-            error: payload.workflow.error,
-          },
-          existingContext,
-        )
-      },
-    )
+      store.loadWorkflow(
+        payload.jobId,
+        {
+          jobId: payload.jobId,
+          workflowName: payload.workflow.workflowName,
+          taskStates: payload.workflow.taskStates as TaskStateMap,
+          status: payload.workflow.status,
+          error: payload.workflow.error,
+        },
+        existingContext,
+      )
+    })
 
-    const unsubscribeTaskCompleted = window.kairos.workflow.onTaskCompleted(
-      (payload) => {
-        if (payload.provides && payload.result !== undefined) {
-          useWorkflowStore.getState().updateContext(payload.jobId, {
-            [payload.provides]: payload.result,
-          })
-        }
-
-        // Invalidate job application query to refetch fresh data
-        queryClient.invalidateQueries({
-          queryKey: ['jobApplication', payload.jobId],
+    const unsubscribeTaskCompleted = onWorkflowTaskCompleted((payload) => {
+      if (payload.provides && payload.result !== undefined) {
+        useWorkflowStore.getState().updateContext(payload.jobId, {
+          [payload.provides]: payload.result,
         })
+      }
 
-        // If score updated, also invalidate the applications list for sidebar
-        if (payload.taskName === SCORE_UPDATING) {
-          queryClient.invalidateQueries({ queryKey: ['jobApplications'] })
+      // Invalidate job application query to refetch fresh data
+      queryClient.invalidateQueries({
+        queryKey: ['jobApplication', payload.jobId],
+      })
+
+      // If score updated, also invalidate the applications list for sidebar
+      if (payload.taskName === SCORE_UPDATING) {
+        queryClient.invalidateQueries({ queryKey: ['jobApplications'] })
+      }
+
+      // If resume parsing or tailoring completed, load into resume store
+      if (
+        payload.taskName === RESUME_PARSING ||
+        payload.taskName === RESUME_TAILORING
+      ) {
+        if (payload.result) {
+          loadParsedResume(payload.result as TemplateData)
         }
+      }
+    })
 
-        // If resume parsing or tailoring completed, load into resume store
-        if (
-          payload.taskName === RESUME_PARSING ||
-          payload.taskName === RESUME_TAILORING
-        ) {
-          if (payload.result) {
-            loadParsedResume(payload.result as TemplateData)
-          }
-        }
-      },
-    )
+    const unsubscribeTaskFailed = onWorkflowTaskFailed((payload) => {
+      const taskLabel = payload.taskName.toLowerCase().replace(/_/g, ' ')
+      toast.error(`Failed: ${taskLabel}`, {
+        description: friendlyError(payload.error),
+      })
+    })
 
-    const unsubscribeTaskFailed = window.kairos.workflow.onTaskFailed(
-      (payload) => {
-        const taskLabel = payload.taskName.toLowerCase().replace(/_/g, ' ')
-        toast.error(`Failed: ${taskLabel}`, {
-          description: friendlyError(payload.error),
-        })
-      },
-    )
+    const unsubscribeCompleted = onWorkflowCompleted((payload) => {
+      const workflowLabel =
+        payload.workflowName === 'tailoring'
+          ? 'Tailoring complete'
+          : 'Processing complete'
 
-    const unsubscribeCompleted = window.kairos.workflow.onCompleted(
-      (payload) => {
-        const workflowLabel =
-          payload.workflowName === 'tailoring'
-            ? 'Tailoring complete'
-            : 'Processing complete'
-
-        toast.success(workflowLabel)
-      },
-    )
+      toast.success(workflowLabel)
+    })
 
     return () => {
       unsubscribeState()

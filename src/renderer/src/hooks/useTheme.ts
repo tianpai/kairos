@@ -1,18 +1,18 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-
-type ThemeSource = 'system' | 'light' | 'dark'
+import { getCurrentTheme, getTheme, setTheme } from '@api/theme'
+import type { ThemeSource } from '@api/theme'
 
 export function useTheme() {
   return useQuery({
     queryKey: ['theme'],
-    queryFn: () => window.kairos.theme.get(),
+    queryFn: getTheme,
   })
 }
 
 export function useSetTheme() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (theme: ThemeSource) => window.kairos.theme.set(theme),
+    mutationFn: (theme: ThemeSource) => setTheme(theme),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['theme'] })
     },
@@ -22,6 +22,6 @@ export function useSetTheme() {
 export function useCurrentTheme() {
   return useQuery({
     queryKey: ['theme', 'current'],
-    queryFn: () => window.kairos.theme.getCurrent(),
+    queryFn: getCurrentTheme,
   })
 }

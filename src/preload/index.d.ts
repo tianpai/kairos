@@ -5,12 +5,25 @@ type BackupExportResult = import("../shared/backup").BackupExportResult;
 type BackupImportResult = import("../shared/backup").BackupImportResult;
 type UpdateState = import("../shared/updater").UpdateState;
 type OllamaPullProgress = import("../shared/ollama").OllamaPullProgress;
+type JobsCreateFromExistingPayload =
+  import("../shared/type/jobs-ipc").JobsCreateFromExistingPayload;
+type JobsCreatePayload = import("../shared/type/jobs-ipc").JobsCreatePayload;
+type JobsCreateResult = import("../shared/type/jobs-ipc").JobsCreateResult;
+type JobApplication = import("../shared/type/jobs-ipc").JobApplication;
+type JobApplicationDetails =
+  import("../shared/type/jobs-ipc").JobApplicationDetails;
+type JobsListQuery = import("../shared/type/jobs-ipc").JobsListQuery;
+type JobsPatchPayload = import("../shared/type/jobs-ipc").JobsPatchPayload;
 type WorkflowStartPayload =
   import("../shared/type/workflow-ipc").WorkflowStartPayload;
 type WorkflowRetryPayload =
   import("../shared/type/workflow-ipc").WorkflowRetryPayload;
 type WorkflowGetStatePayload =
   import("../shared/type/workflow-ipc").WorkflowGetStatePayload;
+type WorkflowCreateApplicationsPayload =
+  import("../shared/type/workflow-ipc").WorkflowCreateApplicationsPayload;
+type WorkflowCreateApplicationsResult =
+  import("../shared/type/workflow-ipc").WorkflowCreateApplicationsResult;
 type WorkflowStateChanged =
   import("../shared/type/workflow-ipc").WorkflowStateChanged;
 type WorkflowTaskCompleted =
@@ -22,6 +35,7 @@ type WorkflowCompleted =
 type WorkflowAiPartial =
   import("../shared/type/workflow-ipc").WorkflowAiPartial;
 type WorkflowStepsData = import("../shared/type/workflow").WorkflowStepsData;
+type IpcSuccessResponse = import("../shared/type/ipc").IpcSuccessResponse;
 
 interface ModelInfo {
   id: string;
@@ -125,46 +139,43 @@ interface KairosAPI {
   };
   jobs: {
     // CRUD
-    create: (data: unknown) => Promise<{ id: string }>;
-    createFromExisting: (data: unknown) => Promise<{ id: string }>;
-    getAll: () => Promise<unknown[]>;
-    getArchived: () => Promise<unknown[]>;
-    get: (id: string) => Promise<unknown>;
-    update: (id: string, data: unknown) => Promise<unknown>;
-    delete: (id: string) => Promise<{ success: boolean }>;
-    deleteAll: () => Promise<{ success: boolean }>;
-    saveResume: (id: string, data: unknown) => Promise<{ success: boolean }>;
-    updateJobDescription: (
-      id: string,
-      data: unknown,
-    ) => Promise<{ success: boolean }>;
+    create: (data: JobsCreatePayload) => Promise<JobsCreateResult>;
+    createFromExisting: (
+      data: JobsCreateFromExistingPayload,
+    ) => Promise<JobsCreateResult>;
+    list: (query?: JobsListQuery) => Promise<JobApplication[]>;
+    get: (id: string) => Promise<JobApplicationDetails>;
+    patch: (id: string, data: JobsPatchPayload) => Promise<IpcSuccessResponse>;
+    delete: (id: string) => Promise<IpcSuccessResponse>;
+    deleteAll: () => Promise<IpcSuccessResponse>;
+    saveResume: (id: string, data: unknown) => Promise<IpcSuccessResponse>;
     // Workflow data
     saveParsedResume: (
       id: string,
       data: unknown,
-    ) => Promise<{ success: boolean }>;
+    ) => Promise<IpcSuccessResponse>;
     saveTailoredResume: (
       id: string,
       data: unknown,
-    ) => Promise<{ success: boolean }>;
-    saveChecklist: (id: string, data: unknown) => Promise<{ success: boolean }>;
+    ) => Promise<IpcSuccessResponse>;
+    saveChecklist: (id: string, data: unknown) => Promise<IpcSuccessResponse>;
     saveMatchScore: (
       id: string,
       data: unknown,
-    ) => Promise<{ success: boolean }>;
+    ) => Promise<IpcSuccessResponse>;
     saveWorkflowState: (
       id: string,
       data: unknown,
-    ) => Promise<{ success: boolean }>;
-    togglePin: (id: string, data: unknown) => Promise<{ success: boolean }>;
-    toggleArchive: (id: string, data: unknown) => Promise<{ success: boolean }>;
-    updateStatus: (id: string, data: unknown) => Promise<{ success: boolean }>;
+    ) => Promise<IpcSuccessResponse>;
   };
   workflow: {
     start: (payload: WorkflowStartPayload) => Promise<{ success: boolean }>;
     retry: (
       payload: WorkflowRetryPayload,
     ) => Promise<{ success: boolean; failedTasks: string[] }>;
+    createApplications: (
+      payload: WorkflowCreateApplicationsPayload,
+    ) => Promise<WorkflowCreateApplicationsResult>;
     getState: (
       payload: WorkflowGetStatePayload,
     ) => Promise<{ workflow: WorkflowStepsData | null }>;

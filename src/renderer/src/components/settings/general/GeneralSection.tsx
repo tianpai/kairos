@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
+import { resetAllProviderSettings } from '@api/settings'
 import { useSetTheme, useTheme } from '@hooks/useTheme'
 import { BackupSection } from './BackupSection'
 import { DangerZoneSection } from './DangerZoneSection'
@@ -99,7 +100,7 @@ export function GeneralSection() {
   const handleResetProviders = async () => {
     setIsResetting(true)
     try {
-      await window.kairos.settings.resetAllProviders()
+      await resetAllProviderSettings()
       await queryClient.invalidateQueries()
 
       toast.success('Provider settings reset')

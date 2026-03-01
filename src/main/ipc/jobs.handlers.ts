@@ -3,17 +3,14 @@ import { JobNotFoundError } from "../services/job-application.service";
 import {
   CreateFromExistingSchema,
   CreateJobApplicationSchema,
+  ListJobsSchema,
+  PatchJobApplicationSchema,
   SaveChecklistSchema,
   SaveMatchScoreSchema,
   SaveParsedResumeSchema,
   SaveResumeSchema,
   SaveTailoredResumeSchema,
   SaveWorkflowStateSchema,
-  ToggleArchiveSchema,
-  TogglePinSchema,
-  UpdateJobApplicationSchema,
-  UpdateJobDescriptionSchema,
-  UpdateStatusSchema,
 } from "../schemas/job-application.schemas";
 import { guardedHandle as handle } from "./guarded-handler";
 import type { JobApplicationService } from "../services/job-application.service";
@@ -51,12 +48,9 @@ export function registerJobsHandlers(service: JobApplicationService): void {
     }
   });
 
-  handle("jobs:getAll", async () => {
-    return service.getAllJobApplications();
-  });
-
-  handle("jobs:getArchived", async () => {
-    return service.getArchivedJobApplications();
+  handle("jobs:list", async (_, data: unknown) => {
+    const validated = ListJobsSchema.parse(data ?? {});
+    return service.listJobApplications(validated);
   });
 
   handle("jobs:get", async (_, id: string) => {
@@ -68,18 +62,6 @@ export function registerJobsHandlers(service: JobApplicationService): void {
         throw new Error(error.message);
       }
       log.error("jobs:get failed", error);
-      throw error;
-    }
-  });
-
-  handle("jobs:update", async (_, id: string, data: unknown) => {
-    const validated = UpdateJobApplicationSchema.parse(data);
-    try {
-      return await service.updateJobApplication(id, validated);
-    } catch (error) {
-      if (error instanceof JobNotFoundError) {
-        throw new Error(error.message);
-      }
       throw error;
     }
   });
@@ -142,23 +124,15 @@ export function registerJobsHandlers(service: JobApplicationService): void {
     return service.saveWorkflowState(id, validated);
   });
 
-  handle("jobs:updateJobDescription", async (_, id: string, data: unknown) => {
-    const validated = UpdateJobDescriptionSchema.parse(data);
-    return service.updateJobDescription(id, validated);
-  });
-
-  handle("jobs:togglePin", async (_, id: string, data: unknown) => {
-    const validated = TogglePinSchema.parse(data);
-    return service.togglePin(id, validated.pinned);
-  });
-
-  handle("jobs:toggleArchive", async (_, id: string, data: unknown) => {
-    const validated = ToggleArchiveSchema.parse(data);
-    return service.toggleArchive(id, validated.archived);
-  });
-
-  handle("jobs:updateStatus", async (_, id: string, data: unknown) => {
-    const validated = UpdateStatusSchema.parse(data);
-    return service.updateStatus(id, validated.status);
+  handle("jobs:patch", async (_, id: string, data: unknown) => {
+    const validated = PatchJobApplicationSchema.parse(data);
+    try {
+      return await service.patchJobApplication(id, validated);
+    } catch (error) {
+      if (error instanceof JobNotFoundError) {
+        throw new Error(error.message);
+      }
+      throw error;
+    }
   });
 }

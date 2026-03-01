@@ -1,4 +1,4 @@
-export type ResumeSource = 'upload' | 'existing'
+import type { ResumeSource } from './newApplication.store'
 
 interface ResumeSourceSelectorProps {
   value: ResumeSource

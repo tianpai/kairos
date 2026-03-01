@@ -1,34 +1,34 @@
 import { z } from "zod";
+import type {
+  JobsCreateFromExistingPayload,
+  JobsCreatePayload,
+  JobsListQuery,
+  JobsPatchPayload,
+} from "@type/jobs-ipc";
 
 // Create job application
-export const CreateJobApplicationSchema = z.object({
-  companyName: z.string().min(1),
-  position: z.string().min(1),
-  dueDate: z.string().date(),
-  jobDescription: z.string().min(1),
-  jobUrl: z.string().url().optional(),
-  templateId: z.string().min(1),
-  rawResumeContent: z.string().min(1),
-});
+export const CreateJobApplicationSchema: z.ZodType<JobsCreatePayload> =
+  z.object({
+    companyName: z.string().min(1),
+    position: z.string().min(1),
+    dueDate: z.string().date(),
+    jobDescription: z.string().min(1),
+    jobUrl: z.string().url().optional(),
+    templateId: z.string().min(1),
+    rawResumeContent: z.string().min(1),
+  });
 
 // Create job application from existing (copy resume from another application)
-export const CreateFromExistingSchema = z.object({
-  sourceJobId: z.string().uuid(),
-  companyName: z.string().min(1),
-  position: z.string().min(1),
-  dueDate: z.string().date(),
-  jobDescription: z.string().min(1),
-  jobUrl: z.string().url().optional(),
-  templateId: z.string().min(1),
-});
-
-// Update job application (basic fields)
-export const UpdateJobApplicationSchema = z.object({
-  companyName: z.string().min(1).optional(),
-  position: z.string().min(1).optional(),
-  dueDate: z.string().date().optional(),
-  jobUrl: z.string().url().nullable().optional(),
-});
+export const CreateFromExistingSchema: z.ZodType<JobsCreateFromExistingPayload> =
+  z.object({
+    sourceJobId: z.string().uuid(),
+    companyName: z.string().min(1),
+    position: z.string().min(1),
+    dueDate: z.string().date(),
+    jobDescription: z.string().min(1),
+    jobUrl: z.string().url().optional(),
+    templateId: z.string().min(1),
+  });
 
 // Save resume
 export const SaveResumeSchema = z.object({
@@ -54,25 +54,28 @@ export const SaveMatchScoreSchema = z.object({
   matchPercentage: z.number().min(0).max(100),
 });
 
-export const TogglePinSchema = z.object({
-  pinned: z.boolean(),
+export const ListJobsSchema: z.ZodType<JobsListQuery> = z.object({
+  archived: z.boolean().optional(),
 });
 
-export const ToggleArchiveSchema = z.object({
-  archived: z.boolean(),
-});
-
-export const UpdateStatusSchema = z.object({
-  status: z.string().nullable(),
-});
+export const PatchJobApplicationSchema: z.ZodType<JobsPatchPayload> = z
+  .object({
+    companyName: z.string().min(1).optional(),
+    position: z.string().min(1).optional(),
+    dueDate: z.string().date().optional(),
+    jobUrl: z.string().url().nullable().optional(),
+    jobDescription: z.string().min(1).optional(),
+    pinned: z.boolean().optional(),
+    archived: z.boolean().optional(),
+    applicationStatus: z.string().nullable().optional(),
+  })
+  .refine((data) => Object.keys(data).length > 0, {
+    message: "At least one field is required",
+  });
 
 export const SaveWorkflowStateSchema = z.object({
   workflowSteps: z.record(z.string(), z.unknown()).optional(),
   workflowStatus: z.string().optional(),
-});
-
-export const UpdateJobDescriptionSchema = z.object({
-  jobDescription: z.string().min(1),
 });
 
 // Inferred types
@@ -80,16 +83,11 @@ export type CreateJobApplicationInput = z.infer<
   typeof CreateJobApplicationSchema
 >;
 export type CreateFromExistingInput = z.infer<typeof CreateFromExistingSchema>;
-export type UpdateJobApplicationInput = z.infer<
-  typeof UpdateJobApplicationSchema
->;
-export type UpdateJobDescriptionInput = z.infer<
-  typeof UpdateJobDescriptionSchema
->;
 export type SaveResumeInput = z.infer<typeof SaveResumeSchema>;
 export type SaveParsedResumeInput = z.infer<typeof SaveParsedResumeSchema>;
 export type SaveTailoredResumeInput = z.infer<typeof SaveTailoredResumeSchema>;
 export type SaveChecklistInput = z.infer<typeof SaveChecklistSchema>;
 export type SaveMatchScoreInput = z.infer<typeof SaveMatchScoreSchema>;
 export type SaveWorkflowStateInput = z.infer<typeof SaveWorkflowStateSchema>;
-export type UpdateStatusInput = z.infer<typeof UpdateStatusSchema>;
+export type ListJobsInput = z.infer<typeof ListJobsSchema>;
+export type PatchJobApplicationInput = z.infer<typeof PatchJobApplicationSchema>;

@@ -3,6 +3,7 @@ import log from "electron-log/main";
 import { onWorkflowEvent } from "../workflow/workflow-events";
 import { guardedHandle as handle } from "./guarded-handler";
 import type {
+  WorkflowCreateApplicationsPayload,
   WorkflowGetStatePayload,
   WorkflowRetryPayload,
   WorkflowStartPayload,
@@ -50,6 +51,18 @@ export function registerWorkflowHandlers(
         return { workflow };
       } catch (error) {
         log.error("workflow:getState failed", error);
+        throw error;
+      }
+    },
+  );
+
+  handle(
+    "workflow:createApplications",
+    async (_event, payload: WorkflowCreateApplicationsPayload) => {
+      try {
+        return await workflowService.createApplications(payload);
+      } catch (error) {
+        log.error("workflow:createApplications failed", error);
         throw error;
       }
     },

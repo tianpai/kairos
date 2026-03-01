@@ -1,11 +1,14 @@
 import { create } from 'zustand'
+import type {
+  WorkflowBatchEntry,
+  WorkflowCreateApplicationsPayload,
+} from '@type/workflow-ipc'
 
 export type ResumeSource = 'upload' | 'existing'
 export type BatchStatus = 'idle' | 'processing' | 'completed' | 'failed'
 
-export interface JdEntry {
+export type JdEntry = WorkflowBatchEntry & {
   id: string
-  jobDescription: string
   jobUrl: string
 }
 
@@ -16,24 +19,22 @@ export interface BatchProgress {
   errorMessage: string | null
 }
 
-export interface SubmitPayload {
-  resumeSource: ResumeSource
-  rawResumeContent?: string
-  sourceJobId?: string
-  entries: Array<{ jobDescription: string; jobUrl?: string }>
-}
+type UploadSubmitPayload = Omit<
+  Extract<WorkflowCreateApplicationsPayload, { resumeSource: 'upload' }>,
+  'templateId'
+>
+
+type ExistingSubmitPayload = Extract<
+  WorkflowCreateApplicationsPayload,
+  { resumeSource: 'existing' }
+>
+
+export type SubmitPayload = UploadSubmitPayload | ExistingSubmitPayload
 
 export const MAX_ENTRIES = 5
-export const EXTRACTING_PLACEHOLDER = 'Extracting...'
 
 export function generateId(): string {
   return Math.random().toString(36).substring(2, 9)
-}
-
-export function getDefaultDueDate(): string {
-  const date = new Date()
-  date.setDate(date.getDate() + 14)
-  return date.toISOString().split('T')[0]
 }
 
 export function normalizeUrl(url: string): string | undefined {
@@ -178,21 +179,26 @@ export const useNewApplicationStore = create<NewApplicationStore>()(
       const { resumeSource, rawResumeContent, selectedSourceId, entries } =
         state
       const filledEntries = getFilledEntries(entries)
+      const normalizedEntries = filledEntries.map((e) => ({
+        jobDescription: e.jobDescription.trim(),
+        jobUrl: normalizeUrl(e.jobUrl),
+      }))
 
+      if (resumeSource === 'upload') {
+        const content = rawResumeContent?.trim()
+        if (!content) return null
+        return {
+          resumeSource: 'upload',
+          rawResumeContent: content,
+          entries: normalizedEntries,
+        }
+      }
+
+      if (!selectedSourceId) return null
       return {
-        resumeSource,
-        rawResumeContent:
-          resumeSource === 'upload'
-            ? (rawResumeContent ?? undefined)
-            : undefined,
-        sourceJobId:
-          resumeSource === 'existing'
-            ? (selectedSourceId ?? undefined)
-            : undefined,
-        entries: filledEntries.map((e) => ({
-          jobDescription: e.jobDescription.trim(),
-          jobUrl: normalizeUrl(e.jobUrl),
-        })),
+        resumeSource: 'existing',
+        sourceJobId: selectedSourceId,
+        entries: normalizedEntries,
       }
     },
   }),

@@ -4,11 +4,7 @@ import { create } from 'zustand'
 import { toast } from 'sonner'
 import { Modal } from '@ui/Modal'
 import { Toggle } from '@ui/Toggle'
-import {
-  getAllJobApplications,
-  getArchivedJobApplications,
-  getJobApplication,
-} from '@api/jobs'
+import { getJobApplication, listJobApplications } from '@api/jobs'
 import { compileToPDF } from '@typst-compiler/compile'
 import { formatDate } from '@utils/format'
 import type { JobApplication } from '@api/jobs'
@@ -352,8 +348,8 @@ export function ExportModal() {
   const showArchived = useExportStore((state) => state.showArchived)
 
   const { data: applications = [] } = useQuery({
-    queryKey: showArchived ? ['archivedJobApplications'] : ['jobApplications'],
-    queryFn: showArchived ? getArchivedJobApplications : getAllJobApplications,
+    queryKey: ['jobApplications', { archived: showArchived }],
+    queryFn: () => listJobApplications({ archived: showArchived }),
     enabled: isOpen,
   })
 

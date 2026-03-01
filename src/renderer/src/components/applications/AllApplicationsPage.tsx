@@ -3,11 +3,8 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
 import { AnimatePresence, motion } from 'motion/react'
 import {
-  getAllJobApplications,
-  getArchivedJobApplications,
-  toggleArchive,
-  togglePin,
-  updateStatus,
+  listJobApplications,
+  patchJobApplication,
 } from '@api/jobs'
 import { AppLayout } from '@layout/AppLayout'
 import { PageHeader } from '@ui/PageHeader'
@@ -18,6 +15,7 @@ import { isOverdue } from './application-card/utils'
 import { SortDropdown } from './SortDropdown'
 import { FilterPopover } from './FilterPopover'
 import type { SortOption } from './SortDropdown'
+import type { JobsPatchPayload } from '@type/jobs-ipc'
 import type { JobApplication } from '@api/jobs'
 import JobInfoModal from '@/components/applications/JobInfoModal'
 import { useExportModal } from '@/components/export/ExportModal'
@@ -312,50 +310,15 @@ export default function AllApplicationsPage() {
   }, [showArchived, setShowArchivedMode])
 
   const { data: applications = [] } = useQuery({
-    queryKey: ['jobApplications'],
-    queryFn: getAllJobApplications,
-    enabled: !showArchived,
+    queryKey: ['jobApplications', { archived: showArchived }],
+    queryFn: () => listJobApplications({ archived: showArchived }),
   })
 
-  const { data: archivedApplications = [] } = useQuery({
-    queryKey: ['archivedJobApplications'],
-    queryFn: getArchivedJobApplications,
-    enabled: showArchived,
-  })
-
-  const displayedApplications = showArchived
-    ? archivedApplications
-    : applications
-
-  const pinMutation = useMutation({
-    mutationFn: ({ id, pinned }: { id: string; pinned: boolean }) =>
-      togglePin(id, pinned),
+  const patchMutation = useMutation({
+    mutationFn: ({ id, patch }: { id: string; patch: JobsPatchPayload }) =>
+      patchJobApplication(id, patch),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['jobApplications'] })
-      queryClient.invalidateQueries({
-        queryKey: ['archivedJobApplications'],
-      })
-    },
-  })
-
-  const archiveMutation = useMutation({
-    mutationFn: (id: string) => toggleArchive(id, !showArchived),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['jobApplications'] })
-      queryClient.invalidateQueries({
-        queryKey: ['archivedJobApplications'],
-      })
-    },
-  })
-
-  const statusMutation = useMutation({
-    mutationFn: ({ id, status }: { id: string; status: string | null }) =>
-      updateStatus(id, status),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['jobApplications'] })
-      queryClient.invalidateQueries({
-        queryKey: ['archivedJobApplications'],
-      })
     },
   })
 
@@ -372,7 +335,7 @@ export default function AllApplicationsPage() {
 
   const filtered = useMemo(
     () =>
-      displayedApplications.filter((app) => {
+      applications.filter((app) => {
         if (!search) return true
         const q = search.toLowerCase()
         return (
@@ -380,7 +343,7 @@ export default function AllApplicationsPage() {
           app.position.toLowerCase().includes(q)
         )
       }),
-    [displayedApplications, search]
+    [applications, search]
   )
 
   const processed = useMemo(() => {
@@ -477,7 +440,7 @@ export default function AllApplicationsPage() {
         />
         {!showArchived && applications.length === 0 ? (
           <EmptyStage />
-        ) : showArchived && displayedApplications.length === 0 ? (
+        ) : showArchived && applications.length === 0 ? (
           <div className="text-hint text-center">No archived applications</div>
         ) : search && filtered.length === 0 ? (
           <div className="text-hint text-center">
@@ -497,10 +460,20 @@ export default function AllApplicationsPage() {
             onToggleExpand={handleToggleExpand}
             onOpen={handleOpenCard}
             onEdit={setEditingApp}
-            onPin={pinMutation.mutate}
-            onArchive={(id: string) => archiveMutation.mutate(id)}
+            onPin={({ id, pinned }) =>
+              patchMutation.mutate({ id, patch: { pinned } })
+            }
+            onArchive={(id: string) =>
+              patchMutation.mutate({
+                id,
+                patch: { archived: !showArchived },
+              })
+            }
             onStatusChange={(id: string, status: string | null) =>
-              statusMutation.mutate({ id, status })
+              patchMutation.mutate({
+                id,
+                patch: { applicationStatus: status },
+              })
             }
             disabled={isOpening}
           />
