@@ -177,8 +177,7 @@ export const useNewApplicationStore = create<NewApplicationStore>()(
       const state = get()
       if (!state.canSubmit()) return null
 
-      const { resumeSource, resumeFile, selectedSourceId, entries } =
-        state
+      const { resumeSource, resumeFile, selectedSourceId, entries } = state
       const filledEntries = getFilledEntries(entries)
       const normalizedEntries = filledEntries.map((e) => ({
         jobDescription: e.jobDescription.trim(),

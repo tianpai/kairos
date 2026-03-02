@@ -72,7 +72,10 @@ export default function ResumeUploadSection({
   resumeFile,
   onResumeFileChange,
 }: ResumeUploadSectionProps) {
-  const fileUpload = useUpload({ purpose: 'resume', onFile: onResumeFileChange })
+  const fileUpload = useUpload({
+    purpose: 'resume',
+    onFile: onResumeFileChange,
+  })
   const hasFile = Boolean(fileUpload.fileName)
   const prevResumeFileRef = useRef<WorkflowResumeFile | null>(null)
   const {

@@ -8,8 +8,8 @@ import {
   onWorkflowTaskFailed,
 } from '@api/workflow'
 import { SCORE_UPDATING } from '@type/task-names'
-import { friendlyError } from '@/utils/error'
 import { useWorkflowRuntimeStore } from './workflowRuntime.store'
+import { friendlyError } from '@/utils/error'
 
 function invalidateJob(
   queryClient: ReturnType<typeof useQueryClient>,

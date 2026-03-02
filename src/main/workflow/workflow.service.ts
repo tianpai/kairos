@@ -1,6 +1,7 @@
 import log from "electron-log/main";
 import { RESUME_PARSING } from "@type/task-names";
 import { AITaskClient } from "../ai/ai-task-client";
+import { extractResumeTextFromFile } from "../utils/resume-text-extractor";
 import { WorkflowEngine } from "./workflow-engine";
 import { onWorkflowEvent } from "./workflow-events";
 import { registerWorkflowTasks } from "./tasks";
@@ -15,7 +16,6 @@ import type { TaskName, WorkflowContext } from "@type/task-contracts";
 import type { Checklist } from "@type/checklist";
 import type { SettingsService } from "../config/settings.service";
 import type { JobApplicationService } from "../services/job-application.service";
-import { extractResumeTextFromFile } from "../utils/resume-text-extractor";
 import "./workflows";
 
 const EXTRACTING_PLACEHOLDER = "Extracting...";
@@ -72,8 +72,7 @@ export class WorkflowService {
 
     const job = await this.jobService.getJobApplication(payload.jobId);
     const checklist = job.checklist;
-    const resumeStructure = (job.tailoredResume ??
-      job.parsedResume) as Record<string, unknown> | null;
+    const resumeStructure = job.tailoredResume ?? job.parsedResume;
     const templateId = job.templateId;
 
     if (!checklist) {
@@ -188,7 +187,9 @@ export class WorkflowService {
       return null;
     }
 
-    const rawResumeContent = await extractResumeTextFromFile(payload.resumeFile);
+    const rawResumeContent = await extractResumeTextFromFile(
+      payload.resumeFile,
+    );
 
     const firstResponse = await this.jobService.createJobApplication({
       rawResumeContent,

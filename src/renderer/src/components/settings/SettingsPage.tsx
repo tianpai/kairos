@@ -1,12 +1,12 @@
 import { useNavigate, useSearch } from '@tanstack/react-router'
 import { PageHeader } from '@ui/PageHeader'
 import { AppLayout } from '@layout/AppLayout'
-import { ApplicationsButton } from '@/components/applications/ApplicationsButton'
 import { SettingsSidebar } from './SettingsSidebar'
 import { ProvidersSection } from './ProvidersSection'
 import { GeneralSection } from './general'
 import { AboutSection } from './AboutSection'
 import type { SettingsSection } from './SettingsSidebar'
+import { ApplicationsButton } from '@/components/applications/ApplicationsButton'
 
 const validSections: SettingsSection[] = ['general', 'providers', 'about']
 
