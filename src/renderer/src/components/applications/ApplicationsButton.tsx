@@ -9,7 +9,7 @@ export function ApplicationsButton() {
     <Button
       onClick={() => navigate({ to: '/' })}
       ariaLabel="All applications"
-      title="All applications"
+      tooltip="All applications"
     >
       <GalleryVerticalEnd size={16} />
     </Button>

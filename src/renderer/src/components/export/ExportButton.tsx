@@ -77,7 +77,7 @@ export function ExportButton({
       onClick={() => void handleExport()}
       loading={exporting}
       ariaLabel={ariaLabel}
-      title="Export"
+      tooltip="Export"
     >
       <Download size={16} />
     </Button>

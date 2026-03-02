@@ -3,11 +3,10 @@ import { useQuery } from '@tanstack/react-query'
 import { ShieldCheck, Star, Users } from 'lucide-react'
 import { getJobApplication } from '@api/jobs'
 import { ChecklistSection } from '@checklist/ChecklistSection'
-import { Button } from '@ui/Button'
-import { Tooltip } from '@ui/Tooltip'
+import { IconTooltipButton } from '@ui/IconTooltipButton'
+import { useSelectedKeywordsStore } from './selectedKeywords.store'
 import type { Checklist } from '@type/checklist'
 import type { LucideIcon } from 'lucide-react'
-import { useSelectedKeywordsStore } from './selectedKeywords.store'
 
 interface ChecklistProps {
   jobId: string | undefined
@@ -49,24 +48,25 @@ function ChecklistTabs({ checklist, activeTab, onChange }: ChecklistTabsProps) {
   return (
     <div className="bg-app-header flex flex-wrap justify-center gap-1 p-2">
       {visibleTabs.map((tab) => {
-        const Icon = tab.icon
         return (
-          <Tooltip key={tab.key} content={tab.label}>
-            <Button
-              variant="icon"
-              active={activeTab === tab.key}
-              onClick={() => onChange(tab.key)}
-            >
-              <Icon size={16} />
-            </Button>
-          </Tooltip>
+          <IconTooltipButton
+            key={tab.key}
+            icon={tab.icon}
+            label={tab.label}
+            active={activeTab === tab.key}
+            onClick={() => onChange(tab.key)}
+          />
         )
       })}
     </div>
   )
 }
 
-function ChecklistContent({ jobId, checklist, activeTab }: ChecklistContentProps) {
+function ChecklistContent({
+  jobId,
+  checklist,
+  activeTab,
+}: ChecklistContentProps) {
   const selectedKeywords = useSelectedKeywordsStore(
     (state) => state.selectedByJobId[jobId] ?? EMPTY_KEYWORDS,
   )

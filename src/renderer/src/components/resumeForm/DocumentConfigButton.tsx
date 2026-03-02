@@ -24,7 +24,7 @@ export function DocumentConfigButton() {
 
   return (
     <>
-      <Button onClick={() => setIsOpen(true)} title="Document settings">
+      <Button onClick={() => setIsOpen(true)} tooltip="Document settings">
         <FileCog size={16} />
       </Button>
       <DocumentConfigModal isOpen={isOpen} onClose={() => setIsOpen(false)} />

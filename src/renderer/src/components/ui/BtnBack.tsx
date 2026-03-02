@@ -8,7 +8,7 @@ export function AllApplicationBtn() {
     <Button
       onClick={() => navigate({ to: '/' })}
       ariaLabel="Back to dashboard"
-      title="Back"
+      tooltip="Back"
     >
       <ArrowLeft size={16} />
     </Button>

@@ -50,7 +50,7 @@ export default function NewApplicationButton() {
       <Button
         onClick={openModal}
         disabled={!hasApiKey}
-        title={
+        tooltip={
           hasApiKey ? 'New application' : 'Configure API key in Settings first'
         }
       >

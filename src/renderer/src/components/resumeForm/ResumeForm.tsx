@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useResumeStore } from '@typst-compiler/resumeState'
-import { Button } from '@ui/Button'
-import { Tooltip } from '@ui/Tooltip'
+import { IconTooltipButton } from '@ui/IconTooltipButton'
 import { DynamicSection } from '@/components/resumeForm/DynamicSection'
 import { TemplateBuilder } from '@/templates/builder'
 import { TemplateId } from '@/templates/templateId'
@@ -36,17 +35,14 @@ export default function ResumeForm() {
       <div className="bg-app-header my-2 ml-2 flex flex-col gap-1 rounded-lg p-2">
         {sectionOrder.map((sectionId) => {
           const schema = schemaById[sectionId]
-          const Icon = schema.icon
           return (
-            <Tooltip key={sectionId} content={schema.label} side="right">
-              <Button
-                variant="icon"
-                active={activeTab === sectionId}
-                onClick={() => setActiveTab(sectionId)}
-              >
-                <Icon size={16} />
-              </Button>
-            </Tooltip>
+            <IconTooltipButton
+              key={sectionId}
+              icon={schema.icon}
+              label={schema.label}
+              active={activeTab === sectionId}
+              onClick={() => setActiveTab(sectionId)}
+            />
           )
         })}
       </div>

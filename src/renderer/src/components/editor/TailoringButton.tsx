@@ -35,7 +35,7 @@ export function TailoringButton() {
   )
   const selectedKeywords = useSelectedKeywordsStore((state) =>
     jobId
-      ? state.selectedByJobId[jobId] ?? EMPTY_SELECTED_KEYWORDS
+      ? (state.selectedByJobId[jobId] ?? EMPTY_SELECTED_KEYWORDS)
       : EMPTY_SELECTED_KEYWORDS,
   )
   const runtimeWorkflow = useWorkflowRuntimeStore((state) =>
@@ -43,7 +43,8 @@ export function TailoringButton() {
   )
   const [isStarting, setIsStarting] = useState(false)
 
-  const taskStates = runtimeWorkflow?.taskStates ?? jobApplication?.workflowSteps?.taskStates
+  const taskStates =
+    runtimeWorkflow?.taskStates ?? jobApplication?.workflowSteps?.taskStates
   const workflowStatus =
     runtimeWorkflow?.status ??
     jobApplication?.workflowStatus ??
@@ -187,7 +188,7 @@ export function TailoringButton() {
       onClick={handleClick}
       disabled={isDisabled}
       loading={isProcessing}
-      title={tooltipMessage}
+      tooltip={tooltipMessage}
       ariaLabel={tooltipMessage}
     >
       <WandSparkles size={16} />

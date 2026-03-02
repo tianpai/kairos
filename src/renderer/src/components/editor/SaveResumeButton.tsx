@@ -34,7 +34,7 @@ export default function SaveResumeButton({ jobId }: SaveResumeButtonProps) {
       onClick={handleSave}
       disabled={!jobId}
       ariaLabel="Save resume"
-      title="Save"
+      tooltip="Save"
       className="-mr-0.5"
     >
       <Save size={16} />
