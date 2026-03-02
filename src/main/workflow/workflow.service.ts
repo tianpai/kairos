@@ -8,9 +8,11 @@ import type {
   WorkflowBatchEntry,
   WorkflowCreateApplicationsPayload,
   WorkflowCreateApplicationsResult,
+  WorkflowStartTailoringPayload,
 } from "@type/workflow-ipc";
 import type { WorkflowStepsData } from "@type/workflow";
 import type { TaskName, WorkflowContext } from "@type/task-contracts";
+import type { Checklist } from "@type/checklist";
 import type { SettingsService } from "../config/settings.service";
 import type { JobApplicationService } from "../services/job-application.service";
 import "./workflows";
@@ -57,6 +59,44 @@ export class WorkflowService {
 
   retryFailedTasks(jobId: string): Promise<TaskName[]> {
     return this.engine.retryFailedTasks(jobId);
+  }
+
+  async startTailoringFromJob(
+    payload: WorkflowStartTailoringPayload,
+  ): Promise<void> {
+    const workflowState = await this.getWorkflowState(payload.jobId);
+    if (workflowState?.status === "running") {
+      throw new Error("A workflow is already running for this job");
+    }
+
+    const job = await this.jobService.getJobApplication(payload.jobId);
+    const checklist = job.checklist;
+    const resumeStructure = (job.tailoredResume ??
+      job.parsedResume) as Record<string, unknown> | null;
+    const templateId = job.templateId;
+
+    if (!checklist) {
+      throw new Error("Checklist is missing for this job");
+    }
+
+    if (!resumeStructure) {
+      throw new Error("Resume content is missing for this job");
+    }
+
+    if (!templateId) {
+      throw new Error("Template ID is missing for this job");
+    }
+
+    const checklistWithNeedTailoring: Checklist = {
+      ...checklist,
+      needTailoring: this.normalizeNeedTailoring(payload.needTailoring),
+    };
+
+    await this.startWorkflow("tailoring", payload.jobId, {
+      checklist: checklistWithNeedTailoring,
+      resumeStructure,
+      templateId,
+    });
   }
 
   async createApplications(
@@ -116,6 +156,24 @@ export class WorkflowService {
     }
 
     return parsedResume;
+  }
+
+  private normalizeNeedTailoring(keywords: string[]): string[] {
+    const seen = new Set<string>();
+    const normalized: string[] = [];
+
+    for (const rawKeyword of keywords) {
+      const keyword = rawKeyword.trim();
+      if (!keyword) continue;
+
+      const dedupeKey = keyword.toLowerCase();
+      if (seen.has(dedupeKey)) continue;
+
+      seen.add(dedupeKey);
+      normalized.push(keyword);
+    }
+
+    return normalized;
   }
 
   private async prepareUploadSource(

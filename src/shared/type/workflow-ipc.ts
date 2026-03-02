@@ -15,6 +15,11 @@ export interface WorkflowGetStatePayload {
   jobId: string;
 }
 
+export interface WorkflowStartTailoringPayload {
+  jobId: string;
+  needTailoring: string[];
+}
+
 export interface WorkflowBatchEntry {
   jobDescription: string;
   jobUrl?: string;

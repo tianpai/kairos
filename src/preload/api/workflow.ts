@@ -7,6 +7,7 @@ import type {
   WorkflowGetStatePayload,
   WorkflowRetryPayload,
   WorkflowStartPayload,
+  WorkflowStartTailoringPayload,
   WorkflowStateChanged,
   WorkflowTaskCompleted,
   WorkflowTaskFailed,
@@ -18,6 +19,10 @@ type Unsubscribe = () => void;
 export const workflow = {
   start: (payload: WorkflowStartPayload): Promise<{ success: boolean }> =>
     ipcRenderer.invoke("workflow:start", payload),
+  startTailoring: (
+    payload: WorkflowStartTailoringPayload,
+  ): Promise<{ success: boolean }> =>
+    ipcRenderer.invoke("workflow:startTailoring", payload),
   retry: (
     payload: WorkflowRetryPayload,
   ): Promise<{ success: boolean; failedTasks: string[] }> =>

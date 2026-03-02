@@ -84,7 +84,6 @@ export default defineConfig({
         "@templates/": `${rendererRoot}/src/templates/`,
         "@typst-compiler/": `${rendererRoot}/src/typst-compiler/`,
         "@utils/": `${rendererRoot}/src/utils/`,
-        "@workflow/": `${rendererRoot}/src/workflow/`,
         "@tips/": `${rendererRoot}/src/tips/`,
         "@sidebar/": `${rendererRoot}/src/components/sidebar/`,
         "@layout/": `${rendererRoot}/src/components/layout/`,

@@ -7,6 +7,7 @@ import type {
   WorkflowGetStatePayload,
   WorkflowRetryPayload,
   WorkflowStartPayload,
+  WorkflowStartTailoringPayload,
 } from "@type/workflow-ipc";
 import type { WorkflowService } from "../workflow/workflow.service";
 
@@ -42,6 +43,19 @@ export function registerWorkflowHandlers(
       throw error;
     }
   });
+
+  handle(
+    "workflow:startTailoring",
+    async (_event, payload: WorkflowStartTailoringPayload) => {
+      try {
+        await workflowService.startTailoringFromJob(payload);
+        return { success: true };
+      } catch (error) {
+        log.error("workflow:startTailoring failed", error);
+        throw error;
+      }
+    },
+  );
 
   handle(
     "workflow:getState",

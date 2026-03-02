@@ -50,6 +50,7 @@ export function useTailoringData() {
 
   return {
     jobId,
+    jobApplication,
     checklist: jobApplication?.checklist ?? undefined,
     resumeStructure,
     templateId,

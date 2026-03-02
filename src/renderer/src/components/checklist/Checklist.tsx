@@ -1,13 +1,13 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { ShieldCheck, Star, Users } from 'lucide-react'
 import { getJobApplication } from '@api/jobs'
-import { useSelectedKeywords } from '@hooks/useSelectedKeywords'
 import { ChecklistSection } from '@checklist/ChecklistSection'
 import { Button } from '@ui/Button'
 import { Tooltip } from '@ui/Tooltip'
 import type { Checklist } from '@type/checklist'
 import type { LucideIcon } from 'lucide-react'
+import { useSelectedKeywordsStore } from './selectedKeywords.store'
 
 interface ChecklistProps {
   jobId: string | undefined
@@ -28,9 +28,12 @@ type ChecklistTabsProps = {
 }
 
 type ChecklistContentProps = {
+  jobId: string
   checklist: Checklist
   activeTab: TabType
 }
+
+const EMPTY_KEYWORDS: string[] = []
 
 function ChecklistTabs({ checklist, activeTab, onChange }: ChecklistTabsProps) {
   const requirementsByTab: Record<TabType, Checklist['hardRequirements']> = {
@@ -63,10 +66,16 @@ function ChecklistTabs({ checklist, activeTab, onChange }: ChecklistTabsProps) {
   )
 }
 
-function ChecklistContent({ checklist, activeTab }: ChecklistContentProps) {
-  const { selectedKeywords, toggleKeyword } = useSelectedKeywords(
-    checklist.needTailoring,
+function ChecklistContent({ jobId, checklist, activeTab }: ChecklistContentProps) {
+  const selectedKeywords = useSelectedKeywordsStore(
+    (state) => state.selectedByJobId[jobId] ?? EMPTY_KEYWORDS,
   )
+  const toggleKeyword = useSelectedKeywordsStore((state) => state.toggleKeyword)
+  const seedIfEmpty = useSelectedKeywordsStore((state) => state.seedIfEmpty)
+
+  useEffect(() => {
+    seedIfEmpty(jobId, checklist.needTailoring)
+  }, [jobId, checklist.needTailoring, seedIfEmpty])
 
   const requirementsByTab: Record<TabType, Checklist['hardRequirements']> = {
     hard: checklist.hardRequirements,
@@ -81,7 +90,7 @@ function ChecklistContent({ checklist, activeTab }: ChecklistContentProps) {
       <ChecklistSection
         requirements={requirements}
         selectedKeywords={selectedKeywords}
-        onToggleKeyword={toggleKeyword}
+        onToggleKeyword={(keyword) => toggleKeyword(jobId, keyword)}
       />
     </div>
   )
@@ -125,14 +134,18 @@ export default function Checklist({ jobId }: ChecklistProps) {
 
   return (
     <div className="flex h-full flex-col">
-      {checklist ? (
+      {checklist && jobId ? (
         <>
           <ChecklistTabs
             checklist={checklist}
             activeTab={activeTab}
             onChange={setActiveTab}
           />
-          <ChecklistContent checklist={checklist} activeTab={activeTab} />
+          <ChecklistContent
+            jobId={jobId}
+            checklist={checklist}
+            activeTab={activeTab}
+          />
         </>
       ) : (
         <ChecklistLoadingState />

@@ -20,6 +20,7 @@ import SettingsPage from '@/components/settings/SettingsPage'
 import * as TanStackQueryProvider from '@/integrations/tanstack-query/root-provider.tsx'
 import { useShortcutListener } from '@/hooks/useShortcutListener'
 import { useUpdateNotification } from '@/hooks/useUpdateNotification'
+import { useWorkflowEvents } from '@/hooks/useWorkflowEvents'
 
 import './styles.css'
 
@@ -44,6 +45,7 @@ function hideSplash() {
 function RootLayout() {
   useShortcutListener()
   useUpdateNotification()
+  useWorkflowEvents()
 
   // Theme for toast notifications
   const { data: currentTheme } = useCurrentTheme()

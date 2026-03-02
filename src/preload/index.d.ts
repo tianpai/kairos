@@ -20,6 +20,8 @@ type WorkflowRetryPayload =
   import("../shared/type/workflow-ipc").WorkflowRetryPayload;
 type WorkflowGetStatePayload =
   import("../shared/type/workflow-ipc").WorkflowGetStatePayload;
+type WorkflowStartTailoringPayload =
+  import("../shared/type/workflow-ipc").WorkflowStartTailoringPayload;
 type WorkflowCreateApplicationsPayload =
   import("../shared/type/workflow-ipc").WorkflowCreateApplicationsPayload;
 type WorkflowCreateApplicationsResult =
@@ -167,6 +169,9 @@ interface KairosAPI {
   };
   workflow: {
     start: (payload: WorkflowStartPayload) => Promise<{ success: boolean }>;
+    startTailoring: (
+      payload: WorkflowStartTailoringPayload,
+    ) => Promise<{ success: boolean }>;
     retry: (
       payload: WorkflowRetryPayload,
     ) => Promise<{ success: boolean; failedTasks: string[] }>;

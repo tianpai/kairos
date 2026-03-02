@@ -8,6 +8,7 @@ import type {
   WorkflowGetStatePayload,
   WorkflowRetryPayload,
   WorkflowStartPayload,
+  WorkflowStartTailoringPayload,
   WorkflowStateChanged,
   WorkflowTaskCompleted,
   WorkflowTaskFailed,
@@ -19,6 +20,12 @@ export async function startWorkflow(
   payload: WorkflowStartPayload,
 ): Promise<void> {
   await window.kairos.workflow.start(payload)
+}
+
+export async function startTailoring(
+  payload: WorkflowStartTailoringPayload,
+): Promise<void> {
+  await window.kairos.workflow.startTailoring(payload)
 }
 
 export async function retryWorkflow(
