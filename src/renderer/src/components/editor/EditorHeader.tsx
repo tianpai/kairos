@@ -7,7 +7,6 @@ import { BtnToggleChecklist } from '../ui/BtnToggleChecklist'
 import { Score } from '../ui/Score'
 import type { JobApplicationDetails } from '@api/jobs'
 import { ExportButton } from '@/components/export/ExportButton'
-import NewApplicationButton from '@/components/upload/NewApplicationButton'
 import { ApplicationsButton } from '@/components/applications/ApplicationsButton'
 
 interface EditorHeaderProps {
@@ -26,7 +25,6 @@ export function EditorHeader({ jobId, jobApplication }: EditorHeaderProps) {
       left={
         <>
           <ApplicationsButton />
-          <NewApplicationButton />
         </>
       }
       center={

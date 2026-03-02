@@ -15,6 +15,7 @@ import type { SortOption } from './SortDropdown'
 import type { JobsPatchPayload } from '@type/jobs-ipc'
 import type { JobApplication } from '@api/jobs'
 import JobInfoModal from '@/components/applications/JobInfoModal'
+import { ApplicationsButton } from '@/components/applications/ApplicationsButton'
 import { useExportModal } from '@/components/export/ExportModal'
 import NewApplicationButton from '@/components/upload/NewApplicationButton'
 import { ExportButton } from '@/components/export/ExportButton'
@@ -29,10 +30,11 @@ interface OpeningApp {
 function ApplicationPageHeader({ showArchived }: { showArchived: boolean }) {
   return (
     <PageHeader
-      left={<NewApplicationButton />}
+      left={<ApplicationsButton staticOnly />}
       center={<span>All Applications</span>}
       right={
         <>
+          <NewApplicationButton />
           <SettingsButton />
           <ExportButton showArchived={showArchived} />
         </>
