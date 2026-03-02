@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.2.4](https://github.com/tianpai/kairos/compare/v0.2.3...v0.2.4) (2026-03-02)
+
+
+### Features
+
+* keep header buttons in consistent positions across pages ([bfad44d](https://github.com/tianpai/kairos/commit/bfad44dbc766f7311fed65be0047a9ac4aee941b))
+* show instant tooltips on icon buttons ([c846148](https://github.com/tianpai/kairos/commit/c846148d372ef48e84e08ba74641aa11e7ba3f3d))
+
+
+### Bug Fixes
+
+* streamline application card animations and controls ([62a78b1](https://github.com/tianpai/kairos/commit/62a78b1bc7037c29358b81178ff795f0c58eccb0))
+
 ### [0.2.3](https://github.com/tianpai/kairos/compare/v0.2.2...v0.2.3) (2026-02-20)
 
 
