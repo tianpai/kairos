@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import type {
   WorkflowBatchEntry,
   WorkflowCreateApplicationsPayload,
+  WorkflowResumeFile,
 } from '@type/workflow-ipc'
 
 export type ResumeSource = 'upload' | 'existing'
@@ -55,7 +56,7 @@ function getFilledEntries(entries: JdEntry[]): JdEntry[] {
 interface NewApplicationState {
   isOpen: boolean
   resumeSource: ResumeSource
-  rawResumeContent: string | null
+  resumeFile: WorkflowResumeFile | null
   selectedSourceId: string | null
   entries: JdEntry[]
   isSubmitting: boolean
@@ -69,7 +70,7 @@ interface NewApplicationActions {
 
   // Form inputs
   setResumeSource: (source: ResumeSource) => void
-  setRawResumeContent: (content: string | null) => void
+  setResumeFile: (file: WorkflowResumeFile | null) => void
   setSelectedSourceId: (id: string | null) => void
   addEntry: () => void
   removeEntry: (id: string) => void
@@ -94,7 +95,7 @@ type NewApplicationStore = NewApplicationState & NewApplicationActions
 const initialState: NewApplicationState = {
   isOpen: false,
   resumeSource: 'upload',
-  rawResumeContent: null,
+  resumeFile: null,
   selectedSourceId: null,
   entries: [createEmptyEntry()],
   isSubmitting: false,
@@ -117,11 +118,11 @@ export const useNewApplicationStore = create<NewApplicationStore>()(
     setResumeSource: (source) =>
       set({
         resumeSource: source,
-        rawResumeContent: null,
+        resumeFile: null,
         selectedSourceId: null,
       }),
 
-    setRawResumeContent: (content) => set({ rawResumeContent: content }),
+    setResumeFile: (file) => set({ resumeFile: file }),
 
     setSelectedSourceId: (id) => set({ selectedSourceId: id }),
 
@@ -156,7 +157,7 @@ export const useNewApplicationStore = create<NewApplicationStore>()(
     canSubmit: () => {
       const {
         resumeSource,
-        rawResumeContent,
+        resumeFile,
         selectedSourceId,
         entries,
         isSubmitting,
@@ -166,7 +167,7 @@ export const useNewApplicationStore = create<NewApplicationStore>()(
       if (isSubmitting || batchProgress.status === 'processing') return false
 
       const filledEntries = getFilledEntries(entries)
-      if (resumeSource === 'upload' && !rawResumeContent?.trim()) return false
+      if (resumeSource === 'upload' && !resumeFile) return false
       if (resumeSource === 'existing' && !selectedSourceId) return false
 
       return filledEntries.length > 0
@@ -176,7 +177,7 @@ export const useNewApplicationStore = create<NewApplicationStore>()(
       const state = get()
       if (!state.canSubmit()) return null
 
-      const { resumeSource, rawResumeContent, selectedSourceId, entries } =
+      const { resumeSource, resumeFile, selectedSourceId, entries } =
         state
       const filledEntries = getFilledEntries(entries)
       const normalizedEntries = filledEntries.map((e) => ({
@@ -185,11 +186,10 @@ export const useNewApplicationStore = create<NewApplicationStore>()(
       }))
 
       if (resumeSource === 'upload') {
-        const content = rawResumeContent?.trim()
-        if (!content) return null
+        if (!resumeFile) return null
         return {
           resumeSource: 'upload',
-          rawResumeContent: content,
+          resumeFile,
           entries: normalizedEntries,
         }
       }

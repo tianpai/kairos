@@ -1,9 +1,7 @@
-import { useCallback } from 'react'
+import { useCallback, useMemo, useRef, useState } from 'react'
 import type { ChangeEvent, DragEvent, RefObject } from 'react'
-import type { FileToTextPolicy } from '@/hooks/useFileToText'
-import { extractResumeText } from '@/utils/resumeTextExtractor'
+import type { WorkflowResumeFile } from '@type/workflow-ipc'
 import { useFileSelect } from '@/hooks/useFileSelect'
-import { useFileToText } from '@/hooks/useFileToText'
 
 const JOB_DESCRIPTION_MAX_SIZE_KB = 50
 
@@ -12,6 +10,7 @@ export type UploadPurpose = 'resume' | 'jobDescription'
 interface UseUploadOptions {
   purpose: UploadPurpose
   onText?: (text: string) => void
+  onFile?: (file: WorkflowResumeFile | null) => void
   onError?: (message: string) => void
 }
 
@@ -43,33 +42,136 @@ interface UseUploadReturn {
   clear: () => void
 }
 
-const uploadPolicies: Record<UploadPurpose, FileToTextPolicy> = {
+const uploadPolicies = {
   resume: {
     acceptedExtensions: ['.pdf', '.docx', '.txt'],
-    toText: extractResumeText,
   },
   jobDescription: {
     acceptedExtensions: ['.md', '.txt'],
     maxSizeKB: JOB_DESCRIPTION_MAX_SIZE_KB,
-    toText: (file: File) => file.text(),
   },
+} as const
+
+function normalizeExtension(extension: string): string {
+  const trimmed = extension.trim().toLowerCase()
+  if (!trimmed) return ''
+  return trimmed.startsWith('.') ? trimmed : `.${trimmed}`
+}
+
+function getFileExtension(fileName: string): string | null {
+  const extension = fileName.split('.').pop()?.toLowerCase()
+  return extension ? `.${extension}` : null
 }
 
 export function useUpload(options: UseUploadOptions): UseUploadReturn {
-  const { purpose, onText, onError } = options
+  const { purpose, onText, onFile, onError } = options
+  const [text, setText] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
+  const [isProcessing, setIsProcessing] = useState(false)
+  const requestIdRef = useRef(0)
 
-  const {
-    text,
-    error,
-    isProcessing,
-    acceptedFileTypes,
-    processFile,
-    clearText,
-  } = useFileToText({
-    policy: uploadPolicies[purpose],
-    onTextReady: onText,
-    onError,
-  })
+  const policy = uploadPolicies[purpose]
+
+  const acceptedExtensions = useMemo(
+    () =>
+      policy.acceptedExtensions
+        .map(normalizeExtension)
+        .filter((extension) => extension.length > 0),
+    [policy.acceptedExtensions],
+  )
+
+  const acceptedSet = useMemo(
+    () => new Set(acceptedExtensions),
+    [acceptedExtensions],
+  )
+
+  const acceptedFileTypes = acceptedExtensions.join(',')
+
+  const validateFile = useCallback(
+    (file: File): string | null => {
+      const extension = getFileExtension(file.name)
+      if (!extension || !acceptedSet.has(extension)) {
+        return `Unsupported file type. Allowed: ${acceptedExtensions.join(', ')}`
+      }
+
+      if ('maxSizeKB' in policy && policy.maxSizeKB) {
+        if (file.size > policy.maxSizeKB * 1024) {
+          return `File exceeds ${policy.maxSizeKB}KB limit`
+        }
+      }
+
+      return null
+    },
+    [acceptedExtensions, acceptedSet, policy],
+  )
+
+  const processFile = useCallback(
+    async (file: File | null): Promise<void> => {
+      const requestId = requestIdRef.current + 1
+      requestIdRef.current = requestId
+
+      if (!file) {
+        setText(null)
+        setError(null)
+        setIsProcessing(false)
+        onFile?.(null)
+        return
+      }
+
+      const validationError = validateFile(file)
+      if (validationError) {
+        setText(null)
+        setError(validationError)
+        setIsProcessing(false)
+        onFile?.(null)
+        onError?.(validationError)
+        return
+      }
+
+      setIsProcessing(true)
+      setText(null)
+      setError(null)
+
+      try {
+        if (purpose === 'jobDescription') {
+          const content = await file.text()
+          if (requestId !== requestIdRef.current) {
+            return
+          }
+
+          setText(content)
+          onText?.(content)
+          return
+        }
+
+        const data = await file.arrayBuffer()
+        if (requestId !== requestIdRef.current) {
+          return
+        }
+
+        onFile?.({
+          fileName: file.name,
+          data,
+        })
+      } catch (cause) {
+        if (requestId !== requestIdRef.current) {
+          return
+        }
+
+        const message =
+          cause instanceof Error ? cause.message : 'Failed to read file'
+        setText(null)
+        setError(message)
+        onFile?.(null)
+        onError?.(message)
+      } finally {
+        if (requestId === requestIdRef.current) {
+          setIsProcessing(false)
+        }
+      }
+    },
+    [onError, onFile, onText, purpose, validateFile],
+  )
 
   const handleFileSelect = useCallback(
     (file: File | null) => {
@@ -93,9 +195,13 @@ export function useUpload(options: UseUploadOptions): UseUploadReturn {
   })
 
   const clear = useCallback(() => {
+    requestIdRef.current += 1
     clearSelectedFile()
-    clearText()
-  }, [clearSelectedFile, clearText])
+    setText(null)
+    setError(null)
+    setIsProcessing(false)
+    onFile?.(null)
+  }, [clearSelectedFile, onFile])
 
   return {
     inputProps: {

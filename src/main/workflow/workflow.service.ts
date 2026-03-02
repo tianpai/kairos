@@ -15,6 +15,7 @@ import type { TaskName, WorkflowContext } from "@type/task-contracts";
 import type { Checklist } from "@type/checklist";
 import type { SettingsService } from "../config/settings.service";
 import type { JobApplicationService } from "../services/job-application.service";
+import { extractResumeTextFromFile } from "../utils/resume-text-extractor";
 import "./workflows";
 
 const EXTRACTING_PLACEHOLDER = "Extracting...";
@@ -187,8 +188,10 @@ export class WorkflowService {
       return null;
     }
 
+    const rawResumeContent = await extractResumeTextFromFile(payload.resumeFile);
+
     const firstResponse = await this.jobService.createJobApplication({
-      rawResumeContent: payload.rawResumeContent,
+      rawResumeContent,
       jobDescription: firstEntry.jobDescription,
       companyName: EXTRACTING_PLACEHOLDER,
       position: EXTRACTING_PLACEHOLDER,
@@ -198,7 +201,7 @@ export class WorkflowService {
     });
 
     await this.startWorkflow("create-application", firstResponse.id, {
-      rawResumeContent: payload.rawResumeContent,
+      rawResumeContent,
       jobDescription: firstEntry.jobDescription,
       templateId: payload.templateId,
     });

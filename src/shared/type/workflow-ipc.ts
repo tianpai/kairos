@@ -25,10 +25,15 @@ export interface WorkflowBatchEntry {
   jobUrl?: string;
 }
 
+export interface WorkflowResumeFile {
+  fileName: string;
+  data: ArrayBuffer;
+}
+
 export type WorkflowCreateApplicationsPayload =
   | {
       resumeSource: "upload";
-      rawResumeContent: string;
+      resumeFile: WorkflowResumeFile;
       templateId: string;
       entries: WorkflowBatchEntry[];
     }
