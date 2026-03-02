@@ -8,7 +8,7 @@ import {
 } from 'react'
 import { createPortal } from 'react-dom'
 import { AnimatePresence, motion } from 'motion/react'
-import type { ReactNode } from 'react'
+import type { MouseEventHandler, ReactNode } from 'react'
 import { cn } from '@/utils/cn'
 
 const variantStyles = {
@@ -24,7 +24,7 @@ const variantStyles = {
 type ButtonVariant = keyof typeof variantStyles
 
 interface ButtonProps {
-  onClick?: () => void
+  onClick?: MouseEventHandler<HTMLButtonElement>
   type?: 'button' | 'submit' | 'reset'
   disabled?: boolean
   loading?: boolean

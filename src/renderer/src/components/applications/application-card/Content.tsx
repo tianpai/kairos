@@ -97,30 +97,31 @@ function ExpandedContent({
       <div className={`mt-1 text-xs ${overdue ? 'text-error' : 'text-hint'}`}>
         Due {formatDate(application.dueDate)}
       </div>
-      <div className="flex items-center gap-2">
-        <div
-          className="text-sm font-semibold"
-          style={{ color: getScoreColor(application.matchPercentage) }}
-        >
-          {Math.round(application.matchPercentage)}%
-        </div>
-        <StatusDropdown
-          status={application.applicationStatus}
-          onStatusChange={onStatusChange}
-        />
+      <div
+        className="mt-0.5 text-sm font-semibold"
+        style={{ color: getScoreColor(application.matchPercentage) }}
+      >
+        {Math.round(application.matchPercentage)}%
       </div>
 
       <div className="absolute right-3 bottom-3 left-3 flex items-center justify-between">
-        <IconButton
-          icon={
-            isArchived ? <ArchiveRestore size={14} /> : <ArchiveX size={14} />
-          }
-          onClick={onArchive}
-          ariaLabel={
-            isArchived ? 'Unarchive application' : 'Archive application'
-          }
-        />
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1">
+          <IconButton
+            icon={
+              isArchived ? <ArchiveRestore size={14} /> : <ArchiveX size={14} />
+            }
+            onClick={onArchive}
+            ariaLabel={
+              isArchived ? 'Unarchive application' : 'Archive application'
+            }
+          />
+          <StatusDropdown
+            status={application.applicationStatus}
+            onStatusChange={onStatusChange}
+            iconOnly
+          />
+        </div>
+        <div className="flex items-center gap-1.5">
           {application.jobUrl && (
             <IconButton
               icon={<ExternalLink size={14} />}

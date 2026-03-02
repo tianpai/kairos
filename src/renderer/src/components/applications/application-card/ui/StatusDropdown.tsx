@@ -1,15 +1,18 @@
 import { useEffect, useRef, useState } from 'react'
-import { ChevronDown, X } from 'lucide-react'
+import { ChevronDown, Circle, X } from 'lucide-react'
+import { Button } from '@ui/Button'
 import { APPLICATION_STATUSES, getStatusConfig } from '../status'
 
 interface StatusDropdownProps {
   status: string | null
   onStatusChange: (status: string | null) => void
+  iconOnly?: boolean
 }
 
 export function StatusDropdown({
   status,
   onStatusChange,
+  iconOnly = false,
 }: StatusDropdownProps) {
   const [isOpen, setIsOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
@@ -28,6 +31,9 @@ export function StatusDropdown({
   }, [isOpen])
 
   const activeConfig = status ? getStatusConfig(status) : null
+  const StatusIcon = activeConfig?.icon ?? Circle
+  const statusColorClass = activeConfig?.color ?? 'text-hint'
+  const statusLabel = activeConfig ? activeConfig.label : 'Set status'
 
   function handleToggle(e: React.MouseEvent) {
     e.stopPropagation()
@@ -48,20 +54,33 @@ export function StatusDropdown({
 
   return (
     <div ref={ref} className="relative">
-      <button
+      <Button
         onClick={handleToggle}
-        className="border-default hover:bg-hover flex items-center gap-1.5 rounded-md border px-2 py-1 text-xs transition-colors"
+        ariaLabel={statusLabel}
+        tooltip={statusLabel}
+        variant="ghost"
+        className={
+          iconOnly
+            ? 'border-default bg-surface hover:bg-hover flex h-8 w-8 items-center justify-center rounded-md border p-0'
+            : 'border-default bg-surface hover:bg-hover flex h-8 items-center gap-1.5 rounded-md border px-2 text-xs leading-none'
+        }
       >
-        {activeConfig ? (
-          <>
-            <activeConfig.icon size={12} className={activeConfig.color} />
-            <span className={activeConfig.color}>{activeConfig.label}</span>
-          </>
+        {iconOnly ? (
+          <StatusIcon size={12} className={statusColorClass} />
         ) : (
-          <span className="text-hint">Set status</span>
+          <>
+            {activeConfig ? (
+              <>
+                <activeConfig.icon size={12} className={activeConfig.color} />
+                <span className={activeConfig.color}>{activeConfig.label}</span>
+              </>
+            ) : (
+              <span className="text-hint">Set status</span>
+            )}
+            <ChevronDown size={12} className="text-hint" />
+          </>
         )}
-        <ChevronDown size={12} className="text-hint" />
-      </button>
+      </Button>
 
       {isOpen && (
         <div className="border-default bg-surface absolute top-0 left-full z-50 ml-1 flex flex-col rounded-lg border py-1 shadow-lg">
