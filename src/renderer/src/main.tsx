@@ -1,5 +1,6 @@
 import { StrictMode, useEffect } from 'react'
 import ReactDOM from 'react-dom/client'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import {
   Outlet,
   RouterProvider,
@@ -17,7 +18,6 @@ import AllApplicationsPage from '@/components/applications/AllApplicationsPage'
 import EditorPage from '@/components/editor/EditorPage'
 import { useExportModal } from '@/components/export/ExportModal'
 import SettingsPage from '@/components/settings/SettingsPage'
-import * as TanStackQueryProvider from '@/integrations/tanstack-query/root-provider.tsx'
 import { useShortcutListener } from '@/hooks/useShortcutListener'
 import { useUpdateNotification } from '@/hooks/useUpdateNotification'
 import { useWorkflowEvents } from '@/hooks/useWorkflowEvents'
@@ -109,13 +109,13 @@ const routeTree = rootRoute.addChildren([
   settingsRoute,
 ])
 
-const TanStackQueryProviderContext = TanStackQueryProvider.getContext()
+const queryClient = new QueryClient()
 const hashHistory = createHashHistory()
 const router = createRouter({
   routeTree,
   history: hashHistory,
   context: {
-    ...TanStackQueryProviderContext,
+    client: queryClient,
   },
   defaultPreload: 'intent',
   scrollRestoration: true,
@@ -134,9 +134,9 @@ if (rootElement && !rootElement.innerHTML) {
   const root = ReactDOM.createRoot(rootElement)
   root.render(
     <StrictMode>
-      <TanStackQueryProvider.Provider {...TanStackQueryProviderContext}>
+      <QueryClientProvider client={queryClient}>
         <RouterProvider router={router} />
-      </TanStackQueryProvider.Provider>
+      </QueryClientProvider>
     </StrictMode>,
   )
 }

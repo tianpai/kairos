@@ -17,7 +17,7 @@ import {
   quitAndInstallUpdate,
 } from '@api/updater'
 import type { UpdateState } from '@api/updater'
-import { versionQuotes } from '@/data/versionQuotes'
+import { versionQuotes } from '@/utils/versionQuotes'
 
 function GitHubIcon({ size = 24 }: { size?: number }) {
   return (
