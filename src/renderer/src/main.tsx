@@ -18,7 +18,6 @@ import AllApplicationsPage from '@/components/applications/AllApplicationsPage'
 import EditorPage from '@/components/editor/EditorPage'
 import { useExportModal } from '@/components/export/ExportModal'
 import SettingsPage from '@/components/settings/SettingsPage'
-import { useShortcutListener } from '@/hooks/useShortcutListener'
 import { useUpdateNotification } from '@/hooks/useUpdateNotification'
 import { useWorkflowEvents } from '@/hooks/useWorkflowEvents'
 
@@ -43,7 +42,6 @@ function hideSplash() {
 }
 
 function RootLayout() {
-  useShortcutListener()
   useUpdateNotification()
   useWorkflowEvents()
 

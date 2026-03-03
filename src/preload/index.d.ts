@@ -45,16 +45,6 @@ interface ModelInfo {
 }
 
 interface KairosAPI {
-  shortcuts: {
-    onSettings: (callback: () => void) => () => void;
-    onNewApplication: (callback: () => void) => () => void;
-    onSave: (callback: () => void) => () => void;
-    onExportPdf: (callback: () => void) => () => void;
-    onDocumentSettings: (callback: () => void) => () => void;
-    onTailor: (callback: () => void) => () => void;
-    onToggleColumns: (callback: () => void) => () => void;
-    onBatchExport: (callback: () => void) => () => void;
-  };
   platform: NodeJS.Platform;
   backup: {
     exportResumeData: () => Promise<BackupExportResult>;

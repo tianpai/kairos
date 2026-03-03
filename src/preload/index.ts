@@ -10,13 +10,11 @@ import { platform } from "./api/platform";
 import { provider } from "./api/provider";
 import { settings } from "./api/settings";
 import { shell } from "./api/shell";
-import { shortcuts } from "./api/shortcuts";
 import { theme } from "./api/theme";
 import { updater } from "./api/updater";
 import { workflow } from "./api/workflow";
 
 contextBridge.exposeInMainWorld("kairos", {
-  shortcuts,
   platform,
   backup,
   shell,

@@ -11,7 +11,6 @@ import {
   startTailoring,
 } from '@api/workflow'
 import { CHECKLIST_MATCHING, RESUME_TAILORING } from '@type/task-names'
-import { useShortcutStore } from '@/components/layout/shortcut.store'
 import { useSelectedKeywordsStore } from '@/components/checklist/selectedKeywords.store'
 import { useWorkflowRuntimeStore } from '@/hooks/workflowRuntime.store'
 import { friendlyError } from '@/utils/error'
@@ -29,10 +28,6 @@ export function TailoringButton() {
     hasResumeContent,
   } = useTailoringData()
 
-  const tailorRequested = useShortcutStore((state) => state.tailorRequested)
-  const clearTailorRequest = useShortcutStore(
-    (state) => state.clearTailorRequest,
-  )
   const selectedKeywords = useSelectedKeywordsStore((state) =>
     jobId
       ? (state.selectedByJobId[jobId] ?? EMPTY_SELECTED_KEYWORDS)
@@ -129,16 +124,6 @@ export function TailoringButton() {
       cancelled = true
     }
   }, [jobId])
-
-  // Listen for keyboard shortcut
-  useEffect(() => {
-    if (tailorRequested) {
-      if (!isDisabled) {
-        void handleClick()
-      }
-      clearTailorRequest()
-    }
-  }, [tailorRequested, isDisabled, handleClick, clearTailorRequest])
 
   useEffect(() => {
     setIsStarting(false)

@@ -60,7 +60,6 @@ export function EditorHeader({ jobId, jobApplication }: EditorHeaderProps) {
                       ]
                     : undefined
                 }
-                useExportShortcut
               />
             </>
           )}

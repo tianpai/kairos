@@ -68,8 +68,8 @@ async function createWindow() {
     mainWindow = null;
   });
 
-  // Create app menu with keyboard shortcuts
-  createAppMenu(mainWindow);
+  // Create app menu
+  createAppMenu();
 }
 
 app.whenReady().then(async () => {

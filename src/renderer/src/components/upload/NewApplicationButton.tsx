@@ -1,4 +1,3 @@
-import { useEffect } from 'react'
 import { Plus } from 'lucide-react'
 import { useNewApplicationStore } from './newApplication.store'
 import type { SubmitPayload } from './newApplication.store'
@@ -6,7 +5,6 @@ import { Button } from '@/components/ui/Button'
 import NewApplicationModal from '@/components/upload/NewApplicationModal'
 import { useHasApiKey } from '@/hooks/useSettings'
 import { useWorkflow } from '@/hooks/useWorkflow'
-import { useShortcutStore } from '@/components/layout/shortcut.store'
 
 export default function NewApplicationButton() {
   const { data: hasApiKey } = useHasApiKey()
@@ -19,26 +17,6 @@ export default function NewApplicationButton() {
   const { createApplications } = useWorkflow()
 
   const isPending = batchProgress.status === 'processing'
-
-  const newApplicationRequested = useShortcutStore(
-    (s) => s.newApplicationRequested,
-  )
-  const clearNewApplicationRequest = useShortcutStore(
-    (s) => s.clearNewApplicationRequest,
-  )
-
-  useEffect(() => {
-    if (!newApplicationRequested) return
-    if (hasApiKey) {
-      openModal()
-    }
-    clearNewApplicationRequest()
-  }, [
-    newApplicationRequested,
-    hasApiKey,
-    clearNewApplicationRequest,
-    openModal,
-  ])
 
   async function handleSubmit(payload: SubmitPayload) {
     if (!hasApiKey) return

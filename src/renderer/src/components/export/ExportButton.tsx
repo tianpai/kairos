@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useState } from 'react'
 import { Download } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@ui/Button'
@@ -8,28 +8,18 @@ import {
   useExportModal,
 } from './ExportModal'
 import type { ExportTarget } from './ExportModal'
-import { useShortcutStore } from '@/components/layout/shortcut.store'
 
 interface ExportButtonProps {
   showArchived?: boolean
   targets?: ExportTarget[]
-  useExportShortcut?: boolean
 }
 
 export function ExportButton({
   showArchived = false,
   targets,
-  useExportShortcut = false,
 }: ExportButtonProps) {
   const { open } = useExportModal()
   const [exporting, setExporting] = useState(false)
-
-  const exportPdfRequested = useShortcutStore(
-    (state) => state.exportPdfRequested,
-  )
-  const clearExportPdfRequest = useShortcutStore(
-    (state) => state.clearExportPdfRequest,
-  )
 
   const handleExport = useCallback(async () => {
     const hasTargets = !!targets?.length
@@ -53,20 +43,6 @@ export function ExportButton({
       setExporting(false)
     }
   }, [open, showArchived, targets])
-
-  useEffect(() => {
-    if (!exportPdfRequested) return
-
-    if (useExportShortcut) {
-      void handleExport()
-    }
-    clearExportPdfRequest()
-  }, [
-    exportPdfRequested,
-    useExportShortcut,
-    handleExport,
-    clearExportPdfRequest,
-  ])
 
   const targetCount = targets?.length ?? 0
   const ariaLabel =
