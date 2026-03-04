@@ -1,11 +1,12 @@
 import { join } from "node:path";
-import { BrowserWindow, app, nativeTheme, shell } from "electron";
+import { BrowserWindow, app, dialog, nativeTheme, shell } from "electron";
 import log from "electron-log/main";
 import { SettingsService } from "./config/settings.service";
 import { registerAllHandlers } from "./ipc";
 import {
   connectDatabase,
   disconnectDatabase,
+  LegacyUpgradeRequiredError,
   runMigrations,
 } from "./services/database.service";
 import { createAppMenu } from "./menu";
@@ -129,6 +130,9 @@ app.whenReady().then(async () => {
     log.info("App ready");
   } catch (error) {
     log.error("Failed to start:", error);
+    if (error instanceof LegacyUpgradeRequiredError) {
+      dialog.showErrorBox("Migration Required", error.message);
+    }
     app.quit();
   }
 

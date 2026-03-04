@@ -7,17 +7,29 @@ import JSZip from "jszip";
 import { app } from "electron";
 import log from "electron-log/main";
 import { z } from "zod";
-import { getSqlite } from "./database.service";
+import { getSqlite, supportsLegacyBackupImport } from "./database.service";
 import type {
   BackupExportResult,
   BackupImportResult,
   BackupManifest,
 } from "../../shared/backup";
 
+type BackupSchemaKind = "legacy" | "split";
+
 const BACKUP_FORMAT_VERSION = 1;
-const DB_SCHEMA_VERSION = 1;
+const DB_SCHEMA_VERSION = 2;
 const DB_ENTRY_PATH = "data/kairos.db";
-const REQUIRED_TABLES = ["companies", "job_applications"] as const;
+const LEGACY_TABLES = ["companies", "job_applications"] as const;
+const SPLIT_TABLES = [
+  "companies",
+  "jobs",
+  "resumes",
+  "checklists",
+  "scores",
+  "workflows",
+] as const;
+const LEGACY_BACKUP_BLOCK_MESSAGE =
+  "Backup is from pre-v0.3 schema. Restore in v0.3.x first, then re-export.";
 
 const backupManifestSchema = z.object({
   backupFormatVersion: z.number().int().positive(),
@@ -77,7 +89,32 @@ function getTableColumns(
   return rows.map((row) => row.name);
 }
 
-function validateImportedDbFile(tempDbPath: string): void {
+function getUserTableNames(
+  db: Database.Database,
+  databaseName: "main" | "imported",
+): Set<string> {
+  const rows = db
+    .prepare(
+      `SELECT name FROM ${databaseName}.sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%'`,
+    )
+    .all() as { name: string }[];
+  return new Set(rows.map((row) => row.name));
+}
+
+function hasAllTables(
+  tableSet: Set<string>,
+  requiredTables: readonly string[],
+): boolean {
+  return requiredTables.every((tableName) => tableSet.has(tableName));
+}
+
+function detectBackupSchema(tableSet: Set<string>): BackupSchemaKind {
+  if (hasAllTables(tableSet, SPLIT_TABLES)) return "split";
+  if (hasAllTables(tableSet, LEGACY_TABLES)) return "legacy";
+  throw new Error("Backup does not match a supported database schema");
+}
+
+function validateImportedDbFile(tempDbPath: string): BackupSchemaKind {
   const importedDb = new Database(tempDbPath, {
     readonly: true,
     fileMustExist: true,
@@ -92,30 +129,152 @@ function validateImportedDbFile(tempDbPath: string): void {
       throw new Error(`SQLite integrity check failed: ${quickCheck}`);
     }
 
-    const rows = importedDb
-      .prepare(
-        "SELECT name FROM sqlite_master WHERE type = 'table' AND name IN (?, ?)",
-      )
-      .all("companies", "job_applications") as { name: string }[];
-
-    const tableSet = new Set(rows.map((row) => row.name));
-    for (const tableName of REQUIRED_TABLES) {
-      if (!tableSet.has(tableName)) {
-        throw new Error(`Backup is missing required table: ${tableName}`);
-      }
-    }
+    const tableSet = getUserTableNames(importedDb, "main");
+    return detectBackupSchema(tableSet);
   } finally {
     importedDb.close();
   }
 }
 
-function restoreImportedDb(tempDbPath: string): void {
+function clearMainSplitTables(db: Database.Database): void {
+  db.exec("DELETE FROM workflows");
+  db.exec("DELETE FROM scores");
+  db.exec("DELETE FROM checklists");
+  db.exec("DELETE FROM resumes");
+  db.exec("DELETE FROM jobs");
+  db.exec("DELETE FROM companies");
+}
+
+function copySharedColumnsBetweenTables(
+  db: Database.Database,
+  tableName: string,
+): void {
+  const targetColumns = getTableColumns(db, "main", tableName);
+  const sourceColumns = getTableColumns(db, "imported", tableName);
+  const sharedColumns = targetColumns.filter((column) =>
+    sourceColumns.includes(column),
+  );
+
+  if (sharedColumns.length === 0) {
+    throw new Error(`No compatible columns found for table: ${tableName}`);
+  }
+
+  const columnList = sharedColumns.map(quoteIdentifier).join(", ");
+  db.exec(
+    `INSERT INTO ${quoteIdentifier(tableName)} (${columnList}) ` +
+      `SELECT ${columnList} FROM imported.${quoteIdentifier(tableName)}`,
+  );
+}
+
+function sourceLegacyColumnExpr(
+  legacyColumns: string[],
+  column: string,
+  fallbackExpr: string,
+): string {
+  return legacyColumns.includes(column) ? quoteIdentifier(column) : fallbackExpr;
+}
+
+function convertLegacyImportToSplit(db: Database.Database): void {
+  const legacyColumns = getTableColumns(db, "imported", "job_applications");
+
+  copySharedColumnsBetweenTables(db, "companies");
+
+  const jobsSelect = [
+    "id",
+    "company_id",
+    "position",
+    "due_date",
+    sourceLegacyColumnExpr(legacyColumns, "job_url", "NULL"),
+    sourceLegacyColumnExpr(legacyColumns, "status", "'active'"),
+    sourceLegacyColumnExpr(legacyColumns, "application_status", "NULL"),
+    sourceLegacyColumnExpr(legacyColumns, "archived", "0"),
+    sourceLegacyColumnExpr(legacyColumns, "pinned", "0"),
+    sourceLegacyColumnExpr(legacyColumns, "pinned_at", "NULL"),
+    sourceLegacyColumnExpr(legacyColumns, "status_updated_at", "NULL"),
+    sourceLegacyColumnExpr(legacyColumns, "interview_date", "NULL"),
+    "created_at",
+    "updated_at",
+  ].join(", ");
+
+  db.exec(`
+    INSERT INTO jobs (
+      id, company_id, position, due_date, job_url, status, application_status,
+      archived, pinned, pinned_at, status_updated_at, interview_date, created_at, updated_at
+    )
+    SELECT ${jobsSelect}
+    FROM imported.job_applications
+  `);
+
+  const originalResumeExpr = sourceLegacyColumnExpr(
+    legacyColumns,
+    "original_resume",
+    "''",
+  );
+  const parsedResumeExpr = sourceLegacyColumnExpr(
+    legacyColumns,
+    "parsed_resume",
+    "NULL",
+  );
+  const tailoredResumeExpr = sourceLegacyColumnExpr(
+    legacyColumns,
+    "tailored_resume",
+    "NULL",
+  );
+
+  db.exec(`
+    INSERT INTO resumes (
+      job_id, template_id, original_resume, parsed_resume, tailored_resume
+    )
+    SELECT
+      id,
+      ${sourceLegacyColumnExpr(legacyColumns, "template_id", "''")},
+      COALESCE(${originalResumeExpr}, ''),
+      ${parsedResumeExpr},
+      ${tailoredResumeExpr}
+    FROM imported.job_applications
+  `);
+
+  db.exec(`
+    INSERT INTO checklists (
+      job_id, job_description, checklist
+    )
+    SELECT
+      id,
+      ${sourceLegacyColumnExpr(legacyColumns, "job_description", "NULL")},
+      ${sourceLegacyColumnExpr(legacyColumns, "checklist", "NULL")}
+    FROM imported.job_applications
+  `);
+
+  db.exec(`
+    INSERT INTO scores (
+      job_id, match_percentage
+    )
+    SELECT
+      id,
+      ${sourceLegacyColumnExpr(legacyColumns, "match_percentage", "0")}
+    FROM imported.job_applications
+  `);
+
+  db.exec(`
+    INSERT INTO workflows (
+      job_id, state
+    )
+    SELECT
+      id,
+      ${sourceLegacyColumnExpr(legacyColumns, "workflow_steps", "NULL")}
+    FROM imported.job_applications
+  `);
+}
+
+function restoreImportedDb(
+  tempDbPath: string,
+  importedSchema: BackupSchemaKind,
+): void {
   const sqlite = getSqlite();
   const hadForeignKeysEnabled = Boolean(
     Number(sqlite.pragma("foreign_keys", { simple: true })),
   );
 
-  // Cleanup any stale attached DB from prior failed attempts.
   try {
     detachImportedIfAttached(sqlite);
   } catch (error) {
@@ -129,28 +288,20 @@ function restoreImportedDb(tempDbPath: string): void {
     sqlite.pragma("foreign_keys = OFF");
 
     const restoreTransaction = sqlite.transaction(() => {
-      sqlite.exec("DELETE FROM job_applications");
-      sqlite.exec("DELETE FROM companies");
+      clearMainSplitTables(sqlite);
 
-      for (const tableName of REQUIRED_TABLES) {
-        const targetColumns = getTableColumns(sqlite, "main", tableName);
-        const sourceColumns = getTableColumns(sqlite, "imported", tableName);
-        const sharedColumns = targetColumns.filter((column) =>
-          sourceColumns.includes(column),
-        );
-
-        if (sharedColumns.length === 0) {
-          throw new Error(
-            `No compatible columns found for table: ${tableName}`,
-          );
+      if (importedSchema === "split") {
+        for (const tableName of SPLIT_TABLES) {
+          copySharedColumnsBetweenTables(sqlite, tableName);
         }
-
-        const columnList = sharedColumns.map(quoteIdentifier).join(", ");
-        sqlite.exec(
-          `INSERT INTO ${quoteIdentifier(tableName)} (${columnList}) ` +
-            `SELECT ${columnList} FROM imported.${quoteIdentifier(tableName)}`,
-        );
+        return;
       }
+
+      if (!supportsLegacyBackupImport()) {
+        throw new Error(LEGACY_BACKUP_BLOCK_MESSAGE);
+      }
+
+      convertLegacyImportToSplit(sqlite);
     });
 
     restoreTransaction();
@@ -175,6 +326,28 @@ function restoreImportedDb(tempDbPath: string): void {
 
   if (restoreError) {
     throw restoreError;
+  }
+}
+
+function pruneExportDbToSplitTables(tempDbPath: string): void {
+  const exportDb = new Database(tempDbPath);
+
+  try {
+    const tableSet = getUserTableNames(exportDb, "main");
+
+    if (!hasAllTables(tableSet, SPLIT_TABLES)) {
+      throw new Error("Current database is missing split-schema tables");
+    }
+
+    const tablesToDrop = [...tableSet].filter(
+      (tableName) => !SPLIT_TABLES.includes(tableName as (typeof SPLIT_TABLES)[number]),
+    );
+
+    for (const tableName of tablesToDrop) {
+      exportDb.exec(`DROP TABLE IF EXISTS ${quoteIdentifier(tableName)}`);
+    }
+  } finally {
+    exportDb.close();
   }
 }
 
@@ -213,23 +386,20 @@ export async function exportResumeDataBackup(
   }
 
   const normalizedDestinationPath = destinationPath.trim();
-
   if (!normalizedDestinationPath) {
     return { success: false, error: "Invalid destination path" };
   }
 
   const resolvedDestinationPath = ensureZipExtension(normalizedDestinationPath);
-
   const tempDir = await mkdtemp(join(tmpdir(), "kairos-backup-"));
   const tempDbPath = join(tempDir, "kairos.db");
 
   try {
     const sqlite = getSqlite();
-
     await sqlite.backup(tempDbPath);
+    pruneExportDbToSplitTables(tempDbPath);
 
     const dbBuffer = await readFile(tempDbPath);
-
     const manifest: BackupManifest = {
       backupFormatVersion: BACKUP_FORMAT_VERSION,
       appVersion: app.getVersion(),
@@ -304,6 +474,12 @@ export async function importResumeDataBackup(
       );
     }
 
+    if (manifest.dbSchemaVersion > DB_SCHEMA_VERSION) {
+      throw new Error(
+        `Unsupported backup schema version: ${manifest.dbSchemaVersion}`,
+      );
+    }
+
     const dbManifest = manifest.files.find(
       (file) => file.path === DB_ENTRY_PATH,
     );
@@ -327,9 +503,13 @@ export async function importResumeDataBackup(
     }
 
     await writeFile(tempDbPath, dbBuffer);
-    validateImportedDbFile(tempDbPath);
 
-    restoreImportedDb(tempDbPath);
+    const importedSchema = validateImportedDbFile(tempDbPath);
+    if (importedSchema === "legacy" && !supportsLegacyBackupImport()) {
+      throw new Error(LEGACY_BACKUP_BLOCK_MESSAGE);
+    }
+
+    restoreImportedDb(tempDbPath, importedSchema);
 
     return { success: true };
   } catch (error) {
