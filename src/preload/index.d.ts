@@ -4,7 +4,6 @@ type ProviderType = import("../shared/providers").ProviderType;
 type BackupExportResult = import("../shared/backup").BackupExportResult;
 type BackupImportResult = import("../shared/backup").BackupImportResult;
 type UpdateState = import("../shared/updater").UpdateState;
-type OllamaPullProgress = import("../shared/ollama").OllamaPullProgress;
 type JobsCreateFromExistingPayload =
   import("../shared/type/jobs-ipc").JobsCreateFromExistingPayload;
 type JobsCreatePayload = import("../shared/type/jobs-ipc").JobsCreatePayload;
@@ -102,24 +101,6 @@ interface KairosAPI {
   provider: {
     getActive: () => Promise<ProviderType>;
     setActive: (provider: ProviderType) => Promise<void>;
-  };
-  ollama: {
-    isRunning: () => Promise<boolean>;
-    getVersion: () => Promise<string | null>;
-    getInstalledModels: () => Promise<ModelInfo[]>;
-    getCuratedModels: () => Promise<ModelInfo[]>;
-    pullModel: (
-      modelName: string,
-    ) => Promise<{ success: boolean; error?: string }>;
-    cancelPull: () => Promise<void>;
-    getBaseUrl: () => Promise<string>;
-    setBaseUrl: (url: string) => Promise<void>;
-    onPullProgress: (
-      callback: (data: {
-        modelName: string;
-        progress: OllamaPullProgress;
-      }) => void,
-    ) => () => void;
   };
   theme: {
     get: () => Promise<ThemeSource>;

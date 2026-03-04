@@ -14,12 +14,6 @@ interface SettingsSchema {
       selectedModel: string | null;
       cachedModels: string[];
     };
-    ollama: {
-      // No apiKey - Ollama runs locally
-      baseUrl: string;
-      selectedModel: string | null;
-      cachedModels: string[];
-    };
     xai: {
       apiKey: string | null;
       selectedModel: string | null;
@@ -39,7 +33,6 @@ interface SettingsSchema {
   activeProvider:
     | "openai"
     | "deepseek"
-    | "ollama"
     | "xai"
     | "gemini"
     | "anthropic";
@@ -60,11 +53,6 @@ export class SettingsService {
           },
           deepseek: {
             apiKey: null,
-            selectedModel: null,
-            cachedModels: [],
-          },
-          ollama: {
-            baseUrl: "http://localhost:11434",
             selectedModel: null,
             cachedModels: [],
           },
@@ -161,31 +149,6 @@ export class SettingsService {
 
   setDeepSeekCachedModels(models: string[]): void {
     this.store.set("aiProviders.deepseek.cachedModels", models);
-  }
-
-  // Ollama methods (no API key - runs locally)
-  getOllamaBaseUrl(): string {
-    return this.store.get("aiProviders.ollama.baseUrl");
-  }
-
-  setOllamaBaseUrl(url: string): void {
-    this.store.set("aiProviders.ollama.baseUrl", url);
-  }
-
-  getOllamaSelectedModel(): string | null {
-    return this.store.get("aiProviders.ollama.selectedModel");
-  }
-
-  setOllamaSelectedModel(model: string): void {
-    this.store.set("aiProviders.ollama.selectedModel", model);
-  }
-
-  getOllamaCachedModels(): string[] {
-    return this.store.get("aiProviders.ollama.cachedModels");
-  }
-
-  setOllamaCachedModels(models: string[]): void {
-    this.store.set("aiProviders.ollama.cachedModels", models);
   }
 
   // xAI methods
@@ -291,7 +254,6 @@ export class SettingsService {
   getActiveProvider():
     | "openai"
     | "deepseek"
-    | "ollama"
     | "xai"
     | "gemini"
     | "anthropic" {
@@ -299,7 +261,7 @@ export class SettingsService {
   }
 
   setActiveProvider(
-    provider: "openai" | "deepseek" | "ollama" | "xai" | "gemini" | "anthropic",
+    provider: "openai" | "deepseek" | "xai" | "gemini" | "anthropic",
   ): void {
     this.store.set("activeProvider", provider);
   }
@@ -317,10 +279,6 @@ export class SettingsService {
         return this.hasGeminiKey();
       case "anthropic":
         return this.hasAnthropicKey();
-      case "ollama":
-        // Ollama runs locally - renderer checks if server is running
-        // Return true here, let renderer handle detailed check
-        return true;
     }
   }
 
@@ -345,7 +303,6 @@ export class SettingsService {
     // Reset all selected models
     this.store.set("aiProviders.openai.selectedModel", null);
     this.store.set("aiProviders.deepseek.selectedModel", null);
-    this.store.set("aiProviders.ollama.selectedModel", null);
     this.store.set("aiProviders.xai.selectedModel", null);
     this.store.set("aiProviders.gemini.selectedModel", null);
     this.store.set("aiProviders.anthropic.selectedModel", null);
@@ -353,13 +310,9 @@ export class SettingsService {
     // Reset cached models
     this.store.set("aiProviders.openai.cachedModels", []);
     this.store.set("aiProviders.deepseek.cachedModels", []);
-    this.store.set("aiProviders.ollama.cachedModels", []);
     this.store.set("aiProviders.xai.cachedModels", []);
     this.store.set("aiProviders.gemini.cachedModels", []);
     this.store.set("aiProviders.anthropic.cachedModels", []);
-
-    // Reset Ollama to default
-    this.store.set("aiProviders.ollama.baseUrl", "http://localhost:11434");
 
     // Reset active provider to default
     this.store.set("activeProvider", "openai");

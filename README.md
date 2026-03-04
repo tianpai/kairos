@@ -43,7 +43,6 @@ Bring your own API key:
 - Google Gemini
 - DeepSeek
 - xAI Grok
-- Ollama (local models)
 
 More providers will be supported once the app is stable in v1.0.0.
 

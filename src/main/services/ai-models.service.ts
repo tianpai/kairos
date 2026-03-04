@@ -39,15 +39,6 @@ const ANTHROPIC_FALLBACK_MODELS: ModelInfo[] = [
   { id: "claude-opus-4-5-20251101", name: "Claude Opus 4.5" },
 ];
 
-// Ollama curated models (known good for structured output)
-const OLLAMA_CURATED_MODELS: ModelInfo[] = [
-  { id: "llama3.2:3b", name: "Llama 3.2 3B (Recommended)" },
-  { id: "llama3.1:8b", name: "Llama 3.1 8B" },
-  { id: "qwen2.5:7b", name: "Qwen 2.5 7B" },
-  { id: "mistral:7b", name: "Mistral 7B" },
-  { id: "gemma2:9b", name: "Gemma 2 9B" },
-];
-
 // Filter patterns for chat models (exclude embeddings, tts, whisper, dall-e, etc.)
 const OPENAI_CHAT_MODEL_PATTERNS = [
   /^gpt-4/,
@@ -244,10 +235,6 @@ export async function fetchAnthropicModels(
   }
 }
 
-export function getOllamaCuratedModels(): ModelInfo[] {
-  return OLLAMA_CURATED_MODELS;
-}
-
 export function getFallbackModels(provider: ProviderType): ModelInfo[] {
   switch (provider) {
     case "openai":
@@ -258,8 +245,6 @@ export function getFallbackModels(provider: ProviderType): ModelInfo[] {
       return XAI_FALLBACK_MODELS.map((id) => ({ id, name: id }));
     case "gemini":
       return GEMINI_FALLBACK_MODELS.map((id) => ({ id, name: id }));
-    case "ollama":
-      return OLLAMA_CURATED_MODELS;
     case "anthropic":
       return ANTHROPIC_FALLBACK_MODELS;
     default:
@@ -277,8 +262,6 @@ export function getDefaultModel(provider: ProviderType): string {
       return "grok-3-fast";
     case "gemini":
       return "gemini-2.5-flash";
-    case "ollama":
-      return "llama3.2:3b";
     case "anthropic":
       return "claude-haiku-4-5-20251001";
     default:

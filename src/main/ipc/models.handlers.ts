@@ -9,7 +9,6 @@ import {
   getDefaultModel,
   getFallbackModels,
 } from "../services/ai-models.service";
-import { getInstalledCuratedModels } from "../services/ollama.service";
 import type { ProviderType } from "../../shared/providers";
 import type { SettingsService } from "../config/settings.service";
 
@@ -51,10 +50,6 @@ export function registerModelHandlers({
         }
         models = await fetchGeminiModels(apiKey);
         settingsService.setGeminiCachedModels(models.map((m) => m.id));
-      } else if (provider === "ollama") {
-        // Ollama returns intersection of installed and curated models
-        models = await getInstalledCuratedModels();
-        settingsService.setOllamaCachedModels(models.map((m) => m.id));
       } else if (provider === "anthropic") {
         const apiKey = settingsService.getAnthropicKey();
         if (!apiKey) {
@@ -81,8 +76,6 @@ export function registerModelHandlers({
       return settingsService.getXAICachedModels();
     } else if (provider === "gemini") {
       return settingsService.getGeminiCachedModels();
-    } else if (provider === "ollama") {
-      return settingsService.getOllamaCachedModels();
     } else if (provider === "anthropic") {
       return settingsService.getAnthropicCachedModels();
     }
@@ -98,8 +91,6 @@ export function registerModelHandlers({
       return settingsService.getXAISelectedModel();
     } else if (provider === "gemini") {
       return settingsService.getGeminiSelectedModel();
-    } else if (provider === "ollama") {
-      return settingsService.getOllamaSelectedModel();
     } else if (provider === "anthropic") {
       return settingsService.getAnthropicSelectedModel();
     }
@@ -127,10 +118,6 @@ export function registerModelHandlers({
         const previous = settingsService.getGeminiSelectedModel();
         settingsService.setGeminiSelectedModel(model);
         log.info(`Gemini model changed: ${previous ?? "default"} -> ${model}`);
-      } else if (provider === "ollama") {
-        const previous = settingsService.getOllamaSelectedModel();
-        settingsService.setOllamaSelectedModel(model);
-        log.info(`Ollama model changed: ${previous ?? "default"} -> ${model}`);
       } else if (provider === "anthropic") {
         const previous = settingsService.getAnthropicSelectedModel();
         settingsService.setAnthropicSelectedModel(model);
@@ -142,13 +129,6 @@ export function registerModelHandlers({
   );
 
   ipcMain.handle("models:getDefault", async (_, provider: ProviderType) => {
-    // For Ollama, return first installed model instead of hardcoded default
-    if (provider === "ollama") {
-      const installed = await getInstalledCuratedModels();
-      if (installed.length > 0) {
-        return installed[0].id;
-      }
-    }
     return getDefaultModel(provider);
   });
 }

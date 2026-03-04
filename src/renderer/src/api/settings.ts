@@ -1,12 +1,9 @@
 import type { ProviderType } from '../../../shared/providers'
-import type { OllamaPullProgress } from '../../../shared/ollama'
 
 export interface ModelInfo {
   id: string
   name: string
 }
-
-type ApiKeyProvider = Exclude<ProviderType, 'ollama'>
 
 type ApiKeyOps = {
   has: () => Promise<boolean>
@@ -15,7 +12,7 @@ type ApiKeyOps = {
   delete: () => Promise<void>
 }
 
-const apiKeyOperations: Record<ApiKeyProvider, ApiKeyOps> = {
+const apiKeyOperations: Record<ProviderType, ApiKeyOps> = {
   openai: {
     has: () => window.kairos.settings.hasApiKey(),
     get: () => window.kairos.settings.getApiKey(),
@@ -48,24 +45,24 @@ const apiKeyOperations: Record<ApiKeyProvider, ApiKeyOps> = {
   },
 }
 
-export function hasProviderApiKey(provider: ApiKeyProvider): Promise<boolean> {
+export function hasProviderApiKey(provider: ProviderType): Promise<boolean> {
   return apiKeyOperations[provider].has()
 }
 
 export function getProviderApiKey(
-  provider: ApiKeyProvider,
+  provider: ProviderType,
 ): Promise<string | null> {
   return apiKeyOperations[provider].get()
 }
 
 export function setProviderApiKey(
-  provider: ApiKeyProvider,
+  provider: ProviderType,
   key: string,
 ): Promise<void> {
   return apiKeyOperations[provider].set(key)
 }
 
-export function deleteProviderApiKey(provider: ApiKeyProvider): Promise<void> {
+export function deleteProviderApiKey(provider: ProviderType): Promise<void> {
   return apiKeyOperations[provider].delete()
 }
 
@@ -102,44 +99,3 @@ export function setActiveProvider(provider: ProviderType): Promise<void> {
   return window.kairos.provider.setActive(provider)
 }
 
-export function getOllamaStatus(): Promise<{
-  running: boolean
-  version: string | null
-}> {
-  return Promise.all([
-    window.kairos.ollama.isRunning(),
-    window.kairos.ollama.getVersion(),
-  ]).then(([running, version]) => ({ running, version }))
-}
-
-export function getOllamaInstalledModels(): Promise<ModelInfo[]> {
-  return window.kairos.ollama.getInstalledModels()
-}
-
-export function getOllamaCuratedModels(): Promise<ModelInfo[]> {
-  return window.kairos.ollama.getCuratedModels()
-}
-
-export function pullOllamaModel(
-  modelName: string,
-): Promise<{ success: boolean; error?: string }> {
-  return window.kairos.ollama.pullModel(modelName)
-}
-
-export function cancelOllamaPull(): Promise<void> {
-  return window.kairos.ollama.cancelPull()
-}
-
-export function getOllamaBaseUrl(): Promise<string> {
-  return window.kairos.ollama.getBaseUrl()
-}
-
-export function setOllamaBaseUrl(url: string): Promise<void> {
-  return window.kairos.ollama.setBaseUrl(url)
-}
-
-export function onOllamaPullProgress(
-  callback: (data: { modelName: string; progress: OllamaPullProgress }) => void,
-): () => void {
-  return window.kairos.ollama.onPullProgress(callback)
-}

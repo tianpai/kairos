@@ -1,29 +1,20 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
-  cancelOllamaPull,
   deleteProviderApiKey,
   fetchModels,
   getActiveProvider,
   getDefaultModel,
-  getOllamaBaseUrl,
-  getOllamaCuratedModels,
-  getOllamaInstalledModels,
-  getOllamaStatus,
   getProviderApiKey,
   getSelectedModel,
   hasProviderApiKey,
-  pullOllamaModel,
   setActiveProvider,
-  setOllamaBaseUrl,
   setProviderApiKey,
   setSelectedModel,
 } from '@api/settings'
 import type { ProviderType } from '../../../shared/providers'
 
-type ApiKeyProvider = Exclude<ProviderType, 'ollama'>
-
 function useHasProviderApiKey(
-  provider: ApiKeyProvider,
+  provider: ProviderType,
   queryKeySuffix: string,
 ) {
   return useQuery({
@@ -32,14 +23,14 @@ function useHasProviderApiKey(
   })
 }
 
-function useProviderApiKey(provider: ApiKeyProvider, queryKeySuffix: string) {
+function useProviderApiKey(provider: ProviderType, queryKeySuffix: string) {
   return useQuery({
     queryKey: ['settings', queryKeySuffix],
     queryFn: () => getProviderApiKey(provider),
   })
 }
 
-function useSetProviderApiKey(provider: ApiKeyProvider) {
+function useSetProviderApiKey(provider: ProviderType) {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: (key: string) => setProviderApiKey(provider, key),
@@ -49,7 +40,7 @@ function useSetProviderApiKey(provider: ApiKeyProvider) {
   })
 }
 
-function useDeleteProviderApiKey(provider: ApiKeyProvider) {
+function useDeleteProviderApiKey(provider: ProviderType) {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: () => deleteProviderApiKey(provider),
@@ -204,59 +195,3 @@ export function useSetActiveProvider() {
   })
 }
 
-// Ollama status hooks
-export function useOllamaStatus() {
-  return useQuery({
-    queryKey: ['ollama', 'status'],
-    queryFn: getOllamaStatus,
-    refetchInterval: 10000, // Re-check every 10s
-  })
-}
-
-export function useOllamaInstalledModels() {
-  return useQuery({
-    queryKey: ['ollama', 'installedModels'],
-    queryFn: getOllamaInstalledModels,
-  })
-}
-
-export function useOllamaCuratedModels() {
-  return useQuery({
-    queryKey: ['ollama', 'curatedModels'],
-    queryFn: getOllamaCuratedModels,
-  })
-}
-
-export function useOllamaPullModel() {
-  const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn: (modelName: string) => pullOllamaModel(modelName),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['ollama', 'installedModels'] })
-      queryClient.invalidateQueries({ queryKey: ['models', 'ollama'] })
-    },
-  })
-}
-
-export function useOllamaCancelPull() {
-  return useMutation({
-    mutationFn: cancelOllamaPull,
-  })
-}
-
-export function useOllamaBaseUrl() {
-  return useQuery({
-    queryKey: ['ollama', 'baseUrl'],
-    queryFn: getOllamaBaseUrl,
-  })
-}
-
-export function useSetOllamaBaseUrl() {
-  const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn: (url: string) => setOllamaBaseUrl(url),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['ollama'] })
-    },
-  })
-}
