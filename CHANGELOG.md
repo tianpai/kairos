@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.2.5](https://github.com/tianpai/kairos/compare/v0.2.4...v0.2.5) (2026-03-04)
+
+
+### Features
+
+* remove Ollama local model support ([2fc5ed7](https://github.com/tianpai/kairos/commit/2fc5ed7c3b2b1ef8f2e2c6f3b5349910dca233a5))
+
+
+### Bug Fixes
+
+* open GitHub links in your default browser ([96dda58](https://github.com/tianpai/kairos/commit/96dda58b2deb07addffc1ca17a0104d9adc71671))
+* remove empty workflow menu and shortcut actions ([74803c4](https://github.com/tianpai/kairos/commit/74803c4e662b9925dccbbe1b9c73835dff81d4df))
+
 ### [0.2.4](https://github.com/tianpai/kairos/compare/v0.2.3...v0.2.4) (2026-03-02)
 
 
