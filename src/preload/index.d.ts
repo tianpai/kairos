@@ -169,7 +169,6 @@ interface KairosAPI {
     getState: () => Promise<UpdateState>;
     getVersion: () => Promise<string>;
     isPackaged: () => Promise<boolean>;
-    openReleasesPage: () => Promise<void>;
     download: () => Promise<void>;
     quitAndInstall: () => Promise<void>;
   };

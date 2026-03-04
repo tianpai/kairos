@@ -21,7 +21,3 @@ export function downloadUpdate(): Promise<void> {
 export function quitAndInstallUpdate(): Promise<void> {
   return window.kairos.updater.quitAndInstall()
 }
-
-export function openUpdaterReleasesPage(): Promise<void> {
-  return window.kairos.updater.openReleasesPage()
-}

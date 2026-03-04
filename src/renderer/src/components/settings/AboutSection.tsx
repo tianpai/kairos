@@ -13,7 +13,6 @@ import {
   downloadUpdate,
   getUpdaterState,
   isUpdaterPackaged,
-  openUpdaterReleasesPage,
   quitAndInstallUpdate,
 } from '@api/updater'
 import type { UpdateState } from '@api/updater'
@@ -39,6 +38,7 @@ function GitHubIcon({ size = 24 }: { size?: number }) {
 }
 
 const GITHUB_URL = 'https://github.com/tianpai/kairos'
+const RELEASES_URL = `${GITHUB_URL}/releases/latest`
 
 interface ChangelogEntry {
   version: string
@@ -195,8 +195,12 @@ export function AboutSection() {
     void quitAndInstallUpdate()
   }
 
+  const openExternalUrl = (url: string) => {
+    void window.kairos.shell.openExternal(url)
+  }
+
   const openReleasesPage = () => {
-    void openUpdaterReleasesPage()
+    openExternalUrl(RELEASES_URL)
   }
 
   return (
@@ -314,6 +318,10 @@ export function AboutSection() {
           href={GITHUB_URL}
           target="_blank"
           rel="noopener noreferrer"
+          onClick={(event) => {
+            event.preventDefault()
+            openExternalUrl(GITHUB_URL)
+          }}
           className="text-secondary hover:text-primary inline-flex items-center gap-2 text-sm"
         >
           <GitHubIcon size={14} />
