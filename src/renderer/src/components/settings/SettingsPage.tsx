@@ -1,14 +1,14 @@
 import { useNavigate, useSearch } from '@tanstack/react-router'
 import { PageHeader } from '@ui/PageHeader'
 import { AppLayout } from '@layout/AppLayout'
-import { AllApplicationBtn } from '../ui/BtnBack'
 import { SettingsSidebar } from './SettingsSidebar'
 import { ProvidersSection } from './ProvidersSection'
 import { GeneralSection } from './general'
 import { AboutSection } from './AboutSection'
 import type { SettingsSection } from './SettingsSidebar'
+import { ApplicationsButton } from '@/components/applications/ApplicationsButton'
 
-const validSections: Array<SettingsSection> = ['general', 'providers', 'about']
+const validSections: SettingsSection[] = ['general', 'providers', 'about']
 
 export default function SettingsPage() {
   const navigate = useNavigate()
@@ -29,7 +29,10 @@ export default function SettingsPage() {
   return (
     <AppLayout
       header={
-        <PageHeader left={<AllApplicationBtn />} center={<div>Settings</div>} />
+        <PageHeader
+          left={<ApplicationsButton />}
+          center={<div>Settings</div>}
+        />
       }
       sidebar={
         <SettingsSidebar

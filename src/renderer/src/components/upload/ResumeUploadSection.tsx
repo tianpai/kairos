@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { CircleX, UploadCloud } from 'lucide-react'
 import { useUpload } from './useUpload'
+import type { WorkflowResumeFile } from '@type/workflow-ipc'
 import { INPUT_BASE } from '@/components/resumeForm/fieldStyles'
 
 interface FileDropzoneProps {
@@ -49,7 +50,9 @@ function FileDropzone({
     <div
       {...dropzoneProps}
       className={`mt-2 flex cursor-pointer items-center gap-2 rounded-md border border-dashed px-3 py-2 text-sm transition ${
-        isDragActive ? 'border-hint bg-hover' : 'border-default hover:border-hint'
+        isDragActive
+          ? 'border-hint bg-hover'
+          : 'border-default hover:border-hint'
       }`}
     >
       <UploadCloud className="text-hint h-4 w-4" />
@@ -61,37 +64,35 @@ function FileDropzone({
 }
 
 export interface ResumeUploadSectionProps {
-  rawResumeContent: string | null
-  onRawResumeContentChange: (content: string | null) => void
+  resumeFile: WorkflowResumeFile | null
+  onResumeFileChange: (file: WorkflowResumeFile | null) => void
 }
 
 export default function ResumeUploadSection({
-  rawResumeContent,
-  onRawResumeContentChange,
+  resumeFile,
+  onResumeFileChange,
 }: ResumeUploadSectionProps) {
-  const fileUpload = useUpload({ purpose: 'resume' })
+  const fileUpload = useUpload({
+    purpose: 'resume',
+    onFile: onResumeFileChange,
+  })
   const hasFile = Boolean(fileUpload.fileName)
-  const prevRawResumeContentRef = useRef<string | null>(null)
+  const prevResumeFileRef = useRef<WorkflowResumeFile | null>(null)
   const {
     clear,
     error,
     fileName,
     inputProps,
     isDragActive,
-    text,
     triggerFileDialog,
   } = fileUpload
 
   useEffect(() => {
-    if (prevRawResumeContentRef.current !== null && rawResumeContent === null) {
+    if (prevResumeFileRef.current !== null && resumeFile === null) {
       clear()
     }
-    prevRawResumeContentRef.current = rawResumeContent
-  }, [clear, rawResumeContent])
-
-  useEffect(() => {
-    onRawResumeContentChange(text)
-  }, [onRawResumeContentChange, text])
+    prevResumeFileRef.current = resumeFile
+  }, [clear, resumeFile])
 
   return (
     <section className="flex min-w-0 flex-col">
@@ -112,8 +113,8 @@ export default function ResumeUploadSection({
       )}
 
       {error && <p className="text-error mt-2 text-xs">{error}</p>}
-      {fileUpload.isProcessing && !text && (
-        <p className="text-hint mt-2 text-xs">Extracting text...</p>
+      {fileUpload.isProcessing && (
+        <p className="text-hint mt-2 text-xs">Reading file...</p>
       )}
     </section>
   )

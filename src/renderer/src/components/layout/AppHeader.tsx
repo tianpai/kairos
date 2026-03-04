@@ -34,7 +34,7 @@ export function AppHeader({
           <Button
             onClick={() => navigate({ to: '/applications' })}
             ariaLabel="All applications"
-            title="All applications"
+            tooltip="All applications"
           >
             <GalleryVerticalEnd size={16} />
           </Button>
@@ -67,7 +67,7 @@ export function AppHeader({
                 ariaLabel={
                   showChecklist ? 'Switch to 2 columns' : 'Switch to 3 columns'
                 }
-                title="Toggle columns"
+                tooltip="Toggle columns"
               >
                 {showChecklist ? (
                   <Columns2 size={16} />

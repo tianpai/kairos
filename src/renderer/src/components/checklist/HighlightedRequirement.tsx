@@ -3,7 +3,7 @@ import type { ChecklistRequirement } from '@type/checklist'
 interface HighlightedRequirementProps {
   text: string
   keywords: ChecklistRequirement['keywords']
-  selectedKeywords: Array<string>
+  selectedKeywords: string[]
   onToggleKeyword: (keyword: string) => void
 }
 

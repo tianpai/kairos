@@ -17,11 +17,11 @@ export function StatusBadge({ status }: StatusBadgeProps) {
   return (
     <motion.div
       {...fade}
-      className={`absolute right-2 bottom-2 flex items-center gap-1 ${config.color}`}
+      className={`absolute right-2 bottom-2 ${config.color}`}
       style={{ opacity: 0.8 }}
+      aria-label={config.label}
     >
-      <Icon size={10} />
-      <span className="text-[10px] font-medium">{config.label}</span>
+      <Icon size={12} />
     </motion.div>
   )
 }

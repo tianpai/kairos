@@ -42,7 +42,7 @@ export function useSectionManager() {
     const overId = over.id as string
 
     // Check if dragged item was in available or current
-    const wasAvailable = (availableSections as ReadonlyArray<string>).includes(
+    const wasAvailable = (availableSections as readonly string[]).includes(
       draggedId,
     )
     const wasInCurrent = config.sections.some((s) => s.id === draggedId)

@@ -1,73 +1,20 @@
-import type { Checklist } from '@type/checklist'
-import type { TaskName } from '../workflow'
-import type { WorkflowStatus, WorkflowStepsData } from '@type/workflow'
+import type {
+  JobApplication,
+  JobApplicationDetails,
+  JobsCreateFromExistingPayload,
+  JobsCreatePayload,
+  JobsCreateResult,
+  JobsListQuery,
+  JobsPatchPayload,
+} from '@type/jobs-ipc'
+import type { IpcSuccessResponse } from '@type/ipc'
 
-// Failed tasks map: task name -> ISO timestamp when it failed
-export type FailedTasksMap = Partial<Record<TaskName, string>>
+export type CreateJobApplicationPayload = JobsCreatePayload
+export type CreateFromExistingPayload = JobsCreateFromExistingPayload
+export type CreateJobApplicationResponse = JobsCreateResult
+export type { JobApplication, JobApplicationDetails } from '@type/jobs-ipc'
 
-export interface CreateJobApplicationResponse {
-  id: string
-}
-
-export interface JobApplicationInput {
-  rawResumeContent: string
-  jobDescription: string
-  companyName: string
-  position: string
-  dueDate: string
-  jobUrl?: string
-}
-
-export interface CreateJobApplicationPayload extends JobApplicationInput {
-  templateId: string
-}
-
-export interface CreateFromExistingPayload {
-  sourceJobId: string
-  companyName: string
-  position: string
-  dueDate: string
-  jobDescription: string
-  jobUrl?: string
-  templateId: string
-}
-
-export interface JobApplication {
-  id: string
-  companyName: string
-  position: string
-  dueDate: string
-  matchPercentage: number
-  applicationStatus: string | null
-  jobUrl: string | null
-  originalResume: string
-  pinned: number
-  pinnedAt: string | null
-  createdAt: string
-  updatedAt: string
-}
-
-export interface JobApplicationDetails extends JobApplication {
-  templateId: string
-  jobDescription: string | null
-  parsedResume: Record<string, unknown> | null
-  tailoredResume: Record<string, unknown> | null
-  checklist: Checklist | null
-  workflowStatus: WorkflowStatus | null
-  workflowSteps: WorkflowStepsData | null
-  failedTasks: FailedTasksMap
-}
-
-export interface GeneralAPIResponse {
-  success: boolean
-}
-
-export interface UpdateJobApplicationPayload {
-  companyName: string
-  position: string
-  dueDate: string
-  jobUrl?: string | null
-}
+export type PatchJobApplicationPayload = JobsPatchPayload
 
 // CRUD operations
 
@@ -83,63 +30,33 @@ export function createFromExisting(
   return window.kairos.jobs.createFromExisting(payload)
 }
 
-export async function getAllJobApplications(): Promise<Array<JobApplication>> {
-  return window.kairos.jobs.getAll() as Promise<Array<JobApplication>>
-}
-
-export async function getArchivedJobApplications(): Promise<Array<JobApplication>> {
-  return window.kairos.jobs.getArchived() as Promise<Array<JobApplication>>
+export async function listJobApplications(
+  query: JobsListQuery = {},
+): Promise<JobApplication[]> {
+  return window.kairos.jobs.list(query)
 }
 
 export async function getJobApplication(
   id: string,
 ): Promise<JobApplicationDetails> {
-  return window.kairos.jobs.get(id) as Promise<JobApplicationDetails>
-}
-
-export async function updateJobApplication(
-  id: string,
-  payload: UpdateJobApplicationPayload,
-): Promise<void> {
-  await window.kairos.jobs.update(id, payload)
+  return window.kairos.jobs.get(id)
 }
 
 export async function deleteJobApplication(id: string): Promise<void> {
   await window.kairos.jobs.delete(id)
 }
 
+export function patchJobApplication(
+  id: string,
+  payload: PatchJobApplicationPayload,
+): Promise<IpcSuccessResponse> {
+  return window.kairos.jobs.patch(id, payload)
+}
+
 export async function saveResume(
   jobId: string,
   resumeStructure: Record<string, unknown>,
   templateId: string,
-): Promise<GeneralAPIResponse> {
+): Promise<IpcSuccessResponse> {
   return window.kairos.jobs.saveResume(jobId, { resumeStructure, templateId })
-}
-
-export function updateJobDescription(
-  jobId: string,
-  jobDescription: string,
-): Promise<GeneralAPIResponse> {
-  return window.kairos.jobs.updateJobDescription(jobId, { jobDescription })
-}
-
-export function togglePin(
-  id: string,
-  pinned: boolean,
-): Promise<GeneralAPIResponse> {
-  return window.kairos.jobs.togglePin(id, { pinned })
-}
-
-export function toggleArchive(
-  id: string,
-  archived: boolean,
-): Promise<GeneralAPIResponse> {
-  return window.kairos.jobs.toggleArchive(id, { archived })
-}
-
-export function updateStatus(
-  id: string,
-  status: string | null,
-): Promise<GeneralAPIResponse> {
-  return window.kairos.jobs.updateStatus(id, { status })
 }

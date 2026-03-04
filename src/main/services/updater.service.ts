@@ -1,4 +1,4 @@
-import { app, shell } from "electron";
+import { app } from "electron";
 import { autoUpdater } from "electron-updater";
 import log from "electron-log/main";
 import type { UpdateInfo } from "electron-updater";
@@ -91,12 +91,6 @@ class UpdaterService {
       this.currentState = { status: "error", error: message };
       return this.currentState;
     }
-  }
-
-  async openReleasesPage(): Promise<void> {
-    const url = "https://github.com/tianpai/kairos/releases/latest";
-    log.info(`[Updater] Opening releases page: ${url}`);
-    await shell.openExternal(url);
   }
 
   async downloadUpdate(): Promise<void> {

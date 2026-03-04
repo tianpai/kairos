@@ -49,7 +49,7 @@ export class SkillsSection implements Section<Skill> {
     return UI_SCHEMA
   }
 
-  generateContent(data: Array<Skill>): string {
+  generateContent(data: Skill[]): string {
     if (data.length === 0) return ''
 
     const content = data

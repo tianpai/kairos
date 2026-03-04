@@ -57,7 +57,7 @@ function quoteString(value: string): string {
 }
 
 function isDatabaseAttached(db: Database.Database, name: string): boolean {
-  const databases = db.pragma("database_list") as Array<{ name: string }>;
+  const databases = db.pragma("database_list") as { name: string }[];
   return databases.some((entry) => entry.name === name);
 }
 
@@ -70,10 +70,10 @@ function getTableColumns(
   db: Database.Database,
   databaseName: "main" | "imported",
   tableName: string,
-): Array<string> {
+): string[] {
   const rows = db
     .prepare(`PRAGMA ${databaseName}.table_info(${quoteIdentifier(tableName)})`)
-    .all() as Array<{ name: string }>;
+    .all() as { name: string }[];
   return rows.map((row) => row.name);
 }
 
@@ -96,7 +96,7 @@ function validateImportedDbFile(tempDbPath: string): void {
       .prepare(
         "SELECT name FROM sqlite_master WHERE type = 'table' AND name IN (?, ?)",
       )
-      .all("companies", "job_applications") as Array<{ name: string }>;
+      .all("companies", "job_applications") as { name: string }[];
 
     const tableSet = new Set(rows.map((row) => row.name));
     for (const tableName of REQUIRED_TABLES) {

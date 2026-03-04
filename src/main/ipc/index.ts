@@ -7,7 +7,6 @@ import { registerFsHandlers } from "./fs.handlers";
 import { registerAIServerHandlers } from "./ai-server.handlers";
 import { registerUpdaterHandlers } from "./updater.handlers";
 import { registerSettingsHandlers } from "./settings.handlers";
-import { registerOllamaHandlers } from "./ollama.handlers";
 import { registerModelHandlers } from "./models.handlers";
 import { registerProviderHandlers } from "./provider.handlers";
 import { registerThemeHandlers } from "./theme.handlers";
@@ -30,7 +29,6 @@ export function registerAllHandlers(deps: IpcDependencies): void {
   registerAIServerHandlers();
   registerUpdaterHandlers();
   registerSettingsHandlers(deps);
-  registerOllamaHandlers(deps);
   registerModelHandlers(deps);
   registerProviderHandlers(deps);
   registerThemeHandlers(deps);

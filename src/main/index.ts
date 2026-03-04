@@ -1,5 +1,5 @@
 import { join } from "node:path";
-import { BrowserWindow, app, nativeTheme } from "electron";
+import { BrowserWindow, app, nativeTheme, shell } from "electron";
 import log from "electron-log/main";
 import { SettingsService } from "./config/settings.service";
 import { registerAllHandlers } from "./ipc";
@@ -16,6 +16,27 @@ log.initialize();
 log.transports.file.level = "info";
 
 let mainWindow: BrowserWindow | null = null;
+
+function canNavigateInApp(url: string): boolean {
+  if (!mainWindow) return false;
+  try {
+    const target = new URL(url);
+    const current = new URL(mainWindow.webContents.getURL());
+    return target.origin === current.origin;
+  } catch {
+    return false;
+  }
+}
+
+function shouldOpenExternally(url: string): boolean {
+  if (canNavigateInApp(url)) return false;
+  try {
+    const protocol = new URL(url).protocol;
+    return protocol === "http:" || protocol === "https:";
+  } catch {
+    return false;
+  }
+}
 
 // Settings service singleton
 export const settingsService = new SettingsService();
@@ -64,12 +85,28 @@ async function createWindow() {
     await mainWindow.loadFile(join(__dirname, "../renderer/index.html"));
   }
 
+  // Keep external links in the user's default browser.
+  mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+    if (shouldOpenExternally(url)) {
+      void shell.openExternal(url);
+      return { action: "deny" };
+    }
+    return { action: "allow" };
+  });
+
+  mainWindow.webContents.on("will-navigate", (event, url) => {
+    if (shouldOpenExternally(url)) {
+      event.preventDefault();
+      void shell.openExternal(url);
+    }
+  });
+
   mainWindow.on("closed", () => {
     mainWindow = null;
   });
 
-  // Create app menu with keyboard shortcuts
-  createAppMenu(mainWindow);
+  // Create app menu
+  createAppMenu();
 }
 
 app.whenReady().then(async () => {

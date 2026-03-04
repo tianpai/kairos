@@ -99,7 +99,7 @@ export class TemplateBuilder {
    * Generate content for all sections in config order
    */
   private generateContent(data: TemplateData): string {
-    const contentParts: Array<string> = []
+    const contentParts: string[] = []
 
     for (const sectionConfig of this.config.sections) {
       const section = this.sections.get(sectionConfig.id)
@@ -152,7 +152,7 @@ export class TemplateBuilder {
   /**
    * Get all UI schemas (for dynamic form generation)
    */
-  getUISchemas(): Array<ReturnType<Section['getUISchema']>> {
+  getUISchemas(): ReturnType<Section['getUISchema']>[] {
     return Array.from(this.sections.values()).map((section) =>
       section.getUISchema(),
     )

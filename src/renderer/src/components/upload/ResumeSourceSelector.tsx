@@ -1,11 +1,11 @@
-export type ResumeSource = 'upload' | 'existing'
+import type { ResumeSource } from './newApplication.store'
 
 interface ResumeSourceSelectorProps {
   value: ResumeSource
   onChange: (source: ResumeSource) => void
 }
 
-const options: Array<{ value: ResumeSource; label: string }> = [
+const options: { value: ResumeSource; label: string }[] = [
   { value: 'upload', label: 'Upload resume' },
   { value: 'existing', label: 'Use existing' },
 ]

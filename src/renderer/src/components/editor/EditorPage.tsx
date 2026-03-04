@@ -1,7 +1,6 @@
 import { useSearch } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { getJobApplication } from '@api/jobs'
-import { useWorkflowSync } from '@hooks/useWorkflowSync'
 import { useSyncJobApplicationToStore } from '@hooks/useSyncJobApplicationToStore'
 import ResumeRender from '@editor/ResumeRender'
 import ResumeForm from '@resumeForm/ResumeForm'
@@ -30,9 +29,6 @@ export default function EditorPage() {
     },
     enabled: !!jobId,
   })
-
-  // Sync workflow state between DB and store
-  useWorkflowSync(jobId, jobApplication)
 
   // Sync job application data to store (templateId + tailored resume)
   useSyncJobApplicationToStore(jobApplication)

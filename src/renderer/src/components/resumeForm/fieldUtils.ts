@@ -4,6 +4,6 @@ export function asString(value: FieldValue): string {
   return typeof value === 'string' ? value : ''
 }
 
-export function asStringArray(value: FieldValue): Array<string> {
+export function asStringArray(value: FieldValue): string[] {
   return Array.isArray(value) ? value : []
 }

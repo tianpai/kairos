@@ -33,7 +33,7 @@ export class SummarySection implements Section<Summary> {
     return UI_SCHEMA
   }
 
-  generateContent(data: Array<Summary>): string {
+  generateContent(data: Summary[]): string {
     if (data.length === 0 || !data[0].content) return ''
 
     const content = escapeTypstMarkup(data[0].content)

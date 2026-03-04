@@ -12,7 +12,7 @@ export function BtnToggleChecklist({
     <Button
       onClick={action}
       ariaLabel={condition ? 'Switch to 2 columns' : 'Switch to 3 columns'}
-      title="Toggle columns"
+      tooltip="Toggle columns"
     >
       {condition ? <Columns2 size={16} /> : <Columns3 size={16} />}
     </Button>

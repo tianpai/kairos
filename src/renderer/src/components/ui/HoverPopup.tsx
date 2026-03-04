@@ -5,7 +5,10 @@ import { cn } from '@/utils/cn'
 
 type Position = 'top' | 'bottom' | 'left' | 'right'
 
-const positionAnimations: Record<Position, { initial: object; animate: object }> = {
+const positionAnimations: Record<
+  Position,
+  { initial: object; animate: object }
+> = {
   top: { initial: { opacity: 0, y: 4 }, animate: { opacity: 1, y: 0 } },
   bottom: { initial: { opacity: 0, y: -4 }, animate: { opacity: 1, y: 0 } },
   left: { initial: { opacity: 0, x: 4 }, animate: { opacity: 1, x: 0 } },

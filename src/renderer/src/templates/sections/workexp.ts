@@ -57,7 +57,7 @@ export class WorkExperienceSection implements Section<WorkExperience> {
     return UI_SCHEMA
   }
 
-  generateContent(data: Array<WorkExperience>): string {
+  generateContent(data: WorkExperience[]): string {
     if (data.length === 0) return ''
 
     const content = data

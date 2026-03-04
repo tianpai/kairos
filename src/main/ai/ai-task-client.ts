@@ -46,9 +46,6 @@ export class AITaskClient {
 
     let apiKey: string | null = null;
     switch (provider) {
-      case "ollama":
-        apiKey = "ollama";
-        break;
       case "deepseek":
         apiKey = this.settingsService.getDeepSeekKey();
         break;
@@ -87,8 +84,6 @@ export class AITaskClient {
         return this.settingsService.getXAISelectedModel();
       case "gemini":
         return this.settingsService.getGeminiSelectedModel();
-      case "ollama":
-        return this.settingsService.getOllamaSelectedModel();
       case "anthropic":
         return this.settingsService.getAnthropicSelectedModel();
       default:

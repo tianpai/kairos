@@ -40,8 +40,13 @@ export function Surface({
       ? '0 15px 40px -8px rgba(0,0,0,0.3)'
       : '0 0 0 0 rgba(0,0,0,0)'
 
+  const springTransition = isExpanded
+    ? { type: 'spring' as const, damping: 23, stiffness: 305, mass: 0.7 }
+    : { type: 'spring' as const, damping: 25, stiffness: 305, mass: 0.7 }
+
   return (
     <motion.div
+      initial={false}
       ref={cardRef}
       role="button"
       tabIndex={0}
@@ -60,9 +65,7 @@ export function Surface({
       }}
       whileHover={!isExpanded ? { scale: 1.03 } : {}}
       transition={{
-        type: 'spring',
-        damping: 20,
-        stiffness: 300,
+        ...springTransition,
         scale: { type: 'tween', duration: 0.15 },
       }}
       className={`border-default bg-surface absolute cursor-pointer rounded-2xl border p-3 will-change-transform focus:outline-none ${isExpanded ? 'z-20' : 'z-10'}`}

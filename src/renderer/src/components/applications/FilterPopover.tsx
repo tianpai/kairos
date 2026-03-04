@@ -74,7 +74,7 @@ export function FilterPopover({
       </button>
 
       {isOpen && (
-        <div className="border-default bg-surface absolute right-0 top-full z-50 mt-1 flex w-48 flex-col rounded-lg border py-1 shadow-lg">
+        <div className="border-default bg-surface absolute top-full right-0 z-50 mt-1 flex w-48 flex-col rounded-lg border py-1 shadow-lg">
           {/* Hide overdue */}
           <button
             onClick={(e) => {

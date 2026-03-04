@@ -34,9 +34,7 @@ export function escapeTypstMarkup(value: unknown): string {
     .replace(/\r?\n/g, ' ')
 }
 
-export function formatBulletList(
-  items: Array<string | undefined | null>,
-): string {
+export function formatBulletList(items: (string | undefined | null)[]): string {
   const filtered = items
     .map((item) => escapeTypstMarkup(item))
     .filter((item) => item.length > 0)
@@ -47,9 +45,7 @@ export function formatBulletList(
   return filtered.map((item) => `- ${item}`).join('\n')
 }
 
-export function formatSkillItems(
-  items: Array<string | undefined | null>,
-): string {
+export function formatSkillItems(items: (string | undefined | null)[]): string {
   return items
     .map((item) => escapeTypstMarkup(item))
     .filter((item) => item.length > 0)

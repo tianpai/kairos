@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useState } from 'react'
 import { Download } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@ui/Button'
@@ -8,26 +8,18 @@ import {
   useExportModal,
 } from './ExportModal'
 import type { ExportTarget } from './ExportModal'
-import { useShortcutStore } from '@/components/layout/shortcut.store'
 
 interface ExportButtonProps {
   showArchived?: boolean
-  targets?: Array<ExportTarget>
-  useExportShortcut?: boolean
+  targets?: ExportTarget[]
 }
 
 export function ExportButton({
   showArchived = false,
   targets,
-  useExportShortcut = false,
 }: ExportButtonProps) {
   const { open } = useExportModal()
   const [exporting, setExporting] = useState(false)
-
-  const exportPdfRequested = useShortcutStore((state) => state.exportPdfRequested)
-  const clearExportPdfRequest = useShortcutStore(
-    (state) => state.clearExportPdfRequest,
-  )
 
   const handleExport = useCallback(async () => {
     const hasTargets = !!targets?.length
@@ -44,25 +36,13 @@ export function ExportButton({
       }
     } catch (error) {
       console.error('Failed to export PDF', error)
-      toast.error(targets.length > 1 ? 'Failed to export PDFs' : 'Failed to export PDF')
+      toast.error(
+        targets.length > 1 ? 'Failed to export PDFs' : 'Failed to export PDF',
+      )
     } finally {
       setExporting(false)
     }
   }, [open, showArchived, targets])
-
-  useEffect(() => {
-    if (!exportPdfRequested) return
-
-    if (useExportShortcut) {
-      void handleExport()
-    }
-    clearExportPdfRequest()
-  }, [
-    exportPdfRequested,
-    useExportShortcut,
-    handleExport,
-    clearExportPdfRequest,
-  ])
 
   const targetCount = targets?.length ?? 0
   const ariaLabel =
@@ -73,7 +53,7 @@ export function ExportButton({
       onClick={() => void handleExport()}
       loading={exporting}
       ariaLabel={ariaLabel}
-      title="Export"
+      tooltip="Export"
     >
       <Download size={16} />
     </Button>

@@ -1,7 +1,7 @@
 import { cn } from '@/utils/cn'
 
 interface DiscreteSliderProps {
-  values: Array<number>
+  values: number[]
   currentValue: number
   onChange: (value: number) => void
   label?: string

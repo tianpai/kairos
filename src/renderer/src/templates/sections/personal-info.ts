@@ -96,7 +96,7 @@ export class PersonalInfoSection implements Section<PersonalInfo> {
     }
   }
 
-  generateContent(data: Array<PersonalInfo>): string {
+  generateContent(data: PersonalInfo[]): string {
     if (data.length === 0) return ''
     const info = data[0]
 

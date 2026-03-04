@@ -57,7 +57,7 @@ export class ProjectsSection implements Section<Project> {
     return UI_SCHEMA
   }
 
-  generateContent(data: Array<Project>): string {
+  generateContent(data: Project[]): string {
     if (data.length === 0) return ''
 
     const content = data

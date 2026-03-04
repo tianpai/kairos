@@ -12,7 +12,7 @@ import type { TaskName } from "@type/task-contracts";
 
 /** Task step in a workflow - defines prerequisites */
 export interface WorkflowStep {
-  after: ReadonlyArray<TaskName>;
+  after: readonly TaskName[];
 }
 
 /**
@@ -88,8 +88,8 @@ export function getAllWorkflows(): ReadonlyMap<string, Workflow> {
 /**
  * Get entry tasks (no prerequisites)
  */
-export function getEntryTasks(workflow: Workflow): Array<TaskName> {
-  const entryTasks: Array<TaskName> = [];
+export function getEntryTasks(workflow: Workflow): TaskName[] {
+  const entryTasks: TaskName[] = [];
 
   for (const [taskName, prerequisites] of workflow.tasks) {
     if (prerequisites.size === 0) {
@@ -123,8 +123,8 @@ export function arePrerequisitesSatisfied(
 /**
  * Validate workflow DAG (no cycles, all references valid)
  */
-export function validateWorkflow(workflow: Workflow): Array<string> {
-  const errors: Array<string> = [];
+export function validateWorkflow(workflow: Workflow): string[] {
+  const errors: string[] = [];
   const taskNames = new Set(workflow.tasks.keys());
 
   // Check that all prerequisites exist

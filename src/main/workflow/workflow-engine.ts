@@ -84,7 +84,7 @@ export class WorkflowEngine {
   /**
    * Retry failed tasks in a workflow
    */
-  async retryFailedTasks(jobId: string): Promise<Array<TaskName>> {
+  async retryFailedTasks(jobId: string): Promise<TaskName[]> {
     const workflowInstance = this.store.getWorkflow(jobId);
 
     if (!workflowInstance) {
@@ -101,7 +101,7 @@ export class WorkflowEngine {
     }
 
     // Find failed tasks
-    const failedTasks: Array<TaskName> = [];
+    const failedTasks: TaskName[] = [];
     const resetTaskStates: TaskStateMap = { ...workflowInstance.taskStates };
 
     for (const [taskName, status] of Object.entries(
@@ -355,7 +355,7 @@ export class WorkflowEngine {
     }
 
     // Find ready tasks
-    const readyTasks: Array<TaskName> = [];
+    const readyTasks: TaskName[] = [];
     const completedTasks = new Set<TaskName>();
 
     for (const [name, status] of Object.entries(workflowInstance.taskStates)) {

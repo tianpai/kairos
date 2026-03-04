@@ -3,9 +3,11 @@ import log from "electron-log/main";
 import { onWorkflowEvent } from "../workflow/workflow-events";
 import { guardedHandle as handle } from "./guarded-handler";
 import type {
+  WorkflowCreateApplicationsPayload,
   WorkflowGetStatePayload,
   WorkflowRetryPayload,
   WorkflowStartPayload,
+  WorkflowStartTailoringPayload,
 } from "@type/workflow-ipc";
 import type { WorkflowService } from "../workflow/workflow.service";
 
@@ -43,6 +45,19 @@ export function registerWorkflowHandlers(
   });
 
   handle(
+    "workflow:startTailoring",
+    async (_event, payload: WorkflowStartTailoringPayload) => {
+      try {
+        await workflowService.startTailoringFromJob(payload);
+        return { success: true };
+      } catch (error) {
+        log.error("workflow:startTailoring failed", error);
+        throw error;
+      }
+    },
+  );
+
+  handle(
     "workflow:getState",
     async (_event, payload: WorkflowGetStatePayload) => {
       try {
@@ -50,6 +65,18 @@ export function registerWorkflowHandlers(
         return { workflow };
       } catch (error) {
         log.error("workflow:getState failed", error);
+        throw error;
+      }
+    },
+  );
+
+  handle(
+    "workflow:createApplications",
+    async (_event, payload: WorkflowCreateApplicationsPayload) => {
+      try {
+        return await workflowService.createApplications(payload);
+      } catch (error) {
+        log.error("workflow:createApplications failed", error);
         throw error;
       }
     },

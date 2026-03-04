@@ -40,7 +40,6 @@ export default defineConfig({
       '@templates/': `${__dirname}/src/templates/`,
       '@typst-compiler/': `${__dirname}/src/typst-compiler/`,
       '@utils/': `${__dirname}/src/utils/`,
-      '@workflow/': `${__dirname}/src/workflow/`,
       '@sidebar/': `${__dirname}/src/components/sidebar/`,
       '@layout/': `${__dirname}/src/components/layout/`,
       '@root': rootDir,

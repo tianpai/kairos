@@ -57,7 +57,7 @@ export function registerJobInfoExtractingTask({
       // (currently skipped as there's no placeholder for dates)
 
       if (Object.keys(updates).length > 0) {
-        await jobService.updateJobApplication(jobId, updates);
+        await jobService.patchJobApplication(jobId, updates);
       }
     },
   });

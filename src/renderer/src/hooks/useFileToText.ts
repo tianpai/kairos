@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useRef, useState } from 'react'
 
 export interface FileToTextPolicy {
-  acceptedExtensions: Array<string>
+  acceptedExtensions: string[]
   maxSizeKB?: number
   toText: (file: File) => Promise<string>
 }

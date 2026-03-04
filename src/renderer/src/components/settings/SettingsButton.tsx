@@ -14,7 +14,7 @@ export function SettingsButton() {
         })
       }
       ariaLabel="Settings"
-      title="Settings"
+      tooltip="Settings"
     >
       <Settings2 size={16} />
     </Button>

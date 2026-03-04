@@ -57,7 +57,7 @@ export class EducationSection implements Section<Education> {
     return UI_SCHEMA
   }
 
-  generateContent(data: Array<Education>): string {
+  generateContent(data: Education[]): string {
     if (data.length === 0) return ''
 
     const content = data

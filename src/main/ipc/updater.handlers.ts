@@ -19,10 +19,6 @@ export function registerUpdaterHandlers(): void {
     return updaterService.isPackaged();
   });
 
-  ipcMain.handle("updater:openReleasesPage", async (): Promise<void> => {
-    await updaterService.openReleasesPage();
-  });
-
   ipcMain.handle("updater:download", async (): Promise<void> => {
     await updaterService.downloadUpdate();
   });

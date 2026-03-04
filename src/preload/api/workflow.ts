@@ -2,9 +2,12 @@ import { ipcRenderer } from "electron";
 import type {
   WorkflowAiPartial,
   WorkflowCompleted,
+  WorkflowCreateApplicationsPayload,
+  WorkflowCreateApplicationsResult,
   WorkflowGetStatePayload,
   WorkflowRetryPayload,
   WorkflowStartPayload,
+  WorkflowStartTailoringPayload,
   WorkflowStateChanged,
   WorkflowTaskCompleted,
   WorkflowTaskFailed,
@@ -16,10 +19,18 @@ type Unsubscribe = () => void;
 export const workflow = {
   start: (payload: WorkflowStartPayload): Promise<{ success: boolean }> =>
     ipcRenderer.invoke("workflow:start", payload),
+  startTailoring: (
+    payload: WorkflowStartTailoringPayload,
+  ): Promise<{ success: boolean }> =>
+    ipcRenderer.invoke("workflow:startTailoring", payload),
   retry: (
     payload: WorkflowRetryPayload,
-  ): Promise<{ success: boolean; failedTasks: Array<string> }> =>
+  ): Promise<{ success: boolean; failedTasks: string[] }> =>
     ipcRenderer.invoke("workflow:retry", payload),
+  createApplications: (
+    payload: WorkflowCreateApplicationsPayload,
+  ): Promise<WorkflowCreateApplicationsResult> =>
+    ipcRenderer.invoke("workflow:createApplications", payload),
   getState: (
     payload: WorkflowGetStatePayload,
   ): Promise<{ workflow: WorkflowStepsData | null }> =>

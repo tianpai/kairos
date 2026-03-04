@@ -4,11 +4,7 @@ import { create } from 'zustand'
 import { toast } from 'sonner'
 import { Modal } from '@ui/Modal'
 import { Toggle } from '@ui/Toggle'
-import {
-  getAllJobApplications,
-  getArchivedJobApplications,
-  getJobApplication,
-} from '@api/jobs'
+import { getJobApplication, listJobApplications } from '@api/jobs'
 import { compileToPDF } from '@typst-compiler/compile'
 import { formatDate } from '@utils/format'
 import type { JobApplication } from '@api/jobs'
@@ -24,7 +20,7 @@ export interface ExportTarget {
 export interface ExportSummary {
   total: number
   succeeded: number
-  failed: Array<string>
+  failed: string[]
 }
 
 interface ApplicationListItemProps {
@@ -35,7 +31,7 @@ interface ApplicationListItemProps {
 }
 
 interface ApplicationListProps {
-  applications: Array<JobApplication>
+  applications: JobApplication[]
   selectedIds: Set<string>
   onToggle: (id: string) => void
   disabled?: boolean
@@ -50,7 +46,7 @@ interface ExportActionsProps {
 
 interface ExportContentProps {
   exporting: boolean
-  applications: Array<JobApplication>
+  applications: JobApplication[]
   allSelected: boolean
   selectedIds: Set<string>
   onToggleSelectAll: () => void
@@ -175,10 +171,10 @@ async function exportApplication(
 }
 
 export async function exportApplicationsToFolder(
-  targets: Array<ExportTarget>,
+  targets: ExportTarget[],
   folderPath: string,
 ): Promise<ExportSummary> {
-  const failedExports: Array<string> = []
+  const failedExports: string[] = []
 
   for (const target of targets) {
     const failure = await exportApplication(target, folderPath)
@@ -214,7 +210,7 @@ export function showExportToast(summary: ExportSummary): void {
 }
 
 export async function exportWithDestinationPicker(
-  targets: Array<ExportTarget>,
+  targets: ExportTarget[],
 ): Promise<ExportSummary | null> {
   if (targets.length === 0) return null
 
@@ -352,8 +348,8 @@ export function ExportModal() {
   const showArchived = useExportStore((state) => state.showArchived)
 
   const { data: applications = [] } = useQuery({
-    queryKey: showArchived ? ['archivedJobApplications'] : ['jobApplications'],
-    queryFn: showArchived ? getArchivedJobApplications : getAllJobApplications,
+    queryKey: ['jobApplications', { archived: showArchived }],
+    queryFn: () => listJobApplications({ archived: showArchived }),
     enabled: isOpen,
   })
 

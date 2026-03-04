@@ -4,15 +4,21 @@ import { companies, jobApplications } from "../db/schema";
 import type * as schema from "../db/schema";
 import type { BetterSQLite3Database } from "drizzle-orm/better-sqlite3";
 import type {
+  JobApplication,
+  JobApplicationDetails,
+  JobsCreateResult,
+} from "@type/jobs-ipc";
+import type { IpcSuccessResponse } from "@type/ipc";
+import type {
   CreateFromExistingInput,
   CreateJobApplicationInput,
+  ListJobsInput,
+  PatchJobApplicationInput,
   SaveChecklistInput,
   SaveParsedResumeInput,
   SaveResumeInput,
   SaveTailoredResumeInput,
   SaveWorkflowStateInput,
-  UpdateJobApplicationInput,
-  UpdateJobDescriptionInput,
 } from "../schemas/job-application.schemas";
 
 type Database = BetterSQLite3Database<typeof schema>;
@@ -61,9 +67,29 @@ export class JobApplicationService {
     };
   }
 
+  private toListItem(row: {
+    job_applications: typeof jobApplications.$inferSelect;
+    companies: typeof companies.$inferSelect;
+  }): JobApplication {
+    return {
+      id: row.job_applications.id,
+      companyName: row.companies.name,
+      position: row.job_applications.position,
+      dueDate: row.job_applications.dueDate.split("T")[0],
+      matchPercentage: row.job_applications.matchPercentage,
+      applicationStatus: row.job_applications.applicationStatus,
+      jobUrl: row.job_applications.jobUrl,
+      originalResume: row.job_applications.originalResume,
+      pinned: row.job_applications.pinned,
+      pinnedAt: row.job_applications.pinnedAt,
+      createdAt: row.job_applications.createdAt,
+      updatedAt: row.job_applications.updatedAt,
+    };
+  }
+
   async createJobApplication(
     dto: CreateJobApplicationInput,
-  ): Promise<{ id: string }> {
+  ): Promise<JobsCreateResult> {
     const jobId = randomUUID();
     const company = this.getOrCreateCompany(dto.companyName);
     const now = nowISO();
@@ -90,7 +116,7 @@ export class JobApplicationService {
 
   async createFromExisting(
     dto: CreateFromExistingInput,
-  ): Promise<{ id: string }> {
+  ): Promise<JobsCreateResult> {
     const sourceJob = this.requireJobApplication(dto.sourceJobId);
     const jobId = randomUUID();
     const company = this.getOrCreateCompany(dto.companyName);
@@ -118,118 +144,30 @@ export class JobApplicationService {
     return { id: jobId };
   }
 
-  async getAllJobApplications(): Promise<
-    Array<{
-      id: string;
-      companyName: string;
-      position: string;
-      dueDate: string;
-      matchPercentage: number;
-      applicationStatus: string | null;
-      jobUrl: string | null;
-      originalResume: string;
-      pinned: number;
-      pinnedAt: string | null;
-      createdAt: string;
-      updatedAt: string;
-    }>
-  > {
+  async listJobApplications(
+    query: ListJobsInput = {},
+  ): Promise<JobApplication[]> {
+    const archived = query.archived ?? false;
     const results = this.db
       .select()
       .from(jobApplications)
       .innerJoin(companies, eq(jobApplications.companyId, companies.id))
-      .where(eq(jobApplications.archived, 0))
+      .where(eq(jobApplications.archived, archived ? 1 : 0))
       .orderBy(desc(jobApplications.createdAt))
       .all();
 
-    return results.map((row) => ({
-      id: row.job_applications.id,
-      companyName: row.companies.name,
-      position: row.job_applications.position,
-      dueDate: row.job_applications.dueDate.split("T")[0],
-      matchPercentage: row.job_applications.matchPercentage,
-      applicationStatus: row.job_applications.applicationStatus,
-      jobUrl: row.job_applications.jobUrl,
-      originalResume: row.job_applications.originalResume,
-      pinned: row.job_applications.pinned,
-      pinnedAt: row.job_applications.pinnedAt,
-      createdAt: row.job_applications.createdAt,
-      updatedAt: row.job_applications.updatedAt,
-    }));
+    return results.map((row) => this.toListItem(row));
   }
 
-  async getArchivedJobApplications(): Promise<
-    Array<{
-      id: string;
-      companyName: string;
-      position: string;
-      dueDate: string;
-      matchPercentage: number;
-      applicationStatus: string | null;
-      jobUrl: string | null;
-      originalResume: string;
-      pinned: number;
-      pinnedAt: string | null;
-      createdAt: string;
-      updatedAt: string;
-    }>
-  > {
-    const results = this.db
-      .select()
-      .from(jobApplications)
-      .innerJoin(companies, eq(jobApplications.companyId, companies.id))
-      .where(eq(jobApplications.archived, 1))
-      .orderBy(desc(jobApplications.createdAt))
-      .all();
-
-    return results.map((row) => ({
-      id: row.job_applications.id,
-      companyName: row.companies.name,
-      position: row.job_applications.position,
-      dueDate: row.job_applications.dueDate.split("T")[0],
-      matchPercentage: row.job_applications.matchPercentage,
-      applicationStatus: row.job_applications.applicationStatus,
-      jobUrl: row.job_applications.jobUrl,
-      originalResume: row.job_applications.originalResume,
-      pinned: row.job_applications.pinned,
-      pinnedAt: row.job_applications.pinnedAt,
-      createdAt: row.job_applications.createdAt,
-      updatedAt: row.job_applications.updatedAt,
-    }));
-  }
-
-  async getJobApplication(id: string): Promise<{
-    id: string;
-    companyName: string;
-    position: string;
-    dueDate: string;
-    matchPercentage: number;
-    applicationStatus: string | null;
-    jobUrl: string | null;
-    createdAt: string;
-    updatedAt: string;
-    templateId: string;
-    jobDescription: string | null;
-    parsedResume: Record<string, unknown> | null;
-    tailoredResume: Record<string, unknown> | null;
-    originalResume: string;
-    checklist: Record<string, unknown> | null;
-    workflowStatus: string | null;
-    workflowSteps: Record<string, unknown> | null;
-    failedTasks: Record<string, unknown>;
-  }> {
+  async getJobApplication(id: string): Promise<JobApplicationDetails> {
     const job = this.requireJobApplication(id);
 
-    const workflowSteps = job.workflowSteps;
-    const failedTasks: Record<string, unknown> = {};
+    const workflowSteps =
+      job.workflowSteps as JobApplicationDetails["workflowSteps"];
+    const failedTasks: JobApplicationDetails["failedTasks"] = {};
 
-    if (
-      workflowSteps &&
-      typeof workflowSteps === "object" &&
-      "taskStates" in workflowSteps
-    ) {
-      const taskStates = workflowSteps.taskStates as Record<string, unknown>;
-      Object.entries(taskStates).forEach(([task, status]) => {
+    if (workflowSteps?.taskStates) {
+      Object.entries(workflowSteps.taskStates).forEach(([task, status]) => {
         if (status === "failed") {
           failedTasks[task] = { status: "failed" };
         }
@@ -244,6 +182,8 @@ export class JobApplicationService {
       matchPercentage: job.matchPercentage,
       applicationStatus: job.applicationStatus,
       jobUrl: job.jobUrl,
+      pinned: job.pinned,
+      pinnedAt: job.pinnedAt,
       createdAt: job.createdAt,
       updatedAt: job.updatedAt,
       templateId: job.templateId,
@@ -251,20 +191,21 @@ export class JobApplicationService {
       parsedResume: job.parsedResume,
       tailoredResume: job.tailoredResume,
       originalResume: job.originalResume,
-      checklist: job.checklist,
-      workflowStatus: job.workflowStatus,
+      checklist: job.checklist as JobApplicationDetails["checklist"],
+      workflowStatus:
+        job.workflowStatus as JobApplicationDetails["workflowStatus"],
       workflowSteps: workflowSteps,
       failedTasks,
     };
   }
 
-  async deleteJobApplication(id: string): Promise<{ success: boolean }> {
+  async deleteJobApplication(id: string): Promise<IpcSuccessResponse> {
     this.requireJobApplication(id);
     this.db.delete(jobApplications).where(eq(jobApplications.id, id)).run();
     return { success: true };
   }
 
-  deleteAllJobApplications(): { success: boolean } {
+  deleteAllJobApplications(): IpcSuccessResponse {
     // Delete in order: jobApplications first (has FK to companies), then companies
     this.db.transaction((tx) => {
       tx.delete(jobApplications).run();
@@ -273,74 +214,10 @@ export class JobApplicationService {
     return { success: true };
   }
 
-  async updateJobApplication(
-    id: string,
-    dto: UpdateJobApplicationInput,
-  ): Promise<{
-    id: string;
-    companyName: string;
-    position: string;
-    dueDate: string;
-    matchPercentage: number;
-  }> {
-    const job = this.requireJobApplication(id);
-    let companyId = job.companyId;
-    let companyName = job.company.name;
-
-    if (dto.companyName && dto.companyName !== job.company.name) {
-      const company = this.getOrCreateCompany(dto.companyName);
-      companyId = company.id;
-      companyName = company.name;
-    }
-
-    const updateData: Partial<{
-      companyId: number;
-      position: string;
-      dueDate: string;
-      jobUrl: string | null;
-      updatedAt: string;
-    }> = {
-      updatedAt: nowISO(),
-    };
-
-    if (dto.companyName) {
-      updateData.companyId = companyId;
-    }
-    if (dto.position) {
-      updateData.position = dto.position;
-    }
-    if (dto.dueDate) {
-      updateData.dueDate = dto.dueDate;
-    }
-    if (dto.jobUrl !== undefined) {
-      updateData.jobUrl = dto.jobUrl;
-    }
-
-    this.db
-      .update(jobApplications)
-      .set(updateData)
-      .where(eq(jobApplications.id, id))
-      .run();
-
-    const updated = this.db
-      .select()
-      .from(jobApplications)
-      .where(eq(jobApplications.id, id))
-      .get()!;
-
-    return {
-      id: updated.id,
-      companyName,
-      position: updated.position,
-      dueDate: updated.dueDate.split("T")[0],
-      matchPercentage: updated.matchPercentage,
-    };
-  }
-
   async saveResume(
     jobId: string,
     dto: SaveResumeInput,
-  ): Promise<{ success: boolean }> {
+  ): Promise<IpcSuccessResponse> {
     this.db
       .update(jobApplications)
       .set({
@@ -356,7 +233,7 @@ export class JobApplicationService {
   async saveParsedResume(
     jobId: string,
     dto: SaveParsedResumeInput,
-  ): Promise<{ success: boolean }> {
+  ): Promise<IpcSuccessResponse> {
     this.db
       .update(jobApplications)
       .set({
@@ -372,7 +249,7 @@ export class JobApplicationService {
   async saveTailoredResume(
     jobId: string,
     dto: SaveTailoredResumeInput,
-  ): Promise<{ success: boolean }> {
+  ): Promise<IpcSuccessResponse> {
     this.db
       .update(jobApplications)
       .set({
@@ -387,7 +264,7 @@ export class JobApplicationService {
   async saveChecklist(
     jobId: string,
     dto: SaveChecklistInput,
-  ): Promise<{ success: boolean }> {
+  ): Promise<IpcSuccessResponse> {
     this.db
       .update(jobApplications)
       .set({
@@ -402,7 +279,7 @@ export class JobApplicationService {
   async saveMatchScore(
     jobId: string,
     matchPercentage: number,
-  ): Promise<{ success: boolean }> {
+  ): Promise<IpcSuccessResponse> {
     this.db
       .update(jobApplications)
       .set({
@@ -417,7 +294,7 @@ export class JobApplicationService {
   async saveWorkflowState(
     jobId: string,
     dto: SaveWorkflowStateInput,
-  ): Promise<{ success: boolean }> {
+  ): Promise<IpcSuccessResponse> {
     const updateData: Partial<{
       workflowSteps: Record<string, unknown> | null;
       workflowStatus: string | null;
@@ -441,71 +318,64 @@ export class JobApplicationService {
     return { success: true };
   }
 
-  async updateJobDescription(
+  async patchJobApplication(
     jobId: string,
-    dto: UpdateJobDescriptionInput,
-  ): Promise<{ success: boolean }> {
-    this.db
-      .update(jobApplications)
-      .set({
-        jobDescription: dto.jobDescription,
-        updatedAt: nowISO(),
-      })
-      .where(eq(jobApplications.id, jobId))
-      .run();
-    return { success: true };
-  }
+    dto: PatchJobApplicationInput,
+  ): Promise<IpcSuccessResponse> {
+    const current = this.requireJobApplication(jobId);
+    const updateData: Partial<{
+      companyId: number;
+      position: string;
+      dueDate: string;
+      jobUrl: string | null;
+      jobDescription: string | null;
+      pinned: number;
+      pinnedAt: string | null;
+      archived: number;
+      applicationStatus: string | null;
+      statusUpdatedAt: string | null;
+      updatedAt: string;
+    }> = {
+      updatedAt: nowISO(),
+    };
 
-  async togglePin(
-    jobId: string,
-    pinned: boolean,
-  ): Promise<{ success: boolean }> {
-    this.requireJobApplication(jobId);
-
-    this.db
-      .update(jobApplications)
-      .set({
-        pinned: pinned ? 1 : 0,
-        pinnedAt: pinned ? nowISO() : null,
-        updatedAt: nowISO(),
-      })
-      .where(eq(jobApplications.id, jobId))
-      .run();
-    return { success: true };
-  }
-
-  async toggleArchive(
-    jobId: string,
-    archived: boolean,
-  ): Promise<{ success: boolean }> {
-    this.requireJobApplication(jobId);
-
-    this.db
-      .update(jobApplications)
-      .set({
-        archived: archived ? 1 : 0,
-        updatedAt: nowISO(),
-      })
-      .where(eq(jobApplications.id, jobId))
-      .run();
-    return { success: true };
-  }
-
-  async updateStatus(
-    jobId: string,
-    status: string | null,
-  ): Promise<{ success: boolean }> {
-    this.requireJobApplication(jobId);
+    if (
+      dto.companyName !== undefined &&
+      dto.companyName !== current.company.name
+    ) {
+      const company = this.getOrCreateCompany(dto.companyName);
+      updateData.companyId = company.id;
+    }
+    if (dto.position !== undefined) {
+      updateData.position = dto.position;
+    }
+    if (dto.dueDate !== undefined) {
+      updateData.dueDate = dto.dueDate;
+    }
+    if (dto.jobUrl !== undefined) {
+      updateData.jobUrl = dto.jobUrl;
+    }
+    if (dto.jobDescription !== undefined) {
+      updateData.jobDescription = dto.jobDescription;
+    }
+    if (dto.pinned !== undefined) {
+      updateData.pinned = dto.pinned ? 1 : 0;
+      updateData.pinnedAt = dto.pinned ? nowISO() : null;
+    }
+    if (dto.archived !== undefined) {
+      updateData.archived = dto.archived ? 1 : 0;
+    }
+    if (dto.applicationStatus !== undefined) {
+      updateData.applicationStatus = dto.applicationStatus;
+      updateData.statusUpdatedAt = dto.applicationStatus ? nowISO() : null;
+    }
 
     this.db
       .update(jobApplications)
-      .set({
-        applicationStatus: status,
-        statusUpdatedAt: status ? nowISO() : null,
-        updatedAt: nowISO(),
-      })
+      .set(updateData)
       .where(eq(jobApplications.id, jobId))
       .run();
+
     return { success: true };
   }
 }

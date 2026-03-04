@@ -1,11 +1,10 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { ShieldCheck, Star, Users } from 'lucide-react'
 import { getJobApplication } from '@api/jobs'
-import { useSelectedKeywords } from '@hooks/useSelectedKeywords'
 import { ChecklistSection } from '@checklist/ChecklistSection'
-import { Button } from '@ui/Button'
-import { Tooltip } from '@ui/Tooltip'
+import { IconTooltipButton } from '@ui/IconTooltipButton'
+import { useSelectedKeywordsStore } from './selectedKeywords.store'
 import type { Checklist } from '@type/checklist'
 import type { LucideIcon } from 'lucide-react'
 
@@ -13,7 +12,7 @@ interface ChecklistProps {
   jobId: string | undefined
 }
 
-const tabs: Array<{ key: TabType; label: string; icon: LucideIcon }> = [
+const tabs: { key: TabType; label: string; icon: LucideIcon }[] = [
   { key: 'hard', label: 'Must Have', icon: ShieldCheck },
   { key: 'soft', label: 'Soft Skills', icon: Users },
   { key: 'preferred', label: 'Preferred', icon: Star },
@@ -28,9 +27,12 @@ type ChecklistTabsProps = {
 }
 
 type ChecklistContentProps = {
+  jobId: string
   checklist: Checklist
   activeTab: TabType
 }
+
+const EMPTY_KEYWORDS: string[] = []
 
 function ChecklistTabs({ checklist, activeTab, onChange }: ChecklistTabsProps) {
   const requirementsByTab: Record<TabType, Checklist['hardRequirements']> = {
@@ -46,27 +48,34 @@ function ChecklistTabs({ checklist, activeTab, onChange }: ChecklistTabsProps) {
   return (
     <div className="bg-app-header flex flex-wrap justify-center gap-1 p-2">
       {visibleTabs.map((tab) => {
-        const Icon = tab.icon
         return (
-          <Tooltip key={tab.key} content={tab.label}>
-            <Button
-              variant="icon"
-              active={activeTab === tab.key}
-              onClick={() => onChange(tab.key)}
-            >
-              <Icon size={16} />
-            </Button>
-          </Tooltip>
+          <IconTooltipButton
+            key={tab.key}
+            icon={tab.icon}
+            label={tab.label}
+            active={activeTab === tab.key}
+            onClick={() => onChange(tab.key)}
+          />
         )
       })}
     </div>
   )
 }
 
-function ChecklistContent({ checklist, activeTab }: ChecklistContentProps) {
-  const { selectedKeywords, toggleKeyword } = useSelectedKeywords(
-    checklist.needTailoring,
+function ChecklistContent({
+  jobId,
+  checklist,
+  activeTab,
+}: ChecklistContentProps) {
+  const selectedKeywords = useSelectedKeywordsStore(
+    (state) => state.selectedByJobId[jobId] ?? EMPTY_KEYWORDS,
   )
+  const toggleKeyword = useSelectedKeywordsStore((state) => state.toggleKeyword)
+  const seedIfEmpty = useSelectedKeywordsStore((state) => state.seedIfEmpty)
+
+  useEffect(() => {
+    seedIfEmpty(jobId, checklist.needTailoring)
+  }, [jobId, checklist.needTailoring, seedIfEmpty])
 
   const requirementsByTab: Record<TabType, Checklist['hardRequirements']> = {
     hard: checklist.hardRequirements,
@@ -81,7 +90,7 @@ function ChecklistContent({ checklist, activeTab }: ChecklistContentProps) {
       <ChecklistSection
         requirements={requirements}
         selectedKeywords={selectedKeywords}
-        onToggleKeyword={toggleKeyword}
+        onToggleKeyword={(keyword) => toggleKeyword(jobId, keyword)}
       />
     </div>
   )
@@ -125,14 +134,18 @@ export default function Checklist({ jobId }: ChecklistProps) {
 
   return (
     <div className="flex h-full flex-col">
-      {checklist ? (
+      {checklist && jobId ? (
         <>
           <ChecklistTabs
             checklist={checklist}
             activeTab={activeTab}
             onChange={setActiveTab}
           />
-          <ChecklistContent checklist={checklist} activeTab={activeTab} />
+          <ChecklistContent
+            jobId={jobId}
+            checklist={checklist}
+            activeTab={activeTab}
+          />
         </>
       ) : (
         <ChecklistLoadingState />

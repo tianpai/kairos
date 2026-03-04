@@ -8,8 +8,15 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@ui/Accordion'
-import type { UpdateState } from '../../../../shared/updater'
-import { versionQuotes } from '@/data/versionQuotes'
+import {
+  checkForUpdates as checkUpdaterForUpdates,
+  downloadUpdate,
+  getUpdaterState,
+  isUpdaterPackaged,
+  quitAndInstallUpdate,
+} from '@api/updater'
+import type { UpdateState } from '@api/updater'
+import { versionQuotes } from '@/utils/versionQuotes'
 
 function GitHubIcon({ size = 24 }: { size?: number }) {
   return (
@@ -31,17 +38,18 @@ function GitHubIcon({ size = 24 }: { size?: number }) {
 }
 
 const GITHUB_URL = 'https://github.com/tianpai/kairos'
+const RELEASES_URL = `${GITHUB_URL}/releases/latest`
 
 interface ChangelogEntry {
   version: string
   quote?: string
-  sections: Array<{ title: string; items: Array<string> }>
+  sections: { title: string; items: string[] }[]
 }
 
 interface GroupedChangelog {
   minorVersion: string
   quote?: string
-  entries: Array<ChangelogEntry>
+  entries: ChangelogEntry[]
 }
 
 function stripCommitLink(text: string): string {
@@ -54,11 +62,11 @@ function getMinorVersion(version: string): string {
   return `${major}.${minor}`
 }
 
-function parseChangelog(raw: string): Array<ChangelogEntry> {
-  const entries: Array<ChangelogEntry> = []
+function parseChangelog(raw: string): ChangelogEntry[] {
+  const entries: ChangelogEntry[] = []
   const lines = raw.split('\n')
   let current: ChangelogEntry | null = null
-  let currentSection: { title: string; items: Array<string> } | null = null
+  let currentSection: { title: string; items: string[] } | null = null
 
   for (const line of lines) {
     // Match both formats:
@@ -96,9 +104,7 @@ function parseChangelog(raw: string): Array<ChangelogEntry> {
   return entries
 }
 
-function groupByMinorVersion(
-  entries: Array<ChangelogEntry>,
-): Array<GroupedChangelog> {
+function groupByMinorVersion(entries: ChangelogEntry[]): GroupedChangelog[] {
   const groups = new Map<string, GroupedChangelog>()
 
   for (const entry of entries) {
@@ -134,13 +140,11 @@ export function AboutSection() {
   const [isPackaged, setIsPackaged] = useState<boolean | null>(null)
 
   useEffect(() => {
-    window.kairos.updater
-      .isPackaged()
+    isUpdaterPackaged()
       .then(setIsPackaged)
       .catch(() => {})
     // Hydrate from current updater state (in case auto-check already ran)
-    window.kairos.updater
-      .getState()
+    getUpdaterState()
       .then(setUpdateState)
       .catch(() => {})
   }, [])
@@ -164,7 +168,7 @@ export function AboutSection() {
   const checkForUpdates = async () => {
     setUpdateState({ status: 'checking' })
     try {
-      const state = await window.kairos.updater.check()
+      const state = await checkUpdaterForUpdates()
       setUpdateState(state)
     } catch {
       setUpdateState({ status: 'error', error: 'Failed to check for updates' })
@@ -173,10 +177,10 @@ export function AboutSection() {
 
   const handleDownload = async () => {
     try {
-      await window.kairos.updater.download()
+      await downloadUpdate()
       // Poll for state updates during download
       const pollInterval = setInterval(async () => {
-        const state = await window.kairos.updater.getState()
+        const state = await getUpdaterState()
         setUpdateState(state)
         if (state.status === 'downloaded' || state.status === 'error') {
           clearInterval(pollInterval)
@@ -188,11 +192,15 @@ export function AboutSection() {
   }
 
   const handleInstall = () => {
-    window.kairos.updater.quitAndInstall()
+    void quitAndInstallUpdate()
+  }
+
+  const openExternalUrl = (url: string) => {
+    void window.kairos.shell.openExternal(url)
   }
 
   const openReleasesPage = () => {
-    window.kairos.updater.openReleasesPage()
+    openExternalUrl(RELEASES_URL)
   }
 
   return (
@@ -310,6 +318,10 @@ export function AboutSection() {
           href={GITHUB_URL}
           target="_blank"
           rel="noopener noreferrer"
+          onClick={(event) => {
+            event.preventDefault()
+            openExternalUrl(GITHUB_URL)
+          }}
           className="text-secondary hover:text-primary inline-flex items-center gap-2 text-sm"
         >
           <GitHubIcon size={14} />

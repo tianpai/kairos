@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { Select } from '@ui/Select'
-import { getAllJobApplications } from '@/api/jobs'
+import { listJobApplications } from '@/api/jobs'
 
 interface ExistingApplicationSelectProps {
   value: string | null
@@ -12,8 +12,8 @@ export function ExistingApplicationSelect({
   onChange,
 }: ExistingApplicationSelectProps) {
   const { data: applications = [], isLoading } = useQuery({
-    queryKey: ['jobApplications'],
-    queryFn: getAllJobApplications,
+    queryKey: ['jobApplications', { archived: false }],
+    queryFn: () => listJobApplications({ archived: false }),
   })
 
   const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {

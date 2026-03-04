@@ -105,9 +105,13 @@ export async function disconnectDatabase(): Promise<void> {
   }
 }
 
-function addColumnIfNotExists(table: string, column: string, definition: string): void {
+function addColumnIfNotExists(
+  table: string,
+  column: string,
+  definition: string,
+): void {
   if (!sqlite) throw new Error("Database not initialized");
-  const columns = sqlite.pragma(`table_info(${table})`) as Array<{ name: string }>;
+  const columns = sqlite.pragma(`table_info(${table})`) as { name: string }[];
   if (!columns.some((col) => col.name === column)) {
     sqlite.exec(`ALTER TABLE ${table} ADD COLUMN ${column} ${definition}`);
     log.info(`Migration: added column ${table}.${column}`);
@@ -116,10 +120,18 @@ function addColumnIfNotExists(table: string, column: string, definition: string)
 
 export async function runMigrations(): Promise<void> {
   // v0.2.2 — status, archive, pin fields
-  addColumnIfNotExists("job_applications", "archived", "INTEGER NOT NULL DEFAULT 0");
+  addColumnIfNotExists(
+    "job_applications",
+    "archived",
+    "INTEGER NOT NULL DEFAULT 0",
+  );
   addColumnIfNotExists("job_applications", "status_updated_at", "TEXT");
   addColumnIfNotExists("job_applications", "interview_date", "TEXT");
-  addColumnIfNotExists("job_applications", "pinned", "INTEGER NOT NULL DEFAULT 0");
+  addColumnIfNotExists(
+    "job_applications",
+    "pinned",
+    "INTEGER NOT NULL DEFAULT 0",
+  );
   addColumnIfNotExists("job_applications", "pinned_at", "TEXT");
 
   log.info("Migrations complete");

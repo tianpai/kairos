@@ -143,8 +143,8 @@ export function resolveTaskInput<T extends TaskName>(
 export function getMissingInputs<T extends TaskName>(
   task: Task<T>,
   context: WorkflowContext,
-): Array<string> {
-  const missing: Array<string> = [];
+): string[] {
+  const missing: string[] = [];
 
   for (const key of task.inputKeys) {
     if (context[key] === undefined) {

@@ -17,20 +17,19 @@ your resume for each application.
 > configure (OpenAI, Anthropic, etc.). You are responsible for reviewing and
 > agreeing to their terms of service and privacy policies.
 
-![Kairos Editor](assets/screenshots/editor.png)
-
-[More screenshots](assets/screenshots/)
-
 ## Features
 
-- **Real-time editing** - Live preview as you type
 - **AI-powered tailoring** - Automatically optimize your resume for job descriptions
 - **Batch applications** - One resume + multiple JDs = multiple tailored applications
-- **Build from scratch** - Start fresh or use an existing application as a base
+- **Application management** - Track, search, filter, sort, pin, and archive applications
+- **Status tracking** - Color-coded indicators to see where each application stands
 - **Keyword scoring** - Weighted scoring system to track requirement coverage
 - **Flexible export** - Single PDF or batch export all applications
+- **Backup & restore** - Import and export your applications and resumes
 - **Full customization** - Sections, subsections, fields are all drag-and-drop reorderable
+- **Real-time editing** - Live preview as you type
 - **Document styling** - Font, margins, heading color, paper size
+- **Auto-update** - Get notified when a new version is available
 - **Dark/light theme** - System-aware appearance
 - **Keyboard-first** - Shortcuts for speed and efficiency
 
@@ -43,7 +42,6 @@ Bring your own API key:
 - Google Gemini
 - DeepSeek
 - xAI Grok
-- Ollama (local models)
 
 More providers will be supported once the app is stable in v1.0.0.
 
@@ -55,11 +53,10 @@ See [CHANGELOG.md](CHANGELOG.md) for version history and detailed feature notes.
 
 1. Download the latest `.dmg` from [Releases](https://github.com/tianpai/kairos/releases)
 2. Open the `.dmg` and drag Kairos to Applications
-3. On first launch, macOS will warn about an unidentified developer:
-   - Right-click the app → **Open** → **Open** again
-   - Or run: `xattr -cr /Applications/Kairos.app`
 
-Windows and Linux builds are available but less tested.
+- Windows builds are available but less tested and fixed until v1.0.0
+- Linux builds are available only after v1.0.0
+
 
 ## Development
 

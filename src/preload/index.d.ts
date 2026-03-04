@@ -4,13 +4,27 @@ type ProviderType = import("../shared/providers").ProviderType;
 type BackupExportResult = import("../shared/backup").BackupExportResult;
 type BackupImportResult = import("../shared/backup").BackupImportResult;
 type UpdateState = import("../shared/updater").UpdateState;
-type OllamaPullProgress = import("../shared/ollama").OllamaPullProgress;
+type JobsCreateFromExistingPayload =
+  import("../shared/type/jobs-ipc").JobsCreateFromExistingPayload;
+type JobsCreatePayload = import("../shared/type/jobs-ipc").JobsCreatePayload;
+type JobsCreateResult = import("../shared/type/jobs-ipc").JobsCreateResult;
+type JobApplication = import("../shared/type/jobs-ipc").JobApplication;
+type JobApplicationDetails =
+  import("../shared/type/jobs-ipc").JobApplicationDetails;
+type JobsListQuery = import("../shared/type/jobs-ipc").JobsListQuery;
+type JobsPatchPayload = import("../shared/type/jobs-ipc").JobsPatchPayload;
 type WorkflowStartPayload =
   import("../shared/type/workflow-ipc").WorkflowStartPayload;
 type WorkflowRetryPayload =
   import("../shared/type/workflow-ipc").WorkflowRetryPayload;
 type WorkflowGetStatePayload =
   import("../shared/type/workflow-ipc").WorkflowGetStatePayload;
+type WorkflowStartTailoringPayload =
+  import("../shared/type/workflow-ipc").WorkflowStartTailoringPayload;
+type WorkflowCreateApplicationsPayload =
+  import("../shared/type/workflow-ipc").WorkflowCreateApplicationsPayload;
+type WorkflowCreateApplicationsResult =
+  import("../shared/type/workflow-ipc").WorkflowCreateApplicationsResult;
 type WorkflowStateChanged =
   import("../shared/type/workflow-ipc").WorkflowStateChanged;
 type WorkflowTaskCompleted =
@@ -22,6 +36,7 @@ type WorkflowCompleted =
 type WorkflowAiPartial =
   import("../shared/type/workflow-ipc").WorkflowAiPartial;
 type WorkflowStepsData = import("../shared/type/workflow").WorkflowStepsData;
+type IpcSuccessResponse = import("../shared/type/ipc").IpcSuccessResponse;
 
 interface ModelInfo {
   id: string;
@@ -29,16 +44,6 @@ interface ModelInfo {
 }
 
 interface KairosAPI {
-  shortcuts: {
-    onSettings: (callback: () => void) => () => void;
-    onNewApplication: (callback: () => void) => () => void;
-    onSave: (callback: () => void) => () => void;
-    onExportPdf: (callback: () => void) => () => void;
-    onDocumentSettings: (callback: () => void) => () => void;
-    onTailor: (callback: () => void) => () => void;
-    onToggleColumns: (callback: () => void) => () => void;
-    onBatchExport: (callback: () => void) => () => void;
-  };
   platform: NodeJS.Platform;
   backup: {
     exportResumeData: () => Promise<BackupExportResult>;
@@ -97,24 +102,6 @@ interface KairosAPI {
     getActive: () => Promise<ProviderType>;
     setActive: (provider: ProviderType) => Promise<void>;
   };
-  ollama: {
-    isRunning: () => Promise<boolean>;
-    getVersion: () => Promise<string | null>;
-    getInstalledModels: () => Promise<ModelInfo[]>;
-    getCuratedModels: () => Promise<ModelInfo[]>;
-    pullModel: (
-      modelName: string,
-    ) => Promise<{ success: boolean; error?: string }>;
-    cancelPull: () => Promise<void>;
-    getBaseUrl: () => Promise<string>;
-    setBaseUrl: (url: string) => Promise<void>;
-    onPullProgress: (
-      callback: (data: {
-        modelName: string;
-        progress: OllamaPullProgress;
-      }) => void,
-    ) => () => void;
-  };
   theme: {
     get: () => Promise<ThemeSource>;
     set: (theme: ThemeSource) => Promise<void>;
@@ -125,46 +112,43 @@ interface KairosAPI {
   };
   jobs: {
     // CRUD
-    create: (data: unknown) => Promise<{ id: string }>;
-    createFromExisting: (data: unknown) => Promise<{ id: string }>;
-    getAll: () => Promise<unknown[]>;
-    getArchived: () => Promise<unknown[]>;
-    get: (id: string) => Promise<unknown>;
-    update: (id: string, data: unknown) => Promise<unknown>;
-    delete: (id: string) => Promise<{ success: boolean }>;
-    deleteAll: () => Promise<{ success: boolean }>;
-    saveResume: (id: string, data: unknown) => Promise<{ success: boolean }>;
-    updateJobDescription: (
-      id: string,
-      data: unknown,
-    ) => Promise<{ success: boolean }>;
+    create: (data: JobsCreatePayload) => Promise<JobsCreateResult>;
+    createFromExisting: (
+      data: JobsCreateFromExistingPayload,
+    ) => Promise<JobsCreateResult>;
+    list: (query?: JobsListQuery) => Promise<JobApplication[]>;
+    get: (id: string) => Promise<JobApplicationDetails>;
+    patch: (id: string, data: JobsPatchPayload) => Promise<IpcSuccessResponse>;
+    delete: (id: string) => Promise<IpcSuccessResponse>;
+    deleteAll: () => Promise<IpcSuccessResponse>;
+    saveResume: (id: string, data: unknown) => Promise<IpcSuccessResponse>;
     // Workflow data
     saveParsedResume: (
       id: string,
       data: unknown,
-    ) => Promise<{ success: boolean }>;
+    ) => Promise<IpcSuccessResponse>;
     saveTailoredResume: (
       id: string,
       data: unknown,
-    ) => Promise<{ success: boolean }>;
-    saveChecklist: (id: string, data: unknown) => Promise<{ success: boolean }>;
-    saveMatchScore: (
-      id: string,
-      data: unknown,
-    ) => Promise<{ success: boolean }>;
+    ) => Promise<IpcSuccessResponse>;
+    saveChecklist: (id: string, data: unknown) => Promise<IpcSuccessResponse>;
+    saveMatchScore: (id: string, data: unknown) => Promise<IpcSuccessResponse>;
     saveWorkflowState: (
       id: string,
       data: unknown,
-    ) => Promise<{ success: boolean }>;
-    togglePin: (id: string, data: unknown) => Promise<{ success: boolean }>;
-    toggleArchive: (id: string, data: unknown) => Promise<{ success: boolean }>;
-    updateStatus: (id: string, data: unknown) => Promise<{ success: boolean }>;
+    ) => Promise<IpcSuccessResponse>;
   };
   workflow: {
     start: (payload: WorkflowStartPayload) => Promise<{ success: boolean }>;
+    startTailoring: (
+      payload: WorkflowStartTailoringPayload,
+    ) => Promise<{ success: boolean }>;
     retry: (
       payload: WorkflowRetryPayload,
     ) => Promise<{ success: boolean; failedTasks: string[] }>;
+    createApplications: (
+      payload: WorkflowCreateApplicationsPayload,
+    ) => Promise<WorkflowCreateApplicationsResult>;
     getState: (
       payload: WorkflowGetStatePayload,
     ) => Promise<{ workflow: WorkflowStepsData | null }>;
@@ -185,7 +169,6 @@ interface KairosAPI {
     getState: () => Promise<UpdateState>;
     getVersion: () => Promise<string>;
     isPackaged: () => Promise<boolean>;
-    openReleasesPage: () => Promise<void>;
     download: () => Promise<void>;
     quitAndInstall: () => Promise<void>;
   };

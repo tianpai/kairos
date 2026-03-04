@@ -2,8 +2,8 @@ import { RequirementItem } from './RequirementItem'
 import type { ChecklistRequirement } from '@type/checklist'
 
 interface ChecklistSectionProps {
-  requirements: Array<ChecklistRequirement>
-  selectedKeywords: Array<string>
+  requirements: ChecklistRequirement[]
+  selectedKeywords: string[]
   onToggleKeyword: (keyword: string) => void
 }
 

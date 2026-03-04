@@ -1,4 +1,5 @@
 import { motion } from 'motion/react'
+import { Button } from '@ui/Button'
 import { fadeScale } from '../constants'
 
 interface TextButtonProps {
@@ -8,12 +9,16 @@ interface TextButtonProps {
 
 export function TextButton({ label, onClick }: TextButtonProps) {
   return (
-    <motion.button
-      {...fadeScale}
-      onClick={onClick}
-      className="border-default bg-surface hover:bg-hover text-secondary hover:text-primary rounded-lg border px-2 py-1 text-xs font-medium transition-colors"
-    >
-      {label}
-    </motion.button>
+    <motion.div {...fadeScale}>
+      <Button
+        onClick={onClick}
+        ariaLabel={label}
+        tooltip={label}
+        variant="ghost"
+        className="border-default bg-surface hover:bg-hover text-secondary hover:text-primary inline-flex h-8 items-center justify-center rounded-md border px-2 text-xs leading-none font-medium"
+      >
+        {label}
+      </Button>
+    </motion.div>
   )
 }
