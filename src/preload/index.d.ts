@@ -13,8 +13,6 @@ type JobApplicationDetails =
   import("../shared/type/jobs-ipc").JobApplicationDetails;
 type JobsListQuery = import("../shared/type/jobs-ipc").JobsListQuery;
 type JobsPatchPayload = import("../shared/type/jobs-ipc").JobsPatchPayload;
-type WorkflowStartPayload =
-  import("../shared/type/workflow-ipc").WorkflowStartPayload;
 type WorkflowRetryPayload =
   import("../shared/type/workflow-ipc").WorkflowRetryPayload;
 type WorkflowGetStatePayload =
@@ -122,24 +120,8 @@ interface KairosAPI {
     delete: (id: string) => Promise<IpcSuccessResponse>;
     deleteAll: () => Promise<IpcSuccessResponse>;
     saveResume: (id: string, data: unknown) => Promise<IpcSuccessResponse>;
-    // Workflow data
-    saveParsedResume: (
-      id: string,
-      data: unknown,
-    ) => Promise<IpcSuccessResponse>;
-    saveTailoredResume: (
-      id: string,
-      data: unknown,
-    ) => Promise<IpcSuccessResponse>;
-    saveChecklist: (id: string, data: unknown) => Promise<IpcSuccessResponse>;
-    saveMatchScore: (id: string, data: unknown) => Promise<IpcSuccessResponse>;
-    saveWorkflowState: (
-      id: string,
-      data: unknown,
-    ) => Promise<IpcSuccessResponse>;
   };
   workflow: {
-    start: (payload: WorkflowStartPayload) => Promise<{ success: boolean }>;
     startTailoring: (
       payload: WorkflowStartTailoringPayload,
     ) => Promise<{ success: boolean }>;

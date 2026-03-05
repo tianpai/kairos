@@ -30,18 +30,4 @@ export const jobs = {
     ipcRenderer.invoke("jobs:deleteAll"),
   saveResume: (id: string, data: unknown): Promise<IpcSuccessResponse> =>
     ipcRenderer.invoke("jobs:saveResume", id, data),
-  // Workflow data
-  saveParsedResume: (id: string, data: unknown): Promise<IpcSuccessResponse> =>
-    ipcRenderer.invoke("jobs:saveParsedResume", id, data),
-  saveTailoredResume: (
-    id: string,
-    data: unknown,
-  ): Promise<IpcSuccessResponse> =>
-    ipcRenderer.invoke("jobs:saveTailoredResume", id, data),
-  saveChecklist: (id: string, data: unknown): Promise<IpcSuccessResponse> =>
-    ipcRenderer.invoke("jobs:saveChecklist", id, data),
-  saveMatchScore: (id: string, data: unknown): Promise<IpcSuccessResponse> =>
-    ipcRenderer.invoke("jobs:saveMatchScore", id, data),
-  saveWorkflowState: (id: string, data: unknown): Promise<IpcSuccessResponse> =>
-    ipcRenderer.invoke("jobs:saveWorkflowState", id, data),
 };

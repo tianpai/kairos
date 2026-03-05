@@ -6,7 +6,6 @@ import type {
   WorkflowCreateApplicationsResult,
   WorkflowGetStatePayload,
   WorkflowRetryPayload,
-  WorkflowStartPayload,
   WorkflowStartTailoringPayload,
   WorkflowStateChanged,
   WorkflowTaskCompleted,
@@ -17,8 +16,6 @@ import type { WorkflowStepsData } from "../../shared/type/workflow";
 type Unsubscribe = () => void;
 
 export const workflow = {
-  start: (payload: WorkflowStartPayload): Promise<{ success: boolean }> =>
-    ipcRenderer.invoke("workflow:start", payload),
   startTailoring: (
     payload: WorkflowStartTailoringPayload,
   ): Promise<{ success: boolean }> =>

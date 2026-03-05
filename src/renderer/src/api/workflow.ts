@@ -7,7 +7,6 @@ import type {
   WorkflowCreateApplicationsResult,
   WorkflowGetStatePayload,
   WorkflowRetryPayload,
-  WorkflowStartPayload,
   WorkflowStartTailoringPayload,
   WorkflowStateChanged,
   WorkflowTaskCompleted,
@@ -15,12 +14,6 @@ import type {
 } from '@type/workflow-ipc'
 
 type Unsubscribe = () => void
-
-export async function startWorkflow(
-  payload: WorkflowStartPayload,
-): Promise<void> {
-  await window.kairos.workflow.start(payload)
-}
 
 export async function startTailoring(
   payload: WorkflowStartTailoringPayload,

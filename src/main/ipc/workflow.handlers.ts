@@ -6,7 +6,6 @@ import type {
   WorkflowCreateApplicationsPayload,
   WorkflowGetStatePayload,
   WorkflowRetryPayload,
-  WorkflowStartPayload,
   WorkflowStartTailoringPayload,
 } from "@type/workflow-ipc";
 import type { WorkflowService } from "../workflow/workflow.service";
@@ -20,20 +19,6 @@ function broadcast<T>(channel: string, payload: T): void {
 export function registerWorkflowHandlers(
   workflowService: WorkflowService,
 ): void {
-  handle("workflow:start", async (_event, payload: WorkflowStartPayload) => {
-    try {
-      await workflowService.startWorkflow(
-        payload.workflowName,
-        payload.jobId,
-        payload.initialContext,
-      );
-      return { success: true };
-    } catch (error) {
-      log.error("workflow:start failed", error);
-      throw error;
-    }
-  });
-
   handle("workflow:retry", async (_event, payload: WorkflowRetryPayload) => {
     try {
       const failedTasks = await workflowService.retryFailedTasks(payload.jobId);

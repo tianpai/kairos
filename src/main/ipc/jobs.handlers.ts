@@ -5,12 +5,7 @@ import {
   CreateJobApplicationSchema,
   ListJobsSchema,
   PatchJobApplicationSchema,
-  SaveChecklistSchema,
-  SaveMatchScoreSchema,
-  SaveParsedResumeSchema,
   SaveResumeSchema,
-  SaveTailoredResumeSchema,
-  SaveWorkflowStateSchema,
 } from "../schemas/job-application.schemas";
 import { guardedHandle as handle } from "./guarded-handler";
 import type { JobApplicationService } from "../services/job-application.service";
@@ -95,33 +90,6 @@ export function registerJobsHandlers(service: JobApplicationService): void {
   handle("jobs:saveResume", async (_, id: string, data: unknown) => {
     const validated = SaveResumeSchema.parse(data);
     return service.saveResume(id, validated);
-  });
-
-  // Workflow data handlers
-
-  handle("jobs:saveParsedResume", async (_, id: string, data: unknown) => {
-    const validated = SaveParsedResumeSchema.parse(data);
-    return service.saveParsedResume(id, validated);
-  });
-
-  handle("jobs:saveTailoredResume", async (_, id: string, data: unknown) => {
-    const validated = SaveTailoredResumeSchema.parse(data);
-    return service.saveTailoredResume(id, validated);
-  });
-
-  handle("jobs:saveChecklist", async (_, id: string, data: unknown) => {
-    const validated = SaveChecklistSchema.parse(data);
-    return service.saveChecklist(id, validated);
-  });
-
-  handle("jobs:saveMatchScore", async (_, id: string, data: unknown) => {
-    const validated = SaveMatchScoreSchema.parse(data);
-    return service.saveMatchScore(id, validated.matchPercentage);
-  });
-
-  handle("jobs:saveWorkflowState", async (_, id: string, data: unknown) => {
-    const validated = SaveWorkflowStateSchema.parse(data);
-    return service.saveWorkflowState(id, validated);
   });
 
   handle("jobs:patch", async (_, id: string, data: unknown) => {
