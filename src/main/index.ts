@@ -4,9 +4,9 @@ import log from "electron-log/main";
 import { SettingsService } from "./config/settings.service";
 import { registerAllHandlers } from "./ipc";
 import {
+  LegacyUpgradeRequiredError,
   connectDatabase,
   disconnectDatabase,
-  LegacyUpgradeRequiredError,
   runMigrations,
 } from "./services/database.service";
 import { createAppMenu } from "./menu";

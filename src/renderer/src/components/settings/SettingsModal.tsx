@@ -1,7 +1,11 @@
 import { useState } from 'react'
 import { Modal } from '@ui/Modal'
 import { Button } from '@ui/Button'
-import { useApiKey, useDeleteApiKey, useSetApiKey } from '@hooks/useSettings'
+import {
+  useDeleteProviderApiKey,
+  useProviderApiKey,
+  useSetProviderApiKey,
+} from '@hooks/useSettings'
 
 interface SettingsModalProps {
   open: boolean
@@ -9,9 +13,9 @@ interface SettingsModalProps {
 }
 
 export function SettingsModal({ open, onClose }: SettingsModalProps) {
-  const { data: currentKey } = useApiKey()
-  const setApiKey = useSetApiKey()
-  const deleteApiKey = useDeleteApiKey()
+  const { data: currentKey } = useProviderApiKey('openai')
+  const setApiKey = useSetProviderApiKey('openai')
+  const deleteApiKey = useDeleteProviderApiKey('openai')
   const [apiKey, setApiKeyInput] = useState('')
 
   const handleSave = async () => {

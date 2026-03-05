@@ -1,13 +1,12 @@
 import { contextBridge } from "electron";
+import { apiKey } from "./api/api-key";
 import { aiServer } from "./api/ai-server";
 import { backup } from "./api/backup";
 import { dialog } from "./api/dialog";
 import { fs } from "./api/fs";
 import { jobs } from "./api/jobs";
-import { models } from "./api/models";
 import { platform } from "./api/platform";
 import { provider } from "./api/provider";
-import { settings } from "./api/settings";
 import { shell } from "./api/shell";
 import { theme } from "./api/theme";
 import { updater } from "./api/updater";
@@ -19,8 +18,7 @@ contextBridge.exposeInMainWorld("kairos", {
   shell,
   dialog,
   fs,
-  settings,
-  models,
+  apiKey,
   provider,
   theme,
   aiServer,

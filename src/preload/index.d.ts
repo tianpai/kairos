@@ -54,45 +54,21 @@ interface KairosAPI {
       data: ArrayBuffer,
     ) => Promise<{ success: boolean; path: string }>;
   };
-  settings: {
-    // OpenAI
-    getApiKey: () => Promise<string | null>;
-    setApiKey: (key: string) => Promise<void>;
-    hasApiKey: () => Promise<boolean>;
-    deleteApiKey: () => Promise<void>;
-    // DeepSeek
-    getDeepSeekApiKey: () => Promise<string | null>;
-    setDeepSeekApiKey: (key: string) => Promise<void>;
-    hasDeepSeekApiKey: () => Promise<boolean>;
-    deleteDeepSeekApiKey: () => Promise<void>;
-    // xAI
-    getXAIApiKey: () => Promise<string | null>;
-    setXAIApiKey: (key: string) => Promise<void>;
-    hasXAIApiKey: () => Promise<boolean>;
-    deleteXAIApiKey: () => Promise<void>;
-    // Gemini
-    getGeminiApiKey: () => Promise<string | null>;
-    setGeminiApiKey: (key: string) => Promise<void>;
-    hasGeminiApiKey: () => Promise<boolean>;
-    deleteGeminiApiKey: () => Promise<void>;
-    // Anthropic
-    getAnthropicApiKey: () => Promise<string | null>;
-    setAnthropicApiKey: (key: string) => Promise<void>;
-    hasAnthropicApiKey: () => Promise<boolean>;
-    deleteAnthropicApiKey: () => Promise<void>;
-    // Reset
-    resetAllProviders: () => Promise<{ success: boolean }>;
-  };
-  models: {
-    fetch: (provider: ProviderType) => Promise<ModelInfo[]>;
-    getCachedIds: (provider: ProviderType) => Promise<string[]>;
-    getSelected: (provider: ProviderType) => Promise<string | null>;
-    setSelected: (provider: ProviderType, model: string) => Promise<void>;
-    getDefault: (provider: ProviderType) => Promise<string>;
+  apiKey: {
+    get: (provider: ProviderType) => Promise<string | null>;
+    set: (provider: ProviderType, key: string) => Promise<void>;
+    has: (provider: ProviderType) => Promise<boolean>;
+    delete: (provider: ProviderType) => Promise<void>;
   };
   provider: {
     getActive: () => Promise<ProviderType>;
     setActive: (provider: ProviderType) => Promise<void>;
+    resetAll: () => Promise<{ success: boolean }>;
+    fetchModels: (provider: ProviderType) => Promise<ModelInfo[]>;
+    getCachedModels: (provider: ProviderType) => Promise<string[]>;
+    getSelectedModel: (provider: ProviderType) => Promise<string | null>;
+    setSelectedModel: (provider: ProviderType, model: string) => Promise<void>;
+    getDefaultModel: (provider: ProviderType) => Promise<string>;
   };
   theme: {
     get: () => Promise<ThemeState>;

@@ -6,6 +6,7 @@ import {
   getDefaultModel,
   getProviderApiKey,
   getSelectedModel,
+  hasActiveProviderApiKey,
   hasProviderApiKey,
   setActiveProvider,
   setProviderApiKey,
@@ -13,132 +14,57 @@ import {
 } from '@api/settings'
 import type { ProviderType } from '../../../shared/providers'
 
-function useHasProviderApiKey(
-  provider: ProviderType,
-  queryKeySuffix: string,
-) {
+export function useHasProviderApiKey(provider: ProviderType) {
   return useQuery({
-    queryKey: ['settings', queryKeySuffix],
+    queryKey: ['apiKey', 'has', provider],
     queryFn: () => hasProviderApiKey(provider),
   })
 }
 
-function useProviderApiKey(provider: ProviderType, queryKeySuffix: string) {
+export function useProviderApiKey(provider: ProviderType) {
   return useQuery({
-    queryKey: ['settings', queryKeySuffix],
+    queryKey: ['apiKey', 'value', provider],
     queryFn: () => getProviderApiKey(provider),
   })
 }
 
-function useSetProviderApiKey(provider: ProviderType) {
+export function useSetProviderApiKey(provider: ProviderType) {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: (key: string) => setProviderApiKey(provider, key),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['settings'] })
+      queryClient.invalidateQueries({ queryKey: ['apiKey'] })
+      queryClient.invalidateQueries({
+        queryKey: ['provider', 'models', provider],
+      })
     },
   })
 }
 
-function useDeleteProviderApiKey(provider: ProviderType) {
+export function useDeleteProviderApiKey(provider: ProviderType) {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: () => deleteProviderApiKey(provider),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['settings'] })
+      queryClient.invalidateQueries({ queryKey: ['apiKey'] })
+      queryClient.invalidateQueries({
+        queryKey: ['provider', 'models', provider],
+      })
     },
   })
 }
 
-// OpenAI API Key hooks
-export function useHasApiKey() {
-  return useHasProviderApiKey('openai', 'hasApiKey')
-}
-
-export function useApiKey() {
-  return useProviderApiKey('openai', 'apiKey')
-}
-
-export function useSetApiKey() {
-  return useSetProviderApiKey('openai')
-}
-
-export function useDeleteApiKey() {
-  return useDeleteProviderApiKey('openai')
-}
-
-// DeepSeek API Key hooks
-export function useHasDeepSeekApiKey() {
-  return useHasProviderApiKey('deepseek', 'hasDeepSeekApiKey')
-}
-
-export function useDeepSeekApiKey() {
-  return useProviderApiKey('deepseek', 'deepSeekApiKey')
-}
-
-export function useSetDeepSeekApiKey() {
-  return useSetProviderApiKey('deepseek')
-}
-
-export function useDeleteDeepSeekApiKey() {
-  return useDeleteProviderApiKey('deepseek')
-}
-
-// xAI API Key hooks
-export function useHasXAIApiKey() {
-  return useHasProviderApiKey('xai', 'hasXAIApiKey')
-}
-
-export function useXAIApiKey() {
-  return useProviderApiKey('xai', 'xaiApiKey')
-}
-
-export function useSetXAIApiKey() {
-  return useSetProviderApiKey('xai')
-}
-
-export function useDeleteXAIApiKey() {
-  return useDeleteProviderApiKey('xai')
-}
-
-// Gemini API Key hooks
-export function useHasGeminiApiKey() {
-  return useHasProviderApiKey('gemini', 'hasGeminiApiKey')
-}
-
-export function useGeminiApiKey() {
-  return useProviderApiKey('gemini', 'geminiApiKey')
-}
-
-export function useSetGeminiApiKey() {
-  return useSetProviderApiKey('gemini')
-}
-
-export function useDeleteGeminiApiKey() {
-  return useDeleteProviderApiKey('gemini')
-}
-
-// Anthropic API Key hooks
-export function useHasAnthropicApiKey() {
-  return useHasProviderApiKey('anthropic', 'hasAnthropicApiKey')
-}
-
-export function useAnthropicApiKey() {
-  return useProviderApiKey('anthropic', 'anthropicApiKey')
-}
-
-export function useSetAnthropicApiKey() {
-  return useSetProviderApiKey('anthropic')
-}
-
-export function useDeleteAnthropicApiKey() {
-  return useDeleteProviderApiKey('anthropic')
+export function useHasActiveProviderApiKey() {
+  return useQuery({
+    queryKey: ['apiKey', 'has', 'active'],
+    queryFn: hasActiveProviderApiKey,
+  })
 }
 
 // Model hooks
 export function useFetchModels(provider: ProviderType) {
   return useQuery({
-    queryKey: ['models', provider],
+    queryKey: ['provider', 'models', provider],
     queryFn: () => fetchModels(provider),
     staleTime: 5 * 60 * 1000, // 5 minutes
   })
@@ -146,7 +72,7 @@ export function useFetchModels(provider: ProviderType) {
 
 export function useSelectedModel(provider: ProviderType) {
   return useQuery({
-    queryKey: ['models', 'selected', provider],
+    queryKey: ['provider', 'selectedModel', provider],
     queryFn: () => getSelectedModel(provider),
   })
 }
@@ -163,7 +89,7 @@ export function useSetSelectedModel() {
     }) => setSelectedModel(provider, model),
     onSuccess: (_, { provider }) => {
       queryClient.invalidateQueries({
-        queryKey: ['models', 'selected', provider],
+        queryKey: ['provider', 'selectedModel', provider],
       })
     },
   })
@@ -171,7 +97,7 @@ export function useSetSelectedModel() {
 
 export function useDefaultModel(provider: ProviderType) {
   return useQuery({
-    queryKey: ['models', 'default', provider],
+    queryKey: ['provider', 'defaultModel', provider],
     queryFn: () => getDefaultModel(provider),
   })
 }
@@ -189,9 +115,8 @@ export function useSetActiveProvider() {
   return useMutation({
     mutationFn: (provider: ProviderType) => setActiveProvider(provider),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['provider'] })
-      queryClient.invalidateQueries({ queryKey: ['settings', 'hasApiKey'] })
+      queryClient.invalidateQueries({ queryKey: ['provider', 'active'] })
+      queryClient.invalidateQueries({ queryKey: ['apiKey', 'has', 'active'] })
     },
   })
 }
-

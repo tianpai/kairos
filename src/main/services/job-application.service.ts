@@ -313,9 +313,9 @@ export class JobApplicationService {
       templateId: job.templateId ?? "",
       jobDescription: job.jobDescription,
       parsedResume:
-        (job.parsedResume as JobApplicationDetails["parsedResume"]) ?? null,
+        (job.parsedResume) ?? null,
       tailoredResume:
-        (job.tailoredResume as JobApplicationDetails["tailoredResume"]) ?? null,
+        (job.tailoredResume) ?? null,
       checklist: (job.checklist as JobApplicationDetails["checklist"]) ?? null,
       workflowStatus,
       workflowSteps,

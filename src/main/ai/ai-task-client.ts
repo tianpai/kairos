@@ -43,26 +43,7 @@ export class AITaskClient {
     apiKey: string;
   } {
     const provider = this.settingsService.getActiveProvider();
-
-    let apiKey: string | null = null;
-    switch (provider) {
-      case "deepseek":
-        apiKey = this.settingsService.getDeepSeekKey();
-        break;
-      case "xai":
-        apiKey = this.settingsService.getXAIKey();
-        break;
-      case "gemini":
-        apiKey = this.settingsService.getGeminiKey();
-        break;
-      case "anthropic":
-        apiKey = this.settingsService.getAnthropicKey();
-        break;
-      case "openai":
-      default:
-        apiKey = this.settingsService.getOpenAIKey();
-        break;
-    }
+    const apiKey = this.settingsService.getApiKey(provider);
 
     if (!apiKey) {
       throw new Error(`API key not configured for ${provider}`);
@@ -75,20 +56,7 @@ export class AITaskClient {
   }
 
   private getSelectedModel(provider: ProviderType): string | null {
-    switch (provider) {
-      case "openai":
-        return this.settingsService.getOpenAISelectedModel();
-      case "deepseek":
-        return this.settingsService.getDeepSeekSelectedModel();
-      case "xai":
-        return this.settingsService.getXAISelectedModel();
-      case "gemini":
-        return this.settingsService.getGeminiSelectedModel();
-      case "anthropic":
-        return this.settingsService.getAnthropicSelectedModel();
-      default:
-        return null;
-    }
+    return this.settingsService.getSelectedModel(provider);
   }
 
   private async ensureConnection(): Promise<void> {
