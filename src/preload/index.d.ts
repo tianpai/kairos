@@ -1,5 +1,5 @@
-type ThemeSource = "system" | "light" | "dark";
-type ThemeMode = "light" | "dark";
+type ThemeSource = import("../shared/type/theme").ThemeSource;
+type ThemeState = import("../shared/type/theme").ThemeState;
 type ProviderType = import("../shared/providers").ProviderType;
 type BackupExportResult = import("../shared/backup").BackupExportResult;
 type BackupImportResult = import("../shared/backup").BackupImportResult;
@@ -95,9 +95,8 @@ interface KairosAPI {
     setActive: (provider: ProviderType) => Promise<void>;
   };
   theme: {
-    get: () => Promise<ThemeSource>;
+    get: () => Promise<ThemeState>;
     set: (theme: ThemeSource) => Promise<void>;
-    getCurrent: () => Promise<ThemeMode>;
   };
   aiServer: {
     getInfo: () => Promise<{ port: number; baseURL: string; wsURL: string }>;

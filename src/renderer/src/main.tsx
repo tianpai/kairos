@@ -12,7 +12,7 @@ import {
 
 import { Toaster } from 'sonner'
 import { CircleAlert, CircleCheck, CircleX, Info } from 'lucide-react'
-import { useCurrentTheme } from '@hooks/useTheme'
+import { useTheme } from '@hooks/useTheme'
 import reportWebVitals from './reportWebVitals.ts'
 import AllApplicationsPage from '@/components/applications/AllApplicationsPage'
 import EditorPage from '@/components/editor/EditorPage'
@@ -46,7 +46,7 @@ function RootLayout() {
   useWorkflowEvents()
 
   // Theme for toast notifications
-  const { data: currentTheme } = useCurrentTheme()
+  const { data: themeData } = useTheme()
   const { Modal: ExportModal } = useExportModal()
 
   useEffect(() => {
@@ -58,7 +58,7 @@ function RootLayout() {
       <Outlet />
       <Toaster
         position="bottom-right"
-        theme={currentTheme}
+        theme={themeData?.current}
         icons={{
           success: <CircleCheck size={20} className="text-success" />,
           error: <CircleX size={20} className="text-error" />,

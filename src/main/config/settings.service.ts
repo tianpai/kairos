@@ -1,6 +1,5 @@
 import Store from "electron-store";
-
-type ThemeSource = "system" | "light" | "dark";
+import type { ThemeSource } from "@type/theme";
 
 interface SettingsSchema {
   aiProviders: {

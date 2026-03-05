@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { getCurrentTheme, getTheme, setTheme } from '@api/theme'
+import { getTheme, setTheme } from '@api/theme'
 import type { ThemeSource } from '@api/theme'
 
 export function useTheme() {
@@ -16,12 +16,5 @@ export function useSetTheme() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['theme'] })
     },
-  })
-}
-
-export function useCurrentTheme() {
-  return useQuery({
-    queryKey: ['theme', 'current'],
-    queryFn: getCurrentTheme,
   })
 }

@@ -1,5 +1,6 @@
 import { ipcMain, nativeTheme } from "electron";
 import type { SettingsService } from "../config/settings.service";
+import type { ThemeSource, ThemeState } from "@type/theme";
 
 interface ThemeHandlerDeps {
   settingsService: SettingsService;
@@ -8,16 +9,14 @@ interface ThemeHandlerDeps {
 export function registerThemeHandlers({
   settingsService,
 }: ThemeHandlerDeps): void {
-  ipcMain.handle("theme:get", () => {
-    return settingsService.getTheme();
+  ipcMain.handle("theme:get", (): ThemeState => {
+    const source = settingsService.getTheme();
+    const current = nativeTheme.shouldUseDarkColors ? "dark" : "light";
+    return { source, current };
   });
 
-  ipcMain.handle("theme:set", (_, theme: "system" | "light" | "dark") => {
+  ipcMain.handle("theme:set", (_, theme: ThemeSource) => {
     settingsService.setTheme(theme);
     nativeTheme.themeSource = theme;
-  });
-
-  ipcMain.handle("theme:getCurrent", () => {
-    return nativeTheme.shouldUseDarkColors ? "dark" : "light";
   });
 }

@@ -1,6 +1,5 @@
 import { Monitor, Moon, Sun } from 'lucide-react'
-
-export type ThemeSource = 'system' | 'light' | 'dark'
+import type { ThemeSource } from '@type/theme'
 
 const THEME_OPTIONS: {
   value: ThemeSource
