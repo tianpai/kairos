@@ -31,7 +31,7 @@ export default defineConfig({
       outDir: "out/main",
       rollupOptions: {
         input: {
-          index: resolve(__dirname, "src/main/index.ts"),
+          index: resolve(__dirname, "src/main/modules/runtime/bootstrap/app.bootstrap.ts"),
         },
         external: ["electron"],
       },

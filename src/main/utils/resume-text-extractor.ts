@@ -1,44 +1,22 @@
 interface ResumeFileInput {
   fileName: string;
-  data: ArrayBuffer;
-}
-
-async function extractTextFromPDF(data: ArrayBuffer): Promise<string> {
-  const { extractText, getDocumentProxy } = await import("unpdf");
-  const pdf = await getDocumentProxy(new Uint8Array(data));
-  const { text } = await extractText(pdf, { mergePages: true });
-  return text;
-}
-
-async function extractTextFromDOCX(data: ArrayBuffer): Promise<string> {
-  const mammoth = await import("mammoth");
-  const result = await mammoth.extractRawText({ buffer: Buffer.from(data) });
-  return result.value;
-}
-
-function extractTextFromTXT(data: ArrayBuffer): string {
-  return Buffer.from(data).toString("utf-8");
-}
-
-function getExtension(fileName: string): string | null {
-  const ext = fileName.split(".").pop()?.toLowerCase();
-  return ext ?? null;
+  buf: ArrayBuffer;
 }
 
 export async function extractResumeTextFromFile(
   input: ResumeFileInput,
 ): Promise<string> {
-  const extension = getExtension(input.fileName);
+  const extension = input.fileName.split(".").pop()?.toLowerCase() ?? null;
   const extensionLabel = extension ?? "unknown";
 
   try {
     switch (extension) {
       case "pdf":
-        return await extractTextFromPDF(input.data);
+        return await docxTextExtract(input.buf);
       case "docx":
-        return await extractTextFromDOCX(input.data);
+        return await pdfTextExtract(input.buf);
       case "txt":
-        return extractTextFromTXT(input.data);
+        return Buffer.from(input.buf).toString("utf-8");
       default:
         throw new Error(
           `Unsupported file type: .${extensionLabel}. Please upload a PDF, DOCX, or TXT file.`,
@@ -52,4 +30,17 @@ export async function extractResumeTextFromFile(
       `Failed to extract text from ${input.fileName}. The file may be corrupted or in an unsupported format.`,
     );
   }
+}
+
+async function docxTextExtract(data: ArrayBuffer): Promise<string> {
+  const { extractText, getDocumentProxy } = await import("unpdf");
+  const pdf = await getDocumentProxy(new Uint8Array(data));
+  const { text } = await extractText(pdf, { mergePages: true });
+  return text;
+}
+
+async function pdfTextExtract(data: ArrayBuffer): Promise<string> {
+  const mammoth = await import("mammoth");
+  const result = await mammoth.extractRawText({ buffer: Buffer.from(data) });
+  return result.value;
 }
