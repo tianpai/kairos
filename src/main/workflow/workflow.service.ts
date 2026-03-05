@@ -301,13 +301,11 @@ export class WorkflowService {
 
     await new Promise<void>((resolve, reject) => {
       let settled = false;
-      let unsubscribeCompleted = () => {};
-      let unsubscribeFailed = () => {};
+      let unsubscribePushState = () => {};
 
       const cleanup = () => {
         clearTimeout(timeoutId);
-        unsubscribeCompleted();
-        unsubscribeFailed();
+        unsubscribePushState();
       };
 
       const resolveOnce = () => {
@@ -328,23 +326,22 @@ export class WorkflowService {
         rejectOnce(new Error(`Timed out waiting for task ${taskName}`));
       }, timeoutMs);
 
-      unsubscribeCompleted = onWorkflowEvent(
-        "workflow:taskCompleted",
-        (payload) => {
-          if (payload.jobId === jobId && payload.taskName === taskName) {
-            resolveOnce();
-          }
-        },
-      );
+      unsubscribePushState = onWorkflowEvent("workflow:pushState", (payload) => {
+        if (payload.jobId !== jobId || payload.type === "stateChanged") {
+          return;
+        }
 
-      unsubscribeFailed = onWorkflowEvent("workflow:taskFailed", (payload) => {
-        if (payload.jobId === jobId && payload.taskName === taskName) {
+        if (payload.type === "taskCompleted" && payload.taskName === taskName) {
+          resolveOnce();
+          return;
+        }
+
+        if (payload.type === "taskFailed" && payload.taskName === taskName) {
           rejectOnce(new Error(payload.error || `Task ${taskName} failed`));
         }
       });
 
-      const currentStatus =
-        this.engine.getWorkflow(jobId)?.taskStates[taskName];
+      const currentStatus = this.engine.getWorkflow(jobId)?.taskStates[taskName];
       if (currentStatus === "completed") {
         resolveOnce();
       } else if (currentStatus === "failed") {

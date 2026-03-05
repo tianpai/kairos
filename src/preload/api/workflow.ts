@@ -1,15 +1,12 @@
 import { ipcRenderer } from "electron";
 import type {
   WorkflowAiPartial,
-  WorkflowCompleted,
   WorkflowCreateApplicationsPayload,
   WorkflowCreateApplicationsResult,
   WorkflowGetStatePayload,
+  WorkflowPushState,
   WorkflowRetryPayload,
   WorkflowStartTailoringPayload,
-  WorkflowStateChanged,
-  WorkflowTaskCompleted,
-  WorkflowTaskFailed,
 } from "../../shared/type/workflow-ipc";
 import type { WorkflowStepsData } from "../../shared/type/workflow";
 
@@ -32,37 +29,13 @@ export const workflow = {
     payload: WorkflowGetStatePayload,
   ): Promise<{ workflow: WorkflowStepsData | null }> =>
     ipcRenderer.invoke("workflow:getState", payload),
-  onStateChanged: (
-    callback: (payload: WorkflowStateChanged) => void,
+  onPushState: (
+    callback: (payload: WorkflowPushState) => void,
   ): Unsubscribe => {
-    const handler = (_: unknown, payload: WorkflowStateChanged) =>
+    const handler = (_: unknown, payload: WorkflowPushState) =>
       callback(payload);
-    ipcRenderer.on("workflow:stateChanged", handler);
-    return () => ipcRenderer.removeListener("workflow:stateChanged", handler);
-  },
-  onTaskCompleted: (
-    callback: (payload: WorkflowTaskCompleted) => void,
-  ): Unsubscribe => {
-    const handler = (_: unknown, payload: WorkflowTaskCompleted) =>
-      callback(payload);
-    ipcRenderer.on("workflow:taskCompleted", handler);
-    return () => ipcRenderer.removeListener("workflow:taskCompleted", handler);
-  },
-  onTaskFailed: (
-    callback: (payload: WorkflowTaskFailed) => void,
-  ): Unsubscribe => {
-    const handler = (_: unknown, payload: WorkflowTaskFailed) =>
-      callback(payload);
-    ipcRenderer.on("workflow:taskFailed", handler);
-    return () => ipcRenderer.removeListener("workflow:taskFailed", handler);
-  },
-  onCompleted: (
-    callback: (payload: WorkflowCompleted) => void,
-  ): Unsubscribe => {
-    const handler = (_: unknown, payload: WorkflowCompleted) =>
-      callback(payload);
-    ipcRenderer.on("workflow:completed", handler);
-    return () => ipcRenderer.removeListener("workflow:completed", handler);
+    ipcRenderer.on("workflow:pushState", handler);
+    return () => ipcRenderer.removeListener("workflow:pushState", handler);
   },
   onAiPartial: (
     callback: (payload: WorkflowAiPartial) => void,

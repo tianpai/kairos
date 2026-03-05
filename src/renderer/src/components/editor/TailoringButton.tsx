@@ -6,8 +6,7 @@ import { useTailoringData } from '@hooks/useTailoringData'
 import { saveResume } from '@api/jobs'
 import {
   getWorkflowState,
-  onWorkflowCompleted,
-  onWorkflowTaskFailed,
+  onWorkflowPushState,
   startTailoring,
 } from '@api/workflow'
 import { CHECKLIST_MATCHING, RESUME_TAILORING } from '@type/task-names'
@@ -140,21 +139,16 @@ export function TailoringButton() {
   useEffect(() => {
     if (!jobId) return
 
-    const unsubscribeCompleted = onWorkflowCompleted((payload) => {
-      if (payload.jobId === jobId) {
-        setIsStarting(false)
-      }
-    })
+    const unsubscribePushState = onWorkflowPushState((payload) => {
+      if (payload.jobId !== jobId) return
 
-    const unsubscribeTaskFailed = onWorkflowTaskFailed((payload) => {
-      if (payload.jobId === jobId) {
+      if (payload.type === 'completed' || payload.type === 'taskFailed') {
         setIsStarting(false)
       }
     })
 
     return () => {
-      unsubscribeCompleted()
-      unsubscribeTaskFailed()
+      unsubscribePushState()
     }
   }, [jobId])
 

@@ -67,17 +67,8 @@ export function registerWorkflowHandlers(
     },
   );
 
-  onWorkflowEvent("workflow:stateChanged", (payload) =>
-    broadcast("workflow:stateChanged", payload),
-  );
-  onWorkflowEvent("workflow:taskCompleted", (payload) =>
-    broadcast("workflow:taskCompleted", payload),
-  );
-  onWorkflowEvent("workflow:taskFailed", (payload) =>
-    broadcast("workflow:taskFailed", payload),
-  );
-  onWorkflowEvent("workflow:completed", (payload) =>
-    broadcast("workflow:completed", payload),
+  onWorkflowEvent("workflow:pushState", (payload) =>
+    broadcast("workflow:pushState", payload),
   );
   onWorkflowEvent("workflow:aiPartial", (payload) =>
     broadcast("workflow:aiPartial", payload),

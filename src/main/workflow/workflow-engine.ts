@@ -192,7 +192,8 @@ export class WorkflowEngine {
   private emitStateChanged(jobId: string): void {
     const workflow = this.store.getWorkflow(jobId);
     if (!workflow) return;
-    emitWorkflowEvent("workflow:stateChanged", {
+    emitWorkflowEvent("workflow:pushState", {
+      type: "stateChanged",
       jobId,
       workflow: this.toWorkflowSteps(workflow),
     });
@@ -319,7 +320,8 @@ export class WorkflowEngine {
       await this.persistWorkflow(jobId, updatedWorkflow);
 
       // Emit completion event for renderer UI
-      emitWorkflowEvent("workflow:taskCompleted", {
+      emitWorkflowEvent("workflow:pushState", {
+        type: "taskCompleted",
         jobId,
         taskName,
         provides: task.provides,
@@ -396,7 +398,8 @@ export class WorkflowEngine {
           `[WorkflowEngine] Workflow '${workflowInstance.workflowName}' completed`,
         );
 
-        emitWorkflowEvent("workflow:completed", {
+        emitWorkflowEvent("workflow:pushState", {
+          type: "completed",
           jobId,
           workflowName: workflowInstance.workflowName,
           status: "completed",
@@ -438,7 +441,8 @@ export class WorkflowEngine {
     const failedWorkflow = this.store.getWorkflow(jobId)!;
     await this.persistWorkflow(jobId, failedWorkflow);
 
-    emitWorkflowEvent("workflow:taskFailed", {
+    emitWorkflowEvent("workflow:pushState", {
+      type: "taskFailed",
       jobId,
       taskName,
       error,

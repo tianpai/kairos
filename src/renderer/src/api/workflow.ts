@@ -2,15 +2,12 @@ import type { TaskName } from '@type/task-contracts'
 import type { WorkflowStepsData } from '@type/workflow'
 import type {
   WorkflowAiPartial,
-  WorkflowCompleted,
   WorkflowCreateApplicationsPayload,
   WorkflowCreateApplicationsResult,
   WorkflowGetStatePayload,
+  WorkflowPushState,
   WorkflowRetryPayload,
   WorkflowStartTailoringPayload,
-  WorkflowStateChanged,
-  WorkflowTaskCompleted,
-  WorkflowTaskFailed,
 } from '@type/workflow-ipc'
 
 type Unsubscribe = () => void
@@ -41,28 +38,10 @@ export async function getWorkflowState(
   return result.workflow ?? null
 }
 
-export function onWorkflowStateChanged(
-  callback: (payload: WorkflowStateChanged) => void,
+export function onWorkflowPushState(
+  callback: (payload: WorkflowPushState) => void,
 ): Unsubscribe {
-  return window.kairos.workflow.onStateChanged(callback)
-}
-
-export function onWorkflowTaskCompleted(
-  callback: (payload: WorkflowTaskCompleted) => void,
-): Unsubscribe {
-  return window.kairos.workflow.onTaskCompleted(callback)
-}
-
-export function onWorkflowTaskFailed(
-  callback: (payload: WorkflowTaskFailed) => void,
-): Unsubscribe {
-  return window.kairos.workflow.onTaskFailed(callback)
-}
-
-export function onWorkflowCompleted(
-  callback: (payload: WorkflowCompleted) => void,
-): Unsubscribe {
-  return window.kairos.workflow.onCompleted(callback)
+  return window.kairos.workflow.onPushState(callback)
 }
 
 export function onWorkflowAiPartial(

@@ -23,14 +23,8 @@ type WorkflowCreateApplicationsPayload =
   import("../shared/type/workflow-ipc").WorkflowCreateApplicationsPayload;
 type WorkflowCreateApplicationsResult =
   import("../shared/type/workflow-ipc").WorkflowCreateApplicationsResult;
-type WorkflowStateChanged =
-  import("../shared/type/workflow-ipc").WorkflowStateChanged;
-type WorkflowTaskCompleted =
-  import("../shared/type/workflow-ipc").WorkflowTaskCompleted;
-type WorkflowTaskFailed =
-  import("../shared/type/workflow-ipc").WorkflowTaskFailed;
-type WorkflowCompleted =
-  import("../shared/type/workflow-ipc").WorkflowCompleted;
+type WorkflowPushState =
+  import("../shared/type/workflow-ipc").WorkflowPushState;
 type WorkflowAiPartial =
   import("../shared/type/workflow-ipc").WorkflowAiPartial;
 type WorkflowStepsData = import("../shared/type/workflow").WorkflowStepsData;
@@ -134,16 +128,7 @@ interface KairosAPI {
     getState: (
       payload: WorkflowGetStatePayload,
     ) => Promise<{ workflow: WorkflowStepsData | null }>;
-    onStateChanged: (
-      callback: (payload: WorkflowStateChanged) => void,
-    ) => () => void;
-    onTaskCompleted: (
-      callback: (payload: WorkflowTaskCompleted) => void,
-    ) => () => void;
-    onTaskFailed: (
-      callback: (payload: WorkflowTaskFailed) => void,
-    ) => () => void;
-    onCompleted: (callback: (payload: WorkflowCompleted) => void) => () => void;
+    onPushState: (callback: (payload: WorkflowPushState) => void) => () => void;
     onAiPartial: (callback: (payload: WorkflowAiPartial) => void) => () => void;
   };
   updater: {

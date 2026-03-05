@@ -1,17 +1,11 @@
 import { EventEmitter } from "node:events";
 import type {
   WorkflowAiPartial,
-  WorkflowCompleted,
-  WorkflowStateChanged,
-  WorkflowTaskCompleted,
-  WorkflowTaskFailed,
+  WorkflowPushState,
 } from "@type/workflow-ipc";
 
 type WorkflowEventMap = {
-  "workflow:stateChanged": WorkflowStateChanged;
-  "workflow:taskCompleted": WorkflowTaskCompleted;
-  "workflow:taskFailed": WorkflowTaskFailed;
-  "workflow:completed": WorkflowCompleted;
+  "workflow:pushState": WorkflowPushState;
   "workflow:aiPartial": WorkflowAiPartial;
 };
 

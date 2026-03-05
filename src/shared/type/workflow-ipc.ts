@@ -73,6 +73,18 @@ export interface WorkflowCompleted {
   status: WorkflowStatus;
 }
 
+export type WorkflowPushStateType =
+  | "stateChanged"
+  | "taskCompleted"
+  | "taskFailed"
+  | "completed";
+
+export type WorkflowPushState =
+  | ({ type: "stateChanged" } & WorkflowStateChanged)
+  | ({ type: "taskCompleted" } & WorkflowTaskCompleted)
+  | ({ type: "taskFailed" } & WorkflowTaskFailed)
+  | ({ type: "completed" } & WorkflowCompleted);
+
 export interface WorkflowAiPartial {
   jobId: string;
   taskName: TaskName;
