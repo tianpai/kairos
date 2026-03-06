@@ -19,7 +19,6 @@ const EMPTY_SELECTED_KEYWORDS: string[] = []
 export function TailoringButton() {
   const {
     jobId,
-    jobApplication,
     checklist,
     resumeStructure,
     templateId,
@@ -37,12 +36,8 @@ export function TailoringButton() {
   )
   const [isStarting, setIsStarting] = useState(false)
 
-  const taskStates =
-    runtimeWorkflow?.taskStates ?? jobApplication?.workflowSteps?.taskStates
-  const workflowStatus =
-    runtimeWorkflow?.status ??
-    jobApplication?.workflowStatus ??
-    jobApplication?.workflowSteps?.status
+  const taskStates = runtimeWorkflow?.taskStates
+  const workflowStatus = runtimeWorkflow?.status
   const isWorkflowRunning = workflowStatus === 'running'
   const isTailoringResume = taskStates?.[RESUME_TAILORING] === 'running'
   const isMatchingTailoredResume =

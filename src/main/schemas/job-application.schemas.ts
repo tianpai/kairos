@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { ChecklistSchema } from "@type/checklist";
 import type {
   JobsCreateFromExistingPayload,
   JobsCreatePayload,
@@ -47,7 +48,7 @@ export const SaveTailoredResumeSchema = z.object({
 });
 
 export const SaveChecklistSchema = z.object({
-  checklist: z.record(z.string(), z.unknown()),
+  checklist: ChecklistSchema,
 });
 
 export const SaveMatchScoreSchema = z.object({

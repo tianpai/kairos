@@ -5,7 +5,8 @@ import { extractResumeTextFromFile } from "../../../utils/resume-text-extractor"
 import { WorkflowEngine } from "../engine/workflow-engine";
 import { onWorkflowEvent } from "../events/workflow-events";
 import { registerWorkflowTasks } from "../tasks";
-import type { AiPreferencesStore} from "../../ai";
+import { getWorkflowDetails } from "./workflow-read.model";
+import type { AiPreferencesStore } from "../../ai";
 import type {
   WorkflowBatchEntry,
   WorkflowCreateApplicationsPayload,
@@ -15,7 +16,9 @@ import type {
 import type { WorkflowStepsData } from "@type/workflow";
 import type { TaskName, WorkflowContext } from "@type/task-contracts";
 import type { Checklist } from "@type/checklist";
+import { JobNotFoundError } from "../../workspace";
 import type { WorkspaceApplicationService } from "../../workspace";
+import type { WorkspacePersistencePort } from "../../workspace/workspace.persistence";
 import "../definitions/workflows";
 
 const EXTRACTING_PLACEHOLDER = "Extracting...";
@@ -40,6 +43,7 @@ export class WorkflowService {
 
   constructor(
     private readonly jobService: WorkspaceApplicationService,
+    private readonly persistence: WorkspacePersistencePort,
     aiPreferences: AiPreferencesStore,
   ) {
     this.aiClient = new AITaskClient(aiPreferences);
@@ -70,10 +74,12 @@ export class WorkflowService {
       throw new Error("A workflow is already running for this job");
     }
 
-    const job = await this.jobService.getJobApplication(payload.jobId);
-    const checklist = job.checklist;
-    const resumeStructure = job.tailoredResume ?? job.parsedResume;
-    const templateId = job.templateId;
+    const [checklist, resume] = await Promise.all([
+      this.jobService.getChecklist(payload.jobId),
+      this.jobService.getResume(payload.jobId),
+    ]);
+    const resumeStructure = resume.tailoredResume ?? resume.parsedResume;
+    const templateId = resume.templateId;
 
     if (!checklist) {
       throw new Error("Checklist is missing for this job");
@@ -130,8 +136,7 @@ export class WorkflowService {
     const active = this.engine.getWorkflowSteps(jobId);
     if (active) return active;
 
-    const job = await this.jobService.getJobApplication(jobId);
-    const workflowSteps = job.workflowSteps;
+    const workflowSteps = this.getPersistedWorkflowSteps(jobId);
     if (!workflowSteps) return null;
 
     const { recovered, wasStale } =
@@ -145,6 +150,16 @@ export class WorkflowService {
     }
 
     return recovered;
+  }
+
+  private getPersistedWorkflowSteps(jobId: string): WorkflowStepsData | null {
+    const row = this.persistence.getWorkflowRecord(jobId);
+    if (!row) {
+      throw new JobNotFoundError(jobId);
+    }
+
+    const { workflowSteps } = getWorkflowDetails(row.workflowState);
+    return workflowSteps;
   }
 
   private requireParsedResume(
@@ -208,15 +223,15 @@ export class WorkflowService {
     });
 
     await this.waitForTask(firstResponse.id, RESUME_PARSING);
-    const firstJob = await this.jobService.getJobApplication(firstResponse.id);
+    const firstResume = await this.jobService.getResume(firstResponse.id);
     const parsedResume = this.requireParsedResume(
-      firstJob.parsedResume,
+      firstResume.parsedResume,
       "Resume parsing failed",
     );
 
     return {
       sourceJobId: firstResponse.id,
-      templateId: firstJob.templateId,
+      templateId: firstResume.templateId,
       parsedResume,
       entriesToClone,
       initialCreatedIds: [firstResponse.id],
@@ -229,17 +244,15 @@ export class WorkflowService {
       { resumeSource: "existing" }
     >,
   ): Promise<BatchSource> {
-    const sourceJob = await this.jobService.getJobApplication(
-      payload.sourceJobId,
-    );
+    const sourceResume = await this.jobService.getResume(payload.sourceJobId);
     const parsedResume = this.requireParsedResume(
-      sourceJob.parsedResume,
+      sourceResume.parsedResume,
       "Source has no parsed resume",
     );
 
     return {
       sourceJobId: payload.sourceJobId,
-      templateId: sourceJob.templateId,
+      templateId: sourceResume.templateId,
       parsedResume,
       entriesToClone: payload.entries,
       initialCreatedIds: [],
@@ -326,22 +339,29 @@ export class WorkflowService {
         rejectOnce(new Error(`Timed out waiting for task ${taskName}`));
       }, timeoutMs);
 
-      unsubscribePushState = onWorkflowEvent("workflow:pushState", (payload) => {
-        if (payload.jobId !== jobId || payload.type === "stateChanged") {
-          return;
-        }
+      unsubscribePushState = onWorkflowEvent(
+        "workflow:pushState",
+        (payload) => {
+          if (payload.jobId !== jobId || payload.type === "stateChanged") {
+            return;
+          }
 
-        if (payload.type === "taskCompleted" && payload.taskName === taskName) {
-          resolveOnce();
-          return;
-        }
+          if (
+            payload.type === "taskCompleted" &&
+            payload.taskName === taskName
+          ) {
+            resolveOnce();
+            return;
+          }
 
-        if (payload.type === "taskFailed" && payload.taskName === taskName) {
-          rejectOnce(new Error(payload.error || `Task ${taskName} failed`));
-        }
-      });
+          if (payload.type === "taskFailed" && payload.taskName === taskName) {
+            rejectOnce(new Error(payload.error || `Task ${taskName} failed`));
+          }
+        },
+      );
 
-      const currentStatus = this.engine.getWorkflow(jobId)?.taskStates[taskName];
+      const currentStatus =
+        this.engine.getWorkflow(jobId)?.taskStates[taskName];
       if (currentStatus === "completed") {
         resolveOnce();
       } else if (currentStatus === "failed") {

@@ -1,7 +1,7 @@
 import { ipcRenderer } from "electron";
 import type {
   JobApplication,
-  JobApplicationDetails,
+  JobApplicationSummary,
   JobsCreateFromExistingPayload,
   JobsCreatePayload,
   JobsCreateResult,
@@ -10,8 +10,7 @@ import type {
 } from "../../../shared/type/jobs-ipc";
 import type { IpcSuccessResponse } from "../../../shared/type/ipc";
 
-export const jobs = {
-  // CRUD
+const jobs = {
   create: (data: JobsCreatePayload): Promise<JobsCreateResult> =>
     ipcRenderer.invoke("jobs:create", data),
   createFromExisting: (
@@ -20,7 +19,7 @@ export const jobs = {
     ipcRenderer.invoke("jobs:createFromExisting", data),
   list: (query: JobsListQuery = {}): Promise<JobApplication[]> =>
     ipcRenderer.invoke("jobs:list", query),
-  get: (id: string): Promise<JobApplicationDetails> =>
+  get: (id: string): Promise<JobApplicationSummary> =>
     ipcRenderer.invoke("jobs:get", id),
   patch: (id: string, data: JobsPatchPayload): Promise<IpcSuccessResponse> =>
     ipcRenderer.invoke("jobs:patch", id, data),
@@ -28,6 +27,6 @@ export const jobs = {
     ipcRenderer.invoke("jobs:delete", id),
   deleteAll: (): Promise<IpcSuccessResponse> =>
     ipcRenderer.invoke("jobs:deleteAll"),
-  saveResume: (id: string, data: unknown): Promise<IpcSuccessResponse> =>
-    ipcRenderer.invoke("jobs:saveResume", id, data),
 };
+
+export { jobs };

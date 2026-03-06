@@ -1,7 +1,6 @@
-import type { JobApplicationDetails } from "@type/jobs-ipc";
-import type { WorkflowStatus } from "@type/workflow";
+import type { WorkflowStatus, WorkflowStepsData } from "@type/workflow";
 
-export type WorkflowState = Record<string, unknown>;
+type WorkflowState = Record<string, unknown>;
 
 function isWorkflowStatus(value: unknown): value is WorkflowStatus {
   return (
@@ -13,12 +12,12 @@ function isWorkflowStatus(value: unknown): value is WorkflowStatus {
 }
 
 export function getWorkflowDetails(state: WorkflowState | null): {
-  workflowSteps: JobApplicationDetails["workflowSteps"];
-  workflowStatus: JobApplicationDetails["workflowStatus"];
+  workflowSteps: WorkflowStepsData | null;
+  workflowStatus: WorkflowStatus | null;
 } {
-  const workflowSteps =
-    (state as JobApplicationDetails["workflowSteps"] | null) ?? null;
+  const workflowSteps = (state as WorkflowStepsData | null) ?? null;
   const status = workflowSteps?.status;
+
   return {
     workflowSteps,
     workflowStatus: isWorkflowStatus(status) ? status : null,

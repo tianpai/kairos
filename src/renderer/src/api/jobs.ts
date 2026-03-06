@@ -1,20 +1,29 @@
 import type {
   JobApplication,
-  JobApplicationDetails,
+  JobApplicationSummary,
   JobsCreateFromExistingPayload,
   JobsCreatePayload,
   JobsCreateResult,
   JobsListQuery,
   JobsPatchPayload,
 } from '@type/jobs-ipc'
+import type { Checklist } from '@type/checklist'
 import type { IpcSuccessResponse } from '@type/ipc'
+import type { WorkflowStepsData } from '@type/workflow'
 
 export type CreateJobApplicationPayload = JobsCreatePayload
 export type CreateFromExistingPayload = JobsCreateFromExistingPayload
 export type CreateJobApplicationResponse = JobsCreateResult
-export type { JobApplication, JobApplicationDetails } from '@type/jobs-ipc'
+export type { JobApplication, JobApplicationSummary } from '@type/jobs-ipc'
 
 export type PatchJobApplicationPayload = JobsPatchPayload
+export interface JobResumeRecord {
+  templateId: string
+  jobDescription: string | null
+  originalResume: string
+  parsedResume: Record<string, unknown> | null
+  tailoredResume: Record<string, unknown> | null
+}
 
 // CRUD operations
 
@@ -36,10 +45,23 @@ export async function listJobApplications(
   return window.kairos.jobs.list(query)
 }
 
-export async function getJobApplication(
+export function getJobApplicationSummary(
   id: string,
-): Promise<JobApplicationDetails> {
+): Promise<JobApplicationSummary> {
   return window.kairos.jobs.get(id)
+}
+
+export function getJobResume(id: string): Promise<JobResumeRecord> {
+  return window.kairos.resume.get(id)
+}
+
+export function getJobChecklist(id: string): Promise<Checklist | null> {
+  return window.kairos.checklist.get(id)
+}
+
+export async function getJobWorkflow(id: string): Promise<WorkflowStepsData | null> {
+  const result = await window.kairos.workflow.getState({ jobId: id })
+  return result.workflow ?? null
 }
 
 export async function deleteJobApplication(id: string): Promise<void> {
@@ -58,5 +80,5 @@ export async function saveResume(
   resumeStructure: Record<string, unknown>,
   templateId: string,
 ): Promise<IpcSuccessResponse> {
-  return window.kairos.jobs.saveResume(jobId, { resumeStructure, templateId })
+  return window.kairos.resume.save(jobId, { resumeStructure, templateId })
 }

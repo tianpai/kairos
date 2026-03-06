@@ -1,5 +1,6 @@
 import { Menu, app } from "electron";
 
+// TODO: consider drop App menu later
 export function createAppMenu() {
   const isMac = process.platform === "darwin";
 

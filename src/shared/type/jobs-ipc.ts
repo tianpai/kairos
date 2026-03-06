@@ -25,7 +25,7 @@ export interface JobsCreateResult {
   id: string;
 }
 
-export interface JobApplication {
+export interface JobSummary {
   id: string;
   companyName: string;
   position: string;
@@ -33,11 +33,14 @@ export interface JobApplication {
   matchPercentage: number;
   applicationStatus: string | null;
   jobUrl: string | null;
-  originalResume: string;
   pinned: number;
   pinnedAt: string | null;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface JobApplication extends JobSummary {
+  originalResume: string;
 }
 
 export interface FailedTaskInfo {
@@ -46,9 +49,10 @@ export interface FailedTaskInfo {
 
 export type FailedTasksMap = Record<string, FailedTaskInfo>;
 
-export interface JobApplicationDetails extends JobApplication {
+export interface JobApplicationDetails extends JobSummary {
   templateId: string;
   jobDescription: string | null;
+  originalResume: string;
   parsedResume: Record<string, unknown> | null;
   tailoredResume: Record<string, unknown> | null;
   checklist: Checklist | null;

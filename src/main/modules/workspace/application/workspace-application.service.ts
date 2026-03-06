@@ -1,8 +1,9 @@
 import { randomUUID } from "node:crypto";
-import { getWorkflowDetails } from "./application-read.model";
+import { ChecklistSchema } from "@type/checklist";
+import type { Checklist } from "@type/checklist";
 import type {
   JobApplication,
-  JobApplicationDetails,
+  JobSummary,
   JobsCreateResult,
 } from "@type/jobs-ipc";
 import type { IpcSuccessResponse } from "@type/ipc";
@@ -41,17 +42,34 @@ function toDateOnly(value: string): string {
 export class WorkspaceApplicationService {
   constructor(private readonly persistence: WorkspacePersistencePort) {}
 
+  private parseChecklist(
+    rawChecklist: Record<string, unknown> | null,
+  ): Checklist | null {
+    if (!rawChecklist) {
+      return null;
+    }
+
+    const parsed = ChecklistSchema.safeParse(rawChecklist);
+    if (!parsed.success) {
+      return null;
+    }
+
+    return parsed.data;
+  }
+
+  /**
+   * ensureJobExists checks if jobid exists and throw an error if not
+   */
   private ensureJobExists(jobId: string): void {
     if (!this.persistence.hasJob(jobId)) {
       throw new JobNotFoundError(jobId);
     }
   }
 
+  // FIX: remove it replace its usage with direct check instead
   private requireJobApplication(id: string): WorkspaceApplicationRecord {
     const row = this.persistence.getApplicationRecord(id);
-
     if (!row) throw new JobNotFoundError(id);
-
     return row;
   }
 
@@ -86,6 +104,7 @@ export class WorkspaceApplicationService {
   async createFromExisting(
     dto: CreateFromExistingInput,
   ): Promise<JobsCreateResult> {
+    // TODO: requireJobApplication is over fetching
     const sourceJob = this.requireJobApplication(dto.sourceJobId);
     const jobId = randomUUID();
     const now = nowISO();
@@ -115,19 +134,10 @@ export class WorkspaceApplicationService {
     return this.persistence.listApplications(archived);
   }
 
-  async getJobApplication(id: string): Promise<JobApplicationDetails> {
-    const job = this.requireJobApplication(id);
-    const { workflowSteps, workflowStatus } = getWorkflowDetails(
-      job.workflowState,
-    );
-
-    const failedTasks: JobApplicationDetails["failedTasks"] = {};
-    if (workflowSteps?.taskStates) {
-      Object.entries(workflowSteps.taskStates).forEach(([task, status]) => {
-        if (status === "failed") {
-          failedTasks[task] = { status: "failed" };
-        }
-      });
+  async getJobApplication(id: string): Promise<JobSummary> {
+    const job = this.persistence.getJobSummary(id);
+    if (!job) {
+      throw new JobNotFoundError(id);
     }
 
     return {
@@ -138,20 +148,79 @@ export class WorkspaceApplicationService {
       matchPercentage: job.matchPercentage ?? 0,
       applicationStatus: job.applicationStatus,
       jobUrl: job.jobUrl,
-      originalResume: job.originalResume ?? "",
       pinned: job.pinned,
       pinnedAt: job.pinnedAt,
       createdAt: job.createdAt,
       updatedAt: job.updatedAt,
-      templateId: job.templateId ?? "",
-      jobDescription: job.jobDescription,
-      parsedResume: job.parsedResume ?? null,
-      tailoredResume: job.tailoredResume ?? null,
-      checklist: (job.checklist as JobApplicationDetails["checklist"]) ?? null,
-      workflowStatus,
-      workflowSteps,
-      failedTasks,
     };
+  }
+
+  async getResume(jobId: string): Promise<{
+    templateId: string;
+    jobDescription: string | null;
+    originalResume: string;
+    parsedResume: Record<string, unknown> | null;
+    tailoredResume: Record<string, unknown> | null;
+  }> {
+    const resume = this.persistence.getResumeRecord(jobId);
+    if (!resume) {
+      throw new JobNotFoundError(jobId);
+    }
+
+    return {
+      templateId: resume.templateId ?? "",
+      jobDescription: resume.jobDescription,
+      originalResume: resume.originalResume ?? "",
+      parsedResume: resume.parsedResume ?? null,
+      tailoredResume: resume.tailoredResume ?? null,
+    };
+  }
+
+  async getTemplateId(jobId: string): Promise<string> {
+    const resume = this.persistence.getResumeRecord(jobId);
+    if (!resume) {
+      throw new JobNotFoundError(jobId);
+    }
+
+    return resume.templateId ?? "";
+  }
+
+  async getChecklist(jobId: string): Promise<Checklist | null> {
+    const row = this.persistence.getChecklistRecord(jobId);
+    if (!row) {
+      throw new JobNotFoundError(jobId);
+    }
+
+    return this.parseChecklist(row.checklist);
+  }
+
+  async getChecklistKw(jobId: string): Promise<string[]> {
+    const checklist = await this.getChecklist(jobId);
+    return checklist?.needTailoring ?? [];
+  }
+
+  async updateChecklistNeedTailoring(
+    jobId: string,
+    keywords: string[],
+  ): Promise<IpcSuccessResponse> {
+    const row = this.persistence.getChecklistRecord(jobId);
+    if (!row) {
+      throw new JobNotFoundError(jobId);
+    }
+
+    const checklist = this.parseChecklist(row.checklist);
+    if (!checklist) {
+      throw new Error("Checklist is missing for this job");
+    }
+
+    this.persistence.saveChecklist(jobId, {
+      checklist: {
+        ...checklist,
+        needTailoring: this.deduplicateKeywords(keywords),
+      },
+    });
+
+    return this.success();
   }
 
   async deleteJobApplication(id: string): Promise<IpcSuccessResponse> {
@@ -223,6 +292,7 @@ export class WorkspaceApplicationService {
     jobId: string,
     dto: PatchJobApplicationInput,
   ): Promise<IpcSuccessResponse> {
+    // TODO: requireJobApplication is overfetching only companyName is used
     const current = this.requireJobApplication(jobId);
     const updateData: WorkspaceJobUpdate = {
       updatedAt: nowISO(),
@@ -260,6 +330,13 @@ export class WorkspaceApplicationService {
     this.persistence.updateApplication(jobId, updateData, dto.jobDescription);
 
     return this.success();
+  }
+
+  private deduplicateKeywords(kw: string[]): string[] {
+    const s = new Set<string>();
+    return kw
+      .map((k) => k.trim())
+      .filter((k) => k && !s.has(k.toLowerCase()) && s.add(k.toLowerCase()));
   }
 }
 

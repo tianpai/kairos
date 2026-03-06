@@ -1,6 +1,7 @@
 type ThemeSource = import("../shared/type/theme").ThemeSource;
 type ThemeState = import("../shared/type/theme").ThemeState;
 type ProviderType = import("../shared/providers").ProviderType;
+type Checklist = import("../shared/type/checklist").Checklist;
 type BackupExportResult = import("../shared/backup").BackupExportResult;
 type BackupImportResult = import("../shared/backup").BackupImportResult;
 type UpdateState = import("../shared/updater").UpdateState;
@@ -9,8 +10,8 @@ type JobsCreateFromExistingPayload =
 type JobsCreatePayload = import("../shared/type/jobs-ipc").JobsCreatePayload;
 type JobsCreateResult = import("../shared/type/jobs-ipc").JobsCreateResult;
 type JobApplication = import("../shared/type/jobs-ipc").JobApplication;
-type JobApplicationDetails =
-  import("../shared/type/jobs-ipc").JobApplicationDetails;
+type JobApplicationSummary =
+  import("../shared/type/jobs-ipc").JobApplicationSummary;
 type JobsListQuery = import("../shared/type/jobs-ipc").JobsListQuery;
 type JobsPatchPayload = import("../shared/type/jobs-ipc").JobsPatchPayload;
 type WorkflowRetryPayload =
@@ -33,6 +34,15 @@ type IpcSuccessResponse = import("../shared/type/ipc").IpcSuccessResponse;
 interface ModelInfo {
   id: string;
   name: string;
+}
+
+// TODO: duplicated interface -> use one interface in shared/
+interface ResumeGetResult {
+  templateId: string;
+  jobDescription: string | null;
+  originalResume: string;
+  parsedResume: Record<string, unknown> | null;
+  tailoredResume: Record<string, unknown> | null;
 }
 
 interface KairosAPI {
@@ -78,17 +88,25 @@ interface KairosAPI {
     getInfo: () => Promise<{ port: number; baseURL: string; wsURL: string }>;
   };
   jobs: {
-    // CRUD
     create: (data: JobsCreatePayload) => Promise<JobsCreateResult>;
     createFromExisting: (
       data: JobsCreateFromExistingPayload,
     ) => Promise<JobsCreateResult>;
     list: (query?: JobsListQuery) => Promise<JobApplication[]>;
-    get: (id: string) => Promise<JobApplicationDetails>;
+    get: (id: string) => Promise<JobApplicationSummary>;
     patch: (id: string, data: JobsPatchPayload) => Promise<IpcSuccessResponse>;
     delete: (id: string) => Promise<IpcSuccessResponse>;
     deleteAll: () => Promise<IpcSuccessResponse>;
-    saveResume: (id: string, data: unknown) => Promise<IpcSuccessResponse>;
+  };
+  checklist: {
+    get: (id: string) => Promise<Checklist | null>;
+    getKw: (id: string) => Promise<string[]>;
+    updateKw: (id: string, keywords: string[]) => Promise<IpcSuccessResponse>;
+  };
+  resume: {
+    get: (id: string) => Promise<ResumeGetResult>;
+    save: (id: string, data: unknown) => Promise<IpcSuccessResponse>;
+    getTemplateId: (id: string) => Promise<string>;
   };
   workflow: {
     startTailoring: (

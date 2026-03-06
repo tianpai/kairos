@@ -7,6 +7,7 @@ import {
   scores,
   workflows,
 } from "../persistence";
+import type { Checklist } from "@type/checklist";
 import type { PersistenceSchema } from "../persistence";
 import type { BetterSQLite3Database } from "drizzle-orm/better-sqlite3";
 import type { JobApplication } from "@type/jobs-ipc";
@@ -17,7 +18,6 @@ import type {
   SaveTailoredResumeInput,
   SaveWorkflowStateInput,
 } from "../../schemas/job-application.schemas";
-import type { WorkflowState } from "./application/application-read.model";
 
 type Database = BetterSQLite3Database<PersistenceSchema>;
 type Transaction = Parameters<Database["transaction"]>[0] extends (
@@ -26,6 +26,7 @@ type Transaction = Parameters<Database["transaction"]>[0] extends (
 ) => unknown
   ? T
   : never;
+type WorkflowState = Record<string, unknown>;
 
 export interface WorkspaceApplicationRecord {
   id: string;
@@ -51,6 +52,40 @@ export interface WorkspaceApplicationRecord {
   checklist: Record<string, unknown> | null;
   matchPercentage: number | null;
   workflowState: WorkflowState | null;
+}
+
+// TODO: it seems duplicated again and again
+export interface ResumeRecord {
+  templateId: string | null;
+  originalResume: string | null;
+  parsedResume: Record<string, unknown> | null;
+  tailoredResume: Record<string, unknown> | null;
+  jobDescription: string | null;
+}
+
+// TODO: use more specific checklist type in shared/
+export interface WorkspaceChecklistRecord {
+  checklist: Checklist | null;
+}
+
+// TODO: probably duplicated interface type
+export interface WorkspaceWorkflowRecord {
+  workflowState: WorkflowState | null;
+}
+
+// TODO: make sure no duplicate type declaration
+export interface WorkspaceJobSummaryRecord {
+  id: string;
+  companyName: string;
+  position: string;
+  dueDate: string;
+  matchPercentage: number | null;
+  applicationStatus: string | null;
+  jobUrl: string | null;
+  pinned: number;
+  pinnedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface WorkspaceInsertApplicationInput {
@@ -84,6 +119,10 @@ export interface WorkspaceJobUpdate {
 export interface WorkspacePersistencePort {
   hasJob: (id: string) => boolean;
   getApplicationRecord: (id: string) => WorkspaceApplicationRecord | undefined;
+  getResumeRecord: (id: string) => ResumeRecord | undefined;
+  getChecklistRecord: (id: string) => WorkspaceChecklistRecord | undefined;
+  getWorkflowRecord: (id: string) => WorkspaceWorkflowRecord | undefined;
+  getJobSummary: (id: string) => WorkspaceJobSummaryRecord | undefined;
   listApplications: (archived: boolean) => JobApplication[];
   insertApplication: (input: WorkspaceInsertApplicationInput) => void;
   deleteApplication: (id: string) => void;
@@ -160,6 +199,113 @@ export class WorkspacePersistence implements WorkspacePersistencePort {
       .get();
 
     return row as WorkspaceApplicationRecord | undefined;
+  }
+
+  getResumeRecord(id: string): ResumeRecord | undefined {
+    const row = this.db
+      .select({
+        id: jobs.id,
+        templateId: resumes.templateId,
+        originalResume: resumes.originalResume,
+        parsedResume: resumes.parsedResume,
+        tailoredResume: resumes.tailoredResume,
+        jobDescription: checklists.jobDescription,
+      })
+      .from(jobs)
+      .leftJoin(resumes, eq(resumes.jobId, jobs.id))
+      .leftJoin(checklists, eq(checklists.jobId, jobs.id))
+      .where(eq(jobs.id, id))
+      .get();
+
+    if (!row) {
+      return undefined;
+    }
+
+    return {
+      templateId: row.templateId ?? null,
+      originalResume: row.originalResume ?? null,
+      parsedResume: row.parsedResume ?? null,
+      tailoredResume: row.tailoredResume ?? null,
+      jobDescription: row.jobDescription ?? null,
+    };
+  }
+
+  getChecklistRecord(id: string): WorkspaceChecklistRecord | undefined {
+    const row = this.db
+      .select({
+        id: jobs.id,
+        checklist: checklists.checklist,
+      })
+      .from(jobs)
+      .leftJoin(checklists, eq(checklists.jobId, jobs.id))
+      .where(eq(jobs.id, id))
+      .get();
+
+    if (!row) {
+      return undefined;
+    }
+
+    return { checklist: row.checklist ?? null };
+  }
+
+  getWorkflowRecord(id: string): WorkspaceWorkflowRecord | undefined {
+    const row = this.db
+      .select({
+        id: jobs.id,
+        workflowState: workflows.state,
+      })
+      .from(jobs)
+      .leftJoin(workflows, eq(workflows.jobId, jobs.id))
+      .where(eq(jobs.id, id))
+      .get();
+
+    if (!row) {
+      return undefined;
+    }
+
+    return {
+      workflowState: (row.workflowState as WorkflowState | null) ?? null,
+    };
+  }
+
+  getJobSummary(id: string): WorkspaceJobSummaryRecord | undefined {
+    const row = this.db
+      .select({
+        id: jobs.id,
+        companyName: companies.name,
+        position: jobs.position,
+        dueDate: jobs.dueDate,
+        matchPercentage: scores.matchPercentage,
+        applicationStatus: jobs.applicationStatus,
+        jobUrl: jobs.jobUrl,
+        pinned: jobs.pinned,
+        pinnedAt: jobs.pinnedAt,
+        createdAt: jobs.createdAt,
+        updatedAt: jobs.updatedAt,
+      })
+      .from(jobs)
+      .innerJoin(companies, eq(jobs.companyId, companies.id))
+      .leftJoin(scores, eq(scores.jobId, jobs.id))
+      .where(eq(jobs.id, id))
+      .get();
+
+    if (!row) {
+      return undefined;
+    }
+
+    return {
+      id: row.id,
+      companyName: row.companyName,
+      position: row.position,
+      dueDate: row.dueDate,
+      matchPercentage: row.matchPercentage ?? null,
+      applicationStatus: row.applicationStatus,
+      jobUrl: row.jobUrl,
+      pinned: row.pinned,
+      pinnedAt: row.pinnedAt,
+      createdAt: row.createdAt,
+      updatedAt: row.updatedAt,
+    };
   }
 
   listApplications(archived: boolean): JobApplication[] {

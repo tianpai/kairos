@@ -1,6 +1,6 @@
 import { useSearch } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
-import { getJobApplication } from '@api/jobs'
+import { getJobApplicationSummary, getJobResume } from '@api/jobs'
 import { useSyncJobApplicationToStore } from '@hooks/useSyncJobApplicationToStore'
 import ResumeRender from '@editor/ResumeRender'
 import ResumeForm from '@resumeForm/ResumeForm'
@@ -21,21 +21,24 @@ export default function EditorPage() {
     preview: showChecklist ? 'col-span-4' : 'col-span-5',
   }
 
-  // Fetch selected application details
-  const { data: jobApplication } = useQuery({
-    queryKey: ['jobApplication', jobId],
-    queryFn: function () {
-      return getJobApplication(jobId!)
-    },
+  const { data: jobSummary } = useQuery({
+    queryKey: ['jobSummary', jobId],
+    queryFn: () => getJobApplicationSummary(jobId!),
+    enabled: !!jobId,
+  })
+
+  const { data: jobResume } = useQuery({
+    queryKey: ['jobResume', jobId],
+    queryFn: () => getJobResume(jobId!),
     enabled: !!jobId,
   })
 
   // Sync job application data to store (templateId + tailored resume)
-  useSyncJobApplicationToStore(jobApplication)
+  useSyncJobApplicationToStore(jobResume)
 
   return (
     <AppLayout
-      header={<EditorHeader jobId={jobId} jobApplication={jobApplication} />}
+      header={<EditorHeader jobId={jobId} jobApplication={jobSummary} />}
     >
       <div className="relative grid h-full grid-cols-8 overflow-hidden">
         <div className={`h-full overflow-hidden ${gridClasses.form}`}>

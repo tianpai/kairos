@@ -1,5 +1,6 @@
 import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 import { relations } from "drizzle-orm";
+import type { Checklist as SharedChecklist } from "@type/checklist";
 
 // Companies table
 export const companies = sqliteTable("companies", {
@@ -54,10 +55,7 @@ export const checklists = sqliteTable("checklists", {
     .references(() => jobs.id, { onDelete: "cascade" })
     .unique(),
   jobDescription: text("job_description"),
-  checklist: text("checklist", { mode: "json" }).$type<Record<
-    string,
-    unknown
-  > | null>(),
+  checklist: text("checklist", { mode: "json" }).$type<SharedChecklist | null>(),
 });
 
 // Score table

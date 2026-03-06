@@ -13,7 +13,16 @@ function invalidateJob(
   jobId: string,
 ) {
   queryClient.invalidateQueries({
-    queryKey: ['jobApplication', jobId],
+    queryKey: ['jobSummary', jobId],
+  })
+  queryClient.invalidateQueries({
+    queryKey: ['jobResume', jobId],
+  })
+  queryClient.invalidateQueries({
+    queryKey: ['jobChecklist', jobId],
+  })
+  queryClient.invalidateQueries({
+    queryKey: ['jobWorkflow', jobId],
   })
 }
 

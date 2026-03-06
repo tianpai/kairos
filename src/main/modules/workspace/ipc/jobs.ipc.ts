@@ -5,16 +5,11 @@ import {
   CreateJobApplicationSchema,
   ListJobsSchema,
   PatchJobApplicationSchema,
-  SaveResumeSchema,
 } from "../../../schemas/job-application.schemas";
 import { guardedHandle as handle } from "../../runtime/ipc";
 import type { WorkspaceApplicationService } from "../application/workspace-application.service";
 
-export function registerJobsHandlers(
-  service: WorkspaceApplicationService,
-): void {
-  // CRUD handlers
-
+export function jobIPC(service: WorkspaceApplicationService): void {
   handle("jobs:create", async (_, data: unknown) => {
     try {
       const validated = CreateJobApplicationSchema.parse(data);
@@ -63,6 +58,18 @@ export function registerJobsHandlers(
     }
   });
 
+  handle("jobs:patch", async (_, id: string, data: unknown) => {
+    const validated = PatchJobApplicationSchema.parse(data);
+    try {
+      return await service.patchJobApplication(id, validated);
+    } catch (error) {
+      if (error instanceof JobNotFoundError) {
+        throw new Error(error.message);
+      }
+      throw error;
+    }
+  });
+
   handle("jobs:delete", async (_, id: string) => {
     try {
       const result = await service.deleteJobApplication(id);
@@ -85,23 +92,6 @@ export function registerJobsHandlers(
       return result;
     } catch (error) {
       log.error("jobs:deleteAll failed", error);
-      throw error;
-    }
-  });
-
-  handle("jobs:saveResume", async (_, id: string, data: unknown) => {
-    const validated = SaveResumeSchema.parse(data);
-    return service.saveResume(id, validated);
-  });
-
-  handle("jobs:patch", async (_, id: string, data: unknown) => {
-    const validated = PatchJobApplicationSchema.parse(data);
-    try {
-      return await service.patchJobApplication(id, validated);
-    } catch (error) {
-      if (error instanceof JobNotFoundError) {
-        throw new Error(error.message);
-      }
       throw error;
     }
   });

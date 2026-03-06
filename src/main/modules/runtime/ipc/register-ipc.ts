@@ -2,7 +2,9 @@ import { getDatabase } from "../../persistence";
 import {
   WorkspaceApplicationService,
   WorkspacePersistence,
-  registerJobsHandlers,
+  checklistIPC,
+  jobIPC,
+  resumeIPC,
 } from "../../workspace";
 import { WorkflowService, registerWorkflowHandlers } from "../../workflow";
 import {
@@ -31,10 +33,13 @@ export function registerIpcHandlers(deps: RuntimeIpcDependencies): void {
   );
   const workflowService = new WorkflowService(
     workspaceService,
+    workspacePersistence,
     deps.aiPreferences,
   );
 
-  registerJobsHandlers(workspaceService);
+  jobIPC(workspaceService);
+  resumeIPC(workspaceService);
+  checklistIPC(workspaceService);
   registerDialogHandlers();
   registerFsHandlers();
   registerAIServerHandlers();
