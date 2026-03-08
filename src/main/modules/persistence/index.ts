@@ -4,7 +4,8 @@ export {
   LegacyUpgradeRequiredError,
   V1_LEGACY,
   V2_SPLIT,
-  V3_SPLIT_CLEAN,
+  V4_COMPANY_INLINE,
+  V5_CLEAN,
   connectDatabase,
   disconnectDatabase,
   getDatabase,
@@ -20,7 +21,6 @@ export {
   isBackupImportInProgress,
 } from "./backup/backup-archive.service";
 export * from "./db/schema";
-export { CompanyRepository } from "./repositories/company.repository";
 export type PersistenceSchema = typeof schema;
 
 export {

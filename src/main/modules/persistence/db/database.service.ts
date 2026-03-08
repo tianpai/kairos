@@ -9,6 +9,8 @@ import type { BetterSQLite3Database } from "drizzle-orm/better-sqlite3";
 export const V1_LEGACY = 1;
 export const V2_SPLIT = 2;
 export const V3_SPLIT_CLEAN = 3;
+export const V4_COMPANY_INLINE = 4;
+export const V5_CLEAN = 5;
 
 const LEGACY_TABLE = "job_applications";
 const TARGET_SCHEMA_ENV = "KAIROS_DB_TARGET_SCHEMA_VERSION";
@@ -37,7 +39,7 @@ export function getTargetSchemaVersion(): number {
     if (
       Number.isInteger(parsed) &&
       parsed >= V2_SPLIT &&
-      parsed <= V3_SPLIT_CLEAN
+      parsed <= V5_CLEAN
     ) {
       return parsed;
     }
@@ -49,15 +51,15 @@ export function getTargetSchemaVersion(): number {
 
   if (Number.isInteger(major) && Number.isInteger(minor)) {
     if (major > 0 || minor >= 4) {
-      return V3_SPLIT_CLEAN;
+      return V5_CLEAN;
     }
   }
 
-  return V2_SPLIT;
+  return V4_COMPANY_INLINE;
 }
 
 export function supportsLegacyBackupImport(): boolean {
-  return getTargetSchemaVersion() < V3_SPLIT_CLEAN;
+  return getTargetSchemaVersion() < V5_CLEAN;
 }
 
 export function getDatabase(): BetterSQLite3Database<typeof schema> {
@@ -105,19 +107,11 @@ function countRows(tableName: string): number {
 function createSplitTables(): void {
   if (!sqlite) throw new Error("Database not initialized");
 
-  // Companies table
-  sqlite.exec(`
-    CREATE TABLE IF NOT EXISTS companies (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT NOT NULL UNIQUE
-    )
-  `);
-
   // Jobs table (metadata only)
   sqlite.exec(`
     CREATE TABLE IF NOT EXISTS jobs (
       id TEXT PRIMARY KEY,
-      company_id INTEGER NOT NULL,
+      company_name TEXT NOT NULL DEFAULT '',
       position TEXT NOT NULL,
       due_date TEXT NOT NULL,
       job_url TEXT,
@@ -129,8 +123,7 @@ function createSplitTables(): void {
       status_updated_at TEXT,
       interview_date TEXT,
       created_at TEXT NOT NULL,
-      updated_at TEXT NOT NULL,
-      FOREIGN KEY (company_id) REFERENCES companies(id) ON DELETE CASCADE
+      updated_at TEXT NOT NULL
     )
   `);
 
@@ -179,7 +172,6 @@ function createSplitTables(): void {
   `);
 
   // Indexes for jobs list and joins
-  sqlite.exec(`CREATE INDEX IF NOT EXISTS idx_jobs_company_id ON jobs(company_id)`);
   sqlite.exec(`CREATE INDEX IF NOT EXISTS idx_jobs_created_at ON jobs(created_at)`);
   sqlite.exec(
     `CREATE INDEX IF NOT EXISTS idx_resumes_job_id ON resumes(job_id)`,
@@ -286,13 +278,17 @@ function migrateLegacyToSplit(): void {
   const migrate = sqliteDb.transaction(() => {
     sqliteDb.exec(`
       INSERT INTO jobs (
-        id, company_id, position, due_date, job_url, status, application_status,
+        id, company_name, position, due_date, job_url, status, application_status,
         archived, pinned, pinned_at, status_updated_at, interview_date, created_at, updated_at
       )
       SELECT
-        id, company_id, position, due_date, job_url, status, application_status,
-        archived, pinned, pinned_at, status_updated_at, interview_date, created_at, updated_at
-      FROM job_applications
+        ja.id,
+        COALESCE(c.name, ''),
+        ja.position, ja.due_date, ja.job_url, ja.status, ja.application_status,
+        ja.archived, ja.pinned, ja.pinned_at, ja.status_updated_at, ja.interview_date,
+        ja.created_at, ja.updated_at
+      FROM job_applications ja
+      LEFT JOIN companies c ON ja.company_id = c.id
     `);
 
     sqliteDb.exec(`
@@ -352,9 +348,95 @@ function migrateLegacyToSplit(): void {
   migrate();
 }
 
+function createCompaniesTableForMigration(): void {
+  if (!sqlite) throw new Error("Database not initialized");
+  sqlite.exec(`
+    CREATE TABLE IF NOT EXISTS companies (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL UNIQUE
+    )
+  `);
+}
+
+function columnExists(table: string, column: string): boolean {
+  if (!sqlite) throw new Error("Database not initialized");
+  const columns = sqlite.pragma(`table_info(${table})`) as { name: string }[];
+  return columns.some((col) => col.name === column);
+}
+
+function migrateCompanyInline(): void {
+  if (!sqlite) throw new Error("Database not initialized");
+  const sqliteDb = sqlite;
+
+  addColumnIfNotExists("jobs", "company_name", "TEXT NOT NULL DEFAULT ''");
+
+  if (!columnExists("jobs", "company_id")) {
+    log.info("Migration V2→V4: company_id already removed, skipping");
+    setUserVersion(V4_COMPANY_INLINE);
+    return;
+  }
+
+  sqliteDb.exec(`
+    UPDATE jobs SET company_name = (
+      SELECT name FROM companies WHERE companies.id = jobs.company_id
+    ) WHERE company_name = ''
+  `);
+
+  sqliteDb.pragma("foreign_keys = OFF");
+
+  try {
+    const migrate = sqliteDb.transaction(() => {
+      sqliteDb.exec(`
+        CREATE TABLE jobs_new (
+          id TEXT PRIMARY KEY,
+          company_name TEXT NOT NULL DEFAULT '',
+          position TEXT NOT NULL,
+          due_date TEXT NOT NULL,
+          job_url TEXT,
+          status TEXT NOT NULL DEFAULT 'active',
+          application_status TEXT,
+          archived INTEGER NOT NULL DEFAULT 0,
+          pinned INTEGER NOT NULL DEFAULT 0,
+          pinned_at TEXT,
+          status_updated_at TEXT,
+          interview_date TEXT,
+          created_at TEXT NOT NULL,
+          updated_at TEXT NOT NULL
+        )
+      `);
+
+      sqliteDb.exec(`
+        INSERT INTO jobs_new (
+          id, company_name, position, due_date, job_url, status, application_status,
+          archived, pinned, pinned_at, status_updated_at, interview_date, created_at, updated_at
+        )
+        SELECT
+          id, company_name, position, due_date, job_url, status, application_status,
+          archived, pinned, pinned_at, status_updated_at, interview_date, created_at, updated_at
+        FROM jobs
+      `);
+
+      sqliteDb.exec("DROP TABLE jobs");
+      sqliteDb.exec("ALTER TABLE jobs_new RENAME TO jobs");
+      sqliteDb.exec("CREATE INDEX IF NOT EXISTS idx_jobs_created_at ON jobs(created_at)");
+
+      setUserVersion(V4_COMPANY_INLINE);
+    });
+
+    migrate();
+  } finally {
+    sqliteDb.pragma("foreign_keys = ON");
+  }
+}
+
 function dropLegacyTable(): void {
   if (!sqlite) throw new Error("Database not initialized");
   sqlite.exec(`DROP TABLE IF EXISTS ${LEGACY_TABLE}`);
+}
+
+function dropCompaniesTable(): void {
+  if (!sqlite) throw new Error("Database not initialized");
+  sqlite.exec("DROP TABLE IF EXISTS companies");
 }
 
 export async function runMigrations(): Promise<void> {
@@ -382,21 +464,29 @@ export async function runMigrations(): Promise<void> {
   }
 
   if (currentVersion < V2_SPLIT && hasLegacyTableBefore) {
-    if (targetSchemaVersion >= V3_SPLIT_CLEAN) {
+    if (targetSchemaVersion >= V5_CLEAN) {
       throw new LegacyUpgradeRequiredError();
     }
 
+    createCompaniesTableForMigration();
     patchLegacyColumnsForMigration();
     migrateLegacyToSplit();
     currentVersion = V2_SPLIT;
     log.info("Migrated schema v1 -> v2 (legacy table retained)");
   }
 
-  if (targetSchemaVersion >= V3_SPLIT_CLEAN && currentVersion === V2_SPLIT) {
+  if (currentVersion >= V2_SPLIT && currentVersion < V4_COMPANY_INLINE) {
+    migrateCompanyInline();
+    currentVersion = V4_COMPANY_INLINE;
+    log.info("Migrated schema v2 -> v4 (company inlined into jobs)");
+  }
+
+  if (targetSchemaVersion >= V5_CLEAN && currentVersion < V5_CLEAN) {
     dropLegacyTable();
-    setUserVersion(V3_SPLIT_CLEAN);
-    currentVersion = V3_SPLIT_CLEAN;
-    log.info("Migrated schema v2 -> v3 (legacy table dropped)");
+    dropCompaniesTable();
+    setUserVersion(V5_CLEAN);
+    currentVersion = V5_CLEAN;
+    log.info("Migrated schema v4 -> v5 (legacy + companies tables dropped)");
   }
 
   if (currentVersion === 0) {

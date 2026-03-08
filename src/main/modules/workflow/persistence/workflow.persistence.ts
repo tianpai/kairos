@@ -3,7 +3,6 @@ import { eq } from "drizzle-orm";
 import { ChecklistSchema } from "@type/checklist";
 import {
   checklists,
-  companies,
   jobs,
   resumes,
   scores,
@@ -139,6 +138,7 @@ export class WorkflowPersistence implements WorkflowPersistencePort {
     });
   }
 
+  // TODO: replace it with direct repo.ts resume methods
   getResume(jobId: string): ResumeData {
     const row = this.db
       .select({
@@ -168,6 +168,7 @@ export class WorkflowPersistence implements WorkflowPersistencePort {
     };
   }
 
+  // TODO: replace it with direct repo.ts resume methods
   getChecklist(jobId: string): Checklist | null {
     const row = this.db
       .select({
@@ -191,11 +192,12 @@ export class WorkflowPersistence implements WorkflowPersistencePort {
     return parsed.success ? parsed.data : null;
   }
 
+  // TODO: replace it with direct repo.ts job findById methods
   getJobSummary(jobId: string): JobSummary {
     const row = this.db
       .select({
         id: jobs.id,
-        companyName: companies.name,
+        companyName: jobs.companyName,
         position: jobs.position,
         dueDate: jobs.dueDate,
         matchPercentage: scores.matchPercentage,
@@ -207,7 +209,6 @@ export class WorkflowPersistence implements WorkflowPersistencePort {
         updatedAt: jobs.updatedAt,
       })
       .from(jobs)
-      .innerJoin(companies, eq(jobs.companyId, companies.id))
       .leftJoin(scores, eq(scores.jobId, jobs.id))
       .where(eq(jobs.id, jobId))
       .get();
@@ -234,13 +235,12 @@ export class WorkflowPersistence implements WorkflowPersistencePort {
   createJobApplication(dto: CreateJobApplicationInput): JobsCreateResult {
     const jobId = randomUUID();
     const now = nowISO();
-    const companyId = this.getOrCreateCompanyId(dto.companyName);
 
     this.db.transaction((tx) => {
       tx.insert(jobs)
         .values({
           id: jobId,
-          companyId,
+          companyName: dto.companyName,
           position: dto.position,
           dueDate: dto.dueDate,
           jobUrl: dto.jobUrl ?? null,
@@ -298,13 +298,12 @@ export class WorkflowPersistence implements WorkflowPersistencePort {
 
     const jobId = randomUUID();
     const now = nowISO();
-    const companyId = this.getOrCreateCompanyId(dto.companyName);
 
     this.db.transaction((tx) => {
       tx.insert(jobs)
         .values({
           id: jobId,
-          companyId,
+          companyName: dto.companyName,
           position: dto.position,
           dueDate: dto.dueDate,
           jobUrl: dto.jobUrl ?? null,
@@ -345,6 +344,7 @@ export class WorkflowPersistence implements WorkflowPersistencePort {
     return { id: jobId };
   }
 
+  // TODO: use repo.ts resme updateByid
   saveParsedResume(jobId: string, dto: SaveParsedResumeInput): void {
     this.runJobMutation(jobId, (tx) => {
       tx.update(resumes)
@@ -357,6 +357,7 @@ export class WorkflowPersistence implements WorkflowPersistencePort {
     });
   }
 
+  // TODO: use repo.ts resme updateByid
   saveTailoredResume(jobId: string, dto: SaveTailoredResumeInput): void {
     this.runJobMutation(jobId, (tx) => {
       tx.update(resumes)
@@ -366,6 +367,7 @@ export class WorkflowPersistence implements WorkflowPersistencePort {
     });
   }
 
+  // TODO: use repo.ts resme updateByid
   saveChecklist(jobId: string, dto: SaveChecklistInput): void {
     this.runJobMutation(jobId, (tx) => {
       tx.update(checklists)
@@ -375,6 +377,7 @@ export class WorkflowPersistence implements WorkflowPersistencePort {
     });
   }
 
+  // TODO: use repo.ts resme updateByid
   saveMatchScore(jobId: string, matchPercentage: number): void {
     this.runJobMutation(jobId, (tx) => {
       tx.update(scores)
@@ -396,16 +399,7 @@ export class WorkflowPersistence implements WorkflowPersistencePort {
     const jobUpdate: Record<string, unknown> = { updatedAt: nowISO() };
 
     if (updates.companyName !== undefined) {
-      const current = this.db
-        .select({ companyName: companies.name })
-        .from(jobs)
-        .innerJoin(companies, eq(jobs.companyId, companies.id))
-        .where(eq(jobs.id, jobId))
-        .get();
-
-      if (current && current.companyName !== updates.companyName) {
-        jobUpdate.companyId = this.getOrCreateCompanyId(updates.companyName);
-      }
+      jobUpdate.companyName = updates.companyName;
     }
     if (updates.position !== undefined) {
       jobUpdate.position = updates.position;
@@ -418,20 +412,6 @@ export class WorkflowPersistence implements WorkflowPersistencePort {
     }
 
     this.db.update(jobs).set(jobUpdate).where(eq(jobs.id, jobId)).run();
-  }
-
-  private getOrCreateCompanyId(name: string): number {
-    const existing = this.db
-      .select({ id: companies.id })
-      .from(companies)
-      .where(eq(companies.name, name))
-      .get();
-
-    if (existing) {
-      return existing.id;
-    }
-
-    return this.db.insert(companies).values({ name }).returning().get().id;
   }
 
   private runJobMutation(

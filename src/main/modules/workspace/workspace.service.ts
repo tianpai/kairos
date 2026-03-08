@@ -1,10 +1,8 @@
 import { ChecklistSchema } from "@type/checklist";
 import {
   ChecklistRepository,
-  CompanyRepository,
   JobRepository,
   ResumeRepository,
-  companies,
   jobs,
 } from "../persistence";
 import type { Checklist } from "@type/checklist";
@@ -41,7 +39,6 @@ class WorkspaceService {
       job: new JobRepository(db),
       resume: new ResumeRepository(db),
       checklist: new ChecklistRepository(db),
-      company: new CompanyRepository(db),
     };
   }
 
@@ -164,10 +161,7 @@ class WorkspaceService {
   }
 
   deleteAllJobApplications(): IpcSuccessResponse {
-    this.db.transaction((tx) => {
-      tx.delete(jobs).run();
-      tx.delete(companies).run();
-    });
+    this.db.delete(jobs).run();
     return this.success();
   }
 
@@ -184,8 +178,6 @@ class WorkspaceService {
     return this.success();
   }
 
-  // TODO: after the company table is abosrted into the job table
-  // come back and upate this
   async patchJobApplication(
     jobId: string,
     dto: PatchJobApplicationInput,
@@ -197,11 +189,8 @@ class WorkspaceService {
 
     const jobUpdate: Record<string, unknown> = { updatedAt: nowISO() };
 
-    if (
-      dto.companyName !== undefined &&
-      dto.companyName !== current.companyName
-    ) {
-      jobUpdate.companyId = this.repos.company.getOrCreate(dto.companyName).id;
+    if (dto.companyName !== undefined) {
+      jobUpdate.companyName = dto.companyName;
     }
     if (dto.position !== undefined) {
       jobUpdate.position = dto.position;

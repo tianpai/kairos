@@ -1,5 +1,5 @@
 import { desc, eq } from "drizzle-orm";
-import { checklists, companies, jobs, resumes, scores, workflows } from "../db/schema";
+import { checklists, jobs, resumes, scores, workflows } from "../db/schema";
 import type { JobSummary } from "@type/jobs-ipc";
 import type * as schema from "../db/schema";
 import type { BetterSQLite3Database } from "drizzle-orm/better-sqlite3";
@@ -84,7 +84,7 @@ class JobRepository implements Repository<schema.Job> {
     const row = this.db
       .select({
         id: jobs.id,
-        companyName: companies.name,
+        companyName: jobs.companyName,
         position: jobs.position,
         dueDate: jobs.dueDate,
         matchPercentage: scores.matchPercentage,
@@ -96,7 +96,6 @@ class JobRepository implements Repository<schema.Job> {
         updatedAt: jobs.updatedAt,
       })
       .from(jobs)
-      .innerJoin(companies, eq(jobs.companyId, companies.id))
       .leftJoin(scores, eq(scores.jobId, jobs.id))
       .where(eq(jobs.id, id))
       .get();
@@ -122,7 +121,7 @@ class JobRepository implements Repository<schema.Job> {
     const rows = this.db
       .select({
         id: jobs.id,
-        companyName: companies.name,
+        companyName: jobs.companyName,
         position: jobs.position,
         dueDate: jobs.dueDate,
         matchPercentage: scores.matchPercentage,
@@ -134,7 +133,6 @@ class JobRepository implements Repository<schema.Job> {
         updatedAt: jobs.updatedAt,
       })
       .from(jobs)
-      .innerJoin(companies, eq(jobs.companyId, companies.id))
       .leftJoin(scores, eq(scores.jobId, jobs.id))
       .where(eq(jobs.archived, filter.archived ? 1 : 0))
       .orderBy(desc(jobs.createdAt))

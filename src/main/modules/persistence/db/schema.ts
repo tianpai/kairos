@@ -2,18 +2,10 @@ import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 import { relations } from "drizzle-orm";
 import type { Checklist as SharedChecklist } from "@type/checklist";
 
-// Companies table
-export const companies = sqliteTable("companies", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
-  name: text("name").notNull().unique(),
-});
-
 // Jobs table (metadata only)
 export const jobs = sqliteTable("jobs", {
   id: text("id").primaryKey(),
-  companyId: integer("company_id")
-    .notNull()
-    .references(() => companies.id, { onDelete: "cascade" }),
+  companyName: text("company_name").notNull().default(""),
   position: text("position").notNull(),
   dueDate: text("due_date").notNull(),
   status: text("status").notNull().default("active"),
@@ -79,17 +71,9 @@ export const workflows = sqliteTable("workflows", {
 });
 
 // Relations
-export const companiesRelations = relations(companies, ({ many }) => ({
-  jobs: many(jobs),
-}));
-
 export const jobsRelations = relations(
   jobs,
   ({ one }) => ({
-    company: one(companies, {
-      fields: [jobs.companyId],
-      references: [companies.id],
-    }),
     resume: one(resumes, {
       fields: [jobs.id],
       references: [resumes.jobId],
@@ -138,8 +122,6 @@ export const workflowsRelations = relations(workflows, ({ one }) => ({
 }));
 
 // Type exports for use in services
-export type Company = typeof companies.$inferSelect;
-export type NewCompany = typeof companies.$inferInsert;
 export type Job = typeof jobs.$inferSelect;
 export type NewJob = typeof jobs.$inferInsert;
 export type Resume = typeof resumes.$inferSelect;

@@ -17,11 +17,10 @@ import type {
 type BackupSchemaKind = "legacy" | "split";
 
 const BACKUP_FORMAT_VERSION = 1;
-const DB_SCHEMA_VERSION = 2;
+const DB_SCHEMA_VERSION = 3;
 const DB_ENTRY_PATH = "data/kairos.db";
 const LEGACY_TABLES = ["companies", "job_applications"] as const;
 const SPLIT_TABLES = [
-  "companies",
   "jobs",
   "resumes",
   "checklists",
@@ -137,7 +136,6 @@ function clearMainSplitTables(db: Database.Database): void {
   db.exec("DELETE FROM checklists");
   db.exec("DELETE FROM resumes");
   db.exec("DELETE FROM jobs");
-  db.exec("DELETE FROM companies");
 }
 
 function copySharedColumnsBetweenTables(
@@ -169,16 +167,58 @@ function sourceLegacyColumnExpr(
   return legacyColumns.includes(column) ? quoteIdentifier(column) : fallbackExpr;
 }
 
+function convertSplitV2Import(db: Database.Database): void {
+  const importedJobColumns = getTableColumns(db, "imported", "jobs");
+
+  if (importedJobColumns.includes("company_name")) {
+    for (const tableName of SPLIT_TABLES) {
+      copySharedColumnsBetweenTables(db, tableName);
+    }
+    return;
+  }
+
+  db.exec(`
+    INSERT INTO jobs (
+      id, company_name, position, due_date, job_url, status, application_status,
+      archived, pinned, pinned_at, status_updated_at, interview_date, created_at, updated_at
+    )
+    SELECT
+      j.id,
+      COALESCE(c.name, ''),
+      j.position,
+      j.due_date,
+      j.job_url,
+      j.status,
+      j.application_status,
+      j.archived,
+      j.pinned,
+      j.pinned_at,
+      j.status_updated_at,
+      j.interview_date,
+      j.created_at,
+      j.updated_at
+    FROM imported.jobs j
+    LEFT JOIN imported.companies c ON j.company_id = c.id
+  `);
+
+  for (const tableName of SPLIT_TABLES) {
+    if (tableName === "jobs") continue;
+    copySharedColumnsBetweenTables(db, tableName);
+  }
+}
+
 function convertLegacyImportToSplit(db: Database.Database): void {
   const legacyColumns = getTableColumns(db, "imported", "job_applications");
 
-  copySharedColumnsBetweenTables(db, "companies");
+  const companyNameExpr = legacyColumns.includes("company_id")
+    ? "COALESCE((SELECT name FROM imported.companies WHERE imported.companies.id = ja.company_id), '')"
+    : "''";
 
   const jobsSelect = [
-    "id",
-    "company_id",
-    "position",
-    "due_date",
+    "ja.id",
+    companyNameExpr,
+    "ja.position",
+    "ja.due_date",
     sourceLegacyColumnExpr(legacyColumns, "job_url", "NULL"),
     sourceLegacyColumnExpr(legacyColumns, "status", "'active'"),
     sourceLegacyColumnExpr(legacyColumns, "application_status", "NULL"),
@@ -187,17 +227,17 @@ function convertLegacyImportToSplit(db: Database.Database): void {
     sourceLegacyColumnExpr(legacyColumns, "pinned_at", "NULL"),
     sourceLegacyColumnExpr(legacyColumns, "status_updated_at", "NULL"),
     sourceLegacyColumnExpr(legacyColumns, "interview_date", "NULL"),
-    "created_at",
-    "updated_at",
+    "ja.created_at",
+    "ja.updated_at",
   ].join(", ");
 
   db.exec(`
     INSERT INTO jobs (
-      id, company_id, position, due_date, job_url, status, application_status,
+      id, company_name, position, due_date, job_url, status, application_status,
       archived, pinned, pinned_at, status_updated_at, interview_date, created_at, updated_at
     )
     SELECT ${jobsSelect}
-    FROM imported.job_applications
+    FROM imported.job_applications ja
   `);
 
   const originalResumeExpr = sourceLegacyColumnExpr(
@@ -286,9 +326,7 @@ function restoreImportedDb(
       clearMainSplitTables(sqlite);
 
       if (importedSchema === "split") {
-        for (const tableName of SPLIT_TABLES) {
-          copySharedColumnsBetweenTables(sqlite, tableName);
-        }
+        convertSplitV2Import(sqlite);
         return;
       }
 
