@@ -1,12 +1,10 @@
 import { getDatabase } from "../../persistence";
+import { workspaceIPC } from "../../workspace";
 import {
-  WorkspaceApplicationService,
-  WorkspacePersistence,
-  checklistIPC,
-  jobIPC,
-  resumeIPC,
-} from "../../workspace";
-import { WorkflowService, registerWorkflowHandlers } from "../../workflow";
+  WorkflowPersistence,
+  WorkflowService,
+  registerWorkflowHandlers,
+} from "../../workflow";
 import {
   registerBackupHandlers,
   registerDialogHandlers,
@@ -27,19 +25,14 @@ export interface RuntimeIpcDependencies {
 
 export function registerIpcHandlers(deps: RuntimeIpcDependencies): void {
   const database = getDatabase();
-  const workspacePersistence = new WorkspacePersistence(database);
-  const workspaceService = new WorkspaceApplicationService(
-    workspacePersistence,
-  );
+
+  const workflowPersistence = new WorkflowPersistence(database);
   const workflowService = new WorkflowService(
-    workspaceService,
-    workspacePersistence,
+    workflowPersistence,
     deps.aiPreferences,
   );
 
-  jobIPC(workspaceService);
-  resumeIPC(workspaceService);
-  checklistIPC(workspaceService);
+  workspaceIPC();
   registerDialogHandlers();
   registerFsHandlers();
   registerAIServerHandlers();

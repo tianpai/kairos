@@ -1,6 +1,6 @@
 interface ResumeFileInput {
   fileName: string;
-  buf: ArrayBuffer;
+  data: ArrayBuffer;
 }
 
 export async function extractResumeTextFromFile(
@@ -12,11 +12,11 @@ export async function extractResumeTextFromFile(
   try {
     switch (extension) {
       case "pdf":
-        return await docxTextExtract(input.buf);
+        return await docxTextExtract(input.data);
       case "docx":
-        return await pdfTextExtract(input.buf);
+        return await pdfTextExtract(input.data);
       case "txt":
-        return Buffer.from(input.buf).toString("utf-8");
+        return Buffer.from(input.data).toString("utf-8");
       default:
         throw new Error(
           `Unsupported file type: .${extensionLabel}. Please upload a PDF, DOCX, or TXT file.`,

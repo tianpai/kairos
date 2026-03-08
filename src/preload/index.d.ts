@@ -1,42 +1,32 @@
-type ThemeSource = import("../shared/type/theme").ThemeSource;
-type ThemeState = import("../shared/type/theme").ThemeState;
-type ProviderType = import("../shared/providers").ProviderType;
-type Checklist = import("../shared/type/checklist").Checklist;
-type BackupExportResult = import("../shared/backup").BackupExportResult;
-type BackupImportResult = import("../shared/backup").BackupImportResult;
-type UpdateState = import("../shared/updater").UpdateState;
-type JobsCreateFromExistingPayload =
-  import("../shared/type/jobs-ipc").JobsCreateFromExistingPayload;
-type JobsCreatePayload = import("../shared/type/jobs-ipc").JobsCreatePayload;
-type JobsCreateResult = import("../shared/type/jobs-ipc").JobsCreateResult;
-type JobApplication = import("../shared/type/jobs-ipc").JobApplication;
-type JobApplicationSummary =
-  import("../shared/type/jobs-ipc").JobApplicationSummary;
-type JobsListQuery = import("../shared/type/jobs-ipc").JobsListQuery;
-type JobsPatchPayload = import("../shared/type/jobs-ipc").JobsPatchPayload;
-type WorkflowRetryPayload =
-  import("../shared/type/workflow-ipc").WorkflowRetryPayload;
-type WorkflowGetStatePayload =
-  import("../shared/type/workflow-ipc").WorkflowGetStatePayload;
-type WorkflowStartTailoringPayload =
-  import("../shared/type/workflow-ipc").WorkflowStartTailoringPayload;
-type WorkflowCreateApplicationsPayload =
-  import("../shared/type/workflow-ipc").WorkflowCreateApplicationsPayload;
-type WorkflowCreateApplicationsResult =
-  import("../shared/type/workflow-ipc").WorkflowCreateApplicationsResult;
-type WorkflowPushState =
-  import("../shared/type/workflow-ipc").WorkflowPushState;
-type WorkflowAiPartial =
-  import("../shared/type/workflow-ipc").WorkflowAiPartial;
-type WorkflowStepsData = import("../shared/type/workflow").WorkflowStepsData;
-type IpcSuccessResponse = import("../shared/type/ipc").IpcSuccessResponse;
+import type { ThemeSource, ThemeState } from "@type/theme";
+import type { ProviderType } from "@shared/providers";
+import type { Checklist } from "@type/checklist";
+import type { BackupExportResult, BackupImportResult } from "@shared/backup";
+import type { UpdateState } from "@shared/updater";
+import type {
+  JobApplication,
+  JobSummary,
+  JobsListQuery,
+  JobsPatchPayload,
+} from "@type/jobs-ipc";
+import type {
+  WorkflowRetryPayload,
+  WorkflowGetStatePayload,
+  WorkflowStartTailoringPayload,
+  WorkflowCreateApplicationsPayload,
+  WorkflowCreateApplicationsResult,
+  WorkflowPushState,
+  WorkflowAiPartial,
+} from "@type/workflow-ipc";
+import type { WorkflowStepsData } from "@type/workflow";
+import type { IpcSuccessResponse } from "@type/ipc";
 
 interface ModelInfo {
   id: string;
   name: string;
 }
 
-// TODO: duplicated interface -> use one interface in shared/
+// TODO: [type] duplicated interface -> use one interface in shared/
 interface ResumeGetResult {
   templateId: string;
   jobDescription: string | null;
@@ -88,12 +78,8 @@ interface KairosAPI {
     getInfo: () => Promise<{ port: number; baseURL: string; wsURL: string }>;
   };
   jobs: {
-    create: (data: JobsCreatePayload) => Promise<JobsCreateResult>;
-    createFromExisting: (
-      data: JobsCreateFromExistingPayload,
-    ) => Promise<JobsCreateResult>;
     list: (query?: JobsListQuery) => Promise<JobApplication[]>;
-    get: (id: string) => Promise<JobApplicationSummary>;
+    get: (id: string) => Promise<JobSummary>;
     patch: (id: string, data: JobsPatchPayload) => Promise<IpcSuccessResponse>;
     delete: (id: string) => Promise<IpcSuccessResponse>;
     deleteAll: () => Promise<IpcSuccessResponse>;

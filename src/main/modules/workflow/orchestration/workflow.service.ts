@@ -16,9 +16,7 @@ import type {
 import type { WorkflowStepsData } from "@type/workflow";
 import type { TaskName, WorkflowContext } from "@type/task-contracts";
 import type { Checklist } from "@type/checklist";
-import { JobNotFoundError } from "../../workspace";
-import type { WorkspaceApplicationService } from "../../workspace";
-import type { WorkspacePersistencePort } from "../../workspace/workspace.persistence";
+import type { WorkflowPersistencePort } from "../persistence/workflow.persistence";
 import "../definitions/workflows";
 
 const EXTRACTING_PLACEHOLDER = "Extracting...";
@@ -42,16 +40,15 @@ export class WorkflowService {
   private readonly aiClient: AITaskClient;
 
   constructor(
-    private readonly jobService: WorkspaceApplicationService,
-    private readonly persistence: WorkspacePersistencePort,
+    private readonly workflowPersistence: WorkflowPersistencePort,
     aiPreferences: AiPreferencesStore,
   ) {
     this.aiClient = new AITaskClient(aiPreferences);
     registerWorkflowTasks({
-      jobService: this.jobService,
+      persistence: this.workflowPersistence,
       aiClient: this.aiClient,
     });
-    this.engine = new WorkflowEngine(this.jobService);
+    this.engine = new WorkflowEngine(this.workflowPersistence);
   }
 
   startWorkflow(
@@ -74,10 +71,8 @@ export class WorkflowService {
       throw new Error("A workflow is already running for this job");
     }
 
-    const [checklist, resume] = await Promise.all([
-      this.jobService.getChecklist(payload.jobId),
-      this.jobService.getResume(payload.jobId),
-    ]);
+    const checklist = this.workflowPersistence.getChecklist(payload.jobId);
+    const resume = this.workflowPersistence.getResume(payload.jobId);
     const resumeStructure = resume.tailoredResume ?? resume.parsedResume;
     const templateId = resume.templateId;
 
@@ -143,7 +138,7 @@ export class WorkflowService {
       this.engine.recoverStaleWorkflow(workflowSteps);
 
     if (wasStale) {
-      await this.jobService.saveWorkflowState(jobId, {
+      this.workflowPersistence.saveWorkflowState(jobId, {
         workflowSteps: recovered,
         workflowStatus: recovered.status,
       });
@@ -153,9 +148,9 @@ export class WorkflowService {
   }
 
   private getPersistedWorkflowSteps(jobId: string): WorkflowStepsData | null {
-    const row = this.persistence.getWorkflowRecord(jobId);
+    const row = this.workflowPersistence.getWorkflowRecord(jobId);
     if (!row) {
-      throw new JobNotFoundError(jobId);
+      throw new Error(`Job application with ID ${jobId} not found`);
     }
 
     const { workflowSteps } = getWorkflowDetails(row.workflowState);
@@ -206,7 +201,7 @@ export class WorkflowService {
       payload.resumeFile,
     );
 
-    const firstResponse = await this.jobService.createJobApplication({
+    const firstResponse = this.workflowPersistence.createJobApplication({
       rawResumeContent,
       jobDescription: firstEntry.jobDescription,
       companyName: EXTRACTING_PLACEHOLDER,
@@ -223,7 +218,7 @@ export class WorkflowService {
     });
 
     await this.waitForTask(firstResponse.id, RESUME_PARSING);
-    const firstResume = await this.jobService.getResume(firstResponse.id);
+    const firstResume = this.workflowPersistence.getResume(firstResponse.id);
     const parsedResume = this.requireParsedResume(
       firstResume.parsedResume,
       "Resume parsing failed",
@@ -244,7 +239,9 @@ export class WorkflowService {
       { resumeSource: "existing" }
     >,
   ): Promise<BatchSource> {
-    const sourceResume = await this.jobService.getResume(payload.sourceJobId);
+    const sourceResume = this.workflowPersistence.getResume(
+      payload.sourceJobId,
+    );
     const parsedResume = this.requireParsedResume(
       sourceResume.parsedResume,
       "Source has no parsed resume",
@@ -274,7 +271,7 @@ export class WorkflowService {
     source: BatchSource,
   ): Promise<string | null> {
     try {
-      const response = await this.jobService.createFromExisting({
+      const response = this.workflowPersistence.createFromExisting({
         sourceJobId: source.sourceJobId,
         companyName: EXTRACTING_PLACEHOLDER,
         position: EXTRACTING_PLACEHOLDER,

@@ -6,7 +6,7 @@ import { DocumentConfigButton } from '@resumeForm/DocumentConfigButton'
 import { useLayoutStore } from '@layout/layout.store'
 import { useNavigate } from '@tanstack/react-router'
 import { Columns2, Columns3, GalleryVerticalEnd } from 'lucide-react'
-import type { JobApplicationSummary } from '@api/jobs'
+import type { JobSummary } from '@api/jobs'
 import { ExportButton } from '@/components/export/ExportButton'
 import { getScoreColor } from '@/utils/scoreThresholds'
 import NewApplicationButton from '@/components/upload/NewApplicationButton'
@@ -14,7 +14,7 @@ import NewApplicationButton from '@/components/upload/NewApplicationButton'
 interface AppHeaderProps {
   hasActiveJob: boolean
   jobId?: string
-  jobApplication?: JobApplicationSummary
+  jobApplication?: JobSummary
 }
 
 export function AppHeader({

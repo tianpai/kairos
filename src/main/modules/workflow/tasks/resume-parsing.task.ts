@@ -9,7 +9,7 @@ import type { ResumeStructure } from "@type/task-contracts";
 import type { WorkflowTaskDeps } from "./task-deps";
 
 export function registerResumeParsingTask({
-  jobService,
+  persistence,
   aiClient,
 }: WorkflowTaskDeps): void {
   defineTask({
@@ -32,7 +32,7 @@ export function registerResumeParsingTask({
     },
 
     async onSuccess(jobId, resumeStructure) {
-      await jobService.saveParsedResume(jobId, {
+      await persistence.saveParsedResume(jobId, {
         parsedResume: resumeStructure,
         tailoredResume: resumeStructure,
       });

@@ -12,7 +12,7 @@ import type { WorkflowTaskDeps } from "./task-deps";
 const EXTRACTING_PLACEHOLDER = "Extracting...";
 
 export function registerJobInfoExtractingTask({
-  jobService,
+  persistence,
   aiClient,
 }: WorkflowTaskDeps): void {
   defineTask({
@@ -35,7 +35,7 @@ export function registerJobInfoExtractingTask({
 
     async onSuccess(jobId, extracted) {
       // Fetch current application to check which fields are placeholders
-      const current = await jobService.getJobApplication(jobId);
+      const current = persistence.getJobSummary(jobId);
 
       // Only update fields that are still showing placeholder values
       const updates: {
@@ -57,7 +57,7 @@ export function registerJobInfoExtractingTask({
       // (currently skipped as there's no placeholder for dates)
 
       if (Object.keys(updates).length > 0) {
-        await jobService.patchJobApplication(jobId, updates);
+        persistence.patchJob(jobId, updates);
       }
     },
   });

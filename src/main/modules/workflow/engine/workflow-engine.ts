@@ -24,7 +24,7 @@ import {
 } from "../definitions/workflow-registry";
 import { emitWorkflowEvent } from "../events/workflow-events";
 import { WorkflowStore } from "../state/workflow-store";
-import type { WorkspaceApplicationService } from "../../workspace";
+import type { WorkflowPersistencePort } from "../persistence/workflow.persistence";
 import type { TaskStatus, WorkflowStepsData } from "@type/workflow";
 import type { TaskName, WorkflowContext } from "@type/task-contracts";
 import type { Task, TaskExecutionMeta } from "../definitions/task-registry";
@@ -34,7 +34,7 @@ import type { TaskStateMap, WorkflowInstance } from "../state/workflow-store";
 export class WorkflowEngine {
   private store = new WorkflowStore();
 
-  constructor(private readonly jobService: WorkspaceApplicationService) {}
+  constructor(private readonly workflowPersistence: WorkflowPersistencePort) {}
 
   /**
    * Start a workflow for a job
@@ -184,7 +184,7 @@ export class WorkflowEngine {
     workflow: WorkflowInstance,
   ): Promise<void> {
     try {
-      await this.jobService.saveWorkflowState(jobId, {
+      this.workflowPersistence.saveWorkflowState(jobId, {
         workflowSteps: this.toWorkflowSteps(workflow),
         workflowStatus: workflow.status,
       });

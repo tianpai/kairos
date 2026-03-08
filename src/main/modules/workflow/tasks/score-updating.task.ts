@@ -70,7 +70,7 @@ export function calculateScore(checklist: Checklist): number {
 // =============================================================================
 
 export function registerScoreUpdatingTask({
-  jobService,
+  persistence,
 }: WorkflowTaskDeps): void {
   defineTask({
     name: "score.updating",
@@ -89,7 +89,7 @@ export function registerScoreUpdatingTask({
     },
 
     async onSuccess(jobId, matchPercentage) {
-      await jobService.saveMatchScore(jobId, matchPercentage);
+      await persistence.saveMatchScore(jobId, matchPercentage);
       log.info(`Score saved: ${matchPercentage}% for job ${jobId}`);
     },
   });

@@ -1,7 +1,7 @@
 import type { AITaskClient } from "../../ai";
-import type { WorkspaceApplicationService } from "../../workspace";
+import type { WorkflowPersistencePort } from "../persistence/workflow.persistence";
 
 export interface WorkflowTaskDeps {
-  jobService: WorkspaceApplicationService;
+  persistence: WorkflowPersistencePort;
   aiClient: AITaskClient;
 }

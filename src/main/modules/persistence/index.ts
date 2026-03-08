@@ -22,3 +22,11 @@ export {
 export * from "./db/schema";
 export { CompanyRepository } from "./repositories/company.repository";
 export type PersistenceSchema = typeof schema;
+
+export {
+  JobRepository,
+  ResumeRepository,
+  ChecklistRepository,
+  ScoreRepository,
+  WorkflowRepository,
+} from "./repositories/repo";

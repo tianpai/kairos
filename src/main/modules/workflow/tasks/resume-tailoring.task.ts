@@ -9,7 +9,7 @@ import type { ResumeStructure } from "@type/task-contracts";
 import type { WorkflowTaskDeps } from "./task-deps";
 
 export function registerResumeTailoringTask({
-  jobService,
+  persistence,
   aiClient,
 }: WorkflowTaskDeps): void {
   defineTask({
@@ -33,7 +33,7 @@ export function registerResumeTailoringTask({
     },
 
     async onSuccess(jobId, tailoredResume) {
-      await jobService.saveTailoredResume(jobId, { tailoredResume });
+      await persistence.saveTailoredResume(jobId, { tailoredResume });
     },
   });
 }

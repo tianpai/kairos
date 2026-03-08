@@ -9,7 +9,7 @@ import type { Checklist } from "@type/checklist";
 import type { WorkflowTaskDeps } from "./task-deps";
 
 export function registerChecklistParsingTask({
-  jobService,
+  persistence,
   aiClient,
 }: WorkflowTaskDeps): void {
   defineTask({
@@ -31,7 +31,7 @@ export function registerChecklistParsingTask({
     },
 
     async onSuccess(jobId, checklist) {
-      await jobService.saveChecklist(jobId, { checklist });
+      await persistence.saveChecklist(jobId, { checklist });
     },
   });
 }
