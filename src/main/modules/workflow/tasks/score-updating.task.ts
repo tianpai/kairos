@@ -89,7 +89,7 @@ export function registerScoreUpdatingTask({
     },
 
     async onSuccess(jobId, matchPercentage) {
-      await persistence.saveMatchScore(jobId, matchPercentage);
+      persistence.saveMatchScore(jobId, matchPercentage);
       log.info(`Score saved: ${matchPercentage}% for job ${jobId}`);
     },
   });

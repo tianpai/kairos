@@ -8,9 +8,11 @@
 import type { TaskName, WorkflowContext } from "@type/task-contracts";
 import type { TaskStatus, WorkflowStatus } from "@type/workflow";
 
-export type TaskStateMap = Partial<Record<TaskName, TaskStatus>>;
+export { TaskStateMap, WorkflowInstance, WorkflowStore };
 
-export interface WorkflowInstance {
+type TaskStateMap = Partial<Record<TaskName, TaskStatus>>;
+
+interface WorkflowInstance {
   jobId: string;
   workflowName: string;
   taskStates: TaskStateMap;
@@ -18,7 +20,7 @@ export interface WorkflowInstance {
   error?: string;
 }
 
-export class WorkflowStore {
+class WorkflowStore {
   private workflows = new Map<string, WorkflowInstance>();
   private contexts = new Map<string, WorkflowContext>();
 

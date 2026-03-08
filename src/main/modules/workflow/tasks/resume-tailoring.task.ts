@@ -33,7 +33,7 @@ export function registerResumeTailoringTask({
     },
 
     async onSuccess(jobId, tailoredResume) {
-      await persistence.saveTailoredResume(jobId, { tailoredResume });
+      persistence.saveTailoredResume(jobId, { tailoredResume });
     },
   });
 }

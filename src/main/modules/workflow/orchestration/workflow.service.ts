@@ -1,11 +1,10 @@
 import log from "electron-log/main";
 import { RESUME_PARSING } from "@type/task-names";
 import { AITaskClient } from "../../ai";
-import { extractResumeTextFromFile } from "../../../utils/resume-text-extractor";
+import { extractResumeTextFromFile } from "../resume-text-extractor";
 import { WorkflowEngine } from "../engine/workflow-engine";
 import { onWorkflowEvent } from "../events/workflow-events";
 import { registerWorkflowTasks } from "../tasks";
-import { getWorkflowDetails } from "./workflow-read.model";
 import type { AiPreferencesStore } from "../../ai";
 import type {
   WorkflowBatchEntry,
@@ -131,7 +130,12 @@ export class WorkflowService {
     const active = this.engine.getWorkflowSteps(jobId);
     if (active) return active;
 
-    const workflowSteps = this.getPersistedWorkflowSteps(jobId);
+    const row = this.workflowPersistence.getWorkflowRecord(jobId);
+    if (!row) {
+      throw new Error(`Job application with ID ${jobId} not found`);
+    }
+
+    const workflowSteps = row.workflowState as WorkflowStepsData | null;
     if (!workflowSteps) return null;
 
     const { recovered, wasStale } =
@@ -145,16 +149,6 @@ export class WorkflowService {
     }
 
     return recovered;
-  }
-
-  private getPersistedWorkflowSteps(jobId: string): WorkflowStepsData | null {
-    const row = this.workflowPersistence.getWorkflowRecord(jobId);
-    if (!row) {
-      throw new Error(`Job application with ID ${jobId} not found`);
-    }
-
-    const { workflowSteps } = getWorkflowDetails(row.workflowState);
-    return workflowSteps;
   }
 
   private requireParsedResume(

@@ -89,7 +89,7 @@ export function defineTask<T extends TaskName>(config: TaskConfig<T>): Task<T> {
   };
 
   // Auto-register
-  taskRegistry.set(config.name, task as Task);
+  taskRegistry.set(config.name, task as unknown as Task);
 
   return task;
 }

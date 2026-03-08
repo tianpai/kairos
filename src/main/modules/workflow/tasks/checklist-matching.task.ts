@@ -33,7 +33,7 @@ export function registerChecklistMatchingTask({
     },
 
     async onSuccess(jobId, checklist) {
-      await persistence.saveChecklist(jobId, { checklist });
+      persistence.saveChecklist(jobId, { checklist });
     },
   });
 }

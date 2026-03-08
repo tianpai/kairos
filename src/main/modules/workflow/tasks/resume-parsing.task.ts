@@ -32,7 +32,7 @@ export function registerResumeParsingTask({
     },
 
     async onSuccess(jobId, resumeStructure) {
-      await persistence.saveParsedResume(jobId, {
+      persistence.saveParsedResume(jobId, {
         parsedResume: resumeStructure,
         tailoredResume: resumeStructure,
       });
