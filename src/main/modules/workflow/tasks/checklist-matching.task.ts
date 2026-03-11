@@ -2,38 +2,39 @@
  * Checklist Matching Task
  *
  * Matches resume content against job requirements.
- * Uses AI worker to determine which requirements are fulfilled.
+ * Uses AI to determine which requirements are fulfilled.
  */
 
 import { defineTask } from "../definitions/task-registry";
 import type { Checklist } from "@type/checklist";
-import type { WorkflowTaskDeps } from "./task-deps";
 
-export function registerChecklistMatchingTask({
-  persistence,
-  aiClient,
-}: WorkflowTaskDeps): void {
+export function registerChecklistMatchingTask(): void {
   defineTask({
     name: "checklist.matching",
-    inputKeys: ["checklist", "resumeStructure"],
-    provides: "checklist", // Overwrites checklist with fulfilled status
     streaming: true,
 
-    async execute({ checklist, resumeStructure }, meta) {
-      return aiClient.execute<Checklist>(
+    async execute(jobId, deps, emitPartial) {
+      const checklistRow = deps.checklistRepo.findByJobId(jobId);
+      if (!checklistRow?.checklist) {
+        throw new Error("Checklist is missing for matching");
+      }
+
+      const resume = deps.resumeRepo.findByJobId(jobId);
+      const resumeStructure = resume?.tailoredResume ?? resume?.parsedResume;
+      if (!resumeStructure) {
+        throw new Error("Resume content is missing for matching");
+      }
+
+      const matched = await deps.aiClient.execute<Checklist>(
         "checklist.matching",
         {
-          checklist,
+          checklist: checklistRow.checklist,
           resumeStructure,
         },
-        meta.emitPartial
-          ? { streaming: true, onPartial: meta.emitPartial }
-          : undefined,
+        emitPartial ? { streaming: true, onPartial: emitPartial } : undefined,
       );
-    },
 
-    async onSuccess(jobId, checklist) {
-      persistence.saveChecklist(jobId, { checklist });
+      deps.checklistRepo.updateByJobId(jobId, { checklist: matched });
     },
   });
 }

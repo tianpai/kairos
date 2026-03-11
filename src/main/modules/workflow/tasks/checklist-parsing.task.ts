@@ -6,32 +6,25 @@
 
 import { defineTask } from "../definitions/task-registry";
 import type { Checklist } from "@type/checklist";
-import type { WorkflowTaskDeps } from "./task-deps";
 
-export function registerChecklistParsingTask({
-  persistence,
-  aiClient,
-}: WorkflowTaskDeps): void {
+export function registerChecklistParsingTask(): void {
   defineTask({
     name: "checklist.parsing",
-    inputKeys: ["jobDescription"],
-    provides: "checklist",
     streaming: true,
 
-    async execute({ jobDescription }, meta) {
-      return aiClient.execute<Checklist>(
-        "checklist.parsing",
-        {
-          jobDescription,
-        },
-        meta.emitPartial
-          ? { streaming: true, onPartial: meta.emitPartial }
-          : undefined,
-      );
-    },
+    async execute(jobId, deps, emitPartial) {
+      const checklistRow = deps.checklistRepo.findByJobId(jobId);
+      if (!checklistRow?.jobDescription) {
+        throw new Error("No job description to parse");
+      }
 
-    async onSuccess(jobId, checklist) {
-      persistence.saveChecklist(jobId, { checklist });
+      const checklist = await deps.aiClient.execute<Checklist>(
+        "checklist.parsing",
+        { jobDescription: checklistRow.jobDescription },
+        emitPartial ? { streaming: true, onPartial: emitPartial } : undefined,
+      );
+
+      deps.checklistRepo.updateByJobId(jobId, { checklist });
     },
   });
 }

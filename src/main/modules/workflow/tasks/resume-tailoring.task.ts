@@ -6,34 +6,39 @@
 
 import { defineTask } from "../definitions/task-registry";
 import type { ResumeStructure } from "@type/task-contracts";
-import type { WorkflowTaskDeps } from "./task-deps";
 
-export function registerResumeTailoringTask({
-  persistence,
-  aiClient,
-}: WorkflowTaskDeps): void {
+export function registerResumeTailoringTask(): void {
   defineTask({
     name: "resume.tailoring",
-    inputKeys: ["checklist", "resumeStructure", "templateId"],
-    provides: "resumeStructure",
     streaming: true,
 
-    async execute({ checklist, resumeStructure, templateId }, meta) {
-      return aiClient.execute<ResumeStructure>(
+    async execute(jobId, deps, emitPartial) {
+      const checklistRow = deps.checklistRepo.findByJobId(jobId);
+      if (!checklistRow?.checklist) {
+        throw new Error("Checklist is missing for tailoring");
+      }
+
+      const resume = deps.resumeRepo.findByJobId(jobId);
+      const resumeStructure = resume?.tailoredResume ?? resume?.parsedResume;
+      if (!resumeStructure) {
+        throw new Error("Resume content is missing for tailoring");
+      }
+
+      if (!resume?.templateId) {
+        throw new Error("Template ID is missing for tailoring");
+      }
+
+      const tailored = await deps.aiClient.execute<ResumeStructure>(
         "resume.tailoring",
         {
-          checklist,
+          checklist: checklistRow.checklist,
           resumeStructure,
-          templateId,
+          templateId: resume.templateId,
         },
-        meta.emitPartial
-          ? { streaming: true, onPartial: meta.emitPartial }
-          : undefined,
+        emitPartial ? { streaming: true, onPartial: emitPartial } : undefined,
       );
-    },
 
-    async onSuccess(jobId, tailoredResume) {
-      persistence.saveTailoredResume(jobId, { tailoredResume });
+      deps.resumeRepo.updateByJobId(jobId, { tailoredResume: tailored });
     },
   });
 }

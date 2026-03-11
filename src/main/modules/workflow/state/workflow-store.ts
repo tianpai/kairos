@@ -2,10 +2,10 @@
  * Workflow Store (in-memory)
  *
  * Manages workflow state for multiple concurrent jobs.
- * Each job has its own WorkflowInstance and WorkflowContext.
+ * Pure state machine — no context, no payloads.
  */
 
-import type { TaskName, WorkflowContext } from "@type/task-contracts";
+import type { TaskName } from "@type/task-contracts";
 import type { TaskStatus, WorkflowStatus } from "@type/workflow";
 
 export { TaskStateMap, WorkflowInstance, WorkflowStore };
@@ -22,14 +22,8 @@ interface WorkflowInstance {
 
 class WorkflowStore {
   private workflows = new Map<string, WorkflowInstance>();
-  private contexts = new Map<string, WorkflowContext>();
 
-  initWorkflow(
-    jobId: string,
-    workflowName: string,
-    tasks: TaskName[],
-    initialContext: Partial<WorkflowContext>,
-  ): void {
+  initWorkflow(jobId: string, workflowName: string, tasks: TaskName[]): void {
     const taskStates: TaskStateMap = {};
     tasks.forEach((task) => {
       taskStates[task] = "pending";
@@ -41,22 +35,10 @@ class WorkflowStore {
       taskStates,
       status: "running",
     });
-
-    this.contexts.set(jobId, {
-      jobId,
-      ...initialContext,
-    } as WorkflowContext);
   }
 
-  loadWorkflow(
-    jobId: string,
-    workflow: WorkflowInstance,
-    context?: WorkflowContext,
-  ): void {
+  loadWorkflow(jobId: string, workflow: WorkflowInstance): void {
     this.workflows.set(jobId, workflow);
-    if (context) {
-      this.contexts.set(jobId, context);
-    }
   }
 
   setTaskStatus(
@@ -75,16 +57,6 @@ class WorkflowStore {
         [task]: status,
       },
       error: error ?? workflow.error,
-    });
-  }
-
-  updateContext(jobId: string, updates: Partial<WorkflowContext>): void {
-    const context = this.contexts.get(jobId);
-    if (!context) return;
-
-    this.contexts.set(jobId, {
-      ...context,
-      ...updates,
     });
   }
 
@@ -111,15 +83,10 @@ class WorkflowStore {
 
   clearWorkflow(jobId: string): void {
     this.workflows.delete(jobId);
-    this.contexts.delete(jobId);
   }
 
   getWorkflow(jobId: string): WorkflowInstance | undefined {
     return this.workflows.get(jobId);
-  }
-
-  getContext(jobId: string): WorkflowContext | undefined {
-    return this.contexts.get(jobId);
   }
 
   getTaskStatus(jobId: string, task: TaskName): TaskStatus | undefined {

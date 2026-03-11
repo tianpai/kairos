@@ -1,7 +1,15 @@
 import type { AITaskClient } from "../../ai";
-import type { WorkflowPersistencePort } from "../persistence/workflow.persistence";
+import type {
+  ChecklistRepository,
+  JobRepository,
+  ResumeRepository,
+  ScoreRepository,
+} from "../../persistence";
 
-export interface WorkflowTaskDeps {
-  persistence: WorkflowPersistencePort;
+export interface TaskDeps {
   aiClient: AITaskClient;
+  jobRepo: JobRepository;
+  resumeRepo: ResumeRepository;
+  checklistRepo: ChecklistRepository;
+  scoreRepo: ScoreRepository;
 }

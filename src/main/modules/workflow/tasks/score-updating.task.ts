@@ -2,13 +2,12 @@
  * Score Updating Task
  *
  * Calculates match score from fulfilled checklist requirements.
- * This is a local computation (no AI worker needed).
+ * This is a local computation (no AI call needed).
  */
 
 import log from "electron-log/main";
 import { defineTask } from "../definitions/task-registry";
 import type { Checklist, ChecklistRequirement } from "@type/checklist";
-import type { WorkflowTaskDeps } from "./task-deps";
 
 // =============================================================================
 // Score Calculation Logic
@@ -69,28 +68,23 @@ export function calculateScore(checklist: Checklist): number {
 // Task Definition
 // =============================================================================
 
-export function registerScoreUpdatingTask({
-  persistence,
-}: WorkflowTaskDeps): void {
+export function registerScoreUpdatingTask(): void {
   defineTask({
     name: "score.updating",
-    inputKeys: ["checklist"],
-    // No 'provides' - score is saved directly to DB, not added to context
 
-    async execute({ checklist }, _meta) {
-      if (!checklist?.hardRequirements) {
+    async execute(jobId, deps) {
+      const checklistRow = deps.checklistRepo.findByJobId(jobId);
+      if (!checklistRow?.checklist?.hardRequirements) {
         log.warn("Score update: no checklist found");
-        return 0;
+        deps.scoreRepo.updateByJobId(jobId, { matchPercentage: 0 });
+        return;
       }
 
-      const score = calculateScore(checklist);
+      const score = calculateScore(checklistRow.checklist);
       log.info(`Score calculated: ${score}%`);
-      return score;
-    },
 
-    async onSuccess(jobId, matchPercentage) {
-      persistence.saveMatchScore(jobId, matchPercentage);
-      log.info(`Score saved: ${matchPercentage}% for job ${jobId}`);
+      deps.scoreRepo.updateByJobId(jobId, { matchPercentage: score });
+      log.info(`Score saved: ${score}% for job ${jobId}`);
     },
   });
 }

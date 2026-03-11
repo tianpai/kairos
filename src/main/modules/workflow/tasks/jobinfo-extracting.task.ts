@@ -2,48 +2,42 @@
  * Job Info Extracting Task
  *
  * Extracts company, position, and due date from job description.
- * Updates DB directly (doesn't write to workflow context).
+ * Updates DB directly — only overwrites placeholder values.
  */
 
 import { defineTask } from "../definitions/task-registry";
 import type { ExtractedJobInfo } from "@type/task-contracts";
-import type { WorkflowTaskDeps } from "./task-deps";
 
 const EXTRACTING_PLACEHOLDER = "Extracting...";
 
-export function registerJobInfoExtractingTask({
-  persistence,
-  aiClient,
-}: WorkflowTaskDeps): void {
+export function registerJobInfoExtractingTask(): void {
   defineTask({
     name: "jobinfo.extracting",
-    inputKeys: ["jobDescription"],
-    // No 'provides' - updates DB directly, doesn't write to context
     streaming: true,
 
-    async execute({ jobDescription }, meta) {
-      return aiClient.execute<ExtractedJobInfo>(
+    async execute(jobId, deps, emitPartial) {
+      const checklistRow = deps.checklistRepo.findByJobId(jobId);
+      if (!checklistRow?.jobDescription) {
+        throw new Error("No job description to extract info from");
+      }
+
+      const extracted = await deps.aiClient.execute<ExtractedJobInfo>(
         "jobinfo.extracting",
-        {
-          jobDescription,
-        },
-        meta.emitPartial
-          ? { streaming: true, onPartial: meta.emitPartial }
-          : undefined,
+        { jobDescription: checklistRow.jobDescription },
+        emitPartial ? { streaming: true, onPartial: emitPartial } : undefined,
       );
-    },
 
-    async onSuccess(jobId, extracted) {
-      // Fetch current application to check which fields are placeholders
-      const current = persistence.getJobSummary(jobId);
+      // Fetch current job to check which fields are placeholders
+      const current = deps.jobRepo.findByJobId(jobId);
+      if (!current) return;
 
-      // Only update fields that are still showing placeholder values
-      const updates: {
-        companyName?: string;
-        position?: string;
-        dueDate?: string;
-        jobUrl?: string | null;
-      } = {};
+      // TODO: (workflow) Persist extracted dueDate with a clear overwrite
+      // policy (placeholder-only or always) and date validation.
+      const updates: Partial<{
+        companyName: string;
+        position: string;
+        updatedAt: string;
+      }> = {};
 
       if (current.companyName === EXTRACTING_PLACEHOLDER && extracted.company) {
         updates.companyName = extracted.company;
@@ -53,11 +47,9 @@ export function registerJobInfoExtractingTask({
         updates.position = extracted.position;
       }
 
-      // dueDate: only update if AI found a specific deadline
-      // (currently skipped as there's no placeholder for dates)
-
       if (Object.keys(updates).length > 0) {
-        persistence.patchJob(jobId, updates);
+        updates.updatedAt = new Date().toISOString();
+        deps.jobRepo.updateByJobId(jobId, updates);
       }
     },
   });

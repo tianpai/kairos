@@ -47,7 +47,9 @@ export const checklists = sqliteTable("checklists", {
     .references(() => jobs.id, { onDelete: "cascade" })
     .unique(),
   jobDescription: text("job_description"),
-  checklist: text("checklist", { mode: "json" }).$type<SharedChecklist | null>(),
+  checklist: text("checklist", {
+    mode: "json",
+  }).$type<SharedChecklist | null>(),
 });
 
 // Score table
@@ -61,37 +63,38 @@ export const scores = sqliteTable("scores", {
 });
 
 // Workflow state table
+// TODO (db): better typing on workflow state
 export const workflows = sqliteTable("workflows", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   jobId: text("job_id")
     .notNull()
     .references(() => jobs.id, { onDelete: "cascade" })
     .unique(),
-  state: text("state", { mode: "json" }).$type<Record<string, unknown> | null>(),
+  state: text("state", { mode: "json" }).$type<Record<
+    string,
+    unknown
+  > | null>(),
 });
 
 // Relations
-export const jobsRelations = relations(
-  jobs,
-  ({ one }) => ({
-    resume: one(resumes, {
-      fields: [jobs.id],
-      references: [resumes.jobId],
-    }),
-    checklist: one(checklists, {
-      fields: [jobs.id],
-      references: [checklists.jobId],
-    }),
-    score: one(scores, {
-      fields: [jobs.id],
-      references: [scores.jobId],
-    }),
-    workflow: one(workflows, {
-      fields: [jobs.id],
-      references: [workflows.jobId],
-    }),
+export const jobsRelations = relations(jobs, ({ one }) => ({
+  resume: one(resumes, {
+    fields: [jobs.id],
+    references: [resumes.jobId],
   }),
-);
+  checklist: one(checklists, {
+    fields: [jobs.id],
+    references: [checklists.jobId],
+  }),
+  score: one(scores, {
+    fields: [jobs.id],
+    references: [scores.jobId],
+  }),
+  workflow: one(workflows, {
+    fields: [jobs.id],
+    references: [workflows.jobId],
+  }),
+}));
 
 export const resumesRelations = relations(resumes, ({ one }) => ({
   job: one(jobs, {

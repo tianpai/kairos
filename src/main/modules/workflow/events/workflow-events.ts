@@ -1,8 +1,5 @@
 import { EventEmitter } from "node:events";
-import type {
-  WorkflowAiPartial,
-  WorkflowPushState,
-} from "@type/workflow-ipc";
+import type { WorkflowAiPartial, WorkflowPushState } from "@type/workflow-ipc";
 
 type WorkflowEventMap = {
   "workflow:pushState": WorkflowPushState;

@@ -1,89 +1,24 @@
-import type { TaskName, WorkflowContext } from "@type/task-contracts";
+import type { TaskName } from "@type/task-contracts";
 import type { WorkflowStatus, WorkflowStepsData } from "@type/workflow";
 
 export interface WorkflowStartPayload {
+  jobId: string;
+  // TODO: (workflow) Replace with a shared WorkflowName union to prevent
+  // invalid strings from renderer/preload callers.
   workflowName: string;
-  jobId: string;
-  initialContext: Partial<WorkflowContext>;
 }
 
-export interface WorkflowRetryPayload {
-  jobId: string;
-}
-
-export interface WorkflowGetStatePayload {
-  jobId: string;
-}
-
-export interface WorkflowStartTailoringPayload {
-  jobId: string;
-  needTailoring: string[];
-}
-
-export interface WorkflowBatchEntry {
-  jobDescription: string;
-  jobUrl?: string;
-}
-
-export interface WorkflowResumeFile {
-  fileName: string;
-  data: ArrayBuffer;
-}
-
-export type WorkflowCreateApplicationsPayload =
-  | {
-      resumeSource: "upload";
-      resumeFile: WorkflowResumeFile;
-      templateId: string;
-      entries: WorkflowBatchEntry[];
-    }
-  | {
-      resumeSource: "existing";
-      sourceJobId: string;
-      entries: WorkflowBatchEntry[];
-    };
-
-export interface WorkflowCreateApplicationsResult {
-  createdIds: string[];
-  succeeded: number;
-  total: number;
-}
-
-export interface WorkflowStateChanged {
-  jobId: string;
-  workflow: WorkflowStepsData;
-}
-
-export interface WorkflowTaskCompleted {
-  jobId: string;
-  taskName: TaskName;
-  provides?: string;
-  result?: unknown;
-}
-
-export interface WorkflowTaskFailed {
-  jobId: string;
-  taskName: TaskName;
-  error: string;
-}
-
-export interface WorkflowCompleted {
-  jobId: string;
-  workflowName: string;
-  status: WorkflowStatus;
-}
-
-export type WorkflowPushStateType =
-  | "stateChanged"
-  | "taskCompleted"
-  | "taskFailed"
-  | "completed";
-
+// TODO: consider a more unified and simple state
 export type WorkflowPushState =
-  | ({ type: "stateChanged" } & WorkflowStateChanged)
-  | ({ type: "taskCompleted" } & WorkflowTaskCompleted)
-  | ({ type: "taskFailed" } & WorkflowTaskFailed)
-  | ({ type: "completed" } & WorkflowCompleted);
+  | { type: "stateChanged"; jobId: string; workflow: WorkflowStepsData }
+  | { type: "taskCompleted"; jobId: string; taskName: TaskName }
+  | { type: "taskFailed"; jobId: string; taskName: TaskName; error: string }
+  | {
+      type: "completed";
+      jobId: string;
+      workflowName: string;
+      status: WorkflowStatus;
+    };
 
 export interface WorkflowAiPartial {
   jobId: string;

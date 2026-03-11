@@ -1,22 +1,12 @@
 /**
  * Workflow Engine
  *
- * Executes workflows using the task and workflow registries.
- * Responsibilities:
- * - Start workflows with initial context
- * - Run tasks when prerequisites are satisfied
- * - Update context with task outputs
- * - Handle failures and retries
- * - Persist workflow state to DB
- * - Emit workflow events for renderer updates
+ * Pure DAG runner. Tasks are self-contained (read DB → run → write DB).
+ * Engine only tracks task statuses and ordering.
  */
 
 import log from "electron-log/main";
-import {
-  getMissingInputs,
-  getTask,
-  resolveTaskInput,
-} from "../definitions/task-registry";
+import { getTask } from "../definitions/task-registry";
 import {
   arePrerequisitesSatisfied,
   getEntryTasks,
@@ -24,26 +14,26 @@ import {
 } from "../definitions/workflow-registry";
 import { emitWorkflowEvent } from "../events/workflow-events";
 import { WorkflowStore } from "../state/workflow-store";
-import type { WorkflowPersistencePort } from "../persistence/workflow.persistence";
 import type { TaskStatus, WorkflowStepsData } from "@type/workflow";
-import type { TaskName, WorkflowContext } from "@type/task-contracts";
-import type { Task, TaskExecutionMeta } from "../definitions/task-registry";
+import type { TaskName } from "@type/task-contracts";
+import type { TaskConfig } from "../definitions/task-registry";
 import type { Workflow } from "../definitions/workflow-registry";
 import type { TaskStateMap, WorkflowInstance } from "../state/workflow-store";
+import type { TaskDeps } from "../tasks/task-deps";
+import type { WorkflowRepository } from "../../persistence";
 
 export class WorkflowEngine {
   private store = new WorkflowStore();
 
-  constructor(private readonly workflowPersistence: WorkflowPersistencePort) {}
+  constructor(
+    private readonly workflowRepo: WorkflowRepository,
+    private readonly taskDeps: TaskDeps,
+  ) {}
 
   /**
    * Start a workflow for a job
    */
-  async startWorkflow(
-    workflowName: string,
-    jobId: string,
-    initialContext: Partial<WorkflowContext>,
-  ): Promise<void> {
+  async startWorkflow(workflowName: string, jobId: string): Promise<void> {
     log.info(`[WorkflowEngine] Starting '${workflowName}' for job ${jobId}`);
 
     const workflow = getWorkflow(workflowName);
@@ -60,18 +50,14 @@ export class WorkflowEngine {
       }
     }
 
-    // Get task names array
     const tasks = Array.from(workflow.tasks.keys());
 
-    // Initialize workflow in store
-    this.store.initWorkflow(jobId, workflowName, tasks, initialContext);
+    this.store.initWorkflow(jobId, workflowName, tasks);
 
-    // Persist initial state
     const workflowInstance = this.store.getWorkflow(jobId)!;
     await this.persistWorkflow(jobId, workflowInstance);
     this.emitStateChanged(jobId);
 
-    // Start entry tasks
     const entryTasks = getEntryTasks(workflow);
     log.info(`[WorkflowEngine] Entry tasks: ${entryTasks.join(", ")}`);
 
@@ -91,6 +77,8 @@ export class WorkflowEngine {
   async retryFailedTasks(jobId: string): Promise<TaskName[]> {
     const workflowInstance = this.store.getWorkflow(jobId);
 
+    // TODO: (workflow) Hydrate failed workflow state from DB when in-memory
+    // state is missing (e.g. app restart) so retry remains durable.
     if (!workflowInstance) {
       throw new Error(`No workflow instance for job ${jobId}`);
     }
@@ -104,7 +92,6 @@ export class WorkflowEngine {
       throw new Error(`Unknown workflow: ${workflowInstance.workflowName}`);
     }
 
-    // Find failed tasks
     const failedTasks: TaskName[] = [];
     const resetTaskStates: TaskStateMap = { ...workflowInstance.taskStates };
 
@@ -117,7 +104,6 @@ export class WorkflowEngine {
       }
     }
 
-    // Reset workflow state
     this.store.loadWorkflow(jobId, {
       ...workflowInstance,
       taskStates: resetTaskStates,
@@ -125,7 +111,6 @@ export class WorkflowEngine {
       error: undefined,
     });
 
-    // Persist and restart
     const updatedWorkflow = this.store.getWorkflow(jobId)!;
     await this.persistWorkflow(jobId, updatedWorkflow);
     this.emitStateChanged(jobId);
@@ -148,7 +133,6 @@ export class WorkflowEngine {
 
   /**
    * Detect and fix stale "running" states from interrupted workflows.
-   * Called when loading workflow state from DB on app start/navigation.
    */
   recoverStaleWorkflow(workflowSteps: WorkflowStepsData): {
     recovered: WorkflowStepsData;
@@ -158,7 +142,6 @@ export class WorkflowEngine {
       return { recovered: workflowSteps, wasStale: false };
     }
 
-    // Workflow was "running" - mark as failed (interrupted)
     const recoveredTaskStates: Record<string, TaskStatus> = {};
 
     for (const [task, status] of Object.entries(workflowSteps.taskStates)) {
@@ -184,9 +167,13 @@ export class WorkflowEngine {
     workflow: WorkflowInstance,
   ): Promise<void> {
     try {
-      this.workflowPersistence.saveWorkflowState(jobId, {
-        workflowSteps: this.toWorkflowSteps(workflow),
-        workflowStatus: workflow.status,
+      // TODO: (workflow): Ensure workflows row exists for new jobs (upsert here
+      // or create row during job creation) so state persistence is reliable.
+      this.workflowRepo.updateByJobId(jobId, {
+        state: this.toWorkflowSteps(workflow) as unknown as Record<
+          string,
+          unknown
+        >,
       });
     } catch (error) {
       log.error("[WorkflowEngine] Failed to persist workflow state:", error);
@@ -213,7 +200,7 @@ export class WorkflowEngine {
   }
 
   /**
-   * Run a task if it's ready (prerequisites met and inputs available)
+   * Run a task if it's ready (prerequisites met + status is pending)
    */
   private async runTaskIfReady(
     workflow: Workflow,
@@ -221,16 +208,10 @@ export class WorkflowEngine {
     taskName: TaskName,
   ): Promise<void> {
     const workflowInstance = this.store.getWorkflow(jobId);
-    const context = this.store.getContext(jobId);
-
-    if (!workflowInstance || !context) {
-      return;
-    }
+    if (!workflowInstance) return;
 
     const status = workflowInstance.taskStates[taskName];
-    if (status !== "pending") {
-      return;
-    }
+    if (status !== "pending") return;
 
     // Check prerequisites
     const completedTasks = new Set<TaskName>();
@@ -245,38 +226,25 @@ export class WorkflowEngine {
       return;
     }
 
-    // Check inputs
     const task = getTask(taskName);
     if (!task) {
       await this.failTask(jobId, taskName, `Task ${taskName} not registered`);
       return;
     }
 
-    const input = resolveTaskInput(task, context);
-    if (input === null) {
-      const missing = getMissingInputs(task, context);
-      log.debug(
-        `[WorkflowEngine] Task ${taskName} blocked on inputs: ${missing.join(", ")}`,
-      );
-      return;
-    }
-
-    // Run the task
-    await this.executeTask(workflow, jobId, task, input);
+    await this.executeTask(workflow, jobId, task);
   }
 
   /**
    * Execute a task
    */
-  private async executeTask<T extends TaskName>(
+  private async executeTask(
     workflow: Workflow,
     jobId: string,
-    task: Task<T>,
-    input: Parameters<Task<T>["execute"]>[0],
+    task: TaskConfig,
   ): Promise<void> {
     const taskName = task.name;
 
-    // Verify workflow is still running
     const workflowInstance = this.store.getWorkflow(jobId);
     if (!workflowInstance || workflowInstance.status !== "running") {
       log.warn(
@@ -290,50 +258,31 @@ export class WorkflowEngine {
     this.emitStateChanged(jobId);
 
     try {
-      const meta: TaskExecutionMeta = {
-        jobId,
-        taskName,
-        emitPartial: task.streaming
-          ? (partial) => {
-              emitWorkflowEvent("workflow:aiPartial", {
-                jobId,
-                taskName,
-                partial,
-              });
-            }
-          : undefined,
-      };
+      const emitPartial = task.streaming
+        ? (partial: unknown) => {
+            emitWorkflowEvent("workflow:aiPartial", {
+              jobId,
+              taskName,
+              partial,
+            });
+          }
+        : undefined;
 
-      // Execute
-      const result = await task.execute(input, meta);
+      await task.execute(jobId, this.taskDeps, emitPartial);
 
-      // Persist task result
-      await task.onSuccess(jobId, result);
-
-      // Update context if task provides a key
-      if (task.provides) {
-        this.store.updateContext(jobId, { [task.provides]: result });
-      }
-
-      // Mark completed
       this.store.setTaskStatus(jobId, taskName, "completed");
       log.info(`[WorkflowEngine] Task completed: ${taskName}`);
 
-      // Persist workflow state
       const updatedWorkflow = this.store.getWorkflow(jobId)!;
       await this.persistWorkflow(jobId, updatedWorkflow);
 
-      // Emit completion event for renderer UI
       emitWorkflowEvent("workflow:pushState", {
         type: "taskCompleted",
         jobId,
         taskName,
-        provides: task.provides,
-        result: task.provides ? (result as unknown) : undefined,
       });
       this.emitStateChanged(jobId);
 
-      // Start dependent tasks
       await this.startReadyTasks(workflow, jobId);
     } catch (error) {
       log.error(`[WorkflowEngine] Task ${taskName} execution failed:`, error);
@@ -350,17 +299,8 @@ export class WorkflowEngine {
     jobId: string,
   ): Promise<void> {
     const workflowInstance = this.store.getWorkflow(jobId);
-    const context = this.store.getContext(jobId);
+    if (!workflowInstance || workflowInstance.status !== "running") return;
 
-    if (
-      !workflowInstance ||
-      workflowInstance.status !== "running" ||
-      !context
-    ) {
-      return;
-    }
-
-    // Find ready tasks
     const readyTasks: TaskName[] = [];
     const completedTasks = new Set<TaskName>();
 
@@ -382,10 +322,7 @@ export class WorkflowEngine {
           completedTasks,
         )
       ) {
-        const task = getTask(taskName as TaskName);
-        if (task && resolveTaskInput(task, context) !== null) {
-          readyTasks.push(taskName as TaskName);
-        }
+        readyTasks.push(taskName as TaskName);
       }
     }
 
@@ -414,7 +351,6 @@ export class WorkflowEngine {
       return;
     }
 
-    // Start ready tasks in parallel
     log.info(
       `[WorkflowEngine] Starting ${readyTasks.length} ready task(s): ${readyTasks.join(", ")}`,
     );
@@ -441,7 +377,6 @@ export class WorkflowEngine {
     this.store.setTaskStatus(jobId, taskName, "failed", error);
     this.store.failWorkflow(jobId, `Task ${taskName} failed: ${error}`);
 
-    // Persist failure
     const failedWorkflow = this.store.getWorkflow(jobId)!;
     await this.persistWorkflow(jobId, failedWorkflow);
 

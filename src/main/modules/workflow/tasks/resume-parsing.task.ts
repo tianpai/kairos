@@ -6,35 +6,30 @@
 
 import { defineTask } from "../definitions/task-registry";
 import type { ResumeStructure } from "@type/task-contracts";
-import type { WorkflowTaskDeps } from "./task-deps";
 
-export function registerResumeParsingTask({
-  persistence,
-  aiClient,
-}: WorkflowTaskDeps): void {
+export function registerResumeParsingTask(): void {
   defineTask({
     name: "resume.parsing",
-    inputKeys: ["rawResumeContent", "templateId"],
-    provides: "resumeStructure",
     streaming: true,
 
-    async execute({ rawResumeContent, templateId }, meta) {
-      return aiClient.execute<ResumeStructure>(
+    async execute(jobId, deps, emitPartial) {
+      const resume = deps.resumeRepo.findByJobId(jobId);
+      if (!resume?.originalResume) {
+        throw new Error("No resume to parse");
+      }
+
+      const parsed = await deps.aiClient.execute<ResumeStructure>(
         "resume.parsing",
         {
-          rawResumeContent,
-          templateId,
+          rawResumeContent: resume.originalResume,
+          templateId: resume.templateId,
         },
-        meta.emitPartial
-          ? { streaming: true, onPartial: meta.emitPartial }
-          : undefined,
+        emitPartial ? { streaming: true, onPartial: emitPartial } : undefined,
       );
-    },
 
-    async onSuccess(jobId, resumeStructure) {
-      persistence.saveParsedResume(jobId, {
-        parsedResume: resumeStructure,
-        tailoredResume: resumeStructure,
+      deps.resumeRepo.updateByJobId(jobId, {
+        parsedResume: parsed,
+        tailoredResume: parsed,
       });
     },
   });
