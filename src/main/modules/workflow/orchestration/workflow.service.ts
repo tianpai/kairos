@@ -1,4 +1,4 @@
-import { AITaskClient } from "../../ai";
+import { initAIClient } from "../../ai";
 import {
   ChecklistRepository,
   JobRepository,
@@ -22,7 +22,7 @@ export class WorkflowService {
   private readonly workflowRepo: WorkflowRepository;
 
   constructor(db: Database, aiPreferences: AiPreferencesStore) {
-    const aiClient = new AITaskClient(aiPreferences);
+    const aiClient = initAIClient(aiPreferences);
     const jobRepo = new JobRepository(db);
     const resumeRepo = new ResumeRepository(db);
     const checklistRepo = new ChecklistRepository(db);

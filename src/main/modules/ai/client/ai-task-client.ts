@@ -7,6 +7,20 @@ import type { ProviderType } from "../../../../shared/providers";
 import type { TaskName } from "@type/task-contracts";
 import type { AiPreferencesStore } from "../config/ai-preferences.store";
 
+let instance: AITaskClient | null = null;
+
+export function initAIClient(aiPreferences: AiPreferencesStore): AITaskClient {
+  instance = new AITaskClient(aiPreferences);
+  return instance;
+}
+
+export function getAIClient(): AITaskClient {
+  if (!instance) {
+    throw new Error("AITaskClient not initialized. Call initAIClient() first.");
+  }
+  return instance;
+}
+
 type PendingTask = {
   resolve: (value: unknown) => void;
   reject: (reason: Error) => void;
