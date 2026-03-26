@@ -42,6 +42,13 @@ export function getJobChecklist(id: string): Promise<Checklist | null> {
   return window.kairos.checklist.get(id)
 }
 
+export async function updateChecklistKeywords(
+  id: string,
+  keywords: string[],
+): Promise<void> {
+  await window.kairos.checklist.updateKw(id, keywords)
+}
+
 export function getJobWorkflow(id: string): Promise<WfState | null> {
   return window.kairos.workflow.getState(id)
 }

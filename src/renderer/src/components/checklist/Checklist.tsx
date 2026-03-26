@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { ShieldCheck, Star, Users } from 'lucide-react'
-import { getJobChecklist } from '@api/jobs'
+import { getJobChecklist, updateChecklistKeywords } from '@api/jobs'
 import { ChecklistSection } from '@checklist/ChecklistSection'
 import { IconTooltipButton } from '@ui/IconTooltipButton'
 import { useSelectedKeywordsStore } from './selectedKeywords.store'
@@ -77,6 +77,15 @@ function ChecklistContent({
     seedIfEmpty(jobId, checklist.needTailoring)
   }, [jobId, checklist.needTailoring, seedIfEmpty])
 
+  function handleToggleKeyword(keyword: string) {
+    toggleKeyword(jobId, keyword)
+
+    const nextKeywords = useSelectedKeywordsStore.getState().getSelected(jobId)
+    void updateChecklistKeywords(jobId, nextKeywords).catch((error) => {
+      console.error('[Checklist] Failed to persist selected keywords:', error)
+    })
+  }
+
   const requirementsByTab: Record<TabType, Checklist['hardRequirements']> = {
     hard: checklist.hardRequirements,
     soft: checklist.softRequirements,
@@ -90,7 +99,7 @@ function ChecklistContent({
       <ChecklistSection
         requirements={requirements}
         selectedKeywords={selectedKeywords}
-        onToggleKeyword={(keyword) => toggleKeyword(jobId, keyword)}
+        onToggleKeyword={handleToggleKeyword}
       />
     </div>
   )
