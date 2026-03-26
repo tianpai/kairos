@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useRef, useState } from 'react'
 import type { ChangeEvent, DragEvent, RefObject } from 'react'
-import type { WorkflowResumeFile } from '@type/workflow-ipc'
+import type { ResumeFile } from '@/components/upload/newApplication.store'
 import { useFileSelect } from '@/hooks/useFileSelect'
 
 const JOB_DESCRIPTION_MAX_SIZE_KB = 50
@@ -10,7 +10,7 @@ export type UploadPurpose = 'resume' | 'jobDescription'
 interface UseUploadOptions {
   purpose: UploadPurpose
   onText?: (text: string) => void
-  onFile?: (file: WorkflowResumeFile | null) => void
+  onFile?: (file: ResumeFile | null) => void
   onError?: (message: string) => void
 }
 

@@ -10,26 +10,15 @@ import {
 import { Button } from '@ui/Button'
 import {
   useActiveProvider,
-  useAnthropicApiKey,
-  useApiKey,
-  useDeepSeekApiKey,
   useDefaultModel,
-  useDeleteAnthropicApiKey,
-  useDeleteApiKey,
-  useDeleteDeepSeekApiKey,
-  useDeleteGeminiApiKey,
-  useDeleteXAIApiKey,
+  useDeleteProviderApiKey,
   useFetchModels,
-  useGeminiApiKey,
+  useHasProviderApiKey,
+  useProviderApiKey,
   useSelectedModel,
   useSetActiveProvider,
-  useSetAnthropicApiKey,
-  useSetApiKey,
-  useSetDeepSeekApiKey,
-  useSetGeminiApiKey,
+  useSetProviderApiKey,
   useSetSelectedModel,
-  useSetXAIApiKey,
-  useXAIApiKey,
 } from '@hooks/useSettings'
 import type { ProviderType } from '../../../../shared/providers'
 
@@ -243,30 +232,15 @@ export function ProvidersSection() {
   const [selectedProvider, setSelectedProvider] =
     useState<ProviderType>('openai')
 
-  // OpenAI hooks
-  const { data: openaiKey } = useApiKey()
-  const setOpenaiKey = useSetApiKey()
-  const deleteOpenaiKey = useDeleteApiKey()
+  const { data: currentKey } = useProviderApiKey(selectedProvider)
+  const setProviderApiKey = useSetProviderApiKey(selectedProvider)
+  const deleteProviderApiKey = useDeleteProviderApiKey(selectedProvider)
 
-  // DeepSeek hooks
-  const { data: deepseekKey } = useDeepSeekApiKey()
-  const setDeepseekKey = useSetDeepSeekApiKey()
-  const deleteDeepseekKey = useDeleteDeepSeekApiKey()
-
-  // xAI hooks
-  const { data: xaiKey } = useXAIApiKey()
-  const setXaiKey = useSetXAIApiKey()
-  const deleteXaiKey = useDeleteXAIApiKey()
-
-  // Gemini hooks
-  const { data: geminiKey } = useGeminiApiKey()
-  const setGeminiKey = useSetGeminiApiKey()
-  const deleteGeminiKey = useDeleteGeminiApiKey()
-
-  // Anthropic hooks
-  const { data: anthropicKey } = useAnthropicApiKey()
-  const setAnthropicKey = useSetAnthropicApiKey()
-  const deleteAnthropicKey = useDeleteAnthropicApiKey()
+  const { data: openaiConfigured } = useHasProviderApiKey('openai')
+  const { data: deepseekConfigured } = useHasProviderApiKey('deepseek')
+  const { data: xaiConfigured } = useHasProviderApiKey('xai')
+  const { data: geminiConfigured } = useHasProviderApiKey('gemini')
+  const { data: anthropicConfigured } = useHasProviderApiKey('anthropic')
 
   // Active provider
   const { data: activeProvider } = useActiveProvider()
@@ -277,55 +251,26 @@ export function ProvidersSection() {
     { isConfigured: boolean; isActive: boolean }
   > = {
     openai: {
-      isConfigured: !!openaiKey,
+      isConfigured: !!openaiConfigured,
       isActive: activeProvider === 'openai',
     },
     deepseek: {
-      isConfigured: !!deepseekKey,
+      isConfigured: !!deepseekConfigured,
       isActive: activeProvider === 'deepseek',
     },
-    xai: { isConfigured: !!xaiKey, isActive: activeProvider === 'xai' },
+    xai: {
+      isConfigured: !!xaiConfigured,
+      isActive: activeProvider === 'xai',
+    },
     gemini: {
-      isConfigured: !!geminiKey,
+      isConfigured: !!geminiConfigured,
       isActive: activeProvider === 'gemini',
     },
     anthropic: {
-      isConfigured: !!anthropicKey,
+      isConfigured: !!anthropicConfigured,
       isActive: activeProvider === 'anthropic',
     },
   }
-
-  // API key config for each provider
-  const apiKeyConfig = {
-    openai: {
-      key: openaiKey,
-      setKey: setOpenaiKey,
-      deleteKey: deleteOpenaiKey,
-    },
-    deepseek: {
-      key: deepseekKey,
-      setKey: setDeepseekKey,
-      deleteKey: deleteDeepseekKey,
-    },
-    xai: { key: xaiKey, setKey: setXaiKey, deleteKey: deleteXaiKey },
-    gemini: {
-      key: geminiKey,
-      setKey: setGeminiKey,
-      deleteKey: deleteGeminiKey,
-    },
-    anthropic: {
-      key: anthropicKey,
-      setKey: setAnthropicKey,
-      deleteKey: deleteAnthropicKey,
-    },
-  } as Record<
-    ProviderType,
-    {
-      key: string | null | undefined
-      setKey: typeof setOpenaiKey
-      deleteKey: typeof deleteOpenaiKey
-    }
-  >
 
   return (
     <div className="flex h-full gap-6">
@@ -369,15 +314,11 @@ export function ProvidersSection() {
       <div className="flex-1">
         <ProviderConfig
           provider={PROVIDERS.find((p) => p.id === selectedProvider)!}
-          currentKey={apiKeyConfig[selectedProvider].key}
+          currentKey={currentKey}
           isActive={activeProvider === selectedProvider}
           onSetActive={() => setActiveProvider.mutateAsync(selectedProvider)}
-          onSave={(key) =>
-            apiKeyConfig[selectedProvider].setKey.mutateAsync(key)
-          }
-          onDelete={() =>
-            apiKeyConfig[selectedProvider].deleteKey.mutateAsync()
-          }
+          onSave={(key) => setProviderApiKey.mutateAsync(key)}
+          onDelete={() => deleteProviderApiKey.mutateAsync()}
         />
       </div>
     </div>

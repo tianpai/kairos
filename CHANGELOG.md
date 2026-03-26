@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.3.0](https://github.com/tianpai/kairos/compare/v0.2.5...v0.3.0) (2026-03-26)
+
+
+### Features
+
+* keep existing resumes when upgrading to the new database layout ([bbf1903](https://github.com/tianpai/kairos/commit/bbf1903cdc5dfcfcfc1d18ab4761cf3024ecfcdd))
+
+
+### Bug Fixes
+
+* keep tailoring focused on your selected keywords ([894905c](https://github.com/tianpai/kairos/commit/894905cedeffd822c7ff099107210f620983754d))
+
 ### [0.2.5](https://github.com/tianpai/kairos/compare/v0.2.4...v0.2.5) (2026-03-04)
 
 

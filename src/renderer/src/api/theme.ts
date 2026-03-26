@@ -1,14 +1,11 @@
-export type ThemeSource = 'system' | 'light' | 'dark'
-export type ThemeMode = 'light' | 'dark'
+import type { ThemeSource, ThemeState } from '@type/theme'
 
-export function getTheme(): Promise<ThemeSource> {
+export type { ThemeMode, ThemeSource, ThemeState } from '@type/theme'
+
+export function getTheme(): Promise<ThemeState> {
   return window.kairos.theme.get()
 }
 
 export function setTheme(theme: ThemeSource): Promise<void> {
   return window.kairos.theme.set(theme)
-}
-
-export function getCurrentTheme(): Promise<ThemeMode> {
-  return window.kairos.theme.getCurrent()
 }

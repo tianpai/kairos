@@ -4,7 +4,11 @@ import { create } from 'zustand'
 import { toast } from 'sonner'
 import { Modal } from '@ui/Modal'
 import { Toggle } from '@ui/Toggle'
-import { getJobApplication, listJobApplications } from '@api/jobs'
+import {
+  getJobApplicationSummary,
+  getJobResume,
+  listJobApplications,
+} from '@api/jobs'
 import { compileToPDF } from '@typst-compiler/compile'
 import { formatDate } from '@utils/format'
 import type { JobApplication } from '@api/jobs'
@@ -133,13 +137,16 @@ async function exportApplication(
   const label = getApplicationLabel(target.companyName, target.position)
 
   try {
-    const details = await getJobApplication(target.id)
-    const resumeData = details.tailoredResume || details.parsedResume
+    const [summary, resume] = await Promise.all([
+      getJobApplicationSummary(target.id),
+      getJobResume(target.id),
+    ])
+    const resumeData = resume.tailoredResume || resume.parsedResume
     if (!resumeData) {
       return `${label} (no resume data)`
     }
 
-    const builder = new TemplateBuilder(details.templateId)
+    const builder = new TemplateBuilder(resume.templateId)
     const dataWithDefaults = applySchemaDefaults(
       resumeData as TemplateData,
       builder.getSchemas(),
@@ -154,8 +161,8 @@ async function exportApplication(
     const name = personalInfo?.name?.trim() || 'resume'
     const filename = generateFilename(
       name,
-      details.companyName,
-      details.position,
+      summary.companyName,
+      summary.position,
     )
 
     await window.kairos.fs.writeFile(

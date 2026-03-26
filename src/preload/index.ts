@@ -1,17 +1,9 @@
 import { contextBridge } from "electron";
-import { aiServer } from "./api/ai-server";
-import { backup } from "./api/backup";
-import { dialog } from "./api/dialog";
-import { fs } from "./api/fs";
-import { jobs } from "./api/jobs";
-import { models } from "./api/models";
-import { platform } from "./api/platform";
-import { provider } from "./api/provider";
-import { settings } from "./api/settings";
-import { shell } from "./api/shell";
-import { theme } from "./api/theme";
-import { updater } from "./api/updater";
-import { workflow } from "./api/workflow";
+import { aiServer, apiKey, provider } from "./modules/ai";
+import { checklist, jobs, resume } from "./modules/workspace";
+import { job, workflow } from "./modules/workflow";
+import { theme } from "./modules/user";
+import { backup, dialog, fs, platform, shell, updater } from "./modules/system";
 
 contextBridge.exposeInMainWorld("kairos", {
   platform,
@@ -19,12 +11,14 @@ contextBridge.exposeInMainWorld("kairos", {
   shell,
   dialog,
   fs,
-  settings,
-  models,
+  apiKey,
   provider,
   theme,
   aiServer,
   jobs,
+  checklist,
+  resume,
+  job,
   workflow,
   updater,
 });

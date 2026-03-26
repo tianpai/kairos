@@ -1,6 +1,6 @@
 {
   "name": "kairos",
-  "version": "0.2.5",
+  "version": "0.3.0",
   "description": "AI-powered resume optimization desktop application",
   "main": "./out/main/index.js",
   "author": "",
@@ -16,6 +16,7 @@
     "postinstall": "npx @electron/rebuild",
     "format": "prettier --write . && npm run lint",
     "lint": "eslint \"{src,apps,libs,test}/**/*.{ts,tsx}\" --fix",
+    "check:legacy-paths": "bash scripts/check-legacy-paths.sh",
     "test": "vitest run",
     "test:watch": "vitest watch",
     "release": "standard-version",

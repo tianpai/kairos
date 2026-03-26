@@ -26,3 +26,6 @@ jobs:
 
       # 4. Run linter
       - run: npm run lint
+
+      # 5. Verify legacy path guardrails
+      - run: npm run check:legacy-paths

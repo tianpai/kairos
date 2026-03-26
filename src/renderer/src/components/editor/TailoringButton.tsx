@@ -6,11 +6,9 @@ import { useTailoringData } from '@hooks/useTailoringData'
 import { saveResume } from '@api/jobs'
 import {
   getWorkflowState,
-  onWorkflowCompleted,
-  onWorkflowTaskFailed,
-  startTailoring,
+  onWorkflowPushState,
+  startWorkflow,
 } from '@api/workflow'
-import { CHECKLIST_MATCHING, RESUME_TAILORING } from '@type/task-names'
 import { useSelectedKeywordsStore } from '@/components/checklist/selectedKeywords.store'
 import { useWorkflowRuntimeStore } from '@/hooks/workflowRuntime.store'
 import { friendlyError } from '@/utils/error'
@@ -20,7 +18,6 @@ const EMPTY_SELECTED_KEYWORDS: string[] = []
 export function TailoringButton() {
   const {
     jobId,
-    jobApplication,
     checklist,
     resumeStructure,
     templateId,
@@ -38,21 +35,14 @@ export function TailoringButton() {
   )
   const [isStarting, setIsStarting] = useState(false)
 
-  const taskStates =
-    runtimeWorkflow?.taskStates ?? jobApplication?.workflowSteps?.taskStates
-  const workflowStatus =
-    runtimeWorkflow?.status ??
-    jobApplication?.workflowStatus ??
-    jobApplication?.workflowSteps?.status
-  const isWorkflowRunning = workflowStatus === 'running'
-  const isTailoringResume = taskStates?.[RESUME_TAILORING] === 'running'
+  const tasks = runtimeWorkflow?.tasks
+  const isTailoringResume = tasks?.['resume.tailoring']?.status === 'running'
   const isMatchingTailoredResume =
-    taskStates?.[CHECKLIST_MATCHING] === 'running'
-  const isProcessing =
-    isStarting ||
-    isWorkflowRunning ||
-    isTailoringResume ||
-    isMatchingTailoredResume
+    tasks?.['checklist.matching']?.status === 'running'
+  const isAnyTaskRunning = tasks
+    ? Object.values(tasks).some((t) => t.status === 'running')
+    : false
+  const isProcessing = isStarting || isAnyTaskRunning
 
   // Check if checklist matching is completed
   const isChecklistReady = Boolean(
@@ -78,10 +68,7 @@ export function TailoringButton() {
 
     try {
       await saveResume(jobId, resumeStructure, templateId)
-      await startTailoring({
-        jobId,
-        needTailoring: selectedKeywords,
-      })
+      await startWorkflow(jobId, 'tailoring')
     } catch (error) {
       setIsStarting(false)
       const message = error instanceof Error ? error.message : String(error)
@@ -89,14 +76,7 @@ export function TailoringButton() {
         description: friendlyError(message),
       })
     }
-  }, [
-    jobId,
-    checklist,
-    isProcessing,
-    resumeStructure,
-    templateId,
-    selectedKeywords,
-  ])
+  }, [jobId, checklist, isProcessing, resumeStructure, templateId])
 
   // Hydrate runtime workflow state on mount/job change for mid-workflow opens.
   useEffect(() => {
@@ -104,13 +84,13 @@ export function TailoringButton() {
 
     let cancelled = false
 
-    void getWorkflowState({ jobId })
-      .then((workflow) => {
+    void getWorkflowState(jobId)
+      .then((state) => {
         if (cancelled) return
 
         const runtimeStore = useWorkflowRuntimeStore.getState()
-        if (workflow) {
-          runtimeStore.setWorkflowState(jobId, workflow)
+        if (state) {
+          runtimeStore.setWorkflowState(jobId, state)
           return
         }
 
@@ -140,21 +120,19 @@ export function TailoringButton() {
   useEffect(() => {
     if (!jobId) return
 
-    const unsubscribeCompleted = onWorkflowCompleted((payload) => {
-      if (payload.jobId === jobId) {
-        setIsStarting(false)
-      }
-    })
-
-    const unsubscribeTaskFailed = onWorkflowTaskFailed((payload) => {
-      if (payload.jobId === jobId) {
+    const unsubscribe = onWorkflowPushState(({ jobId: eventJobId, state }) => {
+      if (eventJobId !== jobId) return
+      // null = completed, or any task failed
+      if (
+        state === null ||
+        Object.values(state.tasks).some((t) => t.status === 'failed')
+      ) {
         setIsStarting(false)
       }
     })
 
     return () => {
-      unsubscribeCompleted()
-      unsubscribeTaskFailed()
+      unsubscribe()
     }
   }, [jobId])
 

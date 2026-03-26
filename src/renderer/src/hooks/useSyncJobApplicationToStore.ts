@@ -2,10 +2,10 @@ import { useEffect } from 'react'
 import { TemplateBuilder } from '@templates/builder'
 import { useResumeStore } from '@typst-compiler/resumeState'
 import type { TemplateData } from '@templates/template.types'
-import type { JobApplicationDetails } from '@/api/jobs'
+import type { JobResumeRecord } from '@/api/jobs'
 
-type SyncJobApplication = Pick<
-  JobApplicationDetails,
+type SyncJobResume = Pick<
+  JobResumeRecord,
   'templateId' | 'tailoredResume' | 'parsedResume'
 >
 
@@ -19,7 +19,7 @@ type SyncJobApplication = Pick<
  * 3. Default template data (for new jobs or while parsing is in progress)
  */
 export function useSyncJobApplicationToStore(
-  jobApplication: SyncJobApplication | undefined,
+  jobApplication: SyncJobResume | undefined,
 ) {
   const loadParsedResume = useResumeStore((state) => state.loadParsedResume)
   const compile = useResumeStore((state) => state.compile)

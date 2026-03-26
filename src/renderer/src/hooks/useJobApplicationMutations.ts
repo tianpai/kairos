@@ -8,6 +8,20 @@ type UpdateData = Pick<
   'companyName' | 'position' | 'dueDate' | 'jobUrl'
 >
 
+function invalidateJobDetails(
+  queryClient: ReturnType<typeof useQueryClient>,
+  jobId: string | undefined,
+) {
+  if (!jobId) return
+
+  queryClient.invalidateQueries({
+    queryKey: ['jobSummary', jobId],
+  })
+  queryClient.invalidateQueries({
+    queryKey: ['jobResume', jobId],
+  })
+}
+
 export function useJobApplicationMutations(selectedJobId?: string) {
   const queryClient = useQueryClient()
 
@@ -17,9 +31,7 @@ export function useJobApplicationMutations(selectedJobId?: string) {
     },
     onSuccess: function () {
       queryClient.invalidateQueries({ queryKey: ['jobApplications'] })
-      queryClient.invalidateQueries({
-        queryKey: ['jobApplication', selectedJobId],
-      })
+      invalidateJobDetails(queryClient, selectedJobId)
     },
     onError: function () {
       toast.error('Failed to update application')

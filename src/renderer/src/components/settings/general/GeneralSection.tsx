@@ -8,12 +8,12 @@ import { BackupSection } from './BackupSection'
 import { DangerZoneSection } from './DangerZoneSection'
 import { ImportBackupOverlay } from './ImportBackupOverlay'
 import { ThemeSection } from './ThemeSection'
-import type { ThemeSource } from './ThemeSection'
+import type { ThemeSource } from '@type/theme'
 
 export function GeneralSection() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
-  const { data: currentTheme } = useTheme()
+  const { data: themeData } = useTheme()
   const setTheme = useSetTheme()
   const [isDeleting, setIsDeleting] = useState(false)
   const [isResetting, setIsResetting] = useState(false)
@@ -127,7 +127,7 @@ export function GeneralSection() {
 
       <div className="space-y-6">
         <ThemeSection
-          currentTheme={currentTheme}
+          currentTheme={themeData?.source}
           onThemeChange={handleThemeChange}
         />
         <BackupSection

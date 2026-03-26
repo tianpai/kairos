@@ -1,7 +1,7 @@
 import { useSearch } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { useResumeStore } from '@typst-compiler/resumeState'
-import { getJobApplication } from '@api/jobs'
+import { getJobChecklist, getJobResume } from '@api/jobs'
 import type { SectionEntry, TemplateData } from '@templates/template.types'
 
 /**
@@ -33,10 +33,15 @@ export function useTailoringData() {
   const search = useSearch({ strict: false })
   const jobId = search.jobId
 
-  // Get checklist from React Query
-  const { data: jobApplication } = useQuery({
-    queryKey: ['jobApplication', jobId],
-    queryFn: () => getJobApplication(jobId!),
+  const { data: resume } = useQuery({
+    queryKey: ['jobResume', jobId],
+    queryFn: () => getJobResume(jobId!),
+    enabled: !!jobId,
+  })
+
+  const { data: checklist } = useQuery({
+    queryKey: ['jobChecklist', jobId],
+    queryFn: () => getJobChecklist(jobId!),
     enabled: !!jobId,
   })
 
@@ -45,13 +50,12 @@ export function useTailoringData() {
   const templateId = useResumeStore((state) => state.templateId)
 
   // Check for required data
-  const hasJobDescription = Boolean(jobApplication?.jobDescription?.trim())
+  const hasJobDescription = Boolean(resume?.jobDescription?.trim())
   const resumeHasContent = hasResumeContent(resumeStructure)
 
   return {
     jobId,
-    jobApplication,
-    checklist: jobApplication?.checklist ?? undefined,
+    checklist: checklist ?? undefined,
     resumeStructure,
     templateId,
     hasJobDescription,

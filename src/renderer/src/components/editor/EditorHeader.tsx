@@ -5,13 +5,13 @@ import { DocumentConfigButton } from '@resumeForm/DocumentConfigButton'
 import { useLayoutStore } from '@layout/layout.store'
 import { BtnToggleChecklist } from '../ui/BtnToggleChecklist'
 import { Score } from '../ui/Score'
-import type { JobApplicationDetails } from '@api/jobs'
+import type { JobSummary } from '@api/jobs'
 import { ExportButton } from '@/components/export/ExportButton'
 import { ApplicationsButton } from '@/components/applications/ApplicationsButton'
 
 interface EditorHeaderProps {
   jobId?: string
-  jobApplication?: JobApplicationDetails
+  jobApplication?: JobSummary
 }
 
 export function EditorHeader({ jobId, jobApplication }: EditorHeaderProps) {

@@ -3,11 +3,11 @@ import { useNewApplicationStore } from './newApplication.store'
 import type { SubmitPayload } from './newApplication.store'
 import { Button } from '@/components/ui/Button'
 import NewApplicationModal from '@/components/upload/NewApplicationModal'
-import { useHasApiKey } from '@/hooks/useSettings'
+import { useHasActiveProviderApiKey } from '@/hooks/useSettings'
 import { useWorkflow } from '@/hooks/useWorkflow'
 
 export default function NewApplicationButton() {
-  const { data: hasApiKey } = useHasApiKey()
+  const { data: hasApiKey } = useHasActiveProviderApiKey()
 
   const isOpen = useNewApplicationStore((s) => s.isOpen)
   const openModal = useNewApplicationStore((s) => s.openModal)
