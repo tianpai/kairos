@@ -12,6 +12,7 @@ import {
 } from "../../persistence";
 import { createAppMenu } from "../menu/app-menu";
 import { aiServerService } from "../ai-server/ai-server.service";
+import { initWfEngine } from "../../workflowV2";
 
 // Initialize logger
 log.initialize();
@@ -51,6 +52,9 @@ async function initializeDatabase() {
   await runMigrations();
 
   registerIpcHandlers({ aiPreferences, userPreferences });
+
+  // workflowV2 engine — init after DB + AI client are ready
+  initWfEngine();
 }
 
 async function createWindow() {
