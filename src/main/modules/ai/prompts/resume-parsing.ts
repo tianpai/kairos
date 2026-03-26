@@ -1,4 +1,5 @@
-import { buildResumeZodSchema } from "@templates/schema-builder";
+// TODO: move schema-builder to shared/ to fix cross-boundary import (main ← renderer)
+import { buildResumeZodSchema } from "../../../../renderer/src/templates/schema-builder";
 import type { AIProvider, DeepPartial } from "../providers/provider.interface";
 
 interface ParseOptions {

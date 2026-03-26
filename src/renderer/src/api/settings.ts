@@ -47,11 +47,7 @@ export function setSelectedModel(
   return window.kairos.provider.setSelectedModel(provider, model)
 }
 
-export function getDefaultModel(provider: ProviderType): Promise<string> {
-  return window.kairos.provider.getDefaultModel(provider)
-}
-
-export function getActiveProvider(): Promise<ProviderType> {
+export function getActiveProvider(): Promise<ProviderType | null> {
   return window.kairos.provider.getActive()
 }
 
@@ -61,5 +57,6 @@ export function setActiveProvider(provider: ProviderType): Promise<void> {
 
 export async function hasActiveProviderApiKey(): Promise<boolean> {
   const activeProvider = await getActiveProvider()
+  if (!activeProvider) return false
   return hasProviderApiKey(activeProvider)
 }

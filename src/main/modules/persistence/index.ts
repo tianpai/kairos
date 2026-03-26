@@ -29,4 +29,4 @@ export {
   ChecklistRepository,
   ScoreRepository,
   WorkflowRepository,
-} from "./repositories/repo";
+} from "./repo";

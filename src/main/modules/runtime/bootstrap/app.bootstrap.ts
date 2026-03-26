@@ -10,7 +10,6 @@ import {
   disconnectDatabase,
   runMigrations,
 } from "../../persistence";
-import { createAppMenu } from "../menu/app-menu";
 import { aiServerService } from "../ai-server/ai-server.service";
 import { initWfEngine } from "../../workflowV2";
 
@@ -108,9 +107,6 @@ async function createWindow() {
   mainWindow.on("closed", () => {
     mainWindow = null;
   });
-
-  // Create app menu
-  createAppMenu();
 }
 
 app.whenReady().then(async () => {

@@ -12,7 +12,7 @@ import type {
   BackupExportResult,
   BackupImportResult,
   BackupManifest,
-} from "../../../../shared/backup";
+} from "@shared/backup";
 
 type BackupSchemaKind = "legacy" | "split";
 
@@ -164,7 +164,9 @@ function sourceLegacyColumnExpr(
   column: string,
   fallbackExpr: string,
 ): string {
-  return legacyColumns.includes(column) ? quoteIdentifier(column) : fallbackExpr;
+  return legacyColumns.includes(column)
+    ? quoteIdentifier(column)
+    : fallbackExpr;
 }
 
 function convertSplitV2Import(db: Database.Database): void {
@@ -373,7 +375,8 @@ function pruneExportDbToSplitTables(tempDbPath: string): void {
     }
 
     const tablesToDrop = [...tableSet].filter(
-      (tableName) => !SPLIT_TABLES.includes(tableName as (typeof SPLIT_TABLES)[number]),
+      (tableName) =>
+        !SPLIT_TABLES.includes(tableName as (typeof SPLIT_TABLES)[number]),
     );
 
     for (const tableName of tablesToDrop) {

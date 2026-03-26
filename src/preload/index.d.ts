@@ -56,14 +56,13 @@ interface KairosAPI {
     delete: (provider: ProviderType) => Promise<void>;
   };
   provider: {
-    getActive: () => Promise<ProviderType>;
+    getActive: () => Promise<ProviderType | null>;
     setActive: (provider: ProviderType) => Promise<void>;
     resetAll: () => Promise<{ success: boolean }>;
     fetchModels: (provider: ProviderType) => Promise<ModelInfo[]>;
     getCachedModels: (provider: ProviderType) => Promise<string[]>;
     getSelectedModel: (provider: ProviderType) => Promise<string | null>;
     setSelectedModel: (provider: ProviderType, model: string) => Promise<void>;
-    getDefaultModel: (provider: ProviderType) => Promise<string>;
   };
   theme: {
     get: () => Promise<ThemeState>;

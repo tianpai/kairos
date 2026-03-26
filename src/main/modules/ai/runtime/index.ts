@@ -5,4 +5,3 @@ export { parseChecklist } from "../prompts/checklist-parsing";
 export { extractJobInfo } from "../prompts/jobinfo-extracting";
 export { parseResume } from "../prompts/resume-parsing";
 export { tailorResume } from "../prompts/resume-tailoring";
-

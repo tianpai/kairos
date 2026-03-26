@@ -1,16 +1,9 @@
 import { useEffect, useState } from 'react'
 import { Copy, Eye, EyeOff } from 'lucide-react'
-import {
-  Anthropic,
-  DeepSeek,
-  Gemini,
-  Grok,
-  OpenAI,
-} from '@lobehub/icons'
+import { Anthropic, DeepSeek, Gemini, Grok, OpenAI } from '@lobehub/icons'
 import { Button } from '@ui/Button'
 import {
   useActiveProvider,
-  useDefaultModel,
   useDeleteProviderApiKey,
   useFetchModels,
   useHasProviderApiKey,
@@ -57,7 +50,7 @@ const PROVIDERS: ProviderInfo[] = [
   {
     id: 'anthropic',
     name: 'Anthropic',
-    description: 'Claude Haiku 4.5, Claude Sonnet 4.5, Claude Opus 4.5 via API',
+    description: 'Claude Haiku 4.5, Claude Sonnet 4.6, Claude Opus 4.6 via API',
     placeholder: 'sk-ant-...',
   },
 ]
@@ -107,10 +100,10 @@ function ProviderConfig({
   const {
     data: models,
     isLoading: isLoadingModels,
+    isError: isErrorModels,
     refetch: refetchModels,
   } = useFetchModels(provider.id)
   const { data: selectedModel } = useSelectedModel(provider.id)
-  const { data: defaultModel } = useDefaultModel(provider.id)
   const setSelectedModel = useSetSelectedModel()
 
   // Refetch models when API key changes
@@ -130,8 +123,6 @@ function ProviderConfig({
   const handleModelChange = async (model: string) => {
     await setSelectedModel.mutateAsync({ provider: provider.id, model })
   }
-
-  const displayModel = selectedModel ?? defaultModel ?? ''
 
   return (
     <div className="space-y-4">
@@ -203,25 +194,41 @@ function ProviderConfig({
           <label className="text-secondary block text-sm font-medium">
             Model
           </label>
-          <select
-            value={displayModel}
-            onChange={(e) => handleModelChange(e.target.value)}
-            disabled={isLoadingModels}
-            className="border-default bg-base text-primary mt-1 w-full rounded-md border-2 px-3 py-2 focus:border-black focus:outline-none disabled:opacity-50 dark:focus:border-white"
-          >
-            {isLoadingModels ? (
-              <option>Loading models...</option>
-            ) : (
-              models?.map((model) => (
-                <option key={model.id} value={model.id}>
-                  {model.name}
-                </option>
-              ))
-            )}
-          </select>
-          <p className="text-hint mt-1 text-xs">
-            Select the model to use for AI tasks.
-          </p>
+          {isErrorModels ? (
+            <p className="text-error mt-1 text-sm">
+              Failed to load models. Check your API key or try again later.
+            </p>
+          ) : (
+            <>
+              <select
+                value={selectedModel ?? ''}
+                onChange={(e) => handleModelChange(e.target.value)}
+                disabled={isLoadingModels}
+                className="border-default bg-base text-primary mt-1 w-full rounded-md border-2 px-3 py-2 focus:border-black focus:outline-none disabled:opacity-50 dark:focus:border-white"
+              >
+                {isLoadingModels ? (
+                  <option>Loading models...</option>
+                ) : (
+                  <>
+                    {!selectedModel && (
+                      <option value="" disabled>
+                        Select a model...
+                      </option>
+                    )}
+                    {models?.map((model) => (
+                      <option key={model.id} value={model.id}>
+                        {model.name}
+                      </option>
+                    ))}
+                  </>
+                )}
+              </select>
+              <p className="text-hint mt-1 text-xs">
+                Pick a text/chat model. Do not use image, video, or code
+                generation models.
+              </p>
+            </>
+          )}
         </div>
       )}
     </div>

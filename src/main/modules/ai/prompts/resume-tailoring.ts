@@ -1,4 +1,5 @@
-import { buildTailoringZodSchema } from "@templates/schema-builder";
+// TODO: move schema-builder to shared/ to fix cross-boundary import (main ← renderer)
+import { buildTailoringZodSchema } from "../../../../renderer/src/templates/schema-builder";
 import type { Checklist } from "@type/checklist";
 import type { AIProvider, DeepPartial } from "../providers/provider.interface";
 
