@@ -1,81 +1,81 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import {
-  onWorkflowPushState,
-} from '@api/workflow'
-import { SCORE_UPDATING } from '@type/task-names'
+import { onWorkflowPushState } from '@api/workflow'
 import { useWorkflowRuntimeStore } from './workflowRuntime.store'
+import type { WfState } from '@type/workflow'
 import { friendlyError } from '@/utils/error'
 
 function invalidateJob(
   queryClient: ReturnType<typeof useQueryClient>,
   jobId: string,
 ) {
-  queryClient.invalidateQueries({
-    queryKey: ['jobSummary', jobId],
-  })
-  queryClient.invalidateQueries({
-    queryKey: ['jobResume', jobId],
-  })
-  queryClient.invalidateQueries({
-    queryKey: ['jobChecklist', jobId],
-  })
-  queryClient.invalidateQueries({
-    queryKey: ['jobWorkflow', jobId],
-  })
+  queryClient.invalidateQueries({ queryKey: ['jobSummary', jobId] })
+  queryClient.invalidateQueries({ queryKey: ['jobResume', jobId] })
+  queryClient.invalidateQueries({ queryKey: ['jobChecklist', jobId] })
+  queryClient.invalidateQueries({ queryKey: ['jobWorkflow', jobId] })
+}
+
+function hasFailedTasks(state: WfState): string[] {
+  return Object.entries(state.tasks)
+    .filter(([, t]) => t.status === 'failed' && t.error)
+    .map(([name, t]) => `${name}: ${t.error!.message}`)
+}
+
+function hasCompletedScoreUpdate(
+  prev: WfState | undefined,
+  next: WfState,
+): boolean {
+  const prevStatus = prev?.tasks['score.updating']?.status
+  const nextStatus = next.tasks['score.updating']?.status
+  return prevStatus !== 'completed' && nextStatus === 'completed'
 }
 
 export function useWorkflowEvents() {
   const queryClient = useQueryClient()
+  const prevStates = useRef<Record<string, WfState>>({})
 
   useEffect(() => {
-    const unsubscribePushState = onWorkflowPushState((payload) => {
-      switch (payload.type) {
-        case 'stateChanged': {
-          const runtimeStore = useWorkflowRuntimeStore.getState()
+    const unsubscribe = onWorkflowPushState(({ jobId, state }) => {
+      const runtimeStore = useWorkflowRuntimeStore.getState()
+      const prev = prevStates.current[jobId]
 
-          if (payload.workflow.status === 'completed') {
-            runtimeStore.clearWorkflowState(payload.jobId)
-            return
-          }
+      if (state === null) {
+        // Workflow completed — clear store, invalidate, toast
+        runtimeStore.clearWorkflowState(jobId)
+        delete prevStates.current[jobId]
+        invalidateJob(queryClient, jobId)
+        queryClient.invalidateQueries({ queryKey: ['jobApplications'] })
+        toast.success('Processing complete')
+        return
+      }
 
-          runtimeStore.setWorkflowState(payload.jobId, payload.workflow)
-          return
-        }
-        case 'taskCompleted': {
-          invalidateJob(queryClient, payload.jobId)
+      // Update store
+      runtimeStore.setWorkflowState(jobId, state)
+      prevStates.current[jobId] = state
 
-          if (payload.taskName === SCORE_UPDATING) {
-            queryClient.invalidateQueries({ queryKey: ['jobApplications'] })
-          }
-          return
-        }
-        case 'taskFailed': {
-          invalidateJob(queryClient, payload.jobId)
+      // Check for newly failed tasks
+      const failures = hasFailedTasks(state)
+      const prevFailures = prev ? hasFailedTasks(prev) : []
+      const newFailures = failures.filter((f) => !prevFailures.includes(f))
+      for (const failure of newFailures) {
+        const [taskLabel, message] = failure.split(': ', 2)
+        toast.error(`Failed: ${taskLabel}`, {
+          description: friendlyError(message),
+        })
+      }
 
-          const taskLabel = payload.taskName.toLowerCase().replace(/_/g, ' ')
-          toast.error(`Failed: ${taskLabel}`, {
-            description: friendlyError(payload.error),
-          })
-          return
-        }
-        case 'completed': {
-          useWorkflowRuntimeStore.getState().clearWorkflowState(payload.jobId)
-          invalidateJob(queryClient, payload.jobId)
-          const workflowLabel =
-            payload.workflowName === 'tailoring'
-              ? 'Tailoring complete'
-              : 'Processing complete'
+      // Invalidate queries on any state change
+      invalidateJob(queryClient, jobId)
 
-          toast.success(workflowLabel)
-          return
-        }
+      // Invalidate job list when score updates complete
+      if (hasCompletedScoreUpdate(prev, state)) {
+        queryClient.invalidateQueries({ queryKey: ['jobApplications'] })
       }
     })
 
     return () => {
-      unsubscribePushState()
+      unsubscribe()
     }
   }, [queryClient])
 }

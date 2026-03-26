@@ -1,6 +1,5 @@
-import { getDatabase } from "../../persistence";
 import { workspaceIPC } from "../../workspace";
-import { WorkflowService, registerWorkflowHandlers } from "../../workflow";
+import { registerWfHandlers } from "../../workflowV2/workflow.ipc";
 import {
   registerBackupHandlers,
   registerDialogHandlers,
@@ -21,9 +20,7 @@ export interface RuntimeIpcDependencies {
 
 export function registerIpcHandlers(deps: RuntimeIpcDependencies): void {
   workspaceIPC();
-  registerWorkflowHandlers(
-    new WorkflowService(getDatabase(), deps.aiPreferences),
-  );
+  registerWfHandlers();
   registerDialogHandlers();
   registerFsHandlers();
   registerAIServerHandlers();

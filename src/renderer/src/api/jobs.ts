@@ -6,7 +6,7 @@ import type {
 } from '@type/jobs-ipc'
 import type { Checklist } from '@type/checklist'
 import type { IpcSuccessResponse } from '@type/ipc'
-import type { WorkflowStepsData } from '@type/workflow'
+import type { WfState } from '@type/workflow'
 
 export type { JobApplication, JobSummary } from '@type/jobs-ipc'
 
@@ -42,12 +42,23 @@ export function getJobChecklist(id: string): Promise<Checklist | null> {
   return window.kairos.checklist.get(id)
 }
 
-// TODO: rename it to getWorkflow
-export async function getJobWorkflow(
-  id: string,
-): Promise<WorkflowStepsData | null> {
-  const result = await window.kairos.workflow.getState({ jobId: id })
-  return result.workflow ?? null
+export function getJobWorkflow(id: string): Promise<WfState | null> {
+  return window.kairos.workflow.getState(id)
+}
+
+export interface CreateJobPayload {
+  resumeSource: 'upload' | 'existing'
+  resumeFile?: { fileName: string; data: ArrayBuffer }
+  sourceJobId?: string
+  templateId: string
+  jobDescription: string
+  jobUrl?: string
+}
+
+export function createJob(
+  payload: CreateJobPayload,
+): Promise<{ jobId: string }> {
+  return window.kairos.job.create(payload)
 }
 
 export async function deleteJobApplication(id: string): Promise<void> {

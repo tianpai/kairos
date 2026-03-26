@@ -1,41 +1,24 @@
-import type { TaskName } from '@type/task-contracts'
-import type { WorkflowStepsData } from '@type/workflow'
 import type {
+  WfState,
   WorkflowAiPartial,
-  WorkflowCreateApplicationsPayload,
-  WorkflowCreateApplicationsResult,
-  WorkflowGetStatePayload,
   WorkflowPushState,
-  WorkflowRetryPayload,
-  WorkflowStartTailoringPayload,
-} from '@type/workflow-ipc'
+} from '@type/workflow'
 
 type Unsubscribe = () => void
 
-export async function startTailoring(
-  payload: WorkflowStartTailoringPayload,
+export async function startWorkflow(
+  jobId: string,
+  workflowName: string,
 ): Promise<void> {
-  await window.kairos.workflow.startTailoring(payload)
+  await window.kairos.workflow.start(jobId, workflowName)
 }
 
-export async function retryWorkflow(
-  payload: WorkflowRetryPayload,
-): Promise<TaskName[]> {
-  const result = await window.kairos.workflow.retry(payload)
-  return result.failedTasks as TaskName[]
+export async function retryWorkflow(jobId: string): Promise<void> {
+  await window.kairos.workflow.retry(jobId)
 }
 
-export function createApplications(
-  payload: WorkflowCreateApplicationsPayload,
-): Promise<WorkflowCreateApplicationsResult> {
-  return window.kairos.workflow.createApplications(payload)
-}
-
-export async function getWorkflowState(
-  payload: WorkflowGetStatePayload,
-): Promise<WorkflowStepsData | null> {
-  const result = await window.kairos.workflow.getState(payload)
-  return result.workflow ?? null
+export async function getWorkflowState(jobId: string): Promise<WfState | null> {
+  return window.kairos.workflow.getState(jobId)
 }
 
 export function onWorkflowPushState(

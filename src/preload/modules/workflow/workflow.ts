@@ -1,45 +1,40 @@
 import { ipcRenderer } from "electron";
 import type {
+  WfState,
   WorkflowAiPartial,
-  WorkflowCreateApplicationsPayload,
-  WorkflowCreateApplicationsResult,
-  WorkflowGetStatePayload,
   WorkflowPushState,
-  WorkflowRetryPayload,
-  WorkflowStartTailoringPayload,
-} from "../../../shared/type/workflow-ipc";
-import type { WorkflowStepsData } from "../../../shared/type/workflow";
+} from "../../../shared/type/workflow";
 
 type Unsubscribe = () => void;
 
+interface JobCreatePayload {
+  resumeSource: "upload" | "existing";
+  resumeFile?: { fileName: string; data: ArrayBuffer };
+  sourceJobId?: string;
+  templateId: string;
+  jobDescription: string;
+  jobUrl?: string;
+}
+
+export const job = {
+  create: (payload: JobCreatePayload): Promise<{ jobId: string }> =>
+    ipcRenderer.invoke("job:create", payload),
+};
+
 export const workflow = {
-  startTailoring: (
-    payload: WorkflowStartTailoringPayload,
-  ): Promise<{ success: boolean }> =>
-    ipcRenderer.invoke("workflow:startTailoring", payload),
-  retry: (
-    payload: WorkflowRetryPayload,
-  ): Promise<{ success: boolean; failedTasks: string[] }> =>
-    ipcRenderer.invoke("workflow:retry", payload),
-  createApplications: (
-    payload: WorkflowCreateApplicationsPayload,
-  ): Promise<WorkflowCreateApplicationsResult> =>
-    ipcRenderer.invoke("workflow:createApplications", payload),
-  getState: (
-    payload: WorkflowGetStatePayload,
-  ): Promise<{ workflow: WorkflowStepsData | null }> =>
-    ipcRenderer.invoke("workflow:getState", payload),
-  onPushState: (
-    callback: (payload: WorkflowPushState) => void,
-  ): Unsubscribe => {
+  start: (jobId: string, workflowName: string): Promise<{ success: boolean }> =>
+    ipcRenderer.invoke("workflow:start", jobId, workflowName),
+  retry: (jobId: string): Promise<{ success: boolean }> =>
+    ipcRenderer.invoke("workflow:retry", jobId),
+  getState: (jobId: string): Promise<WfState | null> =>
+    ipcRenderer.invoke("workflow:getState", jobId),
+  onPushState: (callback: (payload: WorkflowPushState) => void): Unsubscribe => {
     const handler = (_: unknown, payload: WorkflowPushState) =>
       callback(payload);
     ipcRenderer.on("workflow:pushState", handler);
     return () => ipcRenderer.removeListener("workflow:pushState", handler);
   },
-  onAiPartial: (
-    callback: (payload: WorkflowAiPartial) => void,
-  ): Unsubscribe => {
+  onAiPartial: (callback: (payload: WorkflowAiPartial) => void): Unsubscribe => {
     const handler = (_: unknown, payload: WorkflowAiPartial) =>
       callback(payload);
     ipcRenderer.on("workflow:aiPartial", handler);

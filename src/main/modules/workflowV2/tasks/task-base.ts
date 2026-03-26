@@ -1,17 +1,8 @@
 import { emitWorkflowEvent } from "../workflow-events";
+import type { TaskError, TaskName } from "@type/workflow";
 
-export interface TaskError {
-  message: string;
-  retryable: boolean;
-}
-
-export type TaskName =
-  | "resume.parsing"
-  | "resume.tailoring"
-  | "checklist.parsing"
-  | "checklist.matching"
-  | "score.updating"
-  | "jobinfo.extracting";
+// TODO: why export again?
+export type { TaskError, TaskName };
 
 export abstract class BaseTask {
   abstract readonly name: TaskName;

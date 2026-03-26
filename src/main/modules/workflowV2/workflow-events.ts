@@ -1,17 +1,5 @@
 import { EventEmitter } from "node:events";
-import type { TaskName } from "./tasks/task-base";
-import type { WfState } from "./engine";
-
-export interface WorkflowPushState {
-  jobId: string;
-  state: WfState | null;
-}
-
-export interface WorkflowAiPartial {
-  jobId: string;
-  taskName: TaskName;
-  partial: unknown;
-}
+import type { WorkflowAiPartial, WorkflowPushState } from "@type/workflow";
 
 type WorkflowEventMap = {
   "workflow:pushState": WorkflowPushState;

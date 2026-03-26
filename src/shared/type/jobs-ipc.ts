@@ -1,6 +1,6 @@
 import { z } from "zod";
 import type { Checklist } from "./checklist";
-import type { WorkflowStatus, WorkflowStepsData } from "./workflow";
+import type { WfState } from "./workflow";
 
 // TODO: inline this
 export interface JobsCreateResult {
@@ -38,8 +38,7 @@ export interface JobApplicationDetails extends JobSummary {
   parsedResume: Record<string, unknown> | null;
   tailoredResume: Record<string, unknown> | null;
   checklist: Checklist | null;
-  workflowStatus: WorkflowStatus | null;
-  workflowSteps: WorkflowStepsData | null;
+  workflowState: WfState | null;
   failedTasks: FailedTasksMap;
 }
 

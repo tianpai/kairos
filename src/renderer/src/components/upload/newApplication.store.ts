@@ -1,15 +1,21 @@
 import { create } from 'zustand'
-import type {
-  WorkflowBatchEntry,
-  WorkflowCreateApplicationsPayload,
-  WorkflowResumeFile,
-} from '@type/workflow-ipc'
 
 export type ResumeSource = 'upload' | 'existing'
 export type BatchStatus = 'idle' | 'processing' | 'completed' | 'failed'
 
-export type JdEntry = WorkflowBatchEntry & {
+export interface ResumeFile {
+  fileName: string
+  data: ArrayBuffer
+}
+
+export interface BatchEntry {
+  jobDescription: string
+  jobUrl?: string
+}
+
+export interface JdEntry {
   id: string
+  jobDescription: string
   jobUrl: string
 }
 
@@ -20,17 +26,17 @@ export interface BatchProgress {
   errorMessage: string | null
 }
 
-type UploadSubmitPayload = Omit<
-  Extract<WorkflowCreateApplicationsPayload, { resumeSource: 'upload' }>,
-  'templateId'
->
-
-type ExistingSubmitPayload = Extract<
-  WorkflowCreateApplicationsPayload,
-  { resumeSource: 'existing' }
->
-
-export type SubmitPayload = UploadSubmitPayload | ExistingSubmitPayload
+export type SubmitPayload =
+  | {
+      resumeSource: 'upload'
+      resumeFile: ResumeFile
+      entries: BatchEntry[]
+    }
+  | {
+      resumeSource: 'existing'
+      sourceJobId: string
+      entries: BatchEntry[]
+    }
 
 export const MAX_ENTRIES = 5
 
@@ -56,7 +62,7 @@ function getFilledEntries(entries: JdEntry[]): JdEntry[] {
 interface NewApplicationState {
   isOpen: boolean
   resumeSource: ResumeSource
-  resumeFile: WorkflowResumeFile | null
+  resumeFile: ResumeFile | null
   selectedSourceId: string | null
   entries: JdEntry[]
   isSubmitting: boolean
@@ -70,7 +76,7 @@ interface NewApplicationActions {
 
   // Form inputs
   setResumeSource: (source: ResumeSource) => void
-  setResumeFile: (file: WorkflowResumeFile | null) => void
+  setResumeFile: (file: ResumeFile | null) => void
   setSelectedSourceId: (id: string | null) => void
   addEntry: () => void
   removeEntry: (id: string) => void

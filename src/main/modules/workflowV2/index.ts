@@ -1,4 +1,5 @@
-import { WorkflowRepository, getDatabase } from "../persistence";
+import log from "electron-log/main";
+import { WorkflowRepository, getDatabase, workflows } from "../persistence";
 import { WfEngine } from "./engine";
 import { workflowRegistry } from "./workflow";
 import { ChecklistMatchingTask } from "./tasks/checklist-matching";
@@ -23,11 +24,12 @@ export function initWfEngine(): WfEngine {
   tasks.set("checklist.matching", new ChecklistMatchingTask());
   tasks.set("score.updating", new ScoreUpdatingTask());
   tasks.set("jobinfo.extracting", new JobInfoExtractingTask());
-  engine = new WfEngine(
-    new WorkflowRepository(getDatabase()),
-    tasks,
-    workflowRegistry,
-  );
+  const db = getDatabase();
+
+  // TODO: remove at v0.4.0 — one-time migration to clear old workflow state format
+  db.update(workflows).set({ state: null }).run();
+
+  engine = new WfEngine(new WorkflowRepository(db), tasks, workflowRegistry);
   return engine;
 }
 

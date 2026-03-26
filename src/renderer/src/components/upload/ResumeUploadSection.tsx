@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { CircleX, UploadCloud } from 'lucide-react'
 import { useUpload } from './useUpload'
-import type { WorkflowResumeFile } from '@type/workflow-ipc'
+import type { ResumeFile } from '@/components/upload/newApplication.store'
 import { INPUT_BASE } from '@/components/resumeForm/fieldStyles'
 
 interface FileDropzoneProps {
@@ -64,8 +64,8 @@ function FileDropzone({
 }
 
 export interface ResumeUploadSectionProps {
-  resumeFile: WorkflowResumeFile | null
-  onResumeFileChange: (file: WorkflowResumeFile | null) => void
+  resumeFile: ResumeFile | null
+  onResumeFileChange: (file: ResumeFile | null) => void
 }
 
 export default function ResumeUploadSection({
@@ -77,7 +77,7 @@ export default function ResumeUploadSection({
     onFile: onResumeFileChange,
   })
   const hasFile = Boolean(fileUpload.fileName)
-  const prevResumeFileRef = useRef<WorkflowResumeFile | null>(null)
+  const prevResumeFileRef = useRef<ResumeFile | null>(null)
   const {
     clear,
     error,

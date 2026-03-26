@@ -3,13 +3,6 @@ import express from "express";
 import { WebSocket, WebSocketServer } from "ws";
 import log from "electron-log/main";
 import {
-  CHECKLIST_MATCHING,
-  CHECKLIST_PARSING,
-  JOBINFO_EXTRACTING,
-  RESUME_PARSING,
-  RESUME_TAILORING,
-} from "@type/task-names";
-import {
   createAIProvider,
   extractJobInfo,
   matchChecklist,
@@ -17,17 +10,14 @@ import {
   parseResume,
   tailorResume,
 } from "../../ai/runtime";
+import type { TaskName } from "@type/workflow";
 import type { Server } from "node:http";
 import type { NextFunction, Request, Response } from "express";
 import type { AIProviderConfig } from "../../ai/runtime";
 import type { Checklist } from "@type/checklist";
 
-type TaskType =
-  | typeof RESUME_PARSING
-  | typeof RESUME_TAILORING
-  | typeof CHECKLIST_PARSING
-  | typeof CHECKLIST_MATCHING
-  | typeof JOBINFO_EXTRACTING;
+// TODO: reduce this type alias
+type TaskType = TaskName;
 
 interface ExecuteRequest {
   id: string;
@@ -192,7 +182,7 @@ class AIServerService {
     const { streaming = false, onPartial } = options || {};
 
     switch (taskType) {
-      case RESUME_PARSING:
+      case "resume.parsing":
         return parseResume(
           provider,
           payload.rawResumeContent as string,
@@ -200,14 +190,14 @@ class AIServerService {
           { streaming, onPartial, model },
         );
 
-      case CHECKLIST_PARSING:
+      case "checklist.parsing":
         return parseChecklist(provider, payload.jobDescription as string, {
           streaming,
           onPartial,
           model,
         });
 
-      case CHECKLIST_MATCHING:
+      case "checklist.matching":
         return matchChecklist(
           provider,
           payload.checklist as Checklist,
@@ -215,7 +205,7 @@ class AIServerService {
           { streaming, onPartial, model },
         );
 
-      case RESUME_TAILORING:
+      case "resume.tailoring":
         return tailorResume(
           provider,
           payload.checklist as Checklist,
@@ -224,7 +214,7 @@ class AIServerService {
           { streaming, onPartial, model },
         );
 
-      case JOBINFO_EXTRACTING:
+      case "jobinfo.extracting":
         return extractJobInfo(provider, payload.jobDescription as string, {
           streaming,
           onPartial,

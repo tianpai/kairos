@@ -12,9 +12,9 @@ export async function extractResumeTextFromFile(
   try {
     switch (extension) {
       case "pdf":
-        return await docxTextExtract(input.data);
-      case "docx":
         return await pdfTextExtract(input.data);
+      case "docx":
+        return await docxTextExtract(input.data);
       case "txt":
         return Buffer.from(input.data).toString("utf-8");
       default:
@@ -32,14 +32,14 @@ export async function extractResumeTextFromFile(
   }
 }
 
-async function docxTextExtract(data: ArrayBuffer): Promise<string> {
+async function pdfTextExtract(data: ArrayBuffer): Promise<string> {
   const { extractText, getDocumentProxy } = await import("unpdf");
   const pdf = await getDocumentProxy(new Uint8Array(data));
   const { text } = await extractText(pdf, { mergePages: true });
   return text;
 }
 
-async function pdfTextExtract(data: ArrayBuffer): Promise<string> {
+async function docxTextExtract(data: ArrayBuffer): Promise<string> {
   const mammoth = await import("mammoth");
   const result = await mammoth.extractRawText({ buffer: Buffer.from(data) });
   return result.value;

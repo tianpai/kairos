@@ -1,18 +1,12 @@
 import log from "electron-log/main";
 import { emitWorkflowEvent } from "./workflow-events";
-import type { BaseTask, TaskError, TaskName } from "./tasks/task-base";
+import type { BaseTask } from "./tasks/task-base";
 import type { WorkflowDef } from "./workflow";
 import type { WorkflowRepository } from "../persistence";
+import type { TaskError, TaskName, TaskState, WfState } from "@type/workflow";
 
-export interface TaskState {
-  status: "pending" | "running" | "completed" | "failed";
-  error?: TaskError;
-}
-
-export interface WfState {
-  workflowName: string;
-  tasks: Record<TaskName, TaskState>;
-}
+// TODO: why export again?
+export type { TaskState, WfState };
 
 export class WfEngine {
   private readonly activeJobs = new Set<string>();
@@ -83,7 +77,7 @@ export class WfEngine {
 
   getState(jobId: string): WfState | null {
     const state = this.readState(jobId);
-    if (!state) return null;
+    if (!state || !state.tasks) return null;
 
     // If this engine instance is actively running tasks for this job,
     // "running" status is legitimate — skip recovery

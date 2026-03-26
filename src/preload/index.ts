@@ -1,7 +1,7 @@
 import { contextBridge } from "electron";
 import { aiServer, apiKey, provider } from "./modules/ai";
 import { checklist, jobs, resume } from "./modules/workspace";
-import { workflow } from "./modules/workflow";
+import { job, workflow } from "./modules/workflow";
 import { theme } from "./modules/user";
 import { backup, dialog, fs, platform, shell, updater } from "./modules/system";
 
@@ -18,6 +18,7 @@ contextBridge.exposeInMainWorld("kairos", {
   jobs,
   checklist,
   resume,
+  job,
   workflow,
   updater,
 });

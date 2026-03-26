@@ -4,7 +4,7 @@ import { WebSocket } from "ws";
 import { aiServerService } from "../../runtime/ai-server";
 import { getDefaultModel } from "../models/model-catalog.service";
 import type { ProviderType } from "../../../../shared/providers";
-import type { TaskName } from "@type/task-contracts";
+import type { TaskName } from "@type/workflow";
 import type { AiPreferencesStore } from "../config/ai-preferences.store";
 
 let instance: AITaskClient | null = null;

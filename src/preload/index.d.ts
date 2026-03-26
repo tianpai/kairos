@@ -10,15 +10,10 @@ import type {
   JobsPatchPayload,
 } from "@type/jobs-ipc";
 import type {
-  WorkflowRetryPayload,
-  WorkflowGetStatePayload,
-  WorkflowStartTailoringPayload,
-  WorkflowCreateApplicationsPayload,
-  WorkflowCreateApplicationsResult,
-  WorkflowPushState,
+  WfState,
   WorkflowAiPartial,
-} from "@type/workflow-ipc";
-import type { WorkflowStepsData } from "@type/workflow";
+  WorkflowPushState,
+} from "@type/workflow";
 import type { IpcSuccessResponse } from "@type/ipc";
 
 interface ModelInfo {
@@ -94,19 +89,20 @@ interface KairosAPI {
     save: (id: string, data: unknown) => Promise<IpcSuccessResponse>;
     getTemplateId: (id: string) => Promise<string>;
   };
+  job: {
+    create: (payload: {
+      resumeSource: "upload" | "existing";
+      resumeFile?: { fileName: string; data: ArrayBuffer };
+      sourceJobId?: string;
+      templateId: string;
+      jobDescription: string;
+      jobUrl?: string;
+    }) => Promise<{ jobId: string }>;
+  };
   workflow: {
-    startTailoring: (
-      payload: WorkflowStartTailoringPayload,
-    ) => Promise<{ success: boolean }>;
-    retry: (
-      payload: WorkflowRetryPayload,
-    ) => Promise<{ success: boolean; failedTasks: string[] }>;
-    createApplications: (
-      payload: WorkflowCreateApplicationsPayload,
-    ) => Promise<WorkflowCreateApplicationsResult>;
-    getState: (
-      payload: WorkflowGetStatePayload,
-    ) => Promise<{ workflow: WorkflowStepsData | null }>;
+    start: (jobId: string, workflowName: string) => Promise<{ success: boolean }>;
+    retry: (jobId: string) => Promise<{ success: boolean }>;
+    getState: (jobId: string) => Promise<WfState | null>;
     onPushState: (callback: (payload: WorkflowPushState) => void) => () => void;
     onAiPartial: (callback: (payload: WorkflowAiPartial) => void) => () => void;
   };

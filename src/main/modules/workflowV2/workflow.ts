@@ -1,4 +1,4 @@
-import type { TaskName } from "./tasks/task-base";
+import type { TaskName } from "@type/workflow";
 
 export interface WorkflowDef {
   name: string;

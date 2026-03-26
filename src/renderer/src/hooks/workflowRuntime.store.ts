@@ -1,9 +1,9 @@
 import { create } from 'zustand'
-import type { WorkflowStepsData } from '@type/workflow'
+import type { WfState } from '@type/workflow'
 
 interface WorkflowRuntimeState {
-  workflowsByJobId: Record<string, WorkflowStepsData>
-  setWorkflowState: (jobId: string, workflow: WorkflowStepsData) => void
+  workflowsByJobId: Record<string, WfState>
+  setWorkflowState: (jobId: string, workflow: WfState) => void
   clearWorkflowState: (jobId: string) => void
 }
 

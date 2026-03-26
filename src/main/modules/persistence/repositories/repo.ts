@@ -31,14 +31,14 @@ type Database = BetterSQLite3Database<typeof schema>;
  * However, the trade-off is worth it on version 0.3.0 and acceptable in this
  * single user local-first desktop app.
  */
-interface Repository<T> {
-  findByJobId: (jobId: string) => T | null;
-  create: (entity: T) => boolean;
-  updateByJobId: (jobId: string, data: Partial<T>) => boolean;
+interface Repository<TSelect, TInsert = TSelect> {
+  findByJobId: (jobId: string) => TSelect | null;
+  create: (entity: TInsert) => boolean;
+  updateByJobId: (jobId: string, data: Partial<TInsert>) => boolean;
   deleteByJobId: (jobId: string) => number;
 }
 
-class JobRepository implements Repository<schema.Job> {
+class JobRepository implements Repository<schema.Job, schema.NewJob> {
   constructor(private readonly db: Database) {}
 
   findByJobId(id: string): schema.Job | null {
@@ -46,7 +46,7 @@ class JobRepository implements Repository<schema.Job> {
     return job || null;
   }
 
-  create(job: schema.Job): boolean {
+  create(job: schema.NewJob): boolean {
     if (this.findByJobId(job.id)) {
       return false;
     }
@@ -62,7 +62,7 @@ class JobRepository implements Repository<schema.Job> {
     return this.db.select().from(jobs).all();
   }
 
-  updateByJobId(jobId: string, data: Partial<schema.Job>): boolean {
+  updateByJobId(jobId: string, data: Partial<schema.NewJob>): boolean {
     if (!this.findByJobId(jobId)) {
       return false;
     }
@@ -154,7 +154,7 @@ class JobRepository implements Repository<schema.Job> {
   }
 }
 
-class ResumeRepository implements Repository<schema.Resume> {
+class ResumeRepository implements Repository<schema.Resume, schema.NewResume> {
   constructor(private readonly db: Database) {}
 
   findByJobId(jobId: string): schema.Resume | null {
@@ -166,7 +166,7 @@ class ResumeRepository implements Repository<schema.Resume> {
     return resume || null;
   }
 
-  create(resume: schema.Resume): boolean {
+  create(resume: schema.NewResume): boolean {
     if (this.findByJobId(resume.jobId)) {
       return false;
     }
@@ -174,7 +174,7 @@ class ResumeRepository implements Repository<schema.Resume> {
     return true;
   }
 
-  updateByJobId(jobId: string, resumeData: Partial<schema.Resume>): boolean {
+  updateByJobId(jobId: string, resumeData: Partial<schema.NewResume>): boolean {
     if (!this.findByJobId(jobId)) {
       return false;
     }
@@ -192,7 +192,10 @@ class ResumeRepository implements Repository<schema.Resume> {
   }
 }
 
-class ChecklistRepository implements Repository<schema.Checklist> {
+class ChecklistRepository implements Repository<
+  schema.Checklist,
+  schema.NewChecklist
+> {
   constructor(private readonly db: Database) {}
 
   findByJobId(jobId: string): schema.Checklist | null {
@@ -204,7 +207,7 @@ class ChecklistRepository implements Repository<schema.Checklist> {
     return checklist || null;
   }
 
-  create(checklist: schema.Checklist): boolean {
+  create(checklist: schema.NewChecklist): boolean {
     if (this.findByJobId(checklist.jobId)) {
       return false;
     }
@@ -212,7 +215,7 @@ class ChecklistRepository implements Repository<schema.Checklist> {
     return true;
   }
 
-  updateByJobId(jobId: string, cl: Partial<schema.Checklist>): boolean {
+  updateByJobId(jobId: string, cl: Partial<schema.NewChecklist>): boolean {
     if (!this.findByJobId(jobId)) {
       return false;
     }
@@ -229,7 +232,7 @@ class ChecklistRepository implements Repository<schema.Checklist> {
   }
 }
 
-class ScoreRepository implements Repository<schema.Score> {
+class ScoreRepository implements Repository<schema.Score, schema.NewScore> {
   constructor(private readonly db: Database) {}
 
   findByJobId(jobId: string): schema.Score | null {
@@ -241,7 +244,7 @@ class ScoreRepository implements Repository<schema.Score> {
     return score || null;
   }
 
-  create(score: schema.Score): boolean {
+  create(score: schema.NewScore): boolean {
     if (this.findByJobId(score.jobId)) {
       return false;
     }
@@ -249,7 +252,7 @@ class ScoreRepository implements Repository<schema.Score> {
     return true;
   }
 
-  updateByJobId(jobId: string, data: Partial<schema.Score>): boolean {
+  updateByJobId(jobId: string, data: Partial<schema.NewScore>): boolean {
     if (!this.findByJobId(jobId)) {
       return false;
     }
@@ -263,7 +266,10 @@ class ScoreRepository implements Repository<schema.Score> {
   }
 }
 
-class WorkflowRepository implements Repository<schema.Workflow> {
+class WorkflowRepository implements Repository<
+  schema.Workflow,
+  schema.NewWorkflow
+> {
   constructor(private readonly db: Database) {}
 
   findByJobId(jobId: string): schema.Workflow | null {
@@ -275,7 +281,7 @@ class WorkflowRepository implements Repository<schema.Workflow> {
     return workflow || null;
   }
 
-  create(workflow: schema.Workflow): boolean {
+  create(workflow: schema.NewWorkflow): boolean {
     if (this.findByJobId(workflow.jobId)) {
       return false;
     }
@@ -283,7 +289,7 @@ class WorkflowRepository implements Repository<schema.Workflow> {
     return true;
   }
 
-  updateByJobId(jobId: string, data: Partial<schema.Workflow>): boolean {
+  updateByJobId(jobId: string, data: Partial<schema.NewWorkflow>): boolean {
     if (!this.findByJobId(jobId)) {
       return false;
     }

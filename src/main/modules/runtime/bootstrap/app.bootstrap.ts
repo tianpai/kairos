@@ -1,7 +1,7 @@
 import { join } from "node:path";
 import { BrowserWindow, app, dialog, nativeTheme, shell } from "electron";
 import log from "electron-log/main";
-import { AiPreferencesStore } from "../../ai";
+import { AiPreferencesStore, initAIClient } from "../../ai";
 import { UserPreferencesStore } from "../../user";
 import { registerIpcHandlers } from "../ipc/register-ipc";
 import {
@@ -51,10 +51,9 @@ async function initializeDatabase() {
   // Run any pending migrations
   await runMigrations();
 
-  registerIpcHandlers({ aiPreferences, userPreferences });
-
-  // workflowV2 engine — init after DB + AI client are ready
+  initAIClient(aiPreferences);
   initWfEngine();
+  registerIpcHandlers({ aiPreferences, userPreferences });
 }
 
 async function createWindow() {
