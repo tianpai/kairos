@@ -1,0 +1,26 @@
+# docs
+*.md
+
+# data
+*.json
+
+# configs
+*.config.*
+.env
+.env.*
+*.rc
+**/config/
+
+# YAML (vite / electron configs)
+*.yaml
+*.yml
+
+# lock files
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+
+# build output
+dist/
+build/
+coverage/
