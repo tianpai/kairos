@@ -1,19 +1,8 @@
 import { ChecklistSchema } from "@type/checklist";
-import type { Checklist } from "@type/checklist";
-import type { AIProvider, DeepPartial } from "../providers/provider.interface";
 
-interface ParseOptions {
-  streaming?: boolean;
-  onPartial?: (partial: DeepPartial<Checklist>) => void;
-  model: string;
-}
-
-export async function parseChecklist(
-  provider: AIProvider,
-  jobDescription: string,
-  options: ParseOptions,
-): Promise<Checklist> {
-  const systemPrompt = `You are a job description analyzer. Extract requirements from job postings into a structured checklist.
+export function checklistParsingPrompt(jobDescription: string) {
+  return {
+    systemPrompt: `You are a job description analyzer. Extract requirements from job postings into a structured checklist.
 
 Categorize requirements into:
 - Hard Requirements: Provable, measurable qualifications (technical skills, degrees, years of experience)
@@ -31,23 +20,8 @@ For each requirement:
 
 Initialize needTailoring as empty array [] (will be populated by user selection).
 
-Return empty arrays if no requirements found in that category.`;
-
-  const userPrompt = `Job Description:\n\n${jobDescription}`;
-
-  const params = {
-    systemPrompt,
-    userPrompt,
+Return empty arrays if no requirements found in that category.`,
+    userPrompt: `Job Description:\n\n${jobDescription}`,
     schema: ChecklistSchema,
-    model: options.model,
   };
-
-  if (options.streaming && options.onPartial) {
-    return provider.streamStructuredOutput({
-      ...params,
-      onPartial: options.onPartial,
-    });
-  }
-
-  return provider.generateStructuredOutput(params);
 }

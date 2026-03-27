@@ -1,7 +1,7 @@
 import { ipcMain } from "electron";
 import log from "electron-log/main";
 import { fetchModels } from "../models/model-catalog.service";
-import type { ProviderType } from "../../../../shared/providers";
+import type { ProviderType } from "@shared/providers";
 import type { AiPreferencesStore } from "../config/ai-preferences.store";
 
 interface ProviderHandlerDeps {
@@ -55,9 +55,7 @@ export function registerProviderHandlers({
     (_, provider: ProviderType, model: string) => {
       const previous = aiPreferences.getSelectedModel(provider);
       aiPreferences.setSelectedModel(provider, model);
-      log.info(
-        `${provider} model changed: ${previous ?? "none"} -> ${model}`,
-      );
+      log.info(`${provider} model changed: ${previous ?? "none"} -> ${model}`);
     },
   );
 }

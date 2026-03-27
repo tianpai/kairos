@@ -1,20 +1,12 @@
 import { ChecklistSchema } from "@type/checklist";
 import type { Checklist } from "@type/checklist";
-import type { AIProvider, DeepPartial } from "../providers/provider.interface";
 
-interface MatchOptions {
-  streaming?: boolean;
-  onPartial?: (partial: DeepPartial<Checklist>) => void;
-  model: string;
-}
-
-export async function matchChecklist(
-  provider: AIProvider,
+export function checklistMatchingPrompt(
   checklist: Checklist,
   resumeStructure: Record<string, unknown>,
-  options: MatchOptions,
-): Promise<Checklist> {
-  const systemPrompt = `You are a resume-to-job matching expert. Your task is to accurately determine which job requirements are fulfilled by the candidate's resume.
+) {
+  return {
+    systemPrompt: `You are a resume-to-job matching expert. Your task is to accurately determine which job requirements are fulfilled by the candidate's resume.
 
 For each requirement:
 1. For EACH individual keyword in the keywords array:
@@ -36,29 +28,14 @@ For each requirement:
 
 Keep needTailoring as empty array [] (will be populated by user in frontend).
 
-Return the complete checklist with updated keyword-level and requirement-level fulfilled status.`;
-
-  const userPrompt = `Job Requirements Checklist:
+Return the complete checklist with updated keyword-level and requirement-level fulfilled status.`,
+    userPrompt: `Job Requirements Checklist:
 ${JSON.stringify(checklist, null, 2)}
 
 Candidate Resume:
 ${JSON.stringify(resumeStructure, null, 2)}
 
-Analyze the resume against each requirement and return the updated checklist with fulfilled status.`;
-
-  const params = {
-    systemPrompt,
-    userPrompt,
+Analyze the resume against each requirement and return the updated checklist with fulfilled status.`,
     schema: ChecklistSchema,
-    model: options.model,
   };
-
-  if (options.streaming && options.onPartial) {
-    return provider.streamStructuredOutput({
-      ...params,
-      onPartial: options.onPartial,
-    });
-  }
-
-  return provider.generateStructuredOutput(params);
 }
