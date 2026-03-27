@@ -169,28 +169,8 @@ function ProviderConfig({
         </p>
       </div>
 
-      <div className="flex gap-2">
-        <Button
-          onClick={handleSave}
-          disabled={!apiKey.trim()}
-          variant="outline"
-        >
-          Save
-        </Button>
-        {currentKey && (
-          <Button onClick={onDelete} variant="danger">
-            Delete
-          </Button>
-        )}
-        {currentKey && !isActive && (
-          <Button onClick={onSetActive} variant="outline">
-            Set as active
-          </Button>
-        )}
-      </div>
-
       {currentKey && (
-        <div className="border-default border-t pt-4">
+        <div className="pt-4">
           <label className="text-secondary block text-sm font-medium">
             Model
           </label>
@@ -231,6 +211,26 @@ function ProviderConfig({
           )}
         </div>
       )}
+
+      <div className="flex gap-2">
+        <Button
+          onClick={handleSave}
+          disabled={!apiKey.trim()}
+          variant="outline"
+        >
+          Save
+        </Button>
+        {currentKey && (
+          <Button onClick={onDelete} variant="danger">
+            Delete
+          </Button>
+        )}
+        {currentKey && !isActive && (
+          <Button onClick={onSetActive} variant="outline">
+            Set as active
+          </Button>
+        )}
+      </div>
     </div>
   )
 }
@@ -282,10 +282,9 @@ export function ProvidersSection() {
   return (
     <div className="flex h-full gap-6">
       {/* Provider List */}
-      <div className="border-default w-52 shrink-0 border-r pr-4">
-        <h2 className="text-hint mb-3 text-sm font-semibold">Providers</h2>
-        <div className="space-y-1">
-          {PROVIDERS.map((provider) => {
+      <div className="w-52 shrink-0">
+<div className="border-default overflow-hidden rounded-md border-2">
+          {PROVIDERS.map((provider, index) => {
             const status = providerStatus[provider.id]
             const Icon = PROVIDER_ICONS[provider.id]
             const isSelected = selectedProvider === provider.id
@@ -293,9 +292,9 @@ export function ProvidersSection() {
               <button
                 key={provider.id}
                 onClick={() => setSelectedProvider(provider.id)}
-                className={`border-default flex w-full items-center gap-3 rounded-md border-2 px-3 py-2 text-left transition-colors ${
-                  isSelected ? 'bg-surface' : 'bg-base hover:bg-hover'
-                }`}
+                className={`flex w-full items-center gap-3 px-3 py-2 text-left transition-colors ${
+                  index !== 0 ? 'border-default border-t' : ''
+                } ${isSelected ? 'bg-surface' : 'bg-base hover:bg-hover'}`}
               >
                 <Icon size={20} />
                 <span
@@ -307,7 +306,7 @@ export function ProvidersSection() {
                 </span>
                 {(status.isActive || status.isConfigured) && (
                   <span
-                    className={`h-2 w-2 rounded-full ${status.isActive ? 'bg-info' : 'bg-success'}`}
+                    className={`h-2 w-2 rounded-full ${status.isActive ? 'bg-success' : 'bg-info'}`}
                     title={status.isActive ? 'Active' : 'Configured'}
                   />
                 )}
@@ -315,18 +314,30 @@ export function ProvidersSection() {
             )
           })}
         </div>
+        <div className="mt-2 space-y-1">
+          <div className="text-hint flex items-center gap-2 text-xs">
+            <span className="bg-info h-2 w-2 rounded-full" />
+            configured with api key
+          </div>
+          <div className="text-hint flex items-center gap-2 text-xs">
+            <span className="bg-success h-2 w-2 rounded-full" />
+            currently active
+          </div>
+        </div>
       </div>
 
       {/* Provider Configuration */}
       <div className="flex-1">
-        <ProviderConfig
-          provider={PROVIDERS.find((p) => p.id === selectedProvider)!}
-          currentKey={currentKey}
-          isActive={activeProvider === selectedProvider}
-          onSetActive={() => setActiveProvider.mutateAsync(selectedProvider)}
-          onSave={(key) => setProviderApiKey.mutateAsync(key)}
-          onDelete={() => deleteProviderApiKey.mutateAsync()}
-        />
+        <div className="border-default rounded-md border-2 p-4">
+          <ProviderConfig
+            provider={PROVIDERS.find((p) => p.id === selectedProvider)!}
+            currentKey={currentKey}
+            isActive={activeProvider === selectedProvider}
+            onSetActive={() => setActiveProvider.mutateAsync(selectedProvider)}
+            onSave={(key) => setProviderApiKey.mutateAsync(key)}
+            onDelete={() => deleteProviderApiKey.mutateAsync()}
+          />
+        </div>
       </div>
     </div>
   )
