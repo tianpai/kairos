@@ -18,6 +18,7 @@ const PROVIDERS: ProviderType[] = [
   "xai",
   "gemini",
   "anthropic",
+  "moonshotai",
 ];
 
 export class AiPreferencesStore {

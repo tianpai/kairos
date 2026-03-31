@@ -3,6 +3,7 @@ import { createAnthropic } from "@ai-sdk/anthropic";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { createXai } from "@ai-sdk/xai";
 import { createDeepSeek } from "@ai-sdk/deepseek";
+import { createMoonshotAI } from "@ai-sdk/moonshotai";
 import { Output, generateText, streamText } from "ai";
 import type { LanguageModel } from "ai";
 import type { ZodType } from "zod";
@@ -22,7 +23,7 @@ export interface AIProvider {
 }
 
 export interface AIProviderConfig {
-  type: "openai" | "deepseek" | "xai" | "gemini" | "anthropic";
+  type: "openai" | "deepseek" | "xai" | "gemini" | "anthropic" | "moonshotai";
   apiKey?: string;
   baseUrl?: string;
 }
@@ -72,6 +73,8 @@ export function createAIProvider(config: AIProviderConfig): AIProvider {
       return new BaseProvider(createXai({ apiKey, baseURL }));
     case "deepseek":
       return new BaseProvider(createDeepSeek({ apiKey, baseURL }));
+    case "moonshotai":
+      return new BaseProvider(createMoonshotAI({ apiKey, baseURL }));
     default:
       throw new Error(`Unknown provider type: ${config.type}`);
   }

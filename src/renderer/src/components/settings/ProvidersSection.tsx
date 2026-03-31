@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Copy, Eye, EyeOff } from 'lucide-react'
-import { Anthropic, DeepSeek, Gemini, Grok, OpenAI } from '@lobehub/icons'
+import { Anthropic, DeepSeek, Gemini, Grok, Moonshot, OpenAI } from '@lobehub/icons'
 import { Button } from '@ui/Button'
 import {
   useActiveProvider,
@@ -53,6 +53,12 @@ const PROVIDERS: ProviderInfo[] = [
     description: 'Claude Haiku 4.5, Claude Sonnet 4.6, Claude Opus 4.6 via API',
     placeholder: 'sk-ant-...',
   },
+  {
+    id: 'moonshotai',
+    name: 'Moonshot AI',
+    description: 'Kimi-K2, Moonshot-v1, and other Moonshot models',
+    placeholder: 'sk-...',
+  },
 ]
 
 const PROVIDER_ICONS: Record<
@@ -64,6 +70,7 @@ const PROVIDER_ICONS: Record<
   xai: Grok,
   gemini: Gemini,
   anthropic: Anthropic,
+  moonshotai: Moonshot,
 }
 
 interface ProviderConfigProps {
@@ -248,6 +255,7 @@ export function ProvidersSection() {
   const { data: xaiConfigured } = useHasProviderApiKey('xai')
   const { data: geminiConfigured } = useHasProviderApiKey('gemini')
   const { data: anthropicConfigured } = useHasProviderApiKey('anthropic')
+  const { data: moonshotaiConfigured } = useHasProviderApiKey('moonshotai')
 
   // Active provider
   const { data: activeProvider } = useActiveProvider()
@@ -276,6 +284,10 @@ export function ProvidersSection() {
     anthropic: {
       isConfigured: !!anthropicConfigured,
       isActive: activeProvider === 'anthropic',
+    },
+    moonshotai: {
+      isConfigured: !!moonshotaiConfigured,
+      isActive: activeProvider === 'moonshotai',
     },
   }
 

@@ -64,6 +64,12 @@ const PROVIDER_CONFIGS: Record<ProviderType, ProviderModelConfig> = {
         .sort((a, b) => a.id.localeCompare(b.id));
     },
   },
+  moonshotai: {
+    baseUrl: "https://api.moonshot.ai/v1",
+    getUrl: modelsUrl,
+    getHeaders: bearerHeaders,
+    parseModels: parseOpenAICompatible,
+  },
   anthropic: {
     baseUrl: "https://api.anthropic.com/v1",
     getUrl: modelsUrl,
