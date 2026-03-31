@@ -31,7 +31,6 @@ interface ResumeGetResult {
 }
 
 interface KairosAPI {
-  platform: NodeJS.Platform;
   backup: {
     exportResumeData: () => Promise<BackupExportResult>;
     importResumeData: () => Promise<BackupImportResult>;

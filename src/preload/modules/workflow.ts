@@ -3,7 +3,7 @@ import type {
   WfState,
   WorkflowAiPartial,
   WorkflowPushState,
-} from "../../../shared/type/workflow";
+} from "../../shared/type/workflow";
 
 type Unsubscribe = () => void;
 
@@ -28,13 +28,17 @@ export const workflow = {
     ipcRenderer.invoke("workflow:retry", jobId),
   getState: (jobId: string): Promise<WfState | null> =>
     ipcRenderer.invoke("workflow:getState", jobId),
-  onPushState: (callback: (payload: WorkflowPushState) => void): Unsubscribe => {
+  onPushState: (
+    callback: (payload: WorkflowPushState) => void,
+  ): Unsubscribe => {
     const handler = (_: unknown, payload: WorkflowPushState) =>
       callback(payload);
     ipcRenderer.on("workflow:pushState", handler);
     return () => ipcRenderer.removeListener("workflow:pushState", handler);
   },
-  onAiPartial: (callback: (payload: WorkflowAiPartial) => void): Unsubscribe => {
+  onAiPartial: (
+    callback: (payload: WorkflowAiPartial) => void,
+  ): Unsubscribe => {
     const handler = (_: unknown, payload: WorkflowAiPartial) =>
       callback(payload);
     ipcRenderer.on("workflow:aiPartial", handler);

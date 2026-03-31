@@ -3,6 +3,7 @@ import {
   ArchiveX,
   Dot,
   ExternalLink,
+  Loader2,
   Pencil,
 } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
@@ -17,6 +18,7 @@ import { TruncateText } from './ui/TruncateText'
 import { isOverdue } from './utils'
 import type { JobApplication } from '@api/jobs'
 import { getScoreColor } from '@/utils/scoreThresholds'
+import { useWorkflowRuntimeStore } from '@/hooks/workflowRuntime.store'
 
 interface ContentProps {
   application: JobApplication
@@ -38,6 +40,7 @@ interface CollapsedContentProps {
   applicationStatus: string | null
   isPinned: boolean
   isHovered: boolean
+  isWorkflowRunning: boolean
   onPin: (e: React.MouseEvent) => void
 }
 
@@ -47,6 +50,7 @@ function CollapsedContent({
   applicationStatus,
   isPinned,
   isHovered,
+  isWorkflowRunning,
   onPin,
 }: CollapsedContentProps) {
   const overdue = isOverdue(dueDate)
@@ -62,7 +66,14 @@ function CollapsedContent({
         className={`-gap-1 absolute bottom-0 left-2 flex items-center text-xs ${overdue ? 'text-error' : 'text-hint'}`}
         style={{ opacity: 0.8 }}
       >
-        <Dot className="-ml-2 size-8 shrink-0" style={{ color: scoreColor }} />
+        {isWorkflowRunning ? (
+          <Loader2 className="text-hint mr-1 -ml-0.5 size-3.5 shrink-0 animate-spin" />
+        ) : (
+          <Dot
+            className="-ml-2 size-8 shrink-0"
+            style={{ color: scoreColor }}
+          />
+        )}
         Due {formatDate(dueDate)}
       </div>
 
@@ -74,6 +85,7 @@ function CollapsedContent({
 interface ExpandedContentProps {
   application: JobApplication
   isArchived: boolean
+  isWorkflowRunning: boolean
   onSubmit: (e: React.MouseEvent) => void
   onEdit: (e: React.MouseEvent) => void
   onOpen: (e: React.MouseEvent) => void
@@ -84,6 +96,7 @@ interface ExpandedContentProps {
 function ExpandedContent({
   application,
   isArchived,
+  isWorkflowRunning,
   onSubmit,
   onEdit,
   onOpen,
@@ -97,12 +110,18 @@ function ExpandedContent({
       <div className={`mt-1 text-xs ${overdue ? 'text-error' : 'text-hint'}`}>
         Due {formatDate(application.dueDate)}
       </div>
-      <div
-        className="mt-0.5 text-sm font-semibold"
-        style={{ color: getScoreColor(application.matchPercentage) }}
-      >
-        {Math.round(application.matchPercentage)}%
-      </div>
+      {isWorkflowRunning ? (
+        <div className="mt-0.5 flex items-center gap-1.5 text-sm">
+          <Loader2 className="text-hint size-3.5 animate-spin" />
+        </div>
+      ) : (
+        <div
+          className="mt-0.5 text-sm font-semibold"
+          style={{ color: getScoreColor(application.matchPercentage) }}
+        >
+          {Math.round(application.matchPercentage)}%
+        </div>
+      )}
 
       <div className="absolute right-3 bottom-3 left-3 flex items-center justify-between">
         <div className="flex items-center gap-1">
@@ -154,6 +173,13 @@ export function Content({
   onArchive,
   onStatusChange,
 }: ContentProps) {
+  const workflow = useWorkflowRuntimeStore(
+    (state) => state.workflowsByJobId[application.id],
+  )
+  const isWorkflowRunning = workflow
+    ? Object.values(workflow.tasks).some((t) => t.status === 'running')
+    : false
+
   return (
     <>
       <div className="text-left">
@@ -178,6 +204,7 @@ export function Content({
           <ExpandedContent
             application={application}
             isArchived={isArchived}
+            isWorkflowRunning={isWorkflowRunning}
             onSubmit={onSubmit}
             onEdit={onEdit}
             onOpen={onOpen}
@@ -191,6 +218,7 @@ export function Content({
             applicationStatus={application.applicationStatus}
             isPinned={application.pinned === 1}
             isHovered={isHovered}
+            isWorkflowRunning={isWorkflowRunning}
             onPin={onPin}
           />
         )}

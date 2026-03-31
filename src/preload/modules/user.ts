@@ -1,5 +1,5 @@
 import { ipcRenderer } from "electron";
-import type { ThemeSource, ThemeState } from "../../../shared/type/theme";
+import type { ThemeSource, ThemeState } from "../../shared/type/theme";
 
 export const theme = {
   get: (): Promise<ThemeState> => ipcRenderer.invoke("theme:get"),
