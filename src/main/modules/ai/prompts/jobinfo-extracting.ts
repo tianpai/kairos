@@ -1,5 +1,4 @@
 import { z } from "zod";
-import type { AIProvider, DeepPartial } from "../providers/provider.interface";
 
 export const ExtractedJobInfoSchema = z.object({
   company: z
@@ -16,18 +15,9 @@ export const ExtractedJobInfoSchema = z.object({
 
 export type ExtractedJobInfo = z.infer<typeof ExtractedJobInfoSchema>;
 
-interface ExtractOptions {
-  streaming?: boolean;
-  onPartial?: (partial: DeepPartial<ExtractedJobInfo>) => void;
-  model: string;
-}
-
-export async function extractJobInfo(
-  provider: AIProvider,
-  jobDescription: string,
-  options: ExtractOptions,
-): Promise<ExtractedJobInfo> {
-  const systemPrompt = `You are a job posting analyzer. Extract key information from job descriptions.
+export function jobInfoExtractingPrompt(jobDescription: string) {
+  return {
+    systemPrompt: `You are a job posting analyzer. Extract key information from job descriptions.
 
 Extract the following:
 1. Company name: Look for patterns like "at [Company]", "join [Company]", "[Company] is hiring", or company names in headers/titles. If the company name is not clearly stated, use "Unknown Company".
@@ -36,23 +26,8 @@ Extract the following:
 
 3. Application deadline: Look for "apply by", "deadline", "closing date", "applications close", or date patterns near such phrases. Return the date in YYYY-MM-DD format. If no deadline is found, return null.
 
-Be conservative - only extract information that is clearly stated. Do not guess or infer beyond what's explicitly mentioned.`;
-
-  const userPrompt = `Job Description:\n\n${jobDescription}`;
-
-  const params = {
-    systemPrompt,
-    userPrompt,
+Be conservative - only extract information that is clearly stated. Do not guess or infer beyond what's explicitly mentioned.`,
+    userPrompt: `Job Description:\n\n${jobDescription}`,
     schema: ExtractedJobInfoSchema,
-    model: options.model,
   };
-
-  if (options.streaming && options.onPartial) {
-    return provider.streamStructuredOutput({
-      ...params,
-      onPartial: options.onPartial,
-    });
-  }
-
-  return provider.generateStructuredOutput(params);
 }

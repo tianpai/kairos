@@ -1,15 +1,7 @@
 import { ipcMain } from "electron";
 import log from "electron-log/main";
-import {
-  fetchAnthropicModels,
-  fetchDeepSeekModels,
-  fetchGeminiModels,
-  fetchOpenAIModels,
-  fetchXAIModels,
-  getDefaultModel,
-  getFallbackModels,
-} from "../models/model-catalog.service";
-import type { ProviderType } from "../../../../shared/providers";
+import { fetchModels } from "../models/model-catalog.service";
+import type { ProviderType } from "@shared/providers";
 import type { AiPreferencesStore } from "../config/ai-preferences.store";
 
 interface ProviderHandlerDeps {
@@ -37,42 +29,17 @@ export function registerProviderHandlers({
   });
 
   ipcMain.handle("provider:fetchModels", async (_, provider: ProviderType) => {
-    try {
-      const apiKey = aiPreferences.getApiKey(provider);
-      if (!apiKey) {
-        return getFallbackModels(provider);
-      }
-
-      let models;
-      switch (provider) {
-        case "openai":
-          models = await fetchOpenAIModels(apiKey);
-          break;
-        case "deepseek":
-          models = await fetchDeepSeekModels(apiKey);
-          break;
-        case "xai":
-          models = await fetchXAIModels(apiKey);
-          break;
-        case "gemini":
-          models = await fetchGeminiModels(apiKey);
-          break;
-        case "anthropic":
-          models = await fetchAnthropicModels(apiKey);
-          break;
-        default:
-          return getFallbackModels(provider);
-      }
-
-      aiPreferences.setCachedModels(
-        provider,
-        models.map((model) => model.id),
-      );
-      return models;
-    } catch (error) {
-      log.error("Failed to fetch models:", error);
-      return getFallbackModels(provider);
+    const apiKey = aiPreferences.getApiKey(provider);
+    if (!apiKey) {
+      return [];
     }
+
+    const models = await fetchModels(provider, apiKey);
+    aiPreferences.setCachedModels(
+      provider,
+      models.map((model) => model.id),
+    );
+    return models;
   });
 
   ipcMain.handle("provider:getCachedModels", (_, provider: ProviderType) => {
@@ -88,13 +55,7 @@ export function registerProviderHandlers({
     (_, provider: ProviderType, model: string) => {
       const previous = aiPreferences.getSelectedModel(provider);
       aiPreferences.setSelectedModel(provider, model);
-      log.info(
-        `${provider} model changed: ${previous ?? "default"} -> ${model}`,
-      );
+      log.info(`${provider} model changed: ${previous ?? "none"} -> ${model}`);
     },
   );
-
-  ipcMain.handle("provider:getDefaultModel", (_, provider: ProviderType) => {
-    return getDefaultModel(provider);
-  });
 }

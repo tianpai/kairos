@@ -1,21 +1,14 @@
-import { buildTailoringZodSchema } from "@templates/schema-builder";
+// TODO: move schema-builder to shared/ to fix cross-boundary import (main ← renderer)
+import { buildTailoringZodSchema } from "../../../../renderer/src/templates/schema-builder";
 import type { Checklist } from "@type/checklist";
-import type { AIProvider, DeepPartial } from "../providers/provider.interface";
 
-interface TailorOptions {
-  streaming?: boolean;
-  onPartial?: (partial: DeepPartial<Record<string, unknown>>) => void;
-  model: string;
-}
-
-export async function tailorResume(
-  provider: AIProvider,
+export function resumeTailoringPrompt(
   checklist: Checklist,
   resumeStructure: Record<string, unknown>,
   templateId: string,
-  options: TailorOptions,
-): Promise<Record<string, unknown>> {
-  const systemPrompt = `You are an expert resume writer and career coach. Your task is to tailor a resume to incorporate specific keywords selected by the user.
+) {
+  return {
+    systemPrompt: `You are an expert resume writer and career coach. Your task is to tailor a resume to incorporate specific keywords selected by the user.
 
 The checklist includes a "needTailoring" array containing keywords the user wants to add/emphasize in their resume. The application trusts the user's judgment that they possess these skills.
 
@@ -59,32 +52,14 @@ Additional optimization:
 2. QUANTIFY achievements where possible (if data exists)
 3. Make the keyword usage feel natural, not keyword-stuffed
 
-Return the complete resume with needTailoring cleared (empty array []).`;
-
-  const userPrompt = `Job Requirements Analysis (from matching):
+Return the complete resume with needTailoring cleared (empty array []).`,
+    userPrompt: `Job Requirements Analysis (from matching):
 ${JSON.stringify(checklist, null, 2)}
 
 Current Resume:
 ${JSON.stringify(resumeStructure, null, 2)}
 
-Tailor this resume to maximize fit for the job requirements. Remember: maintain complete honesty and the exact JSON schema structure.`;
-
-  // Build Zod schema filtered by existing sections (prevents empty sections)
-  const schema = buildTailoringZodSchema(templateId, resumeStructure);
-
-  const params = {
-    systemPrompt,
-    userPrompt,
-    schema,
-    model: options.model,
+Tailor this resume to maximize fit for the job requirements. Remember: maintain complete honesty and the exact JSON schema structure.`,
+    schema: buildTailoringZodSchema(templateId, resumeStructure),
   };
-
-  if (options.streaming && options.onPartial) {
-    return provider.streamStructuredOutput({
-      ...params,
-      onPartial: options.onPartial,
-    });
-  }
-
-  return provider.generateStructuredOutput(params);
 }

@@ -3,10 +3,9 @@ import { aiServer, apiKey, provider } from "./modules/ai";
 import { checklist, jobs, resume } from "./modules/workspace";
 import { job, workflow } from "./modules/workflow";
 import { theme } from "./modules/user";
-import { backup, dialog, fs, platform, shell, updater } from "./modules/system";
+import { backup, dialog, fs, shell, updater } from "./modules/system";
 
 contextBridge.exposeInMainWorld("kairos", {
-  platform,
   backup,
   shell,
   dialog,

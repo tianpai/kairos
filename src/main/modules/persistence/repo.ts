@@ -1,7 +1,7 @@
 import { desc, eq } from "drizzle-orm";
-import { checklists, jobs, resumes, scores, workflows } from "../db/schema";
+import { checklists, jobs, resumes, scores, workflows } from "./db/schema";
 import type { JobSummary } from "@type/jobs-ipc";
-import type * as schema from "../db/schema";
+import type * as schema from "./db/schema";
 import type { BetterSQLite3Database } from "drizzle-orm/better-sqlite3";
 
 export {

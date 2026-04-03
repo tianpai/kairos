@@ -1,5 +1,5 @@
 import { ipcMain } from "electron";
-import type { ProviderType } from "../../../../shared/providers";
+import type { ProviderType } from "@shared/providers";
 import type { AiPreferencesStore } from "../config/ai-preferences.store";
 
 interface ApiKeyHandlerDeps {

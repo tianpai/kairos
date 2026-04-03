@@ -4,11 +4,8 @@ import {
   exportBackup,
   getDefaultBackupPath,
   importBackup,
-} from "../backup/backup.service";
-import type {
-  BackupExportResult,
-  BackupImportResult,
-} from "../../../../shared/backup";
+} from "../backup.service";
+import type { BackupExportResult, BackupImportResult } from "@shared/backup";
 
 export function registerBackupHandlers(): void {
   ipcMain.handle("backup:exportResumeData", async () => {

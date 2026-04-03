@@ -1,16 +1,9 @@
 import { useEffect, useState } from 'react'
 import { Copy, Eye, EyeOff } from 'lucide-react'
-import {
-  Anthropic,
-  DeepSeek,
-  Gemini,
-  Grok,
-  OpenAI,
-} from '@lobehub/icons'
+import { Anthropic, DeepSeek, Gemini, Grok, Moonshot, OpenAI } from '@lobehub/icons'
 import { Button } from '@ui/Button'
 import {
   useActiveProvider,
-  useDefaultModel,
   useDeleteProviderApiKey,
   useFetchModels,
   useHasProviderApiKey,
@@ -57,8 +50,14 @@ const PROVIDERS: ProviderInfo[] = [
   {
     id: 'anthropic',
     name: 'Anthropic',
-    description: 'Claude Haiku 4.5, Claude Sonnet 4.5, Claude Opus 4.5 via API',
+    description: 'Claude Haiku 4.5, Claude Sonnet 4.6, Claude Opus 4.6 via API',
     placeholder: 'sk-ant-...',
+  },
+  {
+    id: 'moonshotai',
+    name: 'Moonshot AI',
+    description: 'Kimi-K2, Moonshot-v1, and other Moonshot models',
+    placeholder: 'sk-...',
   },
 ]
 
@@ -71,6 +70,7 @@ const PROVIDER_ICONS: Record<
   xai: Grok,
   gemini: Gemini,
   anthropic: Anthropic,
+  moonshotai: Moonshot,
 }
 
 interface ProviderConfigProps {
@@ -107,10 +107,10 @@ function ProviderConfig({
   const {
     data: models,
     isLoading: isLoadingModels,
+    isError: isErrorModels,
     refetch: refetchModels,
   } = useFetchModels(provider.id)
   const { data: selectedModel } = useSelectedModel(provider.id)
-  const { data: defaultModel } = useDefaultModel(provider.id)
   const setSelectedModel = useSetSelectedModel()
 
   // Refetch models when API key changes
@@ -130,8 +130,6 @@ function ProviderConfig({
   const handleModelChange = async (model: string) => {
     await setSelectedModel.mutateAsync({ provider: provider.id, model })
   }
-
-  const displayModel = selectedModel ?? defaultModel ?? ''
 
   return (
     <div className="space-y-4">
@@ -178,6 +176,49 @@ function ProviderConfig({
         </p>
       </div>
 
+      {currentKey && (
+        <div className="pt-4">
+          <label className="text-secondary block text-sm font-medium">
+            Model
+          </label>
+          {isErrorModels ? (
+            <p className="text-error mt-1 text-sm">
+              Failed to load models. Check your API key or try again later.
+            </p>
+          ) : (
+            <>
+              <select
+                value={selectedModel ?? ''}
+                onChange={(e) => handleModelChange(e.target.value)}
+                disabled={isLoadingModels}
+                className="border-default bg-base text-primary mt-1 w-full rounded-md border-2 px-3 py-2 focus:border-black focus:outline-none disabled:opacity-50 dark:focus:border-white"
+              >
+                {isLoadingModels ? (
+                  <option>Loading models...</option>
+                ) : (
+                  <>
+                    {!selectedModel && (
+                      <option value="" disabled>
+                        Select a model...
+                      </option>
+                    )}
+                    {models?.map((model) => (
+                      <option key={model.id} value={model.id}>
+                        {model.name}
+                      </option>
+                    ))}
+                  </>
+                )}
+              </select>
+              <p className="text-hint mt-1 text-xs">
+                Pick a text/chat model. Do not use image, video, or code
+                generation models.
+              </p>
+            </>
+          )}
+        </div>
+      )}
+
       <div className="flex gap-2">
         <Button
           onClick={handleSave}
@@ -197,33 +238,6 @@ function ProviderConfig({
           </Button>
         )}
       </div>
-
-      {currentKey && (
-        <div className="border-default border-t pt-4">
-          <label className="text-secondary block text-sm font-medium">
-            Model
-          </label>
-          <select
-            value={displayModel}
-            onChange={(e) => handleModelChange(e.target.value)}
-            disabled={isLoadingModels}
-            className="border-default bg-base text-primary mt-1 w-full rounded-md border-2 px-3 py-2 focus:border-black focus:outline-none disabled:opacity-50 dark:focus:border-white"
-          >
-            {isLoadingModels ? (
-              <option>Loading models...</option>
-            ) : (
-              models?.map((model) => (
-                <option key={model.id} value={model.id}>
-                  {model.name}
-                </option>
-              ))
-            )}
-          </select>
-          <p className="text-hint mt-1 text-xs">
-            Select the model to use for AI tasks.
-          </p>
-        </div>
-      )}
     </div>
   )
 }
@@ -241,6 +255,7 @@ export function ProvidersSection() {
   const { data: xaiConfigured } = useHasProviderApiKey('xai')
   const { data: geminiConfigured } = useHasProviderApiKey('gemini')
   const { data: anthropicConfigured } = useHasProviderApiKey('anthropic')
+  const { data: moonshotaiConfigured } = useHasProviderApiKey('moonshotai')
 
   // Active provider
   const { data: activeProvider } = useActiveProvider()
@@ -270,15 +285,18 @@ export function ProvidersSection() {
       isConfigured: !!anthropicConfigured,
       isActive: activeProvider === 'anthropic',
     },
+    moonshotai: {
+      isConfigured: !!moonshotaiConfigured,
+      isActive: activeProvider === 'moonshotai',
+    },
   }
 
   return (
     <div className="flex h-full gap-6">
       {/* Provider List */}
-      <div className="border-default w-52 shrink-0 border-r pr-4">
-        <h2 className="text-hint mb-3 text-sm font-semibold">Providers</h2>
-        <div className="space-y-1">
-          {PROVIDERS.map((provider) => {
+      <div className="w-52 shrink-0">
+<div className="border-default overflow-hidden rounded-md border-2">
+          {PROVIDERS.map((provider, index) => {
             const status = providerStatus[provider.id]
             const Icon = PROVIDER_ICONS[provider.id]
             const isSelected = selectedProvider === provider.id
@@ -286,9 +304,9 @@ export function ProvidersSection() {
               <button
                 key={provider.id}
                 onClick={() => setSelectedProvider(provider.id)}
-                className={`border-default flex w-full items-center gap-3 rounded-md border-2 px-3 py-2 text-left transition-colors ${
-                  isSelected ? 'bg-surface' : 'bg-base hover:bg-hover'
-                }`}
+                className={`flex w-full items-center gap-3 px-3 py-2 text-left transition-colors ${
+                  index !== 0 ? 'border-default border-t' : ''
+                } ${isSelected ? 'bg-surface' : 'bg-base hover:bg-hover'}`}
               >
                 <Icon size={20} />
                 <span
@@ -300,7 +318,7 @@ export function ProvidersSection() {
                 </span>
                 {(status.isActive || status.isConfigured) && (
                   <span
-                    className={`h-2 w-2 rounded-full ${status.isActive ? 'bg-info' : 'bg-success'}`}
+                    className={`h-2 w-2 rounded-full ${status.isActive ? 'bg-success' : 'bg-info'}`}
                     title={status.isActive ? 'Active' : 'Configured'}
                   />
                 )}
@@ -308,18 +326,30 @@ export function ProvidersSection() {
             )
           })}
         </div>
+        <div className="mt-2 space-y-1">
+          <div className="text-hint flex items-center gap-2 text-xs">
+            <span className="bg-info h-2 w-2 rounded-full" />
+            configured with api key
+          </div>
+          <div className="text-hint flex items-center gap-2 text-xs">
+            <span className="bg-success h-2 w-2 rounded-full" />
+            currently active
+          </div>
+        </div>
       </div>
 
       {/* Provider Configuration */}
       <div className="flex-1">
-        <ProviderConfig
-          provider={PROVIDERS.find((p) => p.id === selectedProvider)!}
-          currentKey={currentKey}
-          isActive={activeProvider === selectedProvider}
-          onSetActive={() => setActiveProvider.mutateAsync(selectedProvider)}
-          onSave={(key) => setProviderApiKey.mutateAsync(key)}
-          onDelete={() => deleteProviderApiKey.mutateAsync()}
-        />
+        <div className="border-default rounded-md border-2 p-4">
+          <ProviderConfig
+            provider={PROVIDERS.find((p) => p.id === selectedProvider)!}
+            currentKey={currentKey}
+            isActive={activeProvider === selectedProvider}
+            onSetActive={() => setActiveProvider.mutateAsync(selectedProvider)}
+            onSave={(key) => setProviderApiKey.mutateAsync(key)}
+            onDelete={() => deleteProviderApiKey.mutateAsync()}
+          />
+        </div>
       </div>
     </div>
   )

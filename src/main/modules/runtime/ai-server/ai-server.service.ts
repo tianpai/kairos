@@ -2,18 +2,12 @@ import { createServer } from "node:http";
 import express from "express";
 import { WebSocket, WebSocketServer } from "ws";
 import log from "electron-log/main";
-import {
-  createAIProvider,
-  extractJobInfo,
-  matchChecklist,
-  parseChecklist,
-  parseResume,
-  tailorResume,
-} from "../../ai/runtime";
+import { createAIProvider, prompt } from "../../ai";
+import type { AIProvider, AIProviderConfig } from "../../ai";
+import type { ZodType } from "zod";
 import type { TaskName } from "@type/workflow";
 import type { Server } from "node:http";
 import type { NextFunction, Request, Response } from "express";
-import type { AIProviderConfig } from "../../ai/runtime";
 import type { Checklist } from "@type/checklist";
 
 // TODO: reduce this type alias
@@ -129,7 +123,7 @@ class AIServerService {
               payload,
               { type: provider, apiKey },
               model,
-              { streaming: true, onPartial },
+              { onPartial },
             );
 
             const duration = ((Date.now() - startTime) / 1000).toFixed(2);
@@ -171,59 +165,56 @@ class AIServerService {
     });
   }
 
+  private buildPrompt(
+    taskType: TaskType,
+    payload: Record<string, unknown>,
+  ): { systemPrompt: string; userPrompt: string; schema: ZodType } {
+    switch (taskType) {
+      case "resume.parsing":
+        return prompt.resumeParsing(
+          payload.rawResumeContent as string,
+          payload.templateId as string,
+        );
+
+      case "checklist.parsing":
+        return prompt.checklistParsing(payload.jobDescription as string);
+
+      case "checklist.matching":
+        return prompt.checklistMatching(
+          payload.checklist as Checklist,
+          payload.resumeStructure as Record<string, unknown>,
+        );
+
+      case "resume.tailoring":
+        return prompt.resumeTailoring(
+          payload.checklist as Checklist,
+          payload.resumeStructure as Record<string, unknown>,
+          payload.templateId as string,
+        );
+
+      case "jobinfo.extracting":
+        return prompt.jobInfoExtracting(payload.jobDescription as string);
+
+      default:
+        throw new Error(`Unknown task type: ${taskType}`);
+    }
+  }
+
   private async executeTask(
     taskType: TaskType,
     payload: Record<string, unknown>,
     providerConfig: AIProviderConfig,
     model: string,
-    options?: { streaming?: boolean; onPartial?: (partial: unknown) => void },
+    options?: { onPartial?: (partial: unknown) => void },
   ): Promise<unknown> {
-    const provider = createAIProvider(providerConfig);
-    const { streaming = false, onPartial } = options || {};
+    const provider: AIProvider = createAIProvider(providerConfig);
+    const p = this.buildPrompt(taskType, payload);
 
-    switch (taskType) {
-      case "resume.parsing":
-        return parseResume(
-          provider,
-          payload.rawResumeContent as string,
-          payload.templateId as string,
-          { streaming, onPartial, model },
-        );
-
-      case "checklist.parsing":
-        return parseChecklist(provider, payload.jobDescription as string, {
-          streaming,
-          onPartial,
-          model,
-        });
-
-      case "checklist.matching":
-        return matchChecklist(
-          provider,
-          payload.checklist as Checklist,
-          payload.resumeStructure as Record<string, unknown>,
-          { streaming, onPartial, model },
-        );
-
-      case "resume.tailoring":
-        return tailorResume(
-          provider,
-          payload.checklist as Checklist,
-          payload.resumeStructure as Record<string, unknown>,
-          payload.templateId as string,
-          { streaming, onPartial, model },
-        );
-
-      case "jobinfo.extracting":
-        return extractJobInfo(provider, payload.jobDescription as string, {
-          streaming,
-          onPartial,
-          model,
-        });
-
-      default:
-        throw new Error(`Unknown task type: ${taskType}`);
-    }
+    return provider.generateStructuredOutput({
+      ...p,
+      model,
+      onPartial: options?.onPartial,
+    });
   }
 
   async start(): Promise<number> {

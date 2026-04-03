@@ -1,5 +1,5 @@
 import Store from "electron-store";
-import type { ProviderType } from "../../../../shared/providers";
+import type { ProviderType } from "@shared/providers";
 
 interface ProviderSettings {
   apiKey: string | null;
@@ -9,7 +9,7 @@ interface ProviderSettings {
 
 interface AiSettingsSchema {
   aiProviders: Record<ProviderType, ProviderSettings>;
-  activeProvider: ProviderType;
+  activeProvider: ProviderType | null;
 }
 
 const PROVIDERS: ProviderType[] = [
@@ -18,43 +18,26 @@ const PROVIDERS: ProviderType[] = [
   "xai",
   "gemini",
   "anthropic",
+  "moonshotai",
 ];
 
 export class AiPreferencesStore {
   private store;
 
   constructor() {
+    const defaultProvider: ProviderSettings = {
+      apiKey: null,
+      selectedModel: null,
+      cachedModels: [],
+    };
+
     this.store = new Store<AiSettingsSchema>({
       name: "ai",
       defaults: {
-        aiProviders: {
-          openai: {
-            apiKey: null,
-            selectedModel: null,
-            cachedModels: [],
-          },
-          deepseek: {
-            apiKey: null,
-            selectedModel: null,
-            cachedModels: [],
-          },
-          xai: {
-            apiKey: null,
-            selectedModel: null,
-            cachedModels: [],
-          },
-          gemini: {
-            apiKey: null,
-            selectedModel: null,
-            cachedModels: [],
-          },
-          anthropic: {
-            apiKey: null,
-            selectedModel: null,
-            cachedModels: [],
-          },
-        },
-        activeProvider: "openai",
+        aiProviders: Object.fromEntries(
+          PROVIDERS.map((p) => [p, { ...defaultProvider }]),
+        ) as Record<ProviderType, ProviderSettings>,
+        activeProvider: null,
       },
     });
   }
@@ -91,7 +74,7 @@ export class AiPreferencesStore {
     this.store.set(`aiProviders.${provider}.cachedModels` as const, models);
   }
 
-  getActiveProvider(): ProviderType {
+  getActiveProvider(): ProviderType | null {
     return this.store.get("activeProvider");
   }
 
@@ -100,7 +83,8 @@ export class AiPreferencesStore {
   }
 
   hasActiveProviderConfigured(): boolean {
-    return this.hasApiKey(this.getActiveProvider());
+    const active = this.getActiveProvider();
+    return active !== null && this.hasApiKey(active);
   }
 
   resetAllProviders(): void {
@@ -110,6 +94,6 @@ export class AiPreferencesStore {
       this.store.set(`aiProviders.${provider}.cachedModels` as const, []);
     }
 
-    this.store.set("activeProvider", "openai");
+    this.store.set("activeProvider", null);
   }
 }

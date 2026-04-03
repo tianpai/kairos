@@ -2,8 +2,7 @@ import { randomUUID } from "node:crypto";
 import log from "electron-log/main";
 import { WebSocket } from "ws";
 import { aiServerService } from "../../runtime/ai-server";
-import { getDefaultModel } from "../models/model-catalog.service";
-import type { ProviderType } from "../../../../shared/providers";
+import type { ProviderType } from "@shared/providers";
 import type { TaskName } from "@type/workflow";
 import type { AiPreferencesStore } from "../config/ai-preferences.store";
 
@@ -57,14 +56,23 @@ export class AITaskClient {
     apiKey: string;
   } {
     const provider = this.aiPreferences.getActiveProvider();
-    const apiKey = this.aiPreferences.getApiKey(provider);
+    if (!provider) {
+      throw new Error(
+        "No AI provider selected. Please configure one in Settings.",
+      );
+    }
 
+    const apiKey = this.aiPreferences.getApiKey(provider);
     if (!apiKey) {
       throw new Error(`API key not configured for ${provider}`);
     }
 
-    const selected = this.getSelectedModel(provider);
-    const model = selected ?? getDefaultModel(provider);
+    const model = this.getSelectedModel(provider);
+    if (!model) {
+      throw new Error(
+        `No model selected for ${provider}. Please select a model in Settings.`,
+      );
+    }
 
     return { provider, model, apiKey };
   }
@@ -238,15 +246,15 @@ export class AITaskClient {
       });
 
       if (!response.ok) {
-        const error = await response.json();
+        const error = (await response.json()) as { error?: string };
         throw new Error(error.error || `HTTP ${response.status}`);
       }
 
-      const data = await response.json();
+      const data = (await response.json()) as { result: T };
       const duration = ((Date.now() - startTime) / 1000).toFixed(1);
       log.info(`AI task completed: ${taskType} (${duration}s)`);
 
-      return data.result as T;
+      return data.result;
     } catch (error) {
       if (error instanceof Error && error.name === "AbortError") {
         log.error(`AI task timed out: ${taskType}`);

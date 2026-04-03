@@ -5,8 +5,8 @@ import {
   exportResumeDataBackup,
   importResumeDataBackup,
   isBackupImportInProgress,
-} from "../../persistence";
-import type { BackupExportResult, BackupImportResult } from "../../../../shared/backup";
+} from "../persistence";
+import type { BackupExportResult, BackupImportResult } from "@shared/backup";
 
 function createDefaultBackupFilename(): string {
   const date = new Date().toISOString().slice(0, 10);

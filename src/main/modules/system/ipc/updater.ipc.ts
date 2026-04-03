@@ -1,6 +1,6 @@
 import { ipcMain } from "electron";
-import { updaterService } from "../updater/updater.service";
-import type { UpdateState } from "../../../../shared/updater";
+import { updaterService } from "../updater.service";
+import type { UpdateState } from "@shared/updater";
 
 export function registerUpdaterHandlers(): void {
   ipcMain.handle("updater:check", async (): Promise<UpdateState> => {

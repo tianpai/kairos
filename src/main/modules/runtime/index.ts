@@ -5,4 +5,3 @@ export {
   registerIpcHandlers,
   type RuntimeIpcDependencies,
 } from "./ipc";
-export { createAppMenu } from "./menu/app-menu";

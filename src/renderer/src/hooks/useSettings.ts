@@ -3,7 +3,6 @@ import {
   deleteProviderApiKey,
   fetchModels,
   getActiveProvider,
-  getDefaultModel,
   getProviderApiKey,
   getSelectedModel,
   hasActiveProviderApiKey,
@@ -67,6 +66,7 @@ export function useFetchModels(provider: ProviderType) {
     queryKey: ['provider', 'models', provider],
     queryFn: () => fetchModels(provider),
     staleTime: 5 * 60 * 1000, // 5 minutes
+    retry: false,
   })
 }
 
@@ -92,13 +92,6 @@ export function useSetSelectedModel() {
         queryKey: ['provider', 'selectedModel', provider],
       })
     },
-  })
-}
-
-export function useDefaultModel(provider: ProviderType) {
-  return useQuery({
-    queryKey: ['provider', 'defaultModel', provider],
-    queryFn: () => getDefaultModel(provider),
   })
 }
 
