@@ -1,21 +1,19 @@
 # Kairos
 
+> [!IMPORTANT]
+> This project has been paused indefinitely. Development continues at [tianpai/smirk-release](https://github.com/tianpai/smirk-release).
+
 AI-powered resume tailoring for job seekers. Build, customize, and optimize
 your resume for each application.
 
 > [!WARNING]
 > This app is in early development and may have bugs or unexpected behavior. AI
-> can make mistakes when tailoring and parsing your resume - always review the
+> can make mistakes when tailoring and parsing your resume, always review the
 > output before submitting applications.
 
 > [!NOTE]
 > Kairos does not collect any user data. No telemetry, no analytics, no
 > tracking.
-
-> [!IMPORTANT]
-> By using AI features, your resume content is sent to the LLM provider you
-> configure (OpenAI, Anthropic, etc.). You are responsible for reviewing and
-> agreeing to their terms of service and privacy policies.
 
 ## Features
 
@@ -31,7 +29,6 @@ your resume for each application.
 - **Document styling** - Font, margins, heading color, paper size
 - **Auto-update** - Get notified when a new version is available
 - **Dark/light theme** - System-aware appearance
-- **Keyboard-first** - Shortcuts for speed and efficiency
 
 ### AI Providers
 
@@ -42,21 +39,13 @@ Bring your own API key:
 - Google Gemini
 - DeepSeek
 - xAI Grok
-
-More providers will be supported once the app is stable in v1.0.0.
+- Moonshot AI
 
 See [CHANGELOG.md](CHANGELOG.md) for version history and detailed feature notes.
 
 ## Installation
 
-### macOS
-
-1. Download the latest `.dmg` from [Releases](https://github.com/tianpai/kairos/releases)
-2. Open the `.dmg` and drag Kairos to Applications
-
-- Windows builds are available but less tested and fixed until v1.0.0
-- Linux builds are available only after v1.0.0
-
+1. Download the latest release from [Releases](https://github.com/tianpai/kairos/releases)
 
 ## Development
 
